@@ -19,6 +19,7 @@
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.visa-categories.index') }}">Visa Categories</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.visa-countries.index') }}">Visa Countries</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.destinations.index') }}">Destinations</a>
+                <a class="nav-link rounded px-3 py-2" href="{{ route('admin.hero-slides.index') }}">Hero Slider</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.blog-categories.index') }}">Blog Categories</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.blog-posts.index') }}">Blog Posts</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.testimonials.index') }}">Testimonials</a>

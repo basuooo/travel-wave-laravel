@@ -26,6 +26,12 @@ class InquiryController extends Controller
 
         return view('admin.inquiries.index', [
             'items' => $query->paginate(20)->withQueryString(),
+            'stats' => [
+                'all' => Inquiry::count(),
+                'new' => Inquiry::where('status', 'new')->count(),
+                'contacted' => Inquiry::where('status', 'contacted')->count(),
+                'closed' => Inquiry::where('status', 'closed')->count(),
+            ],
         ]);
     }
 

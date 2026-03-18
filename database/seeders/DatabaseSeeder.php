@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\Destination;
+use App\Models\HeroSlide;
 use App\Models\Inquiry;
 use App\Models\MenuItem;
 use App\Models\Page;
@@ -62,8 +63,58 @@ class DatabaseSeeder extends Seeder
                 'global_cta_button_ar' => 'ابدأ طلبك الآن',
                 'global_cta_url' => '/contact',
                 'map_iframe' => '<iframe src="https://www.google.com/maps?q=Cairo%20Egypt&output=embed" width="100%" height="320" style="border:0;" loading="lazy"></iframe>',
+                'hero_slider_autoplay' => true,
+                'hero_slider_interval' => 5000,
+                'hero_slider_overlay_opacity' => 0.48,
+                'hero_slider_show_dots' => true,
+                'hero_slider_show_arrows' => true,
+                'hero_slider_content_alignment' => 'start',
             ]
         );
+
+        foreach ([
+            [
+                'sort_order' => 1,
+                'image_path' => 'hero-slides/slide-1.svg',
+                'headline_en' => 'Luxury journeys shaped around your next visa, flight, and stay',
+                'headline_ar' => 'رحلات راقية نصممها حول تأشيرتك ورحلتك الجوية وإقامتك',
+                'subtitle_en' => 'Travel Wave combines visa support, premium bookings, and responsive trip planning in one smooth customer journey.',
+                'subtitle_ar' => 'تجمع Travel Wave بين دعم التأشيرات والحجوزات الراقية وتخطيط الرحلات السريع ضمن تجربة واحدة متكاملة.',
+                'cta_text_en' => 'Start Planning',
+                'cta_text_ar' => 'ابدأ التخطيط',
+                'cta_link' => '/contact',
+                'is_active' => true,
+            ],
+            [
+                'sort_order' => 2,
+                'image_path' => 'hero-slides/slide-2.svg',
+                'headline_en' => 'Europe, Gulf, and Asia visa services with a clearer path',
+                'headline_ar' => 'خدمات تأشيرات أوروبا والخليج وآسيا بمسار أوضح',
+                'subtitle_en' => 'From file preparation to booking coordination, we help you move with confidence and less last-minute pressure.',
+                'subtitle_ar' => 'من تجهيز الملف إلى تنسيق الحجوزات نساعدك على التحرك بثقة وبضغط أقل في اللحظات الأخيرة.',
+                'cta_text_en' => 'Explore Visa Services',
+                'cta_text_ar' => 'استكشف التأشيرات',
+                'cta_link' => '/visas',
+                'is_active' => true,
+            ],
+            [
+                'sort_order' => 3,
+                'image_path' => 'hero-slides/slide-3.svg',
+                'headline_en' => 'Discover Egypt and beyond with polished travel packages',
+                'headline_ar' => 'اكتشف مصر وخارجها عبر باقات سفر مصممة باحتراف',
+                'subtitle_en' => 'Domestic escapes, hotel bookings, flights, and custom itineraries built around your timing and budget.',
+                'subtitle_ar' => 'رحلات داخلية وحجوزات فنادق وطيران وبرامج مخصصة مبنية حول توقيتك وميزانيتك.',
+                'cta_text_en' => 'Browse Trips',
+                'cta_text_ar' => 'تصفح الرحلات',
+                'cta_link' => '/domestic-tourism',
+                'is_active' => true,
+            ],
+        ] as $slide) {
+            HeroSlide::query()->updateOrCreate(
+                ['sort_order' => $slide['sort_order']],
+                $slide
+            );
+        }
 
         $eu = VisaCategory::query()->updateOrCreate(
             ['slug' => 'european-union'],
@@ -446,5 +497,6 @@ class DatabaseSeeder extends Seeder
                 'preferred_language' => 'en',
             ]
         );
+
     }
 }

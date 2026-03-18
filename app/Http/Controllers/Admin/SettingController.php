@@ -57,6 +57,10 @@ class SettingController extends Controller
             'global_cta_button_en' => ['nullable', 'string', 'max:255'],
             'global_cta_button_ar' => ['nullable', 'string', 'max:255'],
             'global_cta_url' => ['nullable', 'string', 'max:255'],
+            'facebook_url' => ['nullable', 'url'],
+            'instagram_url' => ['nullable', 'url'],
+            'youtube_url' => ['nullable', 'url'],
+            'tiktok_url' => ['nullable', 'url'],
             'logo' => ['nullable', 'image'],
             'favicon' => ['nullable', 'image'],
         ]);

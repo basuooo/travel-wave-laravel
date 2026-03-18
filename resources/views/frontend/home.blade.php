@@ -4,28 +4,75 @@
 
 @section('content')
 @php($sections = $page->sections ?? [])
-<section class="tw-hero py-5">
-    <div class="container position-relative" style="z-index:1">
-        <div class="row align-items-center g-5 py-5">
-            <div class="col-lg-7">
-                <span class="badge bg-light text-dark px-3 py-2 rounded-pill mb-3">{{ $page->localized('hero_badge') }}</span>
-                <h1 class="display-4 fw-bold mb-3">{{ $page->localized('hero_title') }}</h1>
-                <p class="lead text-white-50 mb-4">{{ $page->localized('hero_subtitle') }}</p>
-                <div class="d-flex flex-wrap gap-3">
-                    @if($page->hero_primary_cta_url)<a href="{{ $page->hero_primary_cta_url }}" class="btn btn-primary btn-lg tw-btn-primary">{{ $page->localized('hero_primary_cta_text') }}</a>@endif
-                    @if($page->hero_secondary_cta_url)<a href="{{ $page->hero_secondary_cta_url }}" class="btn btn-lg tw-btn-outline">{{ $page->localized('hero_secondary_cta_text') }}</a>@endif
-                </div>
+@php($sliderSettings = $heroSliderSettings)
+
+<section class="tw-home-slider-wrap">
+    <div id="travelWaveHeroSlider"
+         class="carousel slide tw-home-slider"
+         data-bs-ride="{{ ($sliderSettings?->hero_slider_autoplay ?? true) ? 'carousel' : 'false' }}"
+         data-bs-interval="{{ $sliderSettings?->hero_slider_interval ?? 5000 }}">
+
+        @if(($sliderSettings?->hero_slider_show_dots ?? true) && $heroSlides->count() > 1)
+            <div class="carousel-indicators">
+                @foreach($heroSlides as $slide)
+                    <button type="button" data-bs-target="#travelWaveHeroSlider" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : 'false' }}" aria-label="Slide {{ $loop->iteration }}"></button>
+                @endforeach
             </div>
-            <div class="col-lg-5">
-                <div class="tw-panel p-3">
-                    @if($page->hero_image)
-                        <img src="{{ asset('storage/' . $page->hero_image) }}" class="img-fluid rounded-4" alt="{{ $page->localized('hero_title') }}">
-                    @else
-                        <div class="p-5 text-center text-muted">Travel Wave</div>
-                    @endif
+        @endif
+
+        <div class="carousel-inner">
+            @forelse($heroSlides as $slide)
+                <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                    <div class="tw-home-slide" style="background-image:url('{{ asset('storage/' . $slide->image_path) }}');">
+                        <div class="tw-home-slide-overlay" style="--slide-overlay: {{ $sliderSettings?->hero_slider_overlay_opacity ?? 0.45 }}"></div>
+                        <div class="container position-relative h-100">
+                            <div class="row h-100 align-items-center justify-content-{{ $sliderSettings?->hero_slider_content_alignment ?? 'start' }}">
+                                <div class="col-lg-7 col-xl-6">
+                                    <div class="tw-home-slide-content text-{{ $sliderSettings?->hero_slider_content_alignment ?? 'start' }}">
+                                        <span class="badge bg-light text-dark px-3 py-2 rounded-pill mb-3">{{ $page->localized('hero_badge') }}</span>
+                                        <h1 class="display-4 fw-bold mb-3">{{ $slide->localized('headline') }}</h1>
+                                        @if($slide->localized('subtitle'))
+                                            <p class="lead text-white-50 mb-4">{{ $slide->localized('subtitle') }}</p>
+                                        @endif
+                                        <div class="d-flex flex-wrap gap-3 justify-content-{{ $sliderSettings?->hero_slider_content_alignment ?? 'start' }}">
+                                            @if($slide->cta_link && $slide->localized('cta_text'))
+                                                <a href="{{ $slide->cta_link }}" class="btn btn-primary btn-lg tw-btn-primary">{{ $slide->localized('cta_text') }}</a>
+                                            @endif
+                                            @if($page->hero_secondary_cta_url)
+                                                <a href="{{ $page->hero_secondary_cta_url }}" class="btn btn-lg tw-btn-outline">{{ $page->localized('hero_secondary_cta_text') }}</a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            @empty
+                <div class="carousel-item active">
+                    <section class="tw-hero py-5">
+                        <div class="container position-relative" style="z-index:1">
+                            <div class="row align-items-center g-5 py-5">
+                                <div class="col-lg-7">
+                                    <span class="badge bg-light text-dark px-3 py-2 rounded-pill mb-3">{{ $page->localized('hero_badge') }}</span>
+                                    <h1 class="display-4 fw-bold mb-3">{{ $page->localized('hero_title') }}</h1>
+                                    <p class="lead text-white-50 mb-4">{{ $page->localized('hero_subtitle') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            @endforelse
         </div>
+
+        @if(($sliderSettings?->hero_slider_show_arrows ?? true) && $heroSlides->count() > 1)
+            <button class="carousel-control-prev" type="button" data-bs-target="#travelWaveHeroSlider" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#travelWaveHeroSlider" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        @endif
     </div>
 </section>
 

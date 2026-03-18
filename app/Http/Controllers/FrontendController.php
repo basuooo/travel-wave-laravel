@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
 use App\Models\Destination;
+use App\Models\HeroSlide;
 use App\Models\Inquiry;
 use App\Models\Page;
+use App\Models\Setting;
 use App\Models\Testimonial;
 use App\Models\VisaCategory;
 use App\Models\VisaCountry;
@@ -23,8 +25,12 @@ class FrontendController extends Controller
 
     public function home()
     {
+        $settings = Setting::query()->first();
+
         return view('frontend.home', [
             'page' => $this->page('home'),
+            'heroSlides' => HeroSlide::where('is_active', true)->orderBy('sort_order')->limit(3)->get(),
+            'heroSliderSettings' => $settings,
             'featuredCountries' => VisaCountry::where('is_featured', true)->where('is_active', true)->with('category')->orderBy('sort_order')->limit(6)->get(),
             'featuredDestinations' => Destination::where('is_featured', true)->where('is_active', true)->orderBy('sort_order')->limit(6)->get(),
             'categories' => VisaCategory::where('is_active', true)->orderBy('sort_order')->get(),

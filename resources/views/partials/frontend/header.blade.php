@@ -7,7 +7,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarContent">
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <ul class="navbar-nav {{ $isRtl ? 'me-auto' : 'ms-auto' }} align-items-lg-center gap-lg-2">
                 @foreach ($headerMenuItems ?? [] as $item)
                     <li class="nav-item dropdown">
                         @if ($item->children->isNotEmpty())

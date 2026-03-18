@@ -14,6 +14,31 @@
         </div>
     @endforeach
 </div>
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card admin-card p-4">
+            <h2 class="h5 mb-3">Quick Management</h2>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary" href="{{ route('admin.pages.edit', 'home') }}">Edit Homepage</a>
+                <a class="btn btn-outline-primary" href="{{ route('admin.settings.edit') }}">Site Settings</a>
+                <a class="btn btn-outline-primary" href="{{ route('admin.visa-countries.create') }}">Add Visa Country</a>
+                <a class="btn btn-outline-primary" href="{{ route('admin.destinations.create') }}">Add Destination</a>
+                <a class="btn btn-outline-primary" href="{{ route('admin.blog-posts.create') }}">Create Blog Post</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card admin-card p-4">
+            <h2 class="h5 mb-3">Content Coverage</h2>
+            <ul class="list-unstyled mb-0">
+                <li class="mb-2">Visa pages: {{ $stats['visa_countries'] }}</li>
+                <li class="mb-2">Domestic destinations: {{ $stats['destinations'] }}</li>
+                <li class="mb-2">Blog posts: {{ $stats['posts'] }}</li>
+                <li>Testimonials: {{ $stats['testimonials'] }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
 <div class="row g-4">
     <div class="col-lg-6">
         <div class="card admin-card p-4">

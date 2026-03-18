@@ -9,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ asset('assets/css/site.css') }}" rel="stylesheet">
 </head>
-<body>
+<body class="{{ $isRtl ? 'rtl' : 'ltr' }}">
     @include('partials.frontend.header')
 
     <main class="pb-5">

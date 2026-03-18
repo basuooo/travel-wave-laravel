@@ -32,6 +32,12 @@
             <div class="col-md-12"><label class="form-label">Map Iframe</label><textarea class="form-control" name="map_iframe" rows="4">{{ old('map_iframe', $setting->map_iframe) }}</textarea></div>
             <div class="col-md-6"><label class="form-label">Footer Text EN</label><textarea class="form-control" name="footer_text_en" rows="3">{{ old('footer_text_en', $setting->footer_text_en) }}</textarea></div>
             <div class="col-md-6"><label class="form-label">Footer Text AR</label><textarea class="form-control" name="footer_text_ar" rows="3">{{ old('footer_text_ar', $setting->footer_text_ar) }}</textarea></div>
+            <div class="col-md-6"><label class="form-label">Facebook URL</label><input class="form-control" name="facebook_url" value="{{ old('facebook_url', $setting->facebook_url) }}"></div>
+            <div class="col-md-6"><label class="form-label">Instagram URL</label><input class="form-control" name="instagram_url" value="{{ old('instagram_url', $setting->instagram_url) }}"></div>
+            <div class="col-md-6"><label class="form-label">YouTube URL</label><input class="form-control" name="youtube_url" value="{{ old('youtube_url', $setting->youtube_url) }}"></div>
+            <div class="col-md-6"><label class="form-label">TikTok URL</label><input class="form-control" name="tiktok_url" value="{{ old('tiktok_url', $setting->tiktok_url) }}"></div>
+            <div class="col-md-6"><label class="form-label">Copyright EN</label><input class="form-control" name="copyright_text_en" value="{{ old('copyright_text_en', $setting->copyright_text_en) }}"></div>
+            <div class="col-md-6"><label class="form-label">Copyright AR</label><input class="form-control text-end" dir="rtl" name="copyright_text_ar" value="{{ old('copyright_text_ar', $setting->copyright_text_ar) }}"></div>
         </div>
     </div>
     <div class="card admin-card p-4 mb-4">

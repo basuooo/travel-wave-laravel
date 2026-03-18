@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DestinationController;
+use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\InquiryController;
 use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Admin\PageController;
@@ -52,6 +53,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('blog-posts', BlogPostController::class);
         Route::resource('testimonials', TestimonialController::class);
         Route::resource('menu-items', MenuItemController::class);
+        Route::put('/hero-slides/settings', [HeroSlideController::class, 'updateSettings'])->name('hero-slides.settings');
+        Route::resource('hero-slides', HeroSlideController::class);
         Route::get('/inquiries', [InquiryController::class, 'index'])->name('inquiries.index');
         Route::get('/inquiries/{inquiry}', [InquiryController::class, 'show'])->name('inquiries.show');
         Route::put('/inquiries/{inquiry}', [InquiryController::class, 'update'])->name('inquiries.update');
