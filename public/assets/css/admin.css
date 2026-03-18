@@ -1,0 +1,32 @@
+body {
+    background: #f3f6fb;
+    color: #1a2e42;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.admin-sidebar {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0f2f4a, #153e63);
+}
+
+.admin-sidebar a {
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+}
+
+.admin-sidebar a.active,
+.admin-sidebar a:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-card {
+    border: 0;
+    border-radius: 1rem;
+    box-shadow: 0 12px 30px rgba(17, 35, 54, 0.08);
+}
+
+.admin-topbar {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+}
