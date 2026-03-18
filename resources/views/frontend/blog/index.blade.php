@@ -4,7 +4,7 @@
 
 @section('content')
 <section class="container py-5">
-    <div class="tw-page-header p-4 p-lg-5">
+    <div class="tw-page-header tw-section-shell p-4 p-lg-5">
         <h1 class="display-5">{{ $page->localized('hero_title') ?: $page->localized('title') }}</h1>
         <p class="lead text-white-50">{{ $page->localized('hero_subtitle') ?: $page->localized('intro_body') }}</p>
     </div>
@@ -14,8 +14,8 @@
         @foreach($posts as $post)
             <div class="col-md-6 col-xl-4">
                 <div class="tw-card h-100 overflow-hidden">
-                    @if($post->featured_image)<img src="{{ asset('storage/' . $post->featured_image) }}" class="img-fluid" alt="{{ $post->localized('title') }}">@endif
-                    <div class="p-4">
+                    @if($post->featured_image)<img src="{{ asset('storage/' . $post->featured_image) }}" class="img-fluid w-100 tw-blog-card-image" alt="{{ $post->localized('title') }}">@endif
+                    <div class="p-4 tw-section-shell">
                         <div class="text-muted small mb-2">{{ optional($post->published_at)->format('d M Y') }}</div>
                         <h2 class="h4">{{ $post->localized('title') }}</h2>
                         <p class="text-muted">{{ $post->localized('excerpt') }}</p>

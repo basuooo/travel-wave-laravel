@@ -39,7 +39,7 @@
             <textarea name="message" rows="4" class="form-control"></textarea>
         </div>
         <div class="col-12">
-            <button class="btn btn-primary tw-btn-primary px-4">{{ __('ui.inquire_now') }}</button>
+            <button class="btn btn-primary tw-btn-primary px-4 tw-form-submit">{{ __('ui.inquire_now') }}</button>
         </div>
     </form>
 </div>

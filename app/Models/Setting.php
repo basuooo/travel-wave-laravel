@@ -54,6 +54,7 @@ class Setting extends Model
         'hero_slider_show_dots',
         'hero_slider_show_arrows',
         'hero_slider_content_alignment',
+        'hero_slider_layout_mode',
     ];
 
     protected $casts = [

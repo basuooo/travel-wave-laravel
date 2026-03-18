@@ -5,7 +5,7 @@
 @section('content')
 @php($sections = $page->sections ?? [])
 <section class="container py-5">
-    <div class="tw-page-header p-4 p-lg-5">
+    <div class="tw-page-header tw-section-shell p-4 p-lg-5">
         <span class="badge bg-light text-dark mb-3">{{ $page->localized('hero_badge') }}</span>
         <h1 class="display-5">{{ $page->localized('hero_title') }}</h1>
         <p class="lead text-white-50 mb-0">{{ $page->localized('hero_subtitle') }}</p>
@@ -15,13 +15,13 @@
 <section class="container py-4">
     <div class="row g-4">
         <div class="col-lg-7">
-            <div class="tw-card p-4 h-100">
+            <div class="tw-card tw-section-shell p-4 h-100">
                 <h2 class="tw-section-title h2">{{ $page->localized('intro_title') }}</h2>
                 <div class="text-muted">{!! nl2br(e($page->localized('intro_body'))) !!}</div>
             </div>
         </div>
         <div class="col-lg-5">
-            <div class="tw-card overflow-hidden h-100">
+            <div class="tw-card tw-media-card overflow-hidden h-100">
                 @if($page->hero_image)
                     <img src="{{ asset('storage/' . $page->hero_image) }}" class="tw-image-cover" alt="{{ $page->localized('title') }}">
                 @else
@@ -37,7 +37,7 @@
     <div class="row g-4">
         @foreach($sections['feature_blocks'] as $item)
             <div class="col-md-6 col-xl-4">
-                <div class="tw-card p-4 h-100">
+                    <div class="tw-card tw-section-shell p-4 h-100">
                     <h3 class="h5">{{ app()->getLocale() === 'ar' ? $item['title_ar'] : $item['title_en'] }}</h3>
                     <p class="text-muted mb-0">{{ app()->getLocale() === 'ar' ? $item['text_ar'] : $item['text_en'] }}</p>
                 </div>
@@ -51,7 +51,7 @@
 <section class="container py-4">
     <div class="row g-4">
         <div class="col-lg-5">
-            <div class="tw-card p-4 h-100">
+            <div class="tw-card tw-section-shell p-4 h-100">
                 <h2 class="tw-section-title h3 mb-4">{{ __('ui.contact') }}</h2>
                 <p class="mb-2"><strong>{{ __('ui.phone') }}:</strong> {{ $siteSettings?->phone }}</p>
                 <p class="mb-2"><strong>{{ __('ui.email') }}:</strong> {{ $siteSettings?->contact_email }}</p>
@@ -60,7 +60,9 @@
             </div>
         </div>
         <div class="col-lg-7">
-            {!! $siteSettings?->map_iframe !!}
+            <div class="tw-card tw-map-embed overflow-hidden">
+                {!! $siteSettings?->map_iframe !!}
+            </div>
         </div>
     </div>
 </section>
@@ -68,7 +70,7 @@
 
 @if(!empty($sections['faqs']))
 <section class="container py-5">
-    <div class="tw-card p-4">
+    <div class="tw-card tw-section-shell p-4">
         <h2 class="tw-section-title h2 mb-4">{{ __('ui.faq') }}</h2>
         <div class="accordion" id="faqAccordion">
             @foreach($sections['faqs'] as $item)
@@ -96,7 +98,9 @@
             <p class="text-muted">{{ app()->getLocale() === 'ar' ? ($cta['text_ar'] ?? $siteSettings?->localized('global_cta_text')) : ($cta['text_en'] ?? $siteSettings?->localized('global_cta_text')) }}</p>
         </div>
         <div class="col-lg-6">
-            @include('partials.frontend.inquiry-form', ['type' => $page->key === 'contact' ? 'contact' : $page->key, 'source' => $page->key])
+            <div class="tw-section-shell">
+                @include('partials.frontend.inquiry-form', ['type' => $page->key === 'contact' ? 'contact' : $page->key, 'source' => $page->key])
+            </div>
         </div>
     </div>
 </section>

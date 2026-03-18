@@ -20,6 +20,18 @@
                     <input class="form-control" name="hero_slider_overlay_opacity" value="{{ old('hero_slider_overlay_opacity', $setting->hero_slider_overlay_opacity ?? 0.45) }}">
                 </div>
                 <div class="col-md-12">
+                    <label class="form-label">Banner Layout Mode</label>
+                    <select class="form-select" name="hero_slider_layout_mode">
+                        <option value="full-width" @selected(old('hero_slider_layout_mode', $setting->hero_slider_layout_mode) === 'full-width')>Full Width</option>
+                        <option value="custom-1408" @selected(old('hero_slider_layout_mode', $setting->hero_slider_layout_mode ?? 'custom-1408') === 'custom-1408')>1408 x 656</option>
+                        <option value="large-hero" @selected(old('hero_slider_layout_mode', $setting->hero_slider_layout_mode) === 'large-hero')>Large Hero</option>
+                        <option value="medium-hero" @selected(old('hero_slider_layout_mode', $setting->hero_slider_layout_mode) === 'medium-hero')>Medium Hero</option>
+                        <option value="compact-banner" @selected(old('hero_slider_layout_mode', $setting->hero_slider_layout_mode) === 'compact-banner')>Compact Banner</option>
+                        <option value="fullscreen-hero" @selected(old('hero_slider_layout_mode', $setting->hero_slider_layout_mode) === 'fullscreen-hero')>Full Screen Hero</option>
+                    </select>
+                    <div class="form-text">Choose the overall banner width and height behavior used on the homepage.</div>
+                </div>
+                <div class="col-md-12">
                     <label class="form-label">Content Alignment</label>
                     <select class="form-select" name="hero_slider_content_alignment">
                         <option value="start" @selected(old('hero_slider_content_alignment', $setting->hero_slider_content_alignment) === 'start')>Start</option>

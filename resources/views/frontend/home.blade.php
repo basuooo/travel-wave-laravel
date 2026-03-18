@@ -5,8 +5,11 @@
 @section('content')
 @php($sections = $page->sections ?? [])
 @php($sliderSettings = $heroSliderSettings)
+@php($bannerMode = $sliderSettings?->hero_slider_layout_mode ?? 'custom-1408')
+@php($safeZoneClass = in_array($bannerMode, ['full-width', 'fullscreen-hero'], true) ? 'container-fluid' : 'container-xxl')
 
-<section class="tw-home-slider-wrap">
+<section class="tw-home-slider-wrap tw-home-slider-mode-{{ $bannerMode }}">
+    <div class="{{ $safeZoneClass }} tw-home-slider-shell">
     <div id="travelWaveHeroSlider"
          class="carousel slide tw-home-slider"
          data-bs-ride="{{ ($sliderSettings?->hero_slider_autoplay ?? true) ? 'carousel' : 'false' }}"
@@ -22,30 +25,42 @@
 
         <div class="carousel-inner">
             @forelse($heroSlides as $slide)
+                @php($headline = trim((string) $slide->localized('headline')))
+                @php($subtitle = trim((string) $slide->localized('subtitle')))
+                @php($ctaText = trim((string) $slide->localized('cta_text')))
+                @php($hasSlideContent = $headline !== '' || $subtitle !== '' || ($ctaText !== '' && filled($slide->cta_link)))
                 <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                     <div class="tw-home-slide" style="background-image:url('{{ asset('storage/' . $slide->image_path) }}');">
-                        <div class="tw-home-slide-overlay" style="--slide-overlay: {{ $sliderSettings?->hero_slider_overlay_opacity ?? 0.45 }}"></div>
-                        <div class="container position-relative h-100">
-                            <div class="row h-100 align-items-center justify-content-{{ $sliderSettings?->hero_slider_content_alignment ?? 'start' }}">
-                                <div class="col-lg-7 col-xl-6">
-                                    <div class="tw-home-slide-content text-{{ $sliderSettings?->hero_slider_content_alignment ?? 'start' }}">
-                                        <span class="badge bg-light text-dark px-3 py-2 rounded-pill mb-3">{{ $page->localized('hero_badge') }}</span>
-                                        <h1 class="display-4 fw-bold mb-3">{{ $slide->localized('headline') }}</h1>
-                                        @if($slide->localized('subtitle'))
-                                            <p class="lead text-white-50 mb-4">{{ $slide->localized('subtitle') }}</p>
-                                        @endif
-                                        <div class="d-flex flex-wrap gap-3 justify-content-{{ $sliderSettings?->hero_slider_content_alignment ?? 'start' }}">
-                                            @if($slide->cta_link && $slide->localized('cta_text'))
-                                                <a href="{{ $slide->cta_link }}" class="btn btn-primary btn-lg tw-btn-primary">{{ $slide->localized('cta_text') }}</a>
+                        @if($hasSlideContent)
+                            <div class="tw-home-slide-overlay" style="--slide-overlay: {{ $sliderSettings?->hero_slider_overlay_opacity ?? 0.45 }}"></div>
+                            <div class="tw-home-slide-stage position-relative h-100">
+                                <div class="row h-100 align-items-center justify-content-{{ $sliderSettings?->hero_slider_content_alignment ?? 'start' }}">
+                                    <div class="col-xl-7 col-lg-8 col-md-10">
+                                        <div class="tw-home-slide-content text-{{ $sliderSettings?->hero_slider_content_alignment ?? 'start' }}">
+                                            @if($page->localized('hero_badge'))
+                                                <span class="badge bg-light text-dark px-3 py-2 rounded-pill mb-3">{{ $page->localized('hero_badge') }}</span>
                                             @endif
-                                            @if($page->hero_secondary_cta_url)
-                                                <a href="{{ $page->hero_secondary_cta_url }}" class="btn btn-lg tw-btn-outline">{{ $page->localized('hero_secondary_cta_text') }}</a>
+                                            @if($headline !== '')
+                                                <h1 class="display-4 fw-bold mb-3">{{ $headline }}</h1>
+                                            @endif
+                                            @if($subtitle !== '')
+                                                <p class="lead text-white-50 mb-4">{{ $subtitle }}</p>
+                                            @endif
+                                            @if(($ctaText !== '' && filled($slide->cta_link)) || $page->hero_secondary_cta_url)
+                                                <div class="d-flex flex-wrap gap-3 justify-content-{{ $sliderSettings?->hero_slider_content_alignment ?? 'start' }}">
+                                                    @if($ctaText !== '' && filled($slide->cta_link))
+                                                        <a href="{{ $slide->cta_link }}" class="btn btn-primary btn-lg tw-btn-primary">{{ $ctaText }}</a>
+                                                    @endif
+                                                    @if($page->hero_secondary_cta_url && $page->localized('hero_secondary_cta_text'))
+                                                        <a href="{{ $page->hero_secondary_cta_url }}" class="btn btn-lg tw-btn-outline">{{ $page->localized('hero_secondary_cta_text') }}</a>
+                                                    @endif
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
             @empty
@@ -73,6 +88,7 @@
                 <span class="carousel-control-next-icon"></span>
             </button>
         @endif
+    </div>
     </div>
 </section>
 

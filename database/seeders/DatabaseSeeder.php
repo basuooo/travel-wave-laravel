@@ -69,6 +69,7 @@ class DatabaseSeeder extends Seeder
                 'hero_slider_show_dots' => true,
                 'hero_slider_show_arrows' => true,
                 'hero_slider_content_alignment' => 'start',
+                'hero_slider_layout_mode' => 'custom-1408',
             ]
         );
 

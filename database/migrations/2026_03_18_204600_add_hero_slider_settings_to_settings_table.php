@@ -15,6 +15,7 @@ return new class extends Migration
             $table->boolean('hero_slider_show_dots')->default(true)->after('hero_slider_overlay_opacity');
             $table->boolean('hero_slider_show_arrows')->default(true)->after('hero_slider_show_dots');
             $table->string('hero_slider_content_alignment')->default('start')->after('hero_slider_show_arrows');
+            $table->string('hero_slider_layout_mode')->default('custom-1408')->after('hero_slider_content_alignment');
         });
     }
 
@@ -28,6 +29,7 @@ return new class extends Migration
                 'hero_slider_show_dots',
                 'hero_slider_show_arrows',
                 'hero_slider_content_alignment',
+                'hero_slider_layout_mode',
             ]);
         });
     }

@@ -71,6 +71,7 @@ class HeroSlideController extends Controller
             'hero_slider_interval' => ['required', 'integer', 'min:1000', 'max:30000'],
             'hero_slider_overlay_opacity' => ['required', 'numeric', 'min:0', 'max:0.9'],
             'hero_slider_content_alignment' => ['required', 'in:start,center,end'],
+            'hero_slider_layout_mode' => ['required', 'in:full-width,custom-1408,large-hero,medium-hero,compact-banner,fullscreen-hero'],
         ]);
 
         $data['hero_slider_autoplay'] = $request->boolean('hero_slider_autoplay');
@@ -87,8 +88,8 @@ class HeroSlideController extends Controller
         $imageRules = $requireImage ? ['required', 'image'] : ['nullable', 'image'];
 
         return $request->validate([
-            'headline_en' => ['required', 'string', 'max:255'],
-            'headline_ar' => ['required', 'string', 'max:255'],
+            'headline_en' => ['nullable', 'string', 'max:255'],
+            'headline_ar' => ['nullable', 'string', 'max:255'],
             'subtitle_en' => ['nullable', 'string'],
             'subtitle_ar' => ['nullable', 'string'],
             'cta_text_en' => ['nullable', 'string', 'max:255'],
