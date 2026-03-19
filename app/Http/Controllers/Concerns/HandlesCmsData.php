@@ -3,13 +3,20 @@
 namespace App\Http\Controllers\Concerns;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 trait HandlesCmsData
 {
     protected function uploadFile(Request $request, string $field, string $directory, ?string $current = null): ?string
     {
         if ($request->hasFile($field)) {
-            return $request->file($field)->store($directory, 'public');
+            $path = $request->file($field)->store($directory, 'public');
+
+            if ($current && $current !== $path && Storage::disk('public')->exists($current)) {
+                Storage::disk('public')->delete($current);
+            }
+
+            return $path;
         }
 
         return $current;

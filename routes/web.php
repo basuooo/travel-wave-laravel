@@ -5,7 +5,10 @@ use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DestinationController;
+use App\Http\Controllers\Admin\FooterSettingController;
 use App\Http\Controllers\Admin\HeroSlideController;
+use App\Http\Controllers\Admin\HeaderSettingController;
+use App\Http\Controllers\Admin\HomeCountryStripController;
 use App\Http\Controllers\Admin\InquiryController;
 use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Admin\PageController;
@@ -43,6 +46,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::get('/header-settings', [HeaderSettingController::class, 'edit'])->name('header-settings.edit');
+        Route::put('/header-settings', [HeaderSettingController::class, 'update'])->name('header-settings.update');
+        Route::get('/footer-settings', [FooterSettingController::class, 'edit'])->name('footer-settings.edit');
+        Route::put('/footer-settings', [FooterSettingController::class, 'update'])->name('footer-settings.update');
         Route::get('/pages', [PageController::class, 'index'])->name('pages.index');
         Route::get('/pages/{page:key}/edit', [PageController::class, 'edit'])->name('pages.edit');
         Route::put('/pages/{page:key}', [PageController::class, 'update'])->name('pages.update');
@@ -55,6 +62,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('menu-items', MenuItemController::class);
         Route::put('/hero-slides/settings', [HeroSlideController::class, 'updateSettings'])->name('hero-slides.settings');
         Route::resource('hero-slides', HeroSlideController::class);
+        Route::put('/home-country-strip/settings', [HomeCountryStripController::class, 'updateSettings'])->name('home-country-strip.settings');
+        Route::resource('home-country-strip', HomeCountryStripController::class)->parameters([
+            'home-country-strip' => 'home_country_strip',
+        ]);
         Route::get('/inquiries', [InquiryController::class, 'index'])->name('inquiries.index');
         Route::get('/inquiries/{inquiry}', [InquiryController::class, 'show'])->name('inquiries.show');
         Route::put('/inquiries/{inquiry}', [InquiryController::class, 'update'])->name('inquiries.update');

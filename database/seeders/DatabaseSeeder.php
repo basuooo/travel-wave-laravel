@@ -6,6 +6,7 @@ use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use App\Models\Destination;
 use App\Models\HeroSlide;
+use App\Models\HomeCountryStripItem;
 use App\Models\Inquiry;
 use App\Models\MenuItem;
 use App\Models\Page;
@@ -37,6 +38,10 @@ class DatabaseSeeder extends Seeder
                 'site_name_ar' => 'ترافل ويف',
                 'site_tagline_en' => 'Visas, flights, hotels, and travel planning in one place.',
                 'site_tagline_ar' => 'التأشيرات والطيران والفنادق وتخطيط الرحلات في مكان واحد.',
+                'logo_path' => 'settings/travel-wave-logo.svg',
+                'footer_logo_path' => 'settings/travel-wave-logo.svg',
+                'logo_width' => 220,
+                'mobile_logo_width' => 164,
                 'contact_email' => 'info@travelwave.com',
                 'phone' => '+20 100 123 4567',
                 'secondary_phone' => '+20 122 555 7788',
@@ -55,6 +60,37 @@ class DatabaseSeeder extends Seeder
                 'default_meta_description_ar' => 'تقدم Travel Wave خدمات التأشيرات والسياحة الداخلية والخارجية والطيران والفنادق والاستشارات السياحية.',
                 'primary_color' => '#12395b',
                 'secondary_color' => '#ff8c32',
+                'accent_color' => '#ff8c32',
+                'button_color' => '#ff8c32',
+                'button_hover_color' => '#ef5c00',
+                'link_hover_color' => '#ff8c32',
+                'header_background_color' => '#12395b',
+                'header_text_color' => '#ffffff',
+                'header_link_color' => '#ffffff',
+                'header_hover_color' => '#ff8c32',
+                'header_active_link_color' => '#ff8c32',
+                'header_button_color' => '#ff8c32',
+                'header_button_text_color' => '#ffffff',
+                'header_logo_enabled' => true,
+                'header_is_sticky' => true,
+                'header_vertical_padding' => 8,
+                'footer_background_color' => '#0d2438',
+                'footer_text_color' => '#d9e3ed',
+                'footer_link_color' => '#ffffff',
+                'footer_hover_color' => '#ff8c32',
+                'footer_heading_color' => '#ffffff',
+                'footer_button_color' => '#ff8c32',
+                'footer_button_text_color' => '#ffffff',
+                'footer_vertical_padding' => 80,
+                'footer_quick_links' => [
+                    ['title_en' => 'About Us', 'title_ar' => 'من نحن', 'url' => '/about', 'sort_order' => 1],
+                    ['title_en' => 'Overseas Visas', 'title_ar' => 'التأشيرات الخارجية', 'url' => '/visas', 'sort_order' => 2],
+                    ['title_en' => 'Contact Us', 'title_ar' => 'تواصل معنا', 'url' => '/contact', 'sort_order' => 3],
+                ],
+                'home_country_strip_title_en' => 'Popular Visa Destinations',
+                'home_country_strip_title_ar' => 'أشهر وجهات التأشيرات',
+                'home_country_strip_autoplay' => true,
+                'home_country_strip_speed' => 32,
                 'global_cta_title_en' => 'Plan your next move with Travel Wave',
                 'global_cta_title_ar' => 'خطط خطوتك القادمة مع Travel Wave',
                 'global_cta_text_en' => 'Tell us about your trip and we will match you with the right service, timeline, and budget-friendly plan.',
@@ -77,6 +113,7 @@ class DatabaseSeeder extends Seeder
             [
                 'sort_order' => 1,
                 'image_path' => 'hero-slides/slide-1.svg',
+                'mobile_image_path' => 'hero-slides/slide-1.svg',
                 'headline_en' => 'Luxury journeys shaped around your next visa, flight, and stay',
                 'headline_ar' => 'رحلات راقية نصممها حول تأشيرتك ورحلتك الجوية وإقامتك',
                 'subtitle_en' => 'Travel Wave combines visa support, premium bookings, and responsive trip planning in one smooth customer journey.',
@@ -89,6 +126,7 @@ class DatabaseSeeder extends Seeder
             [
                 'sort_order' => 2,
                 'image_path' => 'hero-slides/slide-2.svg',
+                'mobile_image_path' => 'hero-slides/slide-2.svg',
                 'headline_en' => 'Europe, Gulf, and Asia visa services with a clearer path',
                 'headline_ar' => 'خدمات تأشيرات أوروبا والخليج وآسيا بمسار أوضح',
                 'subtitle_en' => 'From file preparation to booking coordination, we help you move with confidence and less last-minute pressure.',
@@ -101,6 +139,7 @@ class DatabaseSeeder extends Seeder
             [
                 'sort_order' => 3,
                 'image_path' => 'hero-slides/slide-3.svg',
+                'mobile_image_path' => 'hero-slides/slide-3.svg',
                 'headline_en' => 'Discover Egypt and beyond with polished travel packages',
                 'headline_ar' => 'اكتشف مصر وخارجها عبر باقات سفر مصممة باحتراف',
                 'subtitle_en' => 'Domestic escapes, hotel bookings, flights, and custom itineraries built around your timing and budget.',
@@ -234,6 +273,43 @@ class DatabaseSeeder extends Seeder
                 'sort_order' => 1,
             ]
         );
+
+        foreach ([
+            ['slug' => 'france-visa', 'name_en' => 'France', 'name_ar' => 'فرنسا'],
+            ['slug' => 'germany-visa', 'name_en' => 'Germany', 'name_ar' => 'ألمانيا'],
+            ['slug' => 'italy-visa', 'name_en' => 'Italy', 'name_ar' => 'إيطاليا'],
+            ['slug' => 'spain-visa', 'name_en' => 'Spain', 'name_ar' => 'إسبانيا'],
+            ['slug' => 'netherlands-visa', 'name_en' => 'Netherlands', 'name_ar' => 'هولندا'],
+            ['slug' => 'greece-visa', 'name_en' => 'Greece', 'name_ar' => 'اليونان'],
+            ['slug' => 'uae-visa', 'name_en' => 'UAE', 'name_ar' => 'الإمارات'],
+            ['slug' => 'usa-visa', 'name_en' => 'USA', 'name_ar' => 'أمريكا'],
+            ['slug' => 'canada-visa', 'name_en' => 'Canada', 'name_ar' => 'كندا'],
+        ] as $index => $countrySeed) {
+            $country = VisaCountry::query()->firstOrCreate(
+                ['slug' => $countrySeed['slug']],
+                [
+                    'visa_category_id' => $other->id,
+                    'name_en' => $countrySeed['name_en'],
+                    'name_ar' => $countrySeed['name_ar'],
+                    'hero_title_en' => $countrySeed['name_en'] . ' Visa Services',
+                    'hero_title_ar' => 'خدمات تأشيرة ' . $countrySeed['name_ar'],
+                    'is_active' => true,
+                    'sort_order' => $index + 2,
+                ]
+            );
+
+            HomeCountryStripItem::query()->updateOrCreate(
+                ['name_en' => $countrySeed['name_en']],
+                [
+                    'visa_country_id' => $country->id,
+                    'name_ar' => $countrySeed['name_ar'],
+                    'image_path' => $country->flag_image ?: 'visa-countries/france-flag.svg',
+                    'sort_order' => $index + 1,
+                    'is_active' => true,
+                    'show_on_homepage' => true,
+                ]
+            );
+        }
 
         foreach ([
             [$eu->id, 'Germany', 'ألمانيا', 'germany-visa'],
@@ -498,6 +574,8 @@ class DatabaseSeeder extends Seeder
                 'preferred_language' => 'en',
             ]
         );
+
+        $this->call(FranceVisaTemplateSeeder::class);
 
     }
 }

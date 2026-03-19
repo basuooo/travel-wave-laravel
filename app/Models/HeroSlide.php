@@ -13,6 +13,7 @@ class HeroSlide extends Model
 
     protected $fillable = [
         'image_path',
+        'mobile_image_path',
         'headline_en',
         'headline_ar',
         'subtitle_en',

@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('page_title', 'Homepage Hero Slider')
-@section('page_description', 'Manage the 3-slide premium homepage banner plus autoplay, overlay, and navigation behavior.')
+@section('page_description', 'Manage desktop and mobile homepage banners plus autoplay, overlay, navigation, and layout behavior.')
 
 @section('content')
 <div class="row g-4 mb-4">
@@ -60,18 +60,25 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h2 class="h5 mb-1">Slides</h2>
-                    <div class="text-muted small">Exactly 3 slides are seeded by default. You can edit, replace images, disable, or reorder them.</div>
+                    <div class="text-muted small">Each slide supports separate desktop and mobile images, bilingual copy, CTA text, sorting, and active state.</div>
                 </div>
                 <a href="{{ route('admin.hero-slides.create') }}" class="btn btn-primary">Add Slide</a>
             </div>
             <div class="table-responsive">
                 <table class="table align-middle">
-                    <thead><tr><th>Preview</th><th>Headline</th><th>Order</th><th>Status</th><th></th></tr></thead>
+                    <thead><tr><th>Desktop</th><th>Mobile</th><th>Headline</th><th>Order</th><th>Status</th><th></th></tr></thead>
                     <tbody>
                         @foreach($items as $item)
                             <tr>
                                 <td style="width:130px">
                                     <img src="{{ asset('storage/' . $item->image_path) }}" class="img-fluid rounded-3" alt="{{ $item->headline_en }}">
+                                </td>
+                                <td style="width:90px">
+                                    @if($item->mobile_image_path)
+                                        <img src="{{ asset('storage/' . $item->mobile_image_path) }}" class="img-fluid rounded-3 border" alt="{{ $item->headline_en }}" style="max-height: 120px; object-fit: cover;">
+                                    @else
+                                        <span class="badge text-bg-light">Fallback</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="fw-semibold">{{ $item->headline_en }}</div>

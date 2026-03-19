@@ -29,6 +29,7 @@ class HeroSlideController extends Controller
     {
         $data = $this->validatedData($request);
         $data['image_path'] = $this->uploadFile($request, 'image', 'hero-slides');
+        $data['mobile_image_path'] = $this->uploadFile($request, 'mobile_image', 'hero-slides');
         $data['is_active'] = $request->boolean('is_active');
 
         HeroSlide::create($data);
@@ -50,6 +51,7 @@ class HeroSlideController extends Controller
     {
         $data = $this->validatedData($request, false);
         $data['image_path'] = $this->uploadFile($request, 'image', 'hero-slides', $hero_slide->image_path);
+        $data['mobile_image_path'] = $this->uploadFile($request, 'mobile_image', 'hero-slides', $hero_slide->mobile_image_path);
         $data['is_active'] = $request->boolean('is_active');
 
         $hero_slide->update($data);
@@ -97,6 +99,7 @@ class HeroSlideController extends Controller
             'cta_link' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['nullable', 'integer'],
             'image' => $imageRules,
+            'mobile_image' => ['nullable', 'image'],
         ]);
     }
 }

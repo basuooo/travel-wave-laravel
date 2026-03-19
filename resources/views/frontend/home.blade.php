@@ -7,6 +7,31 @@
 @php($sliderSettings = $heroSliderSettings)
 @php($bannerMode = $sliderSettings?->hero_slider_layout_mode ?? 'custom-1408')
 @php($safeZoneClass = in_array($bannerMode, ['full-width', 'fullscreen-hero'], true) ? 'container-fluid' : 'container-xxl')
+@php($homeSearchText = app()->getLocale() === 'ar'
+    ? [
+        'eyebrow' => 'اختر خدمتك بسرعة',
+        'title' => 'ابدأ من الخدمة المناسبة ثم انتقل مباشرة إلى الصفحة المطلوبة',
+        'subtitle' => 'اختيار ذكي للتأشيرات الخارجية والرحلات الداخلية والطيران والفنادق من مكان واحد.',
+        'service' => 'اختر الخدمة',
+        'region' => 'اختر المنطقة',
+        'country' => 'اختر الدولة',
+        'destination' => 'اختر الوجهة',
+        'button' => 'اذهب الآن',
+        'placeholder' => 'اختر',
+        'invalid' => 'اختر خدمة ومساراً صالحاً أولاً',
+    ]
+    : [
+        'eyebrow' => 'Find The Right Service',
+        'title' => 'Start with the right service and jump straight to the page you need',
+        'subtitle' => 'A smarter selection bar for visas, domestic trips, flights, and hotels in one place.',
+        'service' => 'Select service',
+        'region' => 'Select region',
+        'country' => 'Select country',
+        'destination' => 'Select destination',
+        'button' => 'Search Now',
+        'placeholder' => 'Select',
+        'invalid' => 'Choose a valid service and destination first',
+    ])
 
 <section class="tw-home-slider-wrap tw-home-slider-mode-{{ $bannerMode }}">
     <div class="{{ $safeZoneClass }} tw-home-slider-shell">
@@ -28,9 +53,11 @@
                 @php($headline = trim((string) $slide->localized('headline')))
                 @php($subtitle = trim((string) $slide->localized('subtitle')))
                 @php($ctaText = trim((string) $slide->localized('cta_text')))
+                @php($desktopImage = asset('storage/' . $slide->image_path))
+                @php($mobileImage = asset('storage/' . ($slide->mobile_image_path ?: $slide->image_path)))
                 @php($hasSlideContent = $headline !== '' || $subtitle !== '' || ($ctaText !== '' && filled($slide->cta_link)))
                 <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                    <div class="tw-home-slide" style="background-image:url('{{ asset('storage/' . $slide->image_path) }}');">
+                    <div class="tw-home-slide" style="--slide-desktop-image: url('{{ $desktopImage }}'); --slide-mobile-image: url('{{ $mobileImage }}');">
                         @if($hasSlideContent)
                             <div class="tw-home-slide-overlay" style="--slide-overlay: {{ $sliderSettings?->hero_slider_overlay_opacity ?? 0.45 }}"></div>
                             <div class="tw-home-slide-stage position-relative h-100">
@@ -92,8 +119,145 @@
     </div>
 </section>
 
+<section class="container pt-4 pb-2">
+    <div class="tw-home-search-shell">
+        <div class="tw-home-search-copy">
+            <div class="tw-home-search-eyebrow">{{ $homeSearchText['eyebrow'] }}</div>
+            <h2 class="tw-section-title h3 mb-2">{{ $homeSearchText['title'] }}</h2>
+            <p class="text-muted mb-0">{{ $homeSearchText['subtitle'] }}</p>
+        </div>
+        <form class="tw-home-search-form js-home-service-search" data-config='@json($homeSearchConfig)' novalidate>
+            <div class="tw-home-search-field">
+                <label class="form-label" for="home-service-select">{{ $homeSearchText['service'] }}</label>
+                <select id="home-service-select" class="form-select js-home-service-type">
+                    <option value="">{{ $homeSearchText['service'] }}</option>
+                </select>
+            </div>
+            <div class="tw-home-search-field js-home-search-region-wrap d-none">
+                <label class="form-label" for="home-region-select">{{ $homeSearchText['region'] }}</label>
+                <select id="home-region-select" class="form-select js-home-service-region" disabled>
+                    <option value="">{{ $homeSearchText['region'] }}</option>
+                </select>
+            </div>
+            <div class="tw-home-search-field js-home-search-country-wrap d-none">
+                <label class="form-label" for="home-country-select">{{ $homeSearchText['country'] }}</label>
+                <select id="home-country-select" class="form-select js-home-service-country" disabled>
+                    <option value="">{{ $homeSearchText['country'] }}</option>
+                </select>
+            </div>
+            <div class="tw-home-search-field js-home-search-destination-wrap d-none">
+                <label class="form-label" for="home-destination-select">{{ $homeSearchText['destination'] }}</label>
+                <select id="home-destination-select" class="form-select js-home-service-destination" disabled>
+                    <option value="">{{ $homeSearchText['destination'] }}</option>
+                </select>
+            </div>
+            <div class="tw-home-search-action">
+                <button type="submit" class="btn btn-primary tw-btn-primary w-100 js-home-search-submit" disabled>{{ $homeSearchText['button'] }}</button>
+                <div class="tw-home-search-hint js-home-search-hint">{{ $homeSearchText['invalid'] }}</div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@if($homeCountryStripItems->isNotEmpty())
+<section class="container py-4 py-lg-5">
+    <div class="tw-home-destinations-shell">
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4 mb-lg-5">
+            <div class="tw-home-destinations-heading">
+                <div class="tw-home-destinations-eyebrow">{{ __('ui.visas') }}</div>
+                <h2 class="tw-section-title h2 mb-2">{{ $siteSettings?->localized('home_country_strip_title') ?: __('ui.featured_destinations') }}</h2>
+                @if($siteSettings?->localized('home_country_strip_subtitle'))
+                    <p class="text-muted mb-0">{{ $siteSettings?->localized('home_country_strip_subtitle') }}</p>
+                @endif
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                @if($homeCountryStripItems->count() > 1)
+                    <div class="tw-home-destination-controls" aria-label="Featured visa slider controls">
+                        <button type="button" class="tw-home-destination-arrow js-home-destination-prev" aria-label="Previous visas">
+                            <span class="tw-home-destination-arrow-icon tw-home-destination-arrow-icon-prev" aria-hidden="true"></span>
+                        </button>
+                        <button type="button" class="tw-home-destination-arrow js-home-destination-next" aria-label="Next visas">
+                            <span class="tw-home-destination-arrow-icon tw-home-destination-arrow-icon-next" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                @endif
+                <a href="{{ route('visas.index') }}" class="btn btn-outline-primary">{{ __('ui.view_all') }}</a>
+            </div>
+        </div>
+        @php($destinationsAutoplay = $siteSettings?->home_destinations_autoplay ?? ($siteSettings?->home_country_strip_autoplay ?? true))
+        @php($destinationsLoop = $siteSettings?->home_destinations_loop ?? true)
+        @php($destinationsPauseOnHover = $siteSettings?->home_destinations_pause_on_hover ?? true)
+        @php($destinationsInterval = max(1000, (int) ($siteSettings?->home_destinations_interval ?: 3200)))
+        @php($destinationsSpeed = max(100, (int) ($siteSettings?->home_destinations_speed ?: 500)))
+        @php($autoplayCountries = $destinationsAutoplay && $homeCountryStripItems->count() > 1)
+        @php($loopedCountryItems = ($destinationsLoop && $homeCountryStripItems->count() > 1) ? $homeCountryStripItems->concat($homeCountryStripItems)->concat($homeCountryStripItems) : $homeCountryStripItems)
+        <div
+            class="tw-home-destinations-carousel js-home-destination-carousel"
+            data-autoplay="{{ $autoplayCountries ? 'true' : 'false' }}"
+            data-interval="{{ $destinationsInterval }}"
+            data-speed="{{ $destinationsSpeed }}"
+            data-pause-on-hover="{{ $destinationsPauseOnHover ? 'true' : 'false' }}"
+            data-loop="{{ $destinationsLoop ? 'true' : 'false' }}"
+            data-base-count="{{ $homeCountryStripItems->count() }}"
+        >
+            <div class="tw-home-destinations-viewport">
+                <div class="tw-home-destinations-track">
+                    @foreach($loopedCountryItems as $item)
+                    @php($linkedCountry = $item->visaCountry)
+                    @php($itemUrl = $item->resolvedUrl())
+                    @php($itemName = $item->displayName())
+                    @php($itemSubtitle = $item->displaySubtitle())
+                    @php($itemImage = $item->displayImagePath())
+                    @php($itemFlag = $item->displayFlagPath())
+                    <a href="{{ $itemUrl }}" class="tw-home-destination-card" data-name="{{ $itemName }}" data-logical-index="{{ $homeCountryStripItems->count() ? ($loop->index % $homeCountryStripItems->count()) : 0 }}">
+                        <div class="tw-home-destination-connector" aria-hidden="true">
+                            <span class="tw-home-destination-node"></span>
+                        </div>
+                        <div class="tw-home-destination-media">
+                            @if($itemImage)
+                                <img src="{{ asset('storage/' . $itemImage) }}" alt="{{ $itemName }}" class="tw-home-destination-image">
+                            @else
+                                <div class="tw-home-destination-placeholder">{{ strtoupper(substr($itemName, 0, 2)) }}</div>
+                            @endif
+                            <div class="tw-home-destination-overlay"></div>
+                            <div class="tw-home-destination-flag-wrap">
+                                <div class="tw-home-destination-flag">
+                                    @if($itemFlag)
+                                        <img src="{{ asset('storage/' . $itemFlag) }}" alt="{{ $itemName }} flag">
+                                    @else
+                                        <span>{{ strtoupper(substr($itemName, 0, 1)) }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="tw-home-destination-line" aria-hidden="true"></div>
+                        </div>
+                        <div class="tw-home-destination-body">
+                            <div class="tw-home-destination-copy">
+                                <h3 class="h5 mb-1">{{ $itemName }}</h3>
+                                @if($itemSubtitle)
+                                    <p class="mb-0">{{ $itemSubtitle }}</p>
+                                @elseif($linkedCountry?->localized('excerpt'))
+                                    <p class="mb-0">{{ \Illuminate\Support\Str::limit($linkedCountry->localized('excerpt'), 72) }}</p>
+                                @endif
+                            </div>
+                            <div class="tw-home-destination-cta">
+                                <span>{{ __('ui.learn_more') }}</span>
+                            </div>
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@endif
+
 <section class="container py-5">
     <div class="text-center mb-5">
+        <div class="d-inline-flex align-items-center justify-content-center tw-home-brand-lockup mb-4">
+            @include('partials.frontend.logo', ['variant' => 'header', 'className' => 'tw-home-brand-logo'])
+        </div>
         <h2 class="tw-section-title display-6">{{ $page->localized('intro_title') }}</h2>
         <p class="text-muted mx-auto" style="max-width:780px">{{ $page->localized('intro_body') }}</p>
     </div>
@@ -280,4 +444,314 @@
     </div>
 </section>
 @endif
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.js-home-service-search').forEach((form) => {
+        const config = JSON.parse(form.dataset.config || '{}');
+        const serviceSelect = form.querySelector('.js-home-service-type');
+        const regionWrap = form.querySelector('.js-home-search-region-wrap');
+        const regionSelect = form.querySelector('.js-home-service-region');
+        const countryWrap = form.querySelector('.js-home-search-country-wrap');
+        const countrySelect = form.querySelector('.js-home-service-country');
+        const destinationWrap = form.querySelector('.js-home-search-destination-wrap');
+        const destinationSelect = form.querySelector('.js-home-service-destination');
+        const submitButton = form.querySelector('.js-home-search-submit');
+        const hint = form.querySelector('.js-home-search-hint');
+        const isArabic = document.documentElement.lang === 'ar';
+
+        if (!serviceSelect || !submitButton) {
+            return;
+        }
+
+        const labelFor = (item) => isArabic ? item.label_ar : item.label_en;
+        const placeholderFor = (select) => select.options[0]?.textContent ?? '';
+
+        const resetSelect = (select) => {
+            select.innerHTML = '';
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = placeholderFor(select);
+            select.appendChild(placeholder);
+            select.value = '';
+            select.disabled = true;
+        };
+
+        const populateSelect = (select, items) => {
+            const placeholderText = placeholderFor(select);
+            select.innerHTML = '';
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = placeholderText;
+            select.appendChild(placeholder);
+
+            items.forEach((item) => {
+                const option = document.createElement('option');
+                option.value = item.key || item.slug || item.url;
+                option.textContent = labelFor(item);
+                option.dataset.url = item.url || '';
+                select.appendChild(option);
+            });
+
+            select.disabled = items.length === 0;
+            select.value = '';
+        };
+
+        const hideElement = (element) => element.classList.add('d-none');
+        const showElement = (element) => element.classList.remove('d-none');
+
+        let targetUrl = '';
+
+        const syncSubmitState = () => {
+            submitButton.disabled = !targetUrl;
+            hint.classList.toggle('is-active', !targetUrl);
+        };
+
+        populateSelect(serviceSelect, config.services || []);
+        syncSubmitState();
+
+        serviceSelect.addEventListener('change', () => {
+            targetUrl = '';
+            hideElement(regionWrap);
+            hideElement(countryWrap);
+            hideElement(destinationWrap);
+            resetSelect(regionSelect);
+            resetSelect(countrySelect);
+            resetSelect(destinationSelect);
+
+            const service = serviceSelect.value;
+
+            if (service === 'visas') {
+                showElement(regionWrap);
+                populateSelect(regionSelect, config.visa_regions || []);
+            } else if (service === 'domestic') {
+                showElement(destinationWrap);
+                populateSelect(destinationSelect, config.domestic_destinations || []);
+            } else if (service && config.direct_routes?.[service]) {
+                targetUrl = config.direct_routes[service];
+            }
+
+            syncSubmitState();
+        });
+
+        regionSelect.addEventListener('change', () => {
+            targetUrl = '';
+            hideElement(countryWrap);
+            resetSelect(countrySelect);
+
+            const region = (config.visa_regions || []).find((item) => item.key === regionSelect.value);
+            if (region) {
+                showElement(countryWrap);
+                populateSelect(countrySelect, region.countries || []);
+            }
+
+            syncSubmitState();
+        });
+
+        countrySelect.addEventListener('change', () => {
+            targetUrl = countrySelect.selectedOptions[0]?.dataset.url || '';
+            syncSubmitState();
+        });
+
+        destinationSelect.addEventListener('change', () => {
+            targetUrl = destinationSelect.selectedOptions[0]?.dataset.url || '';
+            syncSubmitState();
+        });
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (!targetUrl) {
+                syncSubmitState();
+                return;
+            }
+
+            window.location.href = targetUrl;
+        });
+    });
+
+    document.querySelectorAll('.js-home-destination-carousel').forEach((carousel) => {
+        const viewport = carousel.querySelector('.tw-home-destinations-viewport');
+        const shell = carousel.closest('.tw-home-destinations-shell');
+        const prevButton = shell?.querySelector('.js-home-destination-prev');
+        const nextButton = shell?.querySelector('.js-home-destination-next');
+        const baseCount = parseInt(carousel.dataset.baseCount || '0', 10);
+        const track = carousel.querySelector('.tw-home-destinations-track');
+        const cards = track ? Array.from(track.children) : [];
+        const autoplayEnabled = carousel.dataset.autoplay === 'true';
+        const autoplayInterval = Math.max(3000, parseInt(carousel.dataset.interval || '6000', 10));
+        const transitionSpeed = Math.max(100, parseInt(carousel.dataset.speed || '500', 10));
+        const pauseOnHover = carousel.dataset.pauseOnHover !== 'false';
+        const loopEnabled = carousel.dataset.loop !== 'false';
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (!viewport || !track || cards.length === 0 || baseCount === 0) {
+            return;
+        }
+
+        if (baseCount === 1) {
+            prevButton?.setAttribute('disabled', 'disabled');
+            nextButton?.setAttribute('disabled', 'disabled');
+            return;
+        }
+
+        let currentIndex = loopEnabled ? baseCount : 0;
+        let autoplayTimer = null;
+        let touchStartX = null;
+        let isAnimating = false;
+
+        const offsets = () => cards.map((card) => card.offsetLeft);
+
+        const logicalIndex = (index) => {
+            if (!baseCount) {
+                return 0;
+            }
+
+            return ((index % baseCount) + baseCount) % baseCount;
+        };
+
+        const syncActiveState = () => {
+            const activeLogicalIndex = logicalIndex(currentIndex);
+
+            cards.forEach((card, index) => {
+                const isActive = index === currentIndex;
+                card.classList.toggle('is-active', isActive);
+                card.setAttribute('aria-current', isActive ? 'true' : 'false');
+                card.dataset.active = isActive ? 'true' : 'false';
+                card.dataset.logicalActive = logicalIndex(index) === activeLogicalIndex ? 'true' : 'false';
+            });
+        };
+
+        const jumpToIndex = (index, animate = false) => {
+            const cardOffsets = offsets();
+            const targetLeft = cardOffsets[index];
+
+            if (typeof targetLeft !== 'number') {
+                return;
+            }
+
+            currentIndex = index;
+            isAnimating = animate && !reducedMotion;
+            track.style.transition = isAnimating ? `transform ${transitionSpeed}ms cubic-bezier(0.22, 1, 0.36, 1)` : 'none';
+            track.style.transform = `translate3d(${-targetLeft}px, 0, 0)`;
+            syncActiveState();
+        };
+
+        const normalizeLoopPosition = () => {
+            if (!loopEnabled) {
+                return;
+            }
+
+            let normalizedIndex = currentIndex;
+            if (currentIndex >= baseCount * 2) {
+                normalizedIndex -= baseCount;
+            } else if (currentIndex < baseCount) {
+                normalizedIndex += baseCount;
+            }
+
+            if (normalizedIndex !== currentIndex) {
+                jumpToIndex(normalizedIndex, false);
+            } else {
+                syncActiveState();
+            }
+        };
+
+        const goTo = (direction) => {
+            if (isAnimating) {
+                return;
+            }
+
+            let nextIndex = currentIndex + direction;
+            if (!loopEnabled) {
+                nextIndex = Math.max(0, Math.min(baseCount - 1, nextIndex));
+            }
+
+             if (nextIndex === currentIndex) {
+                syncActiveState();
+                return;
+            }
+
+            jumpToIndex(nextIndex, true);
+        };
+
+        const stopAutoplay = () => {
+            window.clearInterval(autoplayTimer);
+            autoplayTimer = null;
+        };
+
+        const restartAutoplay = () => {
+            stopAutoplay();
+
+            if (!autoplayEnabled || reducedMotion || document.hidden) {
+                return;
+            }
+
+            autoplayTimer = window.setInterval(() => goTo(1), autoplayInterval);
+        };
+
+        track.addEventListener('transitionend', () => {
+            isAnimating = false;
+            normalizeLoopPosition();
+        });
+
+        viewport.addEventListener('touchstart', (event) => {
+            touchStartX = event.changedTouches[0]?.clientX ?? null;
+        }, { passive: true });
+
+        viewport.addEventListener('touchend', (event) => {
+            if (touchStartX === null) {
+                return;
+            }
+
+            const deltaX = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
+            touchStartX = null;
+
+            if (Math.abs(deltaX) < 36) {
+                return;
+            }
+
+            goTo(deltaX < 0 ? 1 : -1);
+            restartAutoplay();
+        }, { passive: true });
+
+        prevButton?.addEventListener('click', () => {
+            goTo(-1);
+            restartAutoplay();
+        });
+
+        nextButton?.addEventListener('click', () => {
+            goTo(1);
+            restartAutoplay();
+        });
+
+        if (pauseOnHover) {
+            carousel.addEventListener('mouseenter', stopAutoplay);
+            carousel.addEventListener('mouseleave', restartAutoplay);
+            carousel.addEventListener('focusin', stopAutoplay);
+            carousel.addEventListener('focusout', restartAutoplay);
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopAutoplay();
+            } else {
+                restartAutoplay();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            window.clearTimeout(carousel.__resizeTimer);
+            carousel.__resizeTimer = window.setTimeout(() => {
+                const nextIndex = loopEnabled
+                    ? baseCount + logicalIndex(currentIndex)
+                    : Math.min(logicalIndex(currentIndex), baseCount - 1);
+
+                jumpToIndex(nextIndex, false);
+            }, 120);
+        });
+
+        jumpToIndex(currentIndex, false);
+        restartAutoplay();
+    });
+});
+</script>
 @endsection

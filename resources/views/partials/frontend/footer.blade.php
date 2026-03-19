@@ -1,8 +1,11 @@
-<footer class="tw-footer pt-5 pb-4 mt-5">
+@php($footerLinks = collect($siteSettings?->footer_quick_links ?: [])->sortBy('sort_order')->values())
+<footer class="tw-footer mt-5" style="padding-top: {{ $siteSettings?->footer_vertical_padding ?? 80 }}px; padding-bottom: {{ max(32, (int) (($siteSettings?->footer_vertical_padding ?? 80) / 2)) }}px;">
     <div class="container">
         <div class="row g-4 g-lg-5 align-items-start">
             <div class="col-md-6 col-xl-4">
-                <h4 class="text-white">{{ $siteSettings?->localized('site_name') ?? 'Travel Wave' }}</h4>
+                <a href="{{ route('home') }}" class="d-inline-flex align-items-center mb-3" aria-label="{{ $siteSettings?->localized('site_name') ?? 'Travel Wave' }}">
+                    @include('partials.frontend.logo', ['variant' => 'footer', 'className' => 'tw-footer-logo'])
+                </a>
                 <p>{{ $siteSettings?->localized('footer_text') }}</p>
                 <div class="d-flex flex-wrap gap-3 tw-footer-social">
                     @if($siteSettings?->facebook_url)<a href="{{ $siteSettings->facebook_url }}">Facebook</a>@endif
@@ -13,15 +16,21 @@
             <div class="col-md-6 col-xl-4">
                 <h5 class="text-white">{{ __('ui.contact') }}</h5>
                 <p class="mb-1">{{ $siteSettings?->phone }}</p>
+                @if($siteSettings?->secondary_phone)<p class="mb-1">{{ $siteSettings?->secondary_phone }}</p>@endif
                 <p class="mb-1">{{ $siteSettings?->contact_email }}</p>
+                @if($siteSettings?->whatsapp_number)<p class="mb-1">WhatsApp: {{ $siteSettings?->whatsapp_number }}</p>@endif
                 <p class="mb-0">{{ $siteSettings?->localized('address') }}</p>
             </div>
             <div class="col-md-12 col-xl-4">
                 <h5 class="text-white">{{ __('ui.learn_more') }}</h5>
                 <ul class="list-unstyled tw-footer-links mb-0">
-                    @foreach ($footerMenuItems ?? [] as $item)
-                        <li class="mb-2"><a href="{{ $item->url ?: ($item->route_name ? route($item->route_name) : '#') }}">{{ $item->localized('title') }}</a></li>
-                    @endforeach
+                    @forelse ($footerLinks as $item)
+                        <li class="mb-2"><a href="{{ $item['url'] ?? '#' }}">{{ app()->getLocale() === 'ar' ? ($item['title_ar'] ?? '') : ($item['title_en'] ?? '') }}</a></li>
+                    @empty
+                        @foreach ($footerMenuItems ?? [] as $item)
+                            <li class="mb-2"><a href="{{ $item->url ?: ($item->route_name ? route($item->route_name) : '#') }}">{{ $item->localized('title') }}</a></li>
+                        @endforeach
+                    @endforelse
                 </ul>
             </div>
         </div>

@@ -14,12 +14,15 @@
             <div class="fw-bold fs-4 mb-4">Travel Wave CMS</div>
             <nav class="nav flex-column gap-1">
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.dashboard') }}">Dashboard</a>
-                <a class="nav-link rounded px-3 py-2" href="{{ route('admin.settings.edit') }}">Site Settings</a>
+                <a class="nav-link rounded px-3 py-2" href="{{ route('admin.settings.edit') }}">Brand Settings</a>
+                <a class="nav-link rounded px-3 py-2" href="{{ route('admin.header-settings.edit') }}">Header Settings</a>
+                <a class="nav-link rounded px-3 py-2" href="{{ route('admin.footer-settings.edit') }}">Footer Settings</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.pages.index') }}">Pages</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.visa-categories.index') }}">Visa Categories</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.visa-countries.index') }}">Visa Countries</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.destinations.index') }}">Destinations</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.hero-slides.index') }}">Hero Slider</a>
+                <a class="nav-link rounded px-3 py-2" href="{{ route('admin.home-country-strip.index') }}">Homepage Country Strip</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.blog-categories.index') }}">Blog Categories</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.blog-posts.index') }}">Blog Posts</a>
                 <a class="nav-link rounded px-3 py-2" href="{{ route('admin.testimonials.index') }}">Testimonials</a>
