@@ -723,9 +723,18 @@ main > section:last-child {
 }
 
 .tw-home-destinations-viewport {
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: visible;
     padding-block: 0.2rem 0.55rem;
     touch-action: pan-y;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.tw-home-destinations-viewport::-webkit-scrollbar {
+    display: none;
 }
 
 .tw-home-destinations-track {
@@ -748,7 +757,8 @@ main > section:last-child {
     border-radius: 1.35rem;
     overflow: visible;
     opacity: 0.86;
-    transition: transform 0.28s ease, filter 0.28s ease, opacity 0.28s ease;
+    scroll-snap-align: start;
+    transition: transform var(--tw-home-destination-speed, 280ms) ease, filter var(--tw-home-destination-speed, 280ms) ease, opacity var(--tw-home-destination-speed, 280ms) ease;
 }
 
 .tw-home-destination-card:hover,

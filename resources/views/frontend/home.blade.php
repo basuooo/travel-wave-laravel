@@ -189,27 +189,24 @@
         @php($destinationsPauseOnHover = $siteSettings?->home_destinations_pause_on_hover ?? true)
         @php($destinationsInterval = max(1000, (int) ($siteSettings?->home_destinations_interval ?: 3200)))
         @php($destinationsSpeed = max(100, (int) ($siteSettings?->home_destinations_speed ?: 500)))
-        @php($autoplayCountries = $destinationsAutoplay && $homeCountryStripItems->count() > 1)
-        @php($loopedCountryItems = ($destinationsLoop && $homeCountryStripItems->count() > 1) ? $homeCountryStripItems->concat($homeCountryStripItems)->concat($homeCountryStripItems) : $homeCountryStripItems)
         <div
             class="tw-home-destinations-carousel js-home-destination-carousel"
-            data-autoplay="{{ $autoplayCountries ? 'true' : 'false' }}"
+            data-autoplay="{{ ($destinationsAutoplay && $homeCountryStripItems->count() > 1) ? 'true' : 'false' }}"
             data-interval="{{ $destinationsInterval }}"
             data-speed="{{ $destinationsSpeed }}"
             data-pause-on-hover="{{ $destinationsPauseOnHover ? 'true' : 'false' }}"
             data-loop="{{ $destinationsLoop ? 'true' : 'false' }}"
-            data-base-count="{{ $homeCountryStripItems->count() }}"
         >
             <div class="tw-home-destinations-viewport">
                 <div class="tw-home-destinations-track">
-                    @foreach($loopedCountryItems as $item)
+                    @foreach($homeCountryStripItems as $item)
                     @php($linkedCountry = $item->visaCountry)
                     @php($itemUrl = $item->resolvedUrl())
                     @php($itemName = $item->displayName())
                     @php($itemSubtitle = $item->displaySubtitle())
                     @php($itemImage = $item->displayImagePath())
                     @php($itemFlag = $item->displayFlagPath())
-                    <a href="{{ $itemUrl }}" class="tw-home-destination-card" data-name="{{ $itemName }}" data-logical-index="{{ $homeCountryStripItems->count() ? ($loop->index % $homeCountryStripItems->count()) : 0 }}">
+                    <a href="{{ $itemUrl }}" class="tw-home-destination-card{{ $loop->first ? ' is-active' : '' }}" data-card-index="{{ $loop->index }}">
                         <div class="tw-home-destination-connector" aria-hidden="true">
                             <span class="tw-home-destination-node"></span>
                         </div>
@@ -574,103 +571,69 @@ document.addEventListener('DOMContentLoaded', () => {
         const shell = carousel.closest('.tw-home-destinations-shell');
         const prevButton = shell?.querySelector('.js-home-destination-prev');
         const nextButton = shell?.querySelector('.js-home-destination-next');
-        const baseCount = parseInt(carousel.dataset.baseCount || '0', 10);
         const track = carousel.querySelector('.tw-home-destinations-track');
         const cards = track ? Array.from(track.children) : [];
         const autoplayEnabled = carousel.dataset.autoplay === 'true';
-        const autoplayInterval = Math.max(3000, parseInt(carousel.dataset.interval || '6000', 10));
+        const autoplayInterval = Math.max(1000, parseInt(carousel.dataset.interval || '3200', 10));
         const transitionSpeed = Math.max(100, parseInt(carousel.dataset.speed || '500', 10));
         const pauseOnHover = carousel.dataset.pauseOnHover !== 'false';
         const loopEnabled = carousel.dataset.loop !== 'false';
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        if (!viewport || !track || cards.length === 0 || baseCount === 0) {
+        if (!viewport || !track || cards.length === 0) {
             return;
         }
 
-        if (baseCount === 1) {
+        if (cards.length === 1) {
             prevButton?.setAttribute('disabled', 'disabled');
             nextButton?.setAttribute('disabled', 'disabled');
             return;
         }
 
-        let currentIndex = loopEnabled ? baseCount : 0;
+        let currentIndex = 0;
         let autoplayTimer = null;
         let touchStartX = null;
-        let isAnimating = false;
-
-        const offsets = () => cards.map((card) => card.offsetLeft);
-
-        const logicalIndex = (index) => {
-            if (!baseCount) {
-                return 0;
-            }
-
-            return ((index % baseCount) + baseCount) % baseCount;
-        };
+        let scrollTimeout = null;
 
         const syncActiveState = () => {
-            const activeLogicalIndex = logicalIndex(currentIndex);
-
             cards.forEach((card, index) => {
                 const isActive = index === currentIndex;
                 card.classList.toggle('is-active', isActive);
                 card.setAttribute('aria-current', isActive ? 'true' : 'false');
-                card.dataset.active = isActive ? 'true' : 'false';
-                card.dataset.logicalActive = logicalIndex(index) === activeLogicalIndex ? 'true' : 'false';
             });
         };
 
-        const jumpToIndex = (index, animate = false) => {
-            const cardOffsets = offsets();
-            const targetLeft = cardOffsets[index];
-
-            if (typeof targetLeft !== 'number') {
+        const scrollToIndex = (index, behavior = 'smooth') => {
+            const card = cards[index];
+            if (!card) {
                 return;
             }
 
             currentIndex = index;
-            isAnimating = animate && !reducedMotion;
-            track.style.transition = isAnimating ? `transform ${transitionSpeed}ms cubic-bezier(0.22, 1, 0.36, 1)` : 'none';
-            track.style.transform = `translate3d(${-targetLeft}px, 0, 0)`;
             syncActiveState();
-        };
 
-        const normalizeLoopPosition = () => {
-            if (!loopEnabled) {
-                return;
-            }
-
-            let normalizedIndex = currentIndex;
-            if (currentIndex >= baseCount * 2) {
-                normalizedIndex -= baseCount;
-            } else if (currentIndex < baseCount) {
-                normalizedIndex += baseCount;
-            }
-
-            if (normalizedIndex !== currentIndex) {
-                jumpToIndex(normalizedIndex, false);
-            } else {
-                syncActiveState();
-            }
+            const targetLeft = card.offsetLeft - Math.max(0, (viewport.clientWidth - card.offsetWidth) / 2);
+            viewport.scrollTo({
+                left: Math.max(0, targetLeft),
+                behavior: reducedMotion ? 'auto' : behavior,
+            });
         };
 
         const goTo = (direction) => {
-            if (isAnimating) {
-                return;
-            }
-
             let nextIndex = currentIndex + direction;
-            if (!loopEnabled) {
-                nextIndex = Math.max(0, Math.min(baseCount - 1, nextIndex));
+
+            if (nextIndex < 0) {
+                nextIndex = loopEnabled ? cards.length - 1 : 0;
+            } else if (nextIndex >= cards.length) {
+                nextIndex = loopEnabled ? 0 : cards.length - 1;
             }
 
-             if (nextIndex === currentIndex) {
+            if (nextIndex === currentIndex) {
                 syncActiveState();
                 return;
             }
 
-            jumpToIndex(nextIndex, true);
+            scrollToIndex(nextIndex, 'smooth');
         };
 
         const stopAutoplay = () => {
@@ -688,10 +651,24 @@ document.addEventListener('DOMContentLoaded', () => {
             autoplayTimer = window.setInterval(() => goTo(1), autoplayInterval);
         };
 
-        track.addEventListener('transitionend', () => {
-            isAnimating = false;
-            normalizeLoopPosition();
-        });
+        const detectNearestIndex = () => {
+            const viewportCenter = viewport.scrollLeft + (viewport.clientWidth / 2);
+            let nearestIndex = currentIndex;
+            let nearestDistance = Number.POSITIVE_INFINITY;
+
+            cards.forEach((card, index) => {
+                const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+                const distance = Math.abs(cardCenter - viewportCenter);
+
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestIndex = index;
+                }
+            });
+
+            currentIndex = nearestIndex;
+            syncActiveState();
+        };
 
         viewport.addEventListener('touchstart', (event) => {
             touchStartX = event.changedTouches[0]?.clientX ?? null;
@@ -711,6 +688,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             goTo(deltaX < 0 ? 1 : -1);
             restartAutoplay();
+        }, { passive: true });
+
+        viewport.addEventListener('scroll', () => {
+            window.clearTimeout(scrollTimeout);
+            scrollTimeout = window.setTimeout(detectNearestIndex, 100);
         }, { passive: true });
 
         prevButton?.addEventListener('click', () => {
@@ -741,15 +723,12 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('resize', () => {
             window.clearTimeout(carousel.__resizeTimer);
             carousel.__resizeTimer = window.setTimeout(() => {
-                const nextIndex = loopEnabled
-                    ? baseCount + logicalIndex(currentIndex)
-                    : Math.min(logicalIndex(currentIndex), baseCount - 1);
-
-                jumpToIndex(nextIndex, false);
+                scrollToIndex(currentIndex, 'auto');
             }, 120);
         });
 
-        jumpToIndex(currentIndex, false);
+        track.style.setProperty('--tw-home-destination-speed', `${transitionSpeed}ms`);
+        syncActiveState();
         restartAutoplay();
     });
 });
