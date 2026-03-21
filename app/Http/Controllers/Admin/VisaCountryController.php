@@ -140,6 +140,8 @@ class VisaCountryController extends Controller
             'inquiry_form_success_en' => ['nullable', 'string'],
             'inquiry_form_success_ar' => ['nullable', 'string'],
             'inquiry_form_default_service_type' => ['nullable', 'string', 'max:255'],
+            'inquiry_form_label_en' => ['nullable', 'string', 'max:255'],
+            'inquiry_form_label_ar' => ['nullable', 'string', 'max:255'],
             'cta_title_en' => ['nullable', 'string', 'max:255'],
             'cta_title_ar' => ['nullable', 'string', 'max:255'],
             'cta_text_en' => ['nullable', 'string'],
@@ -417,6 +419,6 @@ class VisaCountryController extends Controller
 
     protected function availableInquiryFields(): array
     {
-        return ['full_name', 'phone', 'email', 'travel_date', 'message'];
+        return ['full_name', 'phone', 'whatsapp_number', 'email', 'service_type', 'destination', 'travel_date', 'message'];
     }
 }

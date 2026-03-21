@@ -33,6 +33,9 @@
         'invalid' => 'Choose a valid service and destination first',
     ])
 
+@include('partials.frontend.form-zone', ['assignments' => $managedForms['top'] ?? [], 'position' => 'top', 'sourcePage' => 'home'])
+@include('partials.frontend.map-zone', ['assignments' => $managedMaps['top'] ?? [], 'position' => 'top'])
+
 <section class="tw-home-slider-wrap tw-home-slider-mode-{{ $bannerMode }}">
     <div class="{{ $safeZoneClass }} tw-home-slider-shell">
     <div id="travelWaveHeroSlider"
@@ -118,6 +121,9 @@
     </div>
     </div>
 </section>
+
+@include('partials.frontend.form-zone', ['assignments' => $managedForms['below_hero'] ?? [], 'position' => 'below_hero', 'sourcePage' => 'home'])
+@include('partials.frontend.map-zone', ['assignments' => $managedMaps['below_hero'] ?? [], 'position' => 'below_hero'])
 
 <section class="container pt-4 pb-2">
     <div class="tw-home-search-shell">
@@ -250,6 +256,8 @@
 </section>
 @endif
 
+@include('partials.frontend.map-zone', ['assignments' => $managedMaps['middle'] ?? [], 'position' => 'middle'])
+
 <section class="container py-5">
     <div class="text-center mb-5">
         <div class="d-inline-flex align-items-center justify-content-center tw-home-brand-lockup mb-4">
@@ -270,6 +278,8 @@
         @endforeach
     </div>
 </section>
+
+@include('partials.frontend.map-zone', ['assignments' => $managedMaps['bottom'] ?? [], 'position' => 'bottom'])
 
 <section class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -384,6 +394,8 @@
 </section>
 @endif
 
+@include('partials.frontend.form-zone', ['assignments' => $managedForms['middle'] ?? [], 'position' => 'middle', 'sourcePage' => 'home'])
+
 <section class="container py-5">
     <div class="row g-4">
         @foreach($testimonials as $testimonial)
@@ -441,6 +453,8 @@
     </div>
 </section>
 @endif
+
+@include('partials.frontend.form-zone', ['assignments' => $managedForms['bottom'] ?? [], 'position' => 'bottom', 'sourcePage' => 'home'])
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {

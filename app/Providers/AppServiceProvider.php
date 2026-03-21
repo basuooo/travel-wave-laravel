@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\MenuItem;
 use App\Models\Setting;
+use App\Support\SeoManager;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
         view()->composer('*', function ($view) {
             $settings = Setting::query()->first();
+            $seoManager = app(SeoManager::class);
             $headerMenu = MenuItem::query()
                 ->where('location', 'header')
                 ->whereNull('parent_id')
@@ -47,6 +49,8 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with([
                 'siteSettings' => $settings,
+                'seoSettings' => class_exists(\App\Models\SeoSetting::class) ? $seoManager->settings() : null,
+                'seoMetaData' => $seoManager->resolveForRequest(request()),
                 'headerMenuItems' => $headerMenu,
                 'footerMenuItems' => $footerMenu,
             ]);

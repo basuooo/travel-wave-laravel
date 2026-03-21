@@ -363,61 +363,6 @@
 </section>
 @endif
 
-@if($country->map_is_active && $country->map_embed_code)
-<section class="container py-4">
-    <div class="tw-card p-4 p-lg-5">
-        <div class="row g-4 align-items-start">
-            <div class="col-lg-4">
-                <h2 class="tw-section-title h2 mb-3">{{ $mapTitle }}</h2>
-                @if($mapDescription)
-                    <p class="text-muted mb-0">{{ $mapDescription }}</p>
-                @endif
-            </div>
-            <div class="col-lg-8">
-                <div class="tw-map-embed tw-visa-map">
-                    {!! $country->map_embed_code !!}
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-@endif
-
-@if($country->inquiry_form_is_active)
-<section class="container py-4" id="visa-inquiry">
-    <div class="tw-card p-0 overflow-hidden">
-        <div class="row g-0">
-            <div class="col-lg-5">
-                <div class="tw-visa-reference-form-copy">
-                    <div class="small text-uppercase text-muted mb-2">{{ __('ui.ask_about_visa') }}</div>
-                    <h2 class="tw-section-title h2 mb-3">{{ $inquiryTitle }}</h2>
-                    @if($inquirySubtitle)
-                        <p class="text-muted mb-4">{{ $inquirySubtitle }}</p>
-                    @endif
-                    <div class="tw-visa-reference-form-meta">
-                        @foreach($summaryItems->take(2) as $item)
-                            <div class="tw-visa-reference-form-meta-item">
-                                <strong>{{ $country->repeaterValue($item, 'title') }}</strong>
-                                <span>{{ $country->repeaterValue($item, 'value') }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-7">
-                @include('partials.frontend.inquiry-form', [
-                    'type' => 'visa',
-                    'source' => $country->localized('name') . ' Visa',
-                    'destination' => $country->localized('name'),
-                    'config' => $formConfig,
-                    'className' => 'h-100 border-0 rounded-0 shadow-none',
-                ])
-            </div>
-        </div>
-    </div>
-</section>
-@endif
-
 @if($country->final_cta_is_active)
 <section class="container py-4">
     <div class="tw-visa-final-cta" style="{{ $country->final_cta_background_image ? "background-image:linear-gradient(135deg, rgba(9, 31, 51, 0.9), rgba(18, 57, 91, 0.82)), url('" . asset('storage/' . $country->final_cta_background_image) . "');" : '' }}">

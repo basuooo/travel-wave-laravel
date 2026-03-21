@@ -8,6 +8,8 @@ use App\Models\Destination;
 use App\Models\HeroSlide;
 use App\Models\HomeCountryStripItem;
 use App\Models\Inquiry;
+use App\Models\LeadForm;
+use App\Models\MapSection;
 use App\Models\MenuItem;
 use App\Models\Page;
 use App\Models\Setting;
@@ -31,7 +33,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        Setting::query()->updateOrCreate(
+        $settings = Setting::query()->updateOrCreate(
             ['id' => 1],
             [
                 'site_name_en' => 'Travel Wave',
@@ -106,6 +108,21 @@ class DatabaseSeeder extends Seeder
                 'hero_slider_show_arrows' => true,
                 'hero_slider_content_alignment' => 'start',
                 'hero_slider_layout_mode' => 'custom-1408',
+                'floating_whatsapp_enabled' => true,
+                'floating_whatsapp_number' => '201060500236',
+                'floating_whatsapp_message_en' => 'Hello, I want to ask about Travel Wave services',
+                'floating_whatsapp_message_ar' => 'مرحبًا، أريد الاستفسار عن خدمات Travel Wave',
+                'floating_whatsapp_button_text_en' => 'Chat on WhatsApp',
+                'floating_whatsapp_button_text_ar' => 'تواصل واتساب',
+                'floating_whatsapp_show_icon' => true,
+                'floating_whatsapp_position' => 'bottom_right',
+                'floating_whatsapp_animation_style' => 'pulse',
+                'floating_whatsapp_animation_speed' => 3200,
+                'floating_whatsapp_show_desktop' => true,
+                'floating_whatsapp_show_mobile' => true,
+                'floating_whatsapp_background_color' => '#25D366',
+                'floating_whatsapp_visibility_mode' => 'all',
+                'floating_whatsapp_visibility_targets' => [],
             ]
         );
 
@@ -576,6 +593,146 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call(FranceVisaTemplateSeeder::class);
+        $this->call(DestinationPageSystemSeeder::class);
+
+        $visaLeadForm = LeadForm::query()->updateOrCreate(
+            ['slug' => 'default-external-visa-form'],
+            [
+                'name' => 'Default External Visa Form',
+                'form_category' => 'visa',
+                'title_en' => 'Talk to Travel Wave About Your Visa',
+                'title_ar' => 'تواصل مع Travel Wave بخصوص التأشيرة',
+                'subtitle_en' => 'Send your details and our team will guide you on eligibility, documents, and the next practical step.',
+                'subtitle_ar' => 'أرسل بياناتك وسيرشدك فريقنا بخصوص الأهلية والمستندات والخطوة العملية التالية.',
+                'submit_text_en' => 'Send Visa Inquiry',
+                'submit_text_ar' => 'أرسل استفسار التأشيرة',
+                'success_message_en' => 'Your visa inquiry has been received. A Travel Wave advisor will contact you shortly.',
+                'success_message_ar' => 'تم استلام استفسارك الخاص بالتأشيرة وسيتواصل معك أحد مستشاري Travel Wave قريبًا.',
+                'is_active' => true,
+                'settings' => [
+                    'layout_variant' => 'visa_split',
+                ],
+            ]
+        );
+
+        $visaLeadForm->fields()->delete();
+        $visaLeadForm->fields()->createMany([
+            [
+                'field_key' => 'full_name',
+                'type' => 'text',
+                'label_en' => 'Full Name',
+                'label_ar' => 'الاسم الكامل',
+                'is_required' => true,
+                'is_enabled' => true,
+                'sort_order' => 1,
+            ],
+            [
+                'field_key' => 'phone',
+                'type' => 'phone',
+                'label_en' => 'Phone Number',
+                'label_ar' => 'رقم الهاتف',
+                'is_required' => true,
+                'is_enabled' => true,
+                'sort_order' => 2,
+            ],
+            [
+                'field_key' => 'whatsapp_number',
+                'type' => 'text',
+                'label_en' => 'WhatsApp Number',
+                'label_ar' => 'رقم واتساب',
+                'is_required' => false,
+                'is_enabled' => true,
+                'sort_order' => 3,
+            ],
+            [
+                'field_key' => 'email',
+                'type' => 'email',
+                'label_en' => 'Email Address',
+                'label_ar' => 'البريد الإلكتروني',
+                'is_required' => false,
+                'is_enabled' => true,
+                'sort_order' => 4,
+            ],
+            [
+                'field_key' => 'service_type',
+                'type' => 'text',
+                'label_en' => 'Visa Type',
+                'label_ar' => 'نوع التأشيرة',
+                'is_required' => false,
+                'is_enabled' => true,
+                'sort_order' => 5,
+            ],
+            [
+                'field_key' => 'destination',
+                'type' => 'text',
+                'label_en' => 'Country',
+                'label_ar' => 'الدولة',
+                'is_required' => false,
+                'is_enabled' => true,
+                'sort_order' => 6,
+            ],
+            [
+                'field_key' => 'travel_date',
+                'type' => 'date',
+                'label_en' => 'Travel Date',
+                'label_ar' => 'تاريخ السفر',
+                'is_required' => false,
+                'is_enabled' => true,
+                'sort_order' => 7,
+            ],
+            [
+                'field_key' => 'message',
+                'type' => 'textarea',
+                'label_en' => 'Your Message',
+                'label_ar' => 'رسالتك',
+                'is_required' => false,
+                'is_enabled' => true,
+                'sort_order' => 8,
+            ],
+        ]);
+
+        $visaLeadForm->assignments()->delete();
+        $visaLeadForm->assignments()->create([
+            'assignment_type' => 'page_group',
+            'target_key' => 'visa-destinations',
+            'display_position' => 'bottom',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $contactMap = MapSection::query()->updateOrCreate(
+            ['slug' => 'default-contact-map'],
+            [
+                'name' => 'Default Contact Map',
+                'title_en' => 'Visit Travel Wave or Use the Map as a Quick Reference',
+                'title_ar' => 'زورنا أو استخدم الخريطة كمرجع سريع',
+                'subtitle_en' => 'Use the location details for office visits, faster directions, or contact support with more clarity.',
+                'subtitle_ar' => 'استخدم تفاصيل الموقع للوصول إلى المكتب بسهولة أو كمرجع سريع عند التواصل مع فريق Travel Wave.',
+                'address_en' => $settings->address_en,
+                'address_ar' => $settings->address_ar,
+                'button_text_en' => 'Open in Maps',
+                'button_text_ar' => 'افتح في الخرائط',
+                'button_link' => 'https://www.google.com/maps?q=Cairo%20Egypt',
+                'embed_code' => $settings->map_iframe,
+                'layout_type' => 'split',
+                'height' => 380,
+                'background_style' => 'soft',
+                'spacing_preset' => 'normal',
+                'rounded_corners' => true,
+                'is_active' => true,
+            ]
+        );
+
+        $contactMap->assignments()->delete();
+        $contactMap->assignments()->create([
+            'assignment_type' => 'page_key',
+            'target_key' => 'contact',
+            'display_position' => 'before_faq',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $this->call(MarketingLandingPageDemoSeeder::class);
 
     }
 }

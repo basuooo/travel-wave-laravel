@@ -10,10 +10,14 @@ class InquiryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Inquiry::query()->latest();
+        $query = Inquiry::query()->with('form')->latest();
 
         if ($request->filled('type')) {
             $query->where('type', $request->string('type'));
+        }
+
+        if ($request->filled('form')) {
+            $query->where('lead_form_id', $request->integer('form'));
         }
 
         if ($request->filled('status')) {
@@ -26,6 +30,7 @@ class InquiryController extends Controller
 
         return view('admin.inquiries.index', [
             'items' => $query->paginate(20)->withQueryString(),
+            'forms' => \App\Models\LeadForm::query()->orderBy('name')->get(),
             'stats' => [
                 'all' => Inquiry::count(),
                 'new' => Inquiry::where('status', 'new')->count(),

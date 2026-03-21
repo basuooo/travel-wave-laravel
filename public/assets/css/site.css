@@ -1359,6 +1359,669 @@ main > section:last-child {
     border: 1px solid rgba(214, 223, 235, 0.75);
 }
 
+.tw-visa-inquiry-shell {
+    border-radius: 1.85rem;
+    overflow: hidden;
+    position: relative;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(247, 250, 253, 0.98)),
+        linear-gradient(135deg, rgba(255, 140, 50, 0.08), rgba(18, 57, 91, 0.05));
+    border: 1px solid rgba(214, 223, 235, 0.88);
+    box-shadow: 0 28px 60px rgba(16, 33, 50, 0.12);
+}
+
+.tw-visa-inquiry-panel {
+    height: 100%;
+    padding: clamp(1.4rem, 4vw, 3rem);
+}
+
+.tw-visa-inquiry-shell-rtl,
+.tw-visa-inquiry-shell-rtl .tw-visa-inquiry-panel {
+    direction: rtl;
+    text-align: right;
+}
+
+.tw-visa-inquiry-shell-ltr,
+.tw-visa-inquiry-shell-ltr .tw-visa-inquiry-panel {
+    direction: ltr;
+    text-align: left;
+}
+
+.tw-visa-inquiry-panel-info {
+    background:
+        radial-gradient(circle at top right, rgba(255, 140, 50, 0.14), transparent 32%),
+        linear-gradient(180deg, rgba(255, 247, 238, 0.96), rgba(244, 247, 251, 0.98));
+    border-inline-end: 1px solid rgba(214, 223, 235, 0.82);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tw-visa-inquiry-panel-form {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 251, 254, 0.96));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tw-visa-inquiry-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 0.95rem;
+    margin-bottom: 1rem;
+    border-radius: 999px;
+    background: rgba(255, 140, 50, 0.12);
+    color: var(--tw-navy);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.tw-visa-inquiry-copy {
+    color: rgba(33, 48, 66, 0.76);
+    line-height: 1.85;
+    max-width: 38rem;
+}
+
+.tw-visa-inquiry-form-copy .h4 {
+    color: var(--tw-navy);
+    font-weight: 800;
+}
+
+.tw-visa-inquiry-form-copy p {
+    color: rgba(33, 48, 66, 0.7);
+    line-height: 1.8;
+}
+
+.tw-visa-inquiry-info-list {
+    display: grid;
+    gap: 0.95rem;
+}
+
+.tw-visa-inquiry-info-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 1.05rem 1.15rem;
+    border-radius: 1.15rem;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(221, 229, 239, 0.92);
+    box-shadow: 0 14px 32px rgba(16, 33, 50, 0.06);
+}
+
+.tw-visa-inquiry-info-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(33, 48, 66, 0.58);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.tw-visa-inquiry-info-value {
+    font-size: 1.08rem;
+    font-weight: 800;
+    color: var(--tw-ink);
+}
+
+.tw-visa-inquiry-panel-form .form-control,
+.tw-visa-inquiry-panel-form .form-select {
+    min-height: 3.25rem;
+    padding: 0.8rem 1rem;
+    border-radius: 0.95rem;
+    border-color: rgba(203, 214, 227, 0.96);
+    background: #fbfdff;
+    box-shadow: none;
+}
+
+.tw-visa-inquiry-panel-form textarea.form-control {
+    min-height: 10.25rem;
+    resize: vertical;
+}
+
+.tw-visa-inquiry-panel-form .form-control:focus,
+.tw-visa-inquiry-panel-form .form-select:focus {
+    border-color: rgba(255, 140, 50, 0.65);
+    box-shadow: 0 0 0 0.28rem rgba(255, 140, 50, 0.12);
+    background: #ffffff;
+}
+
+.tw-visa-inquiry-panel-form .form-label {
+    font-weight: 700;
+    color: var(--tw-navy);
+    margin-bottom: 0.45rem;
+}
+
+.tw-visa-inquiry-panel-form .premium-contact-form {
+    row-gap: 1.1rem;
+}
+
+.tw-visa-inquiry-shell-rtl .tw-visa-inquiry-panel-form .form-control,
+.tw-visa-inquiry-shell-rtl .tw-visa-inquiry-panel-form .form-select,
+.tw-visa-inquiry-shell-rtl .tw-visa-inquiry-panel-form textarea.form-control,
+.tw-visa-inquiry-shell-rtl .tw-visa-inquiry-panel-form .form-label,
+.tw-visa-inquiry-shell-rtl .tw-visa-inquiry-form-copy,
+.tw-visa-inquiry-shell-rtl .tw-visa-inquiry-copy,
+.tw-visa-inquiry-shell-rtl .tw-visa-inquiry-info-card,
+.tw-visa-inquiry-shell-rtl .tw-visa-inquiry-label {
+    text-align: right;
+}
+
+.tw-visa-inquiry-submit {
+    min-width: min(100%, 17rem);
+    padding: 1rem 1.85rem;
+    border-radius: 1rem;
+    box-shadow: 0 18px 32px rgba(255, 140, 50, 0.24);
+}
+
+.tw-destination-page-hero .btn-outline-light {
+    border-radius: 999px;
+    padding-inline: 1.5rem;
+}
+
+.tw-destination-side-note {
+    background:
+        radial-gradient(circle at top left, rgba(255, 140, 50, 0.16), transparent 26%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 249, 253, 0.98));
+}
+
+.tw-destination-highlight-card {
+    overflow: hidden;
+}
+
+.tw-destination-highlight-media {
+    aspect-ratio: 16 / 11;
+    border-radius: 1.15rem;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(18, 57, 91, 0.92), rgba(255, 140, 50, 0.75));
+}
+
+.tw-destination-highlight-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 800;
+}
+
+.tw-destination-steps-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.tw-visa-hub-page {
+    --visa-hub-navy: #0d2740;
+    --visa-hub-royal: #1d4f91;
+    --visa-hub-amber: #d9a441;
+    background:
+        radial-gradient(circle at top right, rgba(217, 164, 65, 0.12), transparent 22%),
+        linear-gradient(180deg, #f8fbff 0%, #f4f7fb 52%, #eef3f8 100%);
+}
+
+.tw-visa-hub-hero {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.7rem, 4vw, 4rem);
+    border-radius: 2rem;
+    background:
+        linear-gradient(120deg, rgba(6, 17, 29, 0.82), rgba(13, 39, 64, 0.92)),
+        radial-gradient(circle at top left, rgba(217, 164, 65, 0.22), transparent 28%),
+        var(--visa-hub-hero);
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 32px 70px rgba(9, 28, 46, 0.18);
+    color: white;
+}
+
+.tw-visa-hub-badge,
+.tw-visa-hub-section-pill,
+.tw-visa-hub-section-pill-light {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    border-radius: 999px;
+    font-weight: 800;
+}
+
+.tw-visa-hub-badge {
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.tw-visa-hub-display {
+    font-size: clamp(2.4rem, 5vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 1rem;
+}
+
+.tw-visa-hub-lead {
+    max-width: 40rem;
+    font-size: 1.05rem;
+    line-height: 1.95;
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.tw-visa-hub-outline-btn,
+.tw-visa-hub-outline-btn-light {
+    min-height: 3.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding-inline: 1.4rem;
+    font-weight: 700;
+}
+
+.tw-visa-hub-outline-btn {
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tw-visa-hub-outline-btn:hover,
+.tw-visa-hub-outline-btn:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+}
+
+.tw-visa-hub-hero-panel,
+.tw-visa-hub-search-card,
+.tw-visa-hub-steps-shell,
+.tw-visa-hub-contact-copy,
+.tw-visa-hub-cta-banner {
+    border-radius: 1.5rem;
+}
+
+.tw-visa-hub-hero-panel {
+    padding: 1.4rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(14px);
+}
+
+.tw-visa-hub-hero-panel-label {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.74);
+}
+
+.tw-visa-hub-hero-metrics {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.tw-visa-hub-metric-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1rem 1.1rem;
+    border-radius: 1.15rem;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.tw-visa-hub-metric-card strong {
+    font-size: 1.45rem;
+}
+
+.tw-visa-hub-search-card {
+    position: relative;
+    z-index: 1;
+    margin-top: -2.4rem;
+    padding: 1.15rem;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(214, 223, 235, 0.82);
+    box-shadow: 0 24px 55px rgba(13, 39, 64, 0.12);
+}
+
+.tw-visa-hub-search-card .form-label {
+    font-weight: 700;
+    color: var(--visa-hub-navy);
+}
+
+.tw-visa-hub-search-card .form-select {
+    min-height: 3.25rem;
+    border-radius: 1rem;
+}
+
+.tw-visa-hub-section-pill {
+    background: rgba(217, 164, 65, 0.12);
+    color: var(--visa-hub-navy);
+}
+
+.tw-visa-hub-section-pill-light {
+    background: rgba(255, 255, 255, 0.14);
+    color: white;
+}
+
+.tw-visa-hub-slider-viewport {
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-bottom: 0.4rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+}
+
+.tw-visa-hub-slider-viewport::-webkit-scrollbar {
+    display: none;
+}
+
+.tw-visa-hub-slider-track {
+    display: flex;
+    gap: 1.25rem;
+    width: max-content;
+}
+
+.tw-visa-hub-slider-controls {
+    display: inline-flex;
+    gap: 0.65rem;
+}
+
+.tw-visa-hub-slider-arrow {
+    width: 3.2rem;
+    height: 3.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 0;
+    background: linear-gradient(135deg, var(--visa-hub-navy), var(--visa-hub-royal));
+    color: white;
+    box-shadow: 0 18px 34px rgba(13, 39, 64, 0.16);
+}
+
+.tw-visa-hub-slider-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    display: inline-block;
+    border-top: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+}
+
+.tw-visa-hub-slider-icon-next {
+    transform: rotate(45deg);
+}
+
+.tw-visa-hub-slider-icon-prev {
+    transform: rotate(-135deg);
+}
+
+.tw-visa-hub-destination-card {
+    min-width: min(84vw, 330px);
+    max-width: 330px;
+    border-radius: 1.45rem;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(214, 223, 235, 0.82);
+    box-shadow: 0 24px 48px rgba(13, 39, 64, 0.08);
+    opacity: 0.82;
+    transition: transform 0.28s ease, opacity 0.28s ease, box-shadow 0.28s ease;
+}
+
+.tw-visa-hub-destination-card.is-active,
+.tw-visa-hub-destination-card:hover {
+    transform: translateY(-5px);
+    opacity: 1;
+    box-shadow: 0 28px 60px rgba(13, 39, 64, 0.14);
+}
+
+.tw-visa-hub-destination-media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--visa-hub-navy), var(--visa-hub-royal));
+}
+
+.tw-visa-hub-destination-image,
+.tw-visa-hub-destination-placeholder {
+    width: 100%;
+    height: 100%;
+}
+
+.tw-visa-hub-destination-image {
+    object-fit: cover;
+}
+
+.tw-visa-hub-destination-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.tw-visa-hub-destination-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(8, 20, 33, 0.1), rgba(8, 20, 33, 0.38));
+}
+
+.tw-visa-hub-destination-badge {
+    position: absolute;
+    top: 1rem;
+    inset-inline-start: 1rem;
+    z-index: 1;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--visa-hub-navy);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.tw-visa-hub-destination-body {
+    padding: 1.15rem;
+}
+
+.tw-visa-hub-destination-body h3 {
+    font-size: 1.2rem;
+    color: var(--visa-hub-navy);
+    margin-bottom: 0.85rem;
+}
+
+.tw-visa-hub-destination-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-bottom: 1rem;
+    color: #506678;
+}
+
+.tw-visa-hub-feature-card,
+.tw-visa-hub-step-card,
+.tw-visa-hub-info-card,
+.tw-visa-hub-country-card {
+    height: 100%;
+    border-radius: 1.35rem;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(214, 223, 235, 0.82);
+    box-shadow: 0 20px 44px rgba(13, 39, 64, 0.08);
+}
+
+.tw-visa-hub-feature-card {
+    position: relative;
+    padding: 1.35rem;
+    overflow: hidden;
+}
+
+.tw-visa-hub-feature-card h3,
+.tw-visa-hub-step-card h3 {
+    font-size: 1.15rem;
+    color: var(--visa-hub-navy);
+    margin-bottom: 0.75rem;
+}
+
+.tw-visa-hub-feature-tag,
+.tw-visa-hub-step-number {
+    width: 3.1rem;
+    height: 3.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--visa-hub-amber), #f2c56d);
+    color: var(--visa-hub-navy);
+    font-weight: 900;
+}
+
+.tw-visa-hub-steps-shell {
+    padding: 1.5rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.98));
+    border: 1px solid rgba(214, 223, 235, 0.82);
+    box-shadow: 0 24px 55px rgba(13, 39, 64, 0.09);
+}
+
+.tw-visa-hub-step-card {
+    padding: 1.2rem;
+}
+
+.tw-visa-hub-country-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.15rem;
+    color: var(--tw-ink);
+    transition: transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.tw-visa-hub-country-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 50px rgba(13, 39, 64, 0.12);
+}
+
+.tw-visa-hub-country-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.tw-visa-hub-country-name {
+    font-weight: 800;
+    color: var(--visa-hub-navy);
+}
+
+.tw-visa-hub-country-chip {
+    padding: 0.38rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(29, 79, 145, 0.08);
+    color: var(--visa-hub-royal);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.tw-visa-hub-info-card {
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.tw-visa-hub-info-card span {
+    color: #587086;
+    font-weight: 700;
+}
+
+.tw-visa-hub-info-card strong {
+    color: var(--visa-hub-navy);
+    line-height: 1.7;
+}
+
+.tw-visa-hub-info-card-navy {
+    background: linear-gradient(180deg, rgba(13, 39, 64, 0.98), rgba(19, 52, 84, 0.96));
+}
+
+.tw-visa-hub-info-card-navy span,
+.tw-visa-hub-info-card-navy strong {
+    color: white;
+}
+
+.tw-visa-hub-info-card-royal {
+    background: linear-gradient(180deg, rgba(29, 79, 145, 0.12), rgba(29, 79, 145, 0.05));
+}
+
+.tw-visa-hub-info-card-amber {
+    background: linear-gradient(180deg, rgba(217, 164, 65, 0.14), rgba(255, 255, 255, 0.96));
+}
+
+.tw-visa-hub-info-card-slate {
+    background: linear-gradient(180deg, rgba(89, 107, 129, 0.08), rgba(255, 255, 255, 0.96));
+}
+
+.tw-visa-hub-cta-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    background:
+        radial-gradient(circle at top left, rgba(217, 164, 65, 0.18), transparent 26%),
+        linear-gradient(135deg, rgba(10, 30, 49, 0.98), rgba(20, 58, 99, 0.9));
+    color: white;
+    box-shadow: 0 32px 65px rgba(13, 39, 64, 0.18);
+}
+
+.tw-visa-hub-cta-banner h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 0.8rem;
+}
+
+.tw-visa-hub-cta-banner p {
+    max-width: 42rem;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.tw-visa-hub-outline-btn-light {
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    color: white;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.tw-visa-hub-outline-btn-light:hover,
+.tw-visa-hub-outline-btn-light:focus-visible {
+    background: rgba(255, 255, 255, 0.14);
+    color: white;
+}
+
+.tw-visa-hub-faq .accordion-item {
+    border: 1px solid rgba(214, 223, 235, 0.85);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 14px 32px rgba(13, 39, 64, 0.06);
+}
+
+.tw-visa-hub-faq .accordion-button:not(.collapsed) {
+    background: rgba(29, 79, 145, 0.08);
+    color: var(--visa-hub-navy);
+    box-shadow: none;
+}
+
+.tw-visa-hub-contact-copy {
+    padding: 1.45rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 253, 0.98));
+    border: 1px solid rgba(214, 223, 235, 0.82);
+    box-shadow: 0 22px 48px rgba(13, 39, 64, 0.08);
+}
+
+.tw-visa-hub-contact-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.tw-visa-hub-contact-list > div {
+    padding: 0.85rem 1rem;
+    border-radius: 1rem;
+    background: rgba(29, 79, 145, 0.06);
+    color: var(--visa-hub-navy);
+    font-weight: 700;
+}
+
 .dropdown-menu {
     border: 0;
     border-radius: 1rem;
@@ -1434,6 +2097,15 @@ html[dir="rtl"] .tw-list-check li::before {
 
     .tw-home-slider-mode-compact-banner .tw-home-slide {
         min-height: 460px;
+    }
+
+    .tw-visa-hub-search-card {
+        margin-top: -1.4rem;
+    }
+
+    .tw-visa-hub-cta-banner {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .tw-navbar .navbar-collapse {
@@ -1570,6 +2242,38 @@ html[dir="rtl"] .tw-list-check li::before {
         min-height: min(88vh, 620px);
     }
 
+    .tw-visa-hub-hero {
+        border-radius: 1.2rem;
+        padding: 1.3rem;
+    }
+
+    .tw-visa-hub-display {
+        font-size: 2.35rem;
+    }
+
+    .tw-visa-hub-search-card,
+    .tw-visa-hub-steps-shell,
+    .tw-visa-hub-contact-copy,
+    .tw-visa-hub-cta-banner {
+        border-radius: 1.1rem;
+    }
+
+    .tw-visa-hub-search-card {
+        margin-top: -0.9rem;
+    }
+
+    .tw-visa-hub-slider-track {
+        gap: 1rem;
+    }
+
+    .tw-visa-hub-destination-card {
+        min-width: min(82vw, 300px);
+    }
+
+    .tw-visa-hub-country-card-top {
+        flex-direction: column;
+    }
+
     .container {
         padding-inline: 1rem;
     }
@@ -1673,6 +2377,24 @@ html[dir="rtl"] .tw-list-check li::before {
         border-radius: 1rem;
     }
 
+    .tw-visa-inquiry-shell {
+        border-radius: 1.15rem;
+    }
+
+    .tw-visa-inquiry-panel {
+        padding: 1.25rem;
+    }
+
+    .tw-visa-inquiry-panel-info {
+        border-inline-end: 0;
+        border-bottom: 1px solid rgba(214, 223, 235, 0.82);
+    }
+
+    .tw-visa-inquiry-submit {
+        width: 100%;
+        min-width: 0;
+    }
+
     .tw-visa-reference-steps {
         grid-template-columns: 1fr;
     }
@@ -1736,6 +2458,10 @@ html[dir="rtl"] .tw-list-check li::before {
 }
 
 @media (min-width: 768px) and (max-width: 1199.98px) {
+    .tw-visa-hub-destination-card {
+        min-width: 320px;
+    }
+
     .tw-home-search-form {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1753,4 +2479,525 @@ html[dir="rtl"] .tw-list-check li::before {
     .tw-form-card {
         border-radius: 1.2rem;
     }
+}
+
+.tw-brand-page {
+    background:
+        radial-gradient(circle at top right, rgba(255, 140, 50, 0.08), transparent 28%),
+        linear-gradient(180deg, #f6f8fb 0%, #ffffff 22%, #f7f9fc 100%);
+}
+
+.tw-brand-page-hero {
+    color: #fff;
+    background-color: #12395b;
+    background-size: cover;
+    background-position: center;
+    padding: 2rem 0 3rem;
+}
+
+.tw-brand-page-breadcrumb .breadcrumb-item,
+.tw-brand-page-breadcrumb .breadcrumb-item a {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.tw-brand-page-breadcrumb .breadcrumb-item.active {
+    color: #fff;
+}
+
+.tw-brand-page-hero-shell {
+    max-width: 760px;
+    padding: 2rem 2.1rem;
+    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(8, 26, 44, 0.5), rgba(8, 26, 44, 0.2));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 24px 80px rgba(4, 18, 31, 0.28);
+    backdrop-filter: blur(10px);
+}
+
+.tw-brand-page-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.42rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 140, 50, 0.12);
+    color: var(--tw-orange);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.tw-brand-story-card,
+.tw-brand-stats-shell,
+.tw-brand-page-cta {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+}
+
+.tw-brand-story-card::before,
+.tw-brand-stats-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 140, 50, 0.08), rgba(18, 57, 91, 0.03));
+    pointer-events: none;
+}
+
+.tw-brand-story-media {
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #12395b, #295b84);
+}
+
+.tw-brand-story-media-placeholder {
+    display: grid;
+    place-items: center;
+    min-height: 320px;
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.tw-brand-story-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    color: #33475b;
+}
+
+.tw-brand-story-point-dot {
+    width: 0.85rem;
+    height: 0.85rem;
+    margin-top: 0.4rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--tw-orange), #ffc071);
+    box-shadow: 0 0 0 6px rgba(255, 140, 50, 0.12);
+    flex-shrink: 0;
+}
+
+.tw-brand-card {
+    position: relative;
+    border-radius: 24px;
+    border: 1px solid rgba(18, 57, 91, 0.08);
+    box-shadow: 0 18px 44px rgba(10, 24, 40, 0.08);
+    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.tw-brand-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 54px rgba(10, 24, 40, 0.12);
+    border-color: rgba(255, 140, 50, 0.22);
+}
+
+.tw-brand-card-icon {
+    width: 3.4rem;
+    height: 3.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(18, 57, 91, 0.12), rgba(255, 140, 50, 0.2));
+    color: var(--tw-navy);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.tw-brand-card-contact .tw-brand-card-icon,
+.tw-brand-card-service .tw-brand-card-icon {
+    background: linear-gradient(135deg, rgba(255, 140, 50, 0.18), rgba(18, 57, 91, 0.12));
+}
+
+.tw-brand-inline-link {
+    color: var(--tw-navy);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.tw-brand-inline-link:hover {
+    color: var(--tw-orange);
+}
+
+.tw-brand-stats-shell {
+    background: linear-gradient(135deg, rgba(18, 57, 91, 0.98), rgba(15, 41, 67, 0.92));
+    color: #fff;
+    box-shadow: 0 28px 64px rgba(10, 24, 40, 0.16);
+}
+
+.tw-brand-stat-card {
+    padding: 1.6rem;
+    height: 100%;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tw-brand-stat-card .text-muted {
+    color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.tw-brand-stat-value {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+    margin-bottom: 0.8rem;
+}
+
+.tw-brand-form-copy {
+    background: linear-gradient(180deg, rgba(18, 57, 91, 0.06), rgba(255, 140, 50, 0.06));
+}
+
+.tw-brand-form-checklist {
+    display: grid;
+    gap: 1rem;
+}
+
+.tw-brand-map-frame {
+    overflow: hidden;
+    border-radius: 24px;
+}
+
+.tw-brand-map-details {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.tw-brand-map-detail {
+    padding: 1rem 1.1rem;
+    border-radius: 18px;
+    background: rgba(18, 57, 91, 0.05);
+}
+
+.tw-managed-map {
+    border: 1px solid rgba(214, 223, 235, 0.88);
+    box-shadow: 0 24px 50px rgba(16, 33, 50, 0.1);
+}
+
+.tw-managed-map-shell {
+    padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.tw-managed-map-rounded {
+    border-radius: 1.7rem;
+    overflow: hidden;
+}
+
+.tw-managed-map-sharp {
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.tw-managed-map-bg-default {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 253, 0.98));
+}
+
+.tw-managed-map-bg-soft {
+    background:
+        radial-gradient(circle at top right, rgba(255, 140, 50, 0.12), transparent 34%),
+        linear-gradient(180deg, rgba(255, 249, 243, 0.98), rgba(247, 250, 253, 0.98));
+}
+
+.tw-managed-map-bg-plain {
+    background: #ffffff;
+}
+
+.tw-managed-map-bg-dark {
+    background: linear-gradient(135deg, rgba(11, 31, 49, 0.98), rgba(18, 57, 91, 0.95));
+    color: #ffffff;
+}
+
+.tw-managed-map-bg-dark .tw-section-title,
+.tw-managed-map-bg-dark .text-muted,
+.tw-managed-map-bg-dark .tw-managed-map-address {
+    color: #ffffff !important;
+}
+
+.tw-managed-map-spacing-compact .tw-managed-map-shell {
+    padding: 1rem;
+}
+
+.tw-managed-map-spacing-spacious .tw-managed-map-shell {
+    padding: clamp(1.6rem, 4vw, 2.75rem);
+}
+
+.tw-managed-map-frame {
+    overflow: hidden;
+    border-radius: 1.35rem;
+    min-height: var(--tw-map-height, 380px);
+    background: rgba(18, 57, 91, 0.04);
+    border: 1px solid rgba(214, 223, 235, 0.82);
+}
+
+.tw-managed-map-frame iframe {
+    display: block;
+    width: 100%;
+    min-height: var(--tw-map-height, 380px);
+    border: 0;
+}
+
+.tw-managed-map-copy {
+    height: 100%;
+}
+
+.tw-managed-map-address {
+    padding: 1rem 1.1rem;
+    border-radius: 1rem;
+    background: rgba(18, 57, 91, 0.05);
+    line-height: 1.8;
+}
+
+.tw-managed-map-compact .tw-managed-map-shell,
+.tw-managed-map-shell-compact {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.tw-managed-map-rtl,
+.tw-managed-map-rtl .tw-managed-map-copy {
+    direction: rtl;
+    text-align: right;
+}
+
+.tw-managed-map-ltr,
+.tw-managed-map-ltr .tw-managed-map-copy {
+    direction: ltr;
+    text-align: left;
+}
+
+.tw-floating-whatsapp {
+    position: fixed;
+    bottom: clamp(1rem, 2vw, 1.5rem);
+    z-index: 1080;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.75rem;
+    padding: 0.8rem 1.05rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--tw-whatsapp-bg, #25D366) 92%, white 8%), color-mix(in srgb, var(--tw-whatsapp-bg, #25D366) 76%, #0b2237 24%));
+    color: #ffffff;
+    box-shadow: 0 18px 36px rgba(7, 30, 24, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+    text-decoration: none;
+    transition: transform 220ms ease, box-shadow 220ms ease, opacity 220ms ease;
+    direction: rtl;
+}
+
+.tw-floating-whatsapp:hover {
+    transform: translateY(-3px) scale(1.02);
+    color: #ffffff;
+    box-shadow: 0 22px 40px rgba(7, 30, 24, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.18) inset;
+}
+
+.tw-floating-whatsapp-bottom_right {
+    right: clamp(1rem, 2vw, 1.5rem);
+}
+
+.tw-floating-whatsapp-bottom_left {
+    left: clamp(1rem, 2vw, 1.5rem);
+}
+
+.tw-floating-whatsapp-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 10px 20px rgba(6, 24, 20, 0.12);
+    flex-shrink: 0;
+}
+
+.tw-floating-whatsapp-icon svg {
+    width: 1.38rem;
+    height: 1.38rem;
+}
+
+.tw-floating-whatsapp-text {
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.tw-floating-whatsapp-pulse {
+    animation: twWhatsAppPulse var(--tw-whatsapp-animation-speed, 3200ms) ease-in-out infinite;
+}
+
+.tw-floating-whatsapp-float {
+    animation: twWhatsAppFloat var(--tw-whatsapp-animation-speed, 3200ms) ease-in-out infinite;
+}
+
+.tw-floating-whatsapp-bounce {
+    animation: twWhatsAppBounce var(--tw-whatsapp-animation-speed, 3200ms) ease-in-out infinite;
+}
+
+.tw-floating-whatsapp-glow {
+    animation: twWhatsAppGlow var(--tw-whatsapp-animation-speed, 3200ms) ease-in-out infinite;
+}
+
+.tw-floating-whatsapp-hide-desktop {
+    display: none;
+}
+
+@media (max-width: 991.98px) {
+    .tw-floating-whatsapp {
+        min-height: 3.4rem;
+        padding: 0.72rem 0.92rem;
+        gap: 0.62rem;
+    }
+
+    .tw-floating-whatsapp-text {
+        font-size: 0.95rem;
+    }
+
+    .tw-floating-whatsapp-hide-mobile {
+        display: none;
+    }
+
+    .tw-floating-whatsapp-hide-desktop {
+        display: inline-flex;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .tw-floating-whatsapp {
+        bottom: 0.9rem;
+    }
+
+    .tw-floating-whatsapp-bottom_right {
+        right: 0.9rem;
+    }
+
+    .tw-floating-whatsapp-bottom_left {
+        left: 0.9rem;
+    }
+
+    .tw-floating-whatsapp-text {
+        display: none;
+    }
+}
+
+@keyframes twWhatsAppPulse {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 18px 36px rgba(7, 30, 24, 0.22), 0 0 0 0 rgba(37, 211, 102, 0.28);
+    }
+    50% {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(7, 30, 24, 0.28), 0 0 0 12px rgba(37, 211, 102, 0);
+    }
+}
+
+@keyframes twWhatsAppFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes twWhatsAppBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    20% {
+        transform: translateY(-2px);
+    }
+    40% {
+        transform: translateY(-8px);
+    }
+    55% {
+        transform: translateY(-2px);
+    }
+}
+
+@keyframes twWhatsAppGlow {
+    0%, 100% {
+        box-shadow: 0 18px 36px rgba(7, 30, 24, 0.22), 0 0 0 0 rgba(37, 211, 102, 0.18);
+    }
+    50% {
+        box-shadow: 0 22px 42px rgba(7, 30, 24, 0.28), 0 0 0 14px rgba(37, 211, 102, 0);
+    }
+}
+
+.tw-brand-map-detail strong,
+.tw-brand-map-detail span {
+    display: block;
+}
+
+.tw-brand-map-detail strong {
+    margin-bottom: 0.35rem;
+    color: var(--tw-navy);
+}
+
+.tw-brand-page-cta {
+    padding: 2.2rem;
+    color: #fff;
+    background-color: #12395b;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 30px 70px rgba(10, 24, 40, 0.16);
+}
+
+.tw-brand-page-cta .lead {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+@media (max-width: 991.98px) {
+    .tw-brand-page-hero {
+        padding: 1.5rem 0 2.5rem;
+    }
+
+    .tw-brand-page-hero-shell,
+    .tw-brand-page-cta {
+        padding: 1.5rem;
+        border-radius: 22px;
+    }
+
+    .tw-brand-story-media,
+    .tw-brand-story-media-placeholder {
+        min-height: 240px;
+    }
+}
+
+.tw-marketing-page {
+    background:
+        radial-gradient(circle at top right, rgba(255, 140, 50, 0.08), transparent 28%),
+        linear-gradient(180deg, #f7f9fc 0%, #ffffff 36%);
+}
+
+.tw-marketing-hero {
+    margin-bottom: 0;
+}
+
+.tw-marketing-hero-shell {
+    max-width: 840px;
+}
+
+.tw-marketing-testimonial {
+    height: 100%;
+    padding: 1.5rem;
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(248, 250, 253, 0.96), #ffffff);
+    border: 1px solid rgba(16, 46, 77, 0.08);
+    box-shadow: 0 22px 45px rgba(10, 24, 40, 0.08);
+}
+
+.tw-marketing-form-card {
+    border-radius: 28px;
+    box-shadow: 0 26px 60px rgba(10, 24, 40, 0.12);
+}
+
+.tw-marketing-form-card .form-control,
+.tw-marketing-form-card .form-select {
+    min-height: 54px;
+    border-radius: 16px;
+}
+
+.tw-marketing-form-card textarea.form-control {
+    min-height: 170px;
 }

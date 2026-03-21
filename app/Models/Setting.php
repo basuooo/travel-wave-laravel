@@ -5,8 +5,9 @@ namespace App\Models;
 use App\Support\HasLocalizedContent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Setting extends Model
 {
@@ -95,6 +96,26 @@ class Setting extends Model
         'hero_slider_show_arrows',
         'hero_slider_content_alignment',
         'hero_slider_layout_mode',
+        'floating_whatsapp_enabled',
+        'floating_whatsapp_number',
+        'floating_whatsapp_message_en',
+        'floating_whatsapp_message_ar',
+        'floating_whatsapp_button_text_en',
+        'floating_whatsapp_button_text_ar',
+        'floating_whatsapp_show_icon',
+        'floating_whatsapp_position',
+        'floating_whatsapp_animation_style',
+        'floating_whatsapp_animation_speed',
+        'floating_whatsapp_show_desktop',
+        'floating_whatsapp_show_mobile',
+        'floating_whatsapp_background_color',
+        'floating_whatsapp_visibility_mode',
+        'floating_whatsapp_visibility_targets',
+        'meta_pixel_id',
+        'meta_conversion_api_enabled',
+        'meta_conversion_api_access_token',
+        'meta_conversion_api_test_event_code',
+        'meta_conversion_api_default_event_source_url',
     ];
 
     protected $casts = [
@@ -118,6 +139,13 @@ class Setting extends Model
         'home_destinations_speed' => 'integer',
         'home_destinations_pause_on_hover' => 'boolean',
         'home_destinations_loop' => 'boolean',
+        'floating_whatsapp_enabled' => 'boolean',
+        'floating_whatsapp_show_icon' => 'boolean',
+        'floating_whatsapp_animation_speed' => 'integer',
+        'floating_whatsapp_show_desktop' => 'boolean',
+        'floating_whatsapp_show_mobile' => 'boolean',
+        'floating_whatsapp_visibility_targets' => 'array',
+        'meta_conversion_api_enabled' => 'boolean',
     ];
 
     public function logoPathFor(string $variant = 'header'): ?string
@@ -163,5 +191,154 @@ class Setting extends Model
         }
 
         return '/storage/' . $path . '?v=' . ($this->updated_at?->timestamp ?: time());
+    }
+
+    public function floatingWhatsappMessage(): ?string
+    {
+        return $this->localized('floating_whatsapp_message')
+            ?: 'مرحبًا، أريد الاستفسار عن خدمات Travel Wave';
+    }
+
+    public function floatingWhatsappButtonText(): ?string
+    {
+        return $this->localized('floating_whatsapp_button_text');
+    }
+
+    public function floatingWhatsappNumberNormalized(): ?string
+    {
+        $number = preg_replace('/\D+/', '', (string) $this->floating_whatsapp_number);
+
+        return $number !== '' ? $number : null;
+    }
+
+    public function floatingWhatsappUrl(): ?string
+    {
+        $number = $this->floatingWhatsappNumberNormalized();
+
+        if (! $number) {
+            return null;
+        }
+
+        $message = trim((string) $this->floatingWhatsappMessage());
+
+        return 'https://wa.me/' . $number . ($message !== '' ? '?text=' . rawurlencode($message) : '');
+    }
+
+    public function metaPixelId(): ?string
+    {
+        $explicit = preg_replace('/\D+/', '', (string) $this->meta_pixel_id);
+
+        if ($explicit !== '') {
+            return $explicit;
+        }
+
+        $integration = TrackingIntegration::query()
+            ->where('integration_type', TrackingIntegration::TYPE_META_PIXEL)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->first();
+
+        $fallback = preg_replace('/\D+/', '', (string) ($integration?->tracking_code ?? ''));
+
+        return $fallback !== '' ? $fallback : null;
+    }
+
+    public function metaConversionApiConfigured(): bool
+    {
+        return (bool) $this->meta_conversion_api_enabled
+            && filled($this->meta_conversion_api_access_token)
+            && filled($this->metaPixelId());
+    }
+
+    public function shouldRenderFloatingWhatsapp(?Request $request = null): bool
+    {
+        if (! $this->floating_whatsapp_enabled || ! $this->floatingWhatsappUrl()) {
+            return false;
+        }
+
+        $request ??= request();
+        $context = $this->floatingWhatsappContext($request);
+        $targets = collect($this->floating_whatsapp_visibility_targets ?? [])->filter()->values()->all();
+        $mode = $this->floating_whatsapp_visibility_mode ?: 'all';
+
+        if ($mode === 'exclude_selected') {
+            return ! $this->contextMatchesFloatingWhatsappTargets($context, $targets);
+        }
+
+        if ($mode === 'only_selected') {
+            return $this->contextMatchesFloatingWhatsappTargets($context, $targets);
+        }
+
+        return true;
+    }
+
+    public function floatingWhatsappContext(?Request $request = null): array
+    {
+        $request ??= request();
+        $route = $request->route();
+        $routeName = $route?->getName();
+
+        $pageKey = match ($routeName) {
+            'home' => 'home',
+            'visas.index' => 'visas.index',
+            'destinations.index' => 'destinations.index',
+            'flights' => 'flights',
+            'hotels' => 'hotels',
+            'about' => 'about',
+            'contact' => 'contact',
+            default => null,
+        };
+
+        $visaCountry = $route?->parameter('country');
+        $destination = $route?->parameter('destination');
+
+        return array_filter([
+            'page_key' => $pageKey,
+            'visa_country_id' => $visaCountry?->id,
+            'visa_category_id' => $visaCountry?->visa_category_id,
+            'destination_id' => $destination?->id,
+            'destination_type' => $visaCountry ? 'visa' : ($destination?->destination_type ?: ($destination ? 'domestic' : null)),
+        ], fn ($value) => $value !== null && $value !== '');
+    }
+
+    protected function contextMatchesFloatingWhatsappTargets(array $context, array $targets): bool
+    {
+        foreach ($targets as $target) {
+            if (! is_string($target) || ! str_contains($target, '|')) {
+                continue;
+            }
+
+            [$type, $value] = array_pad(explode('|', $target, 2), 2, null);
+
+            if (! $type || ! $value) {
+                continue;
+            }
+
+            $matches = match ($type) {
+                'page_key' => ($context['page_key'] ?? null) === $value,
+                'page_group' => $this->matchesFloatingWhatsappPageGroup($value, $context),
+                'visa_country' => (int) ($context['visa_country_id'] ?? 0) === (int) $value,
+                'visa_category' => (int) ($context['visa_category_id'] ?? 0) === (int) $value,
+                'destination' => (int) ($context['destination_id'] ?? 0) === (int) $value,
+                'destination_type' => ($context['destination_type'] ?? null) === $value,
+                default => false,
+            };
+
+            if ($matches) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function matchesFloatingWhatsappPageGroup(string $group, array $context): bool
+    {
+        return match ($group) {
+            'service-pages' => in_array($context['page_key'] ?? null, ['visas.index', 'destinations.index', 'flights', 'hotels'], true),
+            'visa-destinations' => ! empty($context['visa_country_id']),
+            'domestic-destinations' => ($context['destination_type'] ?? null) === 'domestic',
+            default => false,
+        };
     }
 }

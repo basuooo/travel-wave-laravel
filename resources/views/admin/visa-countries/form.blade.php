@@ -7,7 +7,7 @@
     $feeItems = old('fee_items', $item->fee_items ?: []);
     $faqItems = old('faq_items', $item->faqs ?: []);
     $quickSummaryItems = old('quick_summary_items', $item->quick_summary_items ?: []);
-    $visibleFields = old('inquiry_form_visible_fields', $item->inquiry_form_visible_fields ?: ['full_name', 'phone', 'email', 'travel_date', 'message']);
+    $visibleFields = old('inquiry_form_visible_fields', $item->inquiry_form_visible_fields ?: ['full_name', 'phone', 'whatsapp_number', 'email', 'service_type', 'destination', 'travel_date', 'message']);
     $detailHighlightsEn = old('highlights_en', collect($item->highlights ?? [])->pluck('text_en')->all());
     $detailHighlightsAr = old('highlights_ar', collect($item->highlights ?? [])->pluck('text_ar')->all());
     $introPointsEn = old('introduction_points_en', collect($item->introduction_points ?? [])->pluck('text_en')->all());
@@ -353,6 +353,8 @@
                 <label class="form-label">Support Button Link</label><input class="form-control mb-3" name="support_button_link" value="{{ old('support_button_link', $item->support_button_link) }}">
                 <label class="form-label">Inquiry Title EN</label><input class="form-control mb-3" name="inquiry_form_title_en" value="{{ old('inquiry_form_title_en', $item->inquiry_form_title_en) }}">
                 <label class="form-label">Inquiry Title AR</label><input class="form-control text-end mb-3" dir="rtl" name="inquiry_form_title_ar" value="{{ old('inquiry_form_title_ar', $item->inquiry_form_title_ar) }}">
+                <label class="form-label">Inquiry Section Label EN</label><input class="form-control mb-3" name="inquiry_form_label_en" value="{{ old('inquiry_form_label_en', $item->inquiry_form_label_en) }}">
+                <label class="form-label">Inquiry Section Label AR</label><input class="form-control text-end mb-3" dir="rtl" name="inquiry_form_label_ar" value="{{ old('inquiry_form_label_ar', $item->inquiry_form_label_ar) }}">
                 <label class="form-label">Inquiry Subtitle EN</label><textarea class="form-control mb-3" rows="3" name="inquiry_form_subtitle_en">{{ old('inquiry_form_subtitle_en', $item->inquiry_form_subtitle_en) }}</textarea>
                 <label class="form-label">Inquiry Subtitle AR</label><textarea class="form-control text-end mb-3" dir="rtl" rows="3" name="inquiry_form_subtitle_ar">{{ old('inquiry_form_subtitle_ar', $item->inquiry_form_subtitle_ar) }}</textarea>
                 <label class="form-label">Default Service Type</label><input class="form-control mb-3" name="inquiry_form_default_service_type" value="{{ old('inquiry_form_default_service_type', $item->inquiry_form_default_service_type) }}">
@@ -364,7 +366,7 @@
                 <label class="form-label">Success Message AR</label><textarea class="form-control text-end mb-3" dir="rtl" rows="3" name="inquiry_form_success_ar">{{ old('inquiry_form_success_ar', $item->inquiry_form_success_ar) }}</textarea>
                 <label class="form-label d-block">Visible Fields</label>
                 <div class="row g-2">
-                    @foreach(['full_name' => 'Full Name', 'phone' => 'Phone', 'email' => 'Email', 'travel_date' => 'Travel Date', 'message' => 'Notes / Message'] as $field => $label)
+                    @foreach(['full_name' => 'Full Name', 'phone' => 'Phone', 'whatsapp_number' => 'WhatsApp Number', 'email' => 'Email', 'service_type' => 'Visa Type', 'destination' => 'Country', 'travel_date' => 'Travel Date', 'message' => 'Notes / Message'] as $field => $label)
                         <div class="col-sm-6">
                             <div class="form-check border rounded-3 p-3">
                                 <input class="form-check-input" type="checkbox" name="inquiry_form_visible_fields[]" id="field_{{ $field }}" value="{{ $field }}" @checked(in_array($field, $visibleFields, true))>

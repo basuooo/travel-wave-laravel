@@ -102,6 +102,8 @@ class VisaCountry extends Model
         'inquiry_form_default_service_type',
         'inquiry_form_visible_fields',
         'inquiry_form_is_active',
+        'inquiry_form_label_en',
+        'inquiry_form_label_ar',
         'cta_title_en',
         'cta_title_ar',
         'cta_text_en',

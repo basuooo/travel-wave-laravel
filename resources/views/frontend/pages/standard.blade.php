@@ -50,18 +50,13 @@
 @if($page->key === 'contact')
 <section class="container py-4">
     <div class="row g-4">
-        <div class="col-lg-5">
+        <div class="col-lg-12">
             <div class="tw-card tw-section-shell p-4 h-100">
                 <h2 class="tw-section-title h3 mb-4">{{ __('ui.contact') }}</h2>
                 <p class="mb-2"><strong>{{ __('ui.phone') }}:</strong> {{ $siteSettings?->phone }}</p>
                 <p class="mb-2"><strong>{{ __('ui.email') }}:</strong> {{ $siteSettings?->contact_email }}</p>
                 <p class="mb-3">{{ $siteSettings?->localized('address') }}</p>
                 <p class="text-muted mb-0">{{ $siteSettings?->localized('working_hours') }}</p>
-            </div>
-        </div>
-        <div class="col-lg-7">
-            <div class="tw-card tw-map-embed overflow-hidden">
-                {!! $siteSettings?->map_iframe !!}
             </div>
         </div>
     </div>
