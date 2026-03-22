@@ -18,6 +18,13 @@ class VisaCategoryController extends Controller
         ]);
     }
 
+    public function trash()
+    {
+        return view('admin.visa-categories.trash', [
+            'items' => VisaCategory::onlyTrashed()->with('deletedBy')->orderByDesc('deleted_at')->paginate(15),
+        ]);
+    }
+
     public function create()
     {
         return view('admin.visa-categories.form', ['item' => new VisaCategory()]);
@@ -55,11 +62,48 @@ class VisaCategoryController extends Controller
         return redirect()->route('admin.visa-categories.index')->with('success', 'Visa category updated.');
     }
 
+    public function duplicate(VisaCategory $visa_category)
+    {
+        $copy = $visa_category->replicate();
+        $copy->name_en = trim($visa_category->name_en . ' Copy');
+        $copy->name_ar = trim($visa_category->name_ar . ' - نسخة');
+        $copy->slug = VisaCategory::makeUniqueSlug(($visa_category->slug ?: $visa_category->name_en) . '-copy');
+        $copy->is_active = false;
+        $copy->is_featured = false;
+        $copy->save();
+
+        return redirect()->route('admin.visa-categories.edit', $copy)->with('success', 'Visa category duplicated.');
+    }
+
     public function destroy(VisaCategory $visa_category)
     {
+        $visa_category->forceFill(['deleted_by' => auth()->id()])->save();
         $visa_category->delete();
 
-        return back()->with('success', 'Visa category deleted.');
+        return redirect()->route('admin.visa-categories.index')->with('success', 'Visa category moved to trash.');
+    }
+
+    public function restore(int $visa_category)
+    {
+        $item = VisaCategory::onlyTrashed()->findOrFail($visa_category);
+        $item->restore();
+        $item->forceFill(['deleted_by' => null])->save();
+
+        return redirect()->route('admin.visa-categories.trash')->with('success', 'Visa category restored.');
+    }
+
+    public function forceDestroy(int $visa_category)
+    {
+        $item = VisaCategory::onlyTrashed()->findOrFail($visa_category);
+
+        if ($item->countries()->withTrashed()->exists()) {
+            return redirect()->route('admin.visa-categories.trash')
+                ->withErrors('Delete or reassign the visa countries in this category before permanently deleting it.');
+        }
+
+        $item->forceDelete();
+
+        return redirect()->route('admin.visa-categories.trash')->with('success', 'Visa category deleted permanently.');
     }
 
     protected function validatedData(Request $request, ?int $id = null): array

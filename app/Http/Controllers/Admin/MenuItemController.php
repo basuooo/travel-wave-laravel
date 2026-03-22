@@ -15,6 +15,13 @@ class MenuItemController extends Controller
         ]);
     }
 
+    public function trash()
+    {
+        return view('admin.menu-items.trash', [
+            'items' => MenuItem::onlyTrashed()->with(['parent', 'deletedBy'])->orderByDesc('deleted_at')->paginate(30),
+        ]);
+    }
+
     public function create()
     {
         return view('admin.menu-items.form', [
@@ -50,11 +57,40 @@ class MenuItemController extends Controller
         return redirect()->route('admin.menu-items.index')->with('success', 'Menu item updated.');
     }
 
+    public function duplicate(MenuItem $menu_item)
+    {
+        $copy = $menu_item->replicate();
+        $copy->title_en = trim($menu_item->title_en . ' Copy');
+        $copy->title_ar = trim($menu_item->title_ar . ' - نسخة');
+        $copy->is_active = false;
+        $copy->save();
+
+        return redirect()->route('admin.menu-items.edit', $copy)->with('success', 'Menu item duplicated.');
+    }
+
     public function destroy(MenuItem $menu_item)
     {
+        $menu_item->forceFill(['deleted_by' => auth()->id()])->save();
         $menu_item->delete();
 
-        return back()->with('success', 'Menu item deleted.');
+        return redirect()->route('admin.menu-items.index')->with('success', 'Menu item moved to trash.');
+    }
+
+    public function restore(int $menu_item)
+    {
+        $item = MenuItem::onlyTrashed()->findOrFail($menu_item);
+        $item->restore();
+        $item->forceFill(['deleted_by' => null])->save();
+
+        return redirect()->route('admin.menu-items.trash')->with('success', 'Menu item restored.');
+    }
+
+    public function forceDestroy(int $menu_item)
+    {
+        $item = MenuItem::onlyTrashed()->findOrFail($menu_item);
+        $item->forceDelete();
+
+        return redirect()->route('admin.menu-items.trash')->with('success', 'Menu item deleted permanently.');
     }
 
     protected function validatedData(Request $request): array

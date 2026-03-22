@@ -20,6 +20,13 @@ class VisaCountryController extends Controller
         ]);
     }
 
+    public function trash()
+    {
+        return view('admin.visa-countries.trash', [
+            'items' => VisaCountry::onlyTrashed()->with(['category', 'deletedBy'])->orderByDesc('deleted_at')->paginate(15),
+        ]);
+    }
+
     public function create()
     {
         return view('admin.visa-countries.form', [
@@ -59,11 +66,42 @@ class VisaCountryController extends Controller
         return redirect()->route('admin.visa-countries.index')->with('success', 'Visa country updated.');
     }
 
+    public function duplicate(VisaCountry $visa_country)
+    {
+        $copy = $visa_country->replicate();
+        $copy->name_en = trim($visa_country->name_en . ' Copy');
+        $copy->name_ar = trim($visa_country->name_ar . ' - نسخة');
+        $copy->slug = VisaCountry::makeUniqueSlug(($visa_country->slug ?: $visa_country->name_en) . '-copy');
+        $copy->is_active = false;
+        $copy->is_featured = false;
+        $copy->save();
+
+        return redirect()->route('admin.visa-countries.edit', $copy)->with('success', 'Visa country duplicated.');
+    }
+
     public function destroy(VisaCountry $visa_country)
     {
+        $visa_country->forceFill(['deleted_by' => auth()->id()])->save();
         $visa_country->delete();
 
-        return back()->with('success', 'Visa country deleted.');
+        return redirect()->route('admin.visa-countries.index')->with('success', 'Visa country moved to trash.');
+    }
+
+    public function restore(int $visa_country)
+    {
+        $item = VisaCountry::onlyTrashed()->findOrFail($visa_country);
+        $item->restore();
+        $item->forceFill(['deleted_by' => null])->save();
+
+        return redirect()->route('admin.visa-countries.trash')->with('success', 'Visa country restored.');
+    }
+
+    public function forceDestroy(int $visa_country)
+    {
+        $item = VisaCountry::onlyTrashed()->findOrFail($visa_country);
+        $item->forceDelete();
+
+        return redirect()->route('admin.visa-countries.trash')->with('success', 'Visa country deleted permanently.');
     }
 
     protected function validatedData(Request $request, ?int $id = null): array

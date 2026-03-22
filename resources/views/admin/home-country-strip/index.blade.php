@@ -35,11 +35,14 @@
                     <h2 class="h5 mb-1">Country Items</h2>
                     <div class="text-muted small">Add icons/cards for France, Germany, Italy, Spain, UAE, USA, Canada, and other featured destinations.</div>
                 </div>
-                <a href="{{ route('admin.home-country-strip.create') }}" class="btn btn-primary">Add Country Item</a>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('admin.home-country-strip.trash') }}" class="btn btn-outline-secondary">Country Items Trash</a>
+                    <a href="{{ route('admin.home-country-strip.create') }}" class="btn btn-primary">Add Country Item</a>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table align-middle">
-                    <thead><tr><th>Preview</th><th>Country</th><th>Subtitle</th><th>Linked Page</th><th>Order</th><th>Status</th><th>Homepage</th><th></th></tr></thead>
+                    <thead><tr><th>Preview</th><th>Country</th><th>Subtitle</th><th>Linked Page</th><th>Order</th><th>Status</th><th>Homepage</th><th class="text-end">Actions</th></tr></thead>
                     <tbody>
                         @foreach($items as $item)
                             <tr>
@@ -60,12 +63,21 @@
                                 <td><span class="badge {{ $item->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">{{ $item->is_active ? 'Active' : 'Inactive' }}</span></td>
                                 <td><span class="badge {{ $item->show_on_homepage ? 'text-bg-primary' : 'text-bg-light' }}">{{ $item->show_on_homepage ? 'Shown' : 'Hidden' }}</span></td>
                                 <td class="text-end">
-                                    <a href="{{ route('admin.home-country-strip.edit', $item) }}" class="btn btn-sm btn-primary">Edit</a>
-                                    <form method="post" action="{{ route('admin.home-country-strip.destroy', $item) }}" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this country item?')">Delete</button>
-                                    </form>
+                                    <div class="d-inline-flex flex-wrap justify-content-end gap-2">
+                                        <a href="{{ route('admin.home-country-strip.edit', $item) }}" class="btn btn-sm btn-primary">Edit</a>
+                                        @if($item->resolvedUrl() !== '#')
+                                            <a href="{{ $item->resolvedUrl() }}" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener noreferrer">View</a>
+                                        @endif
+                                        <form method="post" action="{{ route('admin.home-country-strip.duplicate', $item) }}">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">Duplicate</button>
+                                        </form>
+                                        <form method="post" action="{{ route('admin.home-country-strip.destroy', $item) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Move this country item to Trash? You can restore it later.')">Delete</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

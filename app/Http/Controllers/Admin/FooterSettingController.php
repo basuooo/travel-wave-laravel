@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Concerns\HandlesCmsData;
+use App\Http\Controllers\Concerns\InteractsWithSettingColumns;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 class FooterSettingController extends Controller
 {
     use HandlesCmsData;
+    use InteractsWithSettingColumns;
 
     public function edit()
     {
@@ -31,6 +33,10 @@ class FooterSettingController extends Controller
             'footer_button_color' => ['nullable', 'string', 'max:20'],
             'footer_button_text_color' => ['nullable', 'string', 'max:20'],
             'footer_vertical_padding' => ['nullable', 'integer', 'min:24', 'max:180'],
+            'footer_logo_width' => ['nullable', 'integer', 'min:60', 'max:520'],
+            'footer_logo_height' => ['nullable', 'integer', 'min:20', 'max:220'],
+            'footer_logo_keep_aspect_ratio' => ['nullable', 'boolean'],
+            'footer_logo_display_mode' => ['nullable', 'in:original,contain,cover,custom'],
             'footer_text_en' => ['nullable', 'string'],
             'footer_text_ar' => ['nullable', 'string'],
             'copyright_text_en' => ['nullable', 'string'],
@@ -43,7 +49,11 @@ class FooterSettingController extends Controller
             'address_ar' => ['nullable', 'string'],
             'facebook_url' => ['nullable', 'url'],
             'instagram_url' => ['nullable', 'url'],
+            'twitter_url' => ['nullable', 'url'],
             'youtube_url' => ['nullable', 'url'],
+            'linkedin_url' => ['nullable', 'url'],
+            'snapchat_url' => ['nullable', 'url'],
+            'telegram_url' => ['nullable', 'url'],
             'tiktok_url' => ['nullable', 'url'],
         ];
 
@@ -54,12 +64,38 @@ class FooterSettingController extends Controller
         $data = $request->validate($rules);
 
         $data['footer_logo_path'] = $this->uploadFile($request, 'footer_logo', 'settings', $setting->footer_logo_path);
+        $data['footer_logo_display_mode'] = $this->stringOrFallback($data, 'footer_logo_display_mode', $setting->footer_logo_display_mode ?: 'original');
+        $data['footer_logo_width'] = $this->integerOrFallback($data, 'footer_logo_width', $setting->footer_logo_width ?: 200);
+        $data['footer_logo_height'] = $this->integerOrFallback($data, 'footer_logo_height', $setting->footer_logo_height);
+        $data['footer_logo_keep_aspect_ratio'] = $request->boolean('footer_logo_keep_aspect_ratio');
         $data['footer_quick_links'] = $this->mapFooterLinks($request->input('footer_quick_links', []));
-        $data['footer_vertical_padding'] = $data['footer_vertical_padding'] ?? ($setting->footer_vertical_padding ?: 80);
+        $data['footer_vertical_padding'] = $this->integerOrFallback($data, 'footer_vertical_padding', $setting->footer_vertical_padding ?: 80);
 
-        $setting->update($data);
+        $setting->update($this->filterExistingSettingColumns($data));
 
         return back()->with('success', 'Footer settings updated successfully.');
+    }
+
+    protected function integerOrFallback(array $data, string $key, ?int $fallback = null): ?int
+    {
+        if (! array_key_exists($key, $data)) {
+            return $fallback;
+        }
+
+        if ($data[$key] === null || $data[$key] === '') {
+            return $fallback;
+        }
+
+        return (int) $data[$key];
+    }
+
+    protected function stringOrFallback(array $data, string $key, string $fallback): string
+    {
+        if (! array_key_exists($key, $data) || ! is_string($data[$key]) || trim($data[$key]) === '') {
+            return $fallback;
+        }
+
+        return trim($data[$key]);
     }
 
     protected function mapFooterLinks(array $links): array

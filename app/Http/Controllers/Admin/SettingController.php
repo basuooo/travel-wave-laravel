@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Concerns\HandlesCmsData;
+use App\Http\Controllers\Concerns\InteractsWithSettingColumns;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 class SettingController extends Controller
 {
     use HandlesCmsData;
+    use InteractsWithSettingColumns;
 
     public function edit()
     {
@@ -27,9 +29,6 @@ class SettingController extends Controller
             'site_name_ar' => ['nullable', 'string', 'max:255'],
             'site_tagline_en' => ['nullable', 'string', 'max:255'],
             'site_tagline_ar' => ['nullable', 'string', 'max:255'],
-            'logo_width' => ['nullable', 'integer', 'min:60', 'max:520'],
-            'logo_height' => ['nullable', 'integer', 'min:20', 'max:220'],
-            'mobile_logo_width' => ['nullable', 'integer', 'min:50', 'max:320'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'secondary_phone' => ['nullable', 'string', 'max:255'],
@@ -70,7 +69,7 @@ class SettingController extends Controller
             'tiktok_url' => ['nullable', 'url'],
         ];
 
-        foreach (['logo', 'footer_logo', 'favicon'] as $field) {
+        foreach (['favicon'] as $field) {
             if ($request->hasFile($field)) {
                 $rules[$field] = ['nullable', 'image', 'mimes:png,jpg,jpeg,webp'];
             }
@@ -78,13 +77,9 @@ class SettingController extends Controller
 
         $data = $request->validate($rules);
 
-        $data['logo_path'] = $this->uploadFile($request, 'logo', 'settings', $setting->logo_path);
-        $data['footer_logo_path'] = $this->uploadFile($request, 'footer_logo', 'settings', $setting->footer_logo_path);
         $data['favicon_path'] = $this->uploadFile($request, 'favicon', 'settings', $setting->favicon_path);
-        $data['logo_width'] = $data['logo_width'] ?: ($setting->logo_width ?: 220);
-        $data['mobile_logo_width'] = $data['mobile_logo_width'] ?: ($setting->mobile_logo_width ?: 168);
 
-        $setting->update($data);
+        $setting->update($this->filterExistingSettingColumns($data));
 
         return back()->with('success', 'Site settings updated successfully.');
     }

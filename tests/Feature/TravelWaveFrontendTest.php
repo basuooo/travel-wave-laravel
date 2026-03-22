@@ -10,12 +10,15 @@ use App\Models\LeadFormField;
 use App\Models\MarketingLandingPage;
 use App\Models\MarketingLandingPageEvent;
 use App\Models\MapSection;
+use App\Models\MediaAsset;
 use App\Models\Page;
 use App\Models\SeoMetaEntry;
 use App\Models\SeoRedirect;
 use App\Models\SeoSetting;
 use App\Models\Setting;
 use App\Models\TrackingIntegration;
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\VisaCountry;
 use App\Models\Destination;
@@ -179,6 +182,100 @@ class TravelWaveFrontendTest extends TestCase
             ->assertSee('js-home-destination-carousel', false);
     }
 
+    public function test_footer_renders_social_links_as_icons_only_for_configured_platforms(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Setting::query()->firstOrFail()->update([
+            'facebook_url' => 'https://facebook.com/travelwave',
+            'instagram_url' => 'https://instagram.com/travelwave',
+            'twitter_url' => 'https://x.com/travelwave',
+            'youtube_url' => null,
+            'tiktok_url' => 'https://tiktok.com/@travelwave',
+            'linkedin_url' => 'https://linkedin.com/company/travelwave',
+            'snapchat_url' => 'https://snapchat.com/add/travelwave',
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('tw-footer-social-link', false)
+            ->assertSee('https://facebook.com/travelwave', false)
+            ->assertSee('https://instagram.com/travelwave', false)
+            ->assertSee('https://x.com/travelwave', false)
+            ->assertSee('https://tiktok.com/@travelwave', false)
+            ->assertSee('https://linkedin.com/company/travelwave', false)
+            ->assertSee('https://snapchat.com/add/travelwave', false)
+            ->assertDontSee('YouTube</a>', false);
+    }
+
+    public function test_footer_whatsapp_number_opens_direct_whatsapp_link(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Setting::query()->firstOrFail()->update([
+            'whatsapp_number' => '+20 106 050 0236',
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('tw-footer-whatsapp-link', false)
+            ->assertSee('https://wa.me/201060500236', false)
+            ->assertSee('+20 106 050 0236');
+    }
+
+    public function test_footer_phone_numbers_render_as_clickable_tel_links(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Setting::query()->firstOrFail()->update([
+            'phone' => '+20 100 123 4567',
+            'secondary_phone' => '0100 765 4321',
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('tel:+201001234567', false)
+            ->assertSee('tel:01007654321', false)
+            ->assertSee('+20 100 123 4567')
+            ->assertSee('0100 765 4321');
+    }
+
+    public function test_header_phone_number_renders_as_clickable_tel_link(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Setting::query()->firstOrFail()->update([
+            'phone' => '+20 106 050 0236',
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('tw-navbar-phone', false)
+            ->assertSee('tel:+201060500236', false)
+            ->assertSee('+20 106 050 0236');
+    }
+
+    public function test_footer_settings_can_save_new_social_platform_urls(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)->put(route('admin.footer-settings.update'), [
+            'twitter_url' => 'https://x.com/travelwave',
+            'linkedin_url' => 'https://linkedin.com/company/travelwave',
+            'snapchat_url' => 'https://snapchat.com/add/travelwave',
+            'telegram_url' => 'https://t.me/travelwave',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('settings', [
+            'twitter_url' => 'https://x.com/travelwave',
+            'linkedin_url' => 'https://linkedin.com/company/travelwave',
+            'snapchat_url' => 'https://snapchat.com/add/travelwave',
+            'telegram_url' => 'https://t.me/travelwave',
+        ]);
+    }
+
     public function test_global_floating_whatsapp_button_renders_with_seeded_settings(): void
     {
         $this->seed(DatabaseSeeder::class);
@@ -297,6 +394,107 @@ class TravelWaveFrontendTest extends TestCase
             ->assertSee('Included Services')
             ->assertSee('CTA and Form Section')
             ->assertSee('Section Visibility');
+    }
+
+    public function test_pages_manager_supports_create_view_duplicate_and_trash_restore_for_custom_pages(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.pages.index'))
+            ->assertOk()
+            ->assertSee('Create New Page')
+            ->assertSee('Duplicate')
+            ->assertSee('Pages Trash');
+
+        $this->actingAs($admin)->post(route('admin.pages.store'), [
+            'key' => 'travel-tips',
+            'title_en' => 'Travel Tips',
+            'title_ar' => 'نصائح السفر',
+            'slug' => 'travel-tips',
+            'is_active' => '1',
+        ])->assertRedirect();
+
+        $page = Page::query()->where('key', 'travel-tips')->firstOrFail();
+        $this->assertSame('travel-tips', $page->slug);
+        $this->assertTrue($page->is_active);
+
+        $this->get(route('pages.show', $page))
+            ->assertOk()
+            ->assertSee('Travel Tips');
+
+        $this->actingAs($admin)->post(route('admin.pages.duplicate', $page))
+            ->assertRedirect();
+
+        $duplicate = Page::query()->where('key', 'travel_tips_copy')->firstOrFail();
+        $this->assertSame('travel-tips-copy', $duplicate->slug);
+        $this->assertFalse($duplicate->is_active);
+
+        $this->actingAs($admin)->delete(route('admin.pages.destroy', $page))
+            ->assertRedirect(route('admin.pages.index'));
+
+        $this->assertSoftDeleted('pages', ['id' => $page->id]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.pages.trash'))
+            ->assertOk()
+            ->assertSee('Travel Tips')
+            ->assertSee('Restore')
+            ->assertSee('Delete Permanently');
+
+        $this->actingAs($admin)->post(route('admin.pages.restore', $page->id))
+            ->assertRedirect(route('admin.pages.trash'));
+
+        $this->assertDatabaseHas('pages', [
+            'id' => $page->id,
+            'deleted_at' => null,
+        ]);
+    }
+
+    public function test_core_pages_can_be_viewed_and_moved_to_trash_then_deleted_permanently(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $about = Page::query()->where('key', 'about')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.pages.index'))
+            ->assertOk()
+            ->assertSee(route('about'), false);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.pages.destroy', $about))
+            ->assertRedirect(route('admin.pages.index'));
+
+        $this->assertSoftDeleted('pages', ['id' => $about->id]);
+
+        $this->actingAs($admin)
+            ->get(route('about'))
+            ->assertNotFound();
+
+        $this->actingAs($admin)
+            ->post(route('admin.pages.restore', $about->id))
+            ->assertRedirect(route('admin.pages.trash'));
+
+        $this->assertDatabaseHas('pages', [
+            'id' => $about->id,
+            'deleted_at' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.pages.destroy', $about))
+            ->assertRedirect(route('admin.pages.index'));
+
+        $this->assertSoftDeleted('pages', ['id' => $about->id]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.pages.force-destroy', $about->id))
+            ->assertRedirect(route('admin.pages.trash'));
+
+        $this->assertDatabaseMissing('pages', ['id' => $about->id]);
     }
 
     public function test_admin_forms_manager_pages_render(): void
@@ -1190,13 +1388,159 @@ class TravelWaveFrontendTest extends TestCase
             ->assertSee('Transition Speed (ms)');
     }
 
+    public function test_country_items_manager_supports_view_duplicate_trash_restore_and_permanent_delete(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $item = \App\Models\HomeCountryStripItem::query()->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.home-country-strip.index'))
+            ->assertOk()
+            ->assertSee('Country Items Trash')
+            ->assertSee('Duplicate');
+
+        $this->assertNotSame('#', $item->resolvedUrl());
+
+        $this->actingAs($admin)
+            ->post(route('admin.home-country-strip.duplicate', $item))
+            ->assertRedirect();
+
+        $duplicate = \App\Models\HomeCountryStripItem::query()
+            ->where('name_en', 'like', '%Copy')
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertFalse($duplicate->is_active);
+        $this->assertFalse($duplicate->show_on_homepage);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.home-country-strip.destroy', $item))
+            ->assertRedirect(route('admin.home-country-strip.index'));
+
+        $this->assertSoftDeleted('home_country_strip_items', ['id' => $item->id]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.home-country-strip.trash'))
+            ->assertOk()
+            ->assertSee($item->displayName('en'))
+            ->assertSee('Restore')
+            ->assertSee('Delete Permanently');
+
+        $this->actingAs($admin)
+            ->post(route('admin.home-country-strip.restore', $item->id))
+            ->assertRedirect(route('admin.home-country-strip.trash'));
+
+        $this->assertDatabaseHas('home_country_strip_items', [
+            'id' => $item->id,
+            'deleted_at' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.home-country-strip.destroy', $item))
+            ->assertRedirect(route('admin.home-country-strip.index'));
+
+        $this->assertSoftDeleted('home_country_strip_items', ['id' => $item->id]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.home-country-strip.force-destroy', $item->id))
+            ->assertRedirect(route('admin.home-country-strip.trash'));
+
+        $this->assertDatabaseMissing('home_country_strip_items', ['id' => $item->id]);
+    }
+
+    public function test_managed_content_modules_support_duplicate_and_trash_workflows(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $visaCategory = \App\Models\VisaCategory::query()->firstOrFail();
+        $visaCountry = \App\Models\VisaCountry::query()->firstOrFail();
+        $destination = Destination::query()->firstOrFail();
+        $testimonial = \App\Models\Testimonial::query()->firstOrFail();
+        $menuItem = \App\Models\MenuItem::query()->firstOrFail();
+        $blogCategory = \App\Models\BlogCategory::query()->firstOrFail();
+        $blogPost = \App\Models\BlogPost::query()->firstOrFail();
+
+        $this->actingAs($admin)->get(route('admin.visa-categories.index'))->assertOk()->assertSee('Duplicate')->assertSee('Trash');
+        $this->actingAs($admin)->get(route('admin.visa-countries.index'))->assertOk()->assertSee('Duplicate')->assertSee('Trash');
+        $this->actingAs($admin)->get(route('admin.destinations.index'))->assertOk()->assertSee('Duplicate')->assertSee('Trash');
+        $this->actingAs($admin)->get(route('admin.testimonials.index'))->assertOk()->assertSee('Duplicate')->assertSee('Trash');
+        $this->actingAs($admin)->get(route('admin.menu-items.index'))->assertOk()->assertSee('Duplicate')->assertSee('Trash');
+        $this->actingAs($admin)->get(route('admin.blog-categories.index'))->assertOk()->assertSee('Duplicate')->assertSee('Trash');
+        $this->actingAs($admin)->get(route('admin.blog-posts.index'))->assertOk()->assertSee('Duplicate')->assertSee('Trash');
+
+        $this->actingAs($admin)->post(route('admin.visa-categories.duplicate', $visaCategory))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.visa-countries.duplicate', $visaCountry))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.destinations.duplicate', $destination))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.testimonials.duplicate', $testimonial))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.menu-items.duplicate', $menuItem))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.blog-categories.duplicate', $blogCategory))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.blog-posts.duplicate', $blogPost))->assertRedirect();
+
+        $this->actingAs($admin)->delete(route('admin.visa-categories.destroy', $visaCategory))->assertRedirect();
+        $this->actingAs($admin)->delete(route('admin.visa-countries.destroy', $visaCountry))->assertRedirect();
+        $this->actingAs($admin)->delete(route('admin.destinations.destroy', $destination))->assertRedirect();
+        $this->actingAs($admin)->delete(route('admin.testimonials.destroy', $testimonial))->assertRedirect();
+        $this->actingAs($admin)->delete(route('admin.menu-items.destroy', $menuItem))->assertRedirect();
+        $this->actingAs($admin)->delete(route('admin.blog-categories.destroy', $blogCategory))->assertRedirect();
+        $this->actingAs($admin)->delete(route('admin.blog-posts.destroy', $blogPost))->assertRedirect();
+
+        $this->assertSoftDeleted('visa_categories', ['id' => $visaCategory->id]);
+        $this->assertSoftDeleted('visa_countries', ['id' => $visaCountry->id]);
+        $this->assertSoftDeleted('destinations', ['id' => $destination->id]);
+        $this->assertSoftDeleted('testimonials', ['id' => $testimonial->id]);
+        $this->assertSoftDeleted('menu_items', ['id' => $menuItem->id]);
+        $this->assertSoftDeleted('blog_categories', ['id' => $blogCategory->id]);
+        $this->assertSoftDeleted('blog_posts', ['id' => $blogPost->id]);
+
+        $this->actingAs($admin)->post(route('admin.visa-categories.restore', $visaCategory->id))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.visa-countries.restore', $visaCountry->id))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.destinations.restore', $destination->id))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.testimonials.restore', $testimonial->id))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.menu-items.restore', $menuItem->id))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.blog-categories.restore', $blogCategory->id))->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.blog-posts.restore', $blogPost->id))->assertRedirect();
+
+        $this->assertDatabaseHas('visa_categories', ['id' => $visaCategory->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('visa_countries', ['id' => $visaCountry->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('destinations', ['id' => $destination->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('testimonials', ['id' => $testimonial->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('menu_items', ['id' => $menuItem->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('blog_categories', ['id' => $blogCategory->id, 'deleted_at' => null]);
+        $this->assertDatabaseHas('blog_posts', ['id' => $blogPost->id, 'deleted_at' => null]);
+
+        $this->actingAs($admin)->delete(route('admin.blog-posts.destroy', $blogPost))->assertRedirect();
+        $this->assertSoftDeleted('blog_posts', ['id' => $blogPost->id]);
+        $this->actingAs($admin)->delete(route('admin.blog-posts.force-destroy', $blogPost->id))->assertRedirect();
+        $this->assertDatabaseMissing('blog_posts', ['id' => $blogPost->id]);
+    }
+
+    public function test_hero_slide_form_renders_mobile_banner_safe_area_guidance(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.hero-slides.create'))
+            ->assertOk()
+            ->assertSee('Desktop Banner Image')
+            ->assertSee('Mobile Banner Image')
+            ->assertSee('1204 x 800')
+            ->assertSee('900 x 1200')
+            ->assertSee('Mobile safe area');
+    }
+
     public function test_header_settings_can_be_saved_without_reuploading_logo(): void
     {
         $this->seed(DatabaseSeeder::class);
 
         $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
         $setting = Setting::query()->firstOrFail();
-        $existingLogoPath = $setting->logo_path;
+        $existingLogoPath = $setting->header_logo_path ?: $setting->logo_path;
 
         $response = $this->actingAs($admin)->put(route('admin.header-settings.update'), [
             'header_background_color' => '#0A1E45',
@@ -1206,9 +1550,9 @@ class TravelWaveFrontendTest extends TestCase
             'header_active_link_color' => '#FF8A00',
             'header_button_color' => '#FF8A00',
             'header_button_text_color' => '#0A1E45',
-            'logo_width' => 240,
-            'logo_height' => 72,
-            'mobile_logo_width' => 160,
+            'header_logo_width' => 240,
+            'header_logo_height' => 72,
+            'header_mobile_logo_width' => 160,
             'header_vertical_padding' => 12,
             'header_logo_enabled' => '1',
             'header_is_sticky' => '1',
@@ -1217,8 +1561,340 @@ class TravelWaveFrontendTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHasNoErrors();
 
-        $this->assertSame($existingLogoPath, $setting->fresh()->logo_path);
-        $this->assertSame(240, $setting->fresh()->logo_width);
+        $this->assertSame($existingLogoPath, $setting->fresh()->header_logo_path ?: $setting->fresh()->logo_path);
+        $this->assertSame(240, $setting->fresh()->header_logo_width);
+    }
+
+    public function test_header_settings_can_update_aspect_ratio_and_sticky_flags_without_logo_upload(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $setting = Setting::query()->firstOrFail();
+        $existingLogoPath = $setting->header_logo_path ?: $setting->logo_path;
+
+        $response = $this->actingAs($admin)->put(route('admin.header-settings.update'), [
+            'header_logo_keep_aspect_ratio' => '1',
+            'header_logo_enabled' => '1',
+            'header_is_sticky' => '0',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $fresh = $setting->fresh();
+        $this->assertSame($existingLogoPath, $fresh->header_logo_path ?: $fresh->logo_path);
+        $this->assertTrue((bool) $fresh->header_logo_keep_aspect_ratio);
+        $this->assertFalse((bool) $fresh->header_is_sticky);
+    }
+
+    public function test_header_settings_can_save_unchecked_boolean_toggles_as_false(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $setting = Setting::query()->firstOrFail();
+        $setting->update([
+            'header_logo_keep_aspect_ratio' => true,
+            'header_logo_enabled' => true,
+            'header_is_sticky' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('admin.header-settings.update'), [
+            'header_logo_keep_aspect_ratio' => '0',
+            'header_logo_enabled' => '0',
+            'header_is_sticky' => '0',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $fresh = $setting->fresh();
+        $this->assertFalse((bool) $fresh->header_logo_keep_aspect_ratio);
+        $this->assertFalse((bool) $fresh->header_logo_enabled);
+        $this->assertFalse((bool) $fresh->header_is_sticky);
+    }
+
+    public function test_brand_settings_can_update_favicon_only_without_optional_dimensions(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $setting = Setting::query()->firstOrFail();
+        $existingLogoPath = $setting->logo_path;
+        $existingFooterLogoPath = $setting->footer_logo_path;
+        $favicon = UploadedFile::fake()->create('favicon.png', 16, 'image/png');
+
+        $response = $this->actingAs($admin)->put(route('admin.settings.update'), [
+            'favicon' => $favicon,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $fresh = $setting->fresh();
+        $this->assertSame($existingLogoPath, $fresh->logo_path);
+        $this->assertSame($existingFooterLogoPath, $fresh->footer_logo_path);
+        $this->assertNotNull($fresh->favicon_path);
+        Storage::disk('public')->assertExists($fresh->favicon_path);
+    }
+
+    public function test_header_settings_can_update_logo_only_without_optional_dimensions(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $setting = Setting::query()->firstOrFail();
+        $logo = UploadedFile::fake()->create('logo.png', 24, 'image/png');
+
+        $response = $this->actingAs($admin)->put(route('admin.header-settings.update'), [
+            'header_logo' => $logo,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $fresh = $setting->fresh();
+        $this->assertNotNull($fresh->header_logo_path);
+        Storage::disk('public')->assertExists($fresh->header_logo_path);
+        $this->assertNotNull($fresh->header_logo_width);
+    }
+
+    public function test_footer_settings_can_update_footer_logo_only(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $setting = Setting::query()->firstOrFail();
+        $footerLogo = UploadedFile::fake()->create('footer-logo.png', 24, 'image/png');
+
+        $response = $this->actingAs($admin)->put(route('admin.footer-settings.update'), [
+            'footer_logo' => $footerLogo,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $fresh = $setting->fresh();
+        $this->assertNotNull($fresh->footer_logo_path);
+        Storage::disk('public')->assertExists($fresh->footer_logo_path);
+        $this->assertNotNull($fresh->footer_vertical_padding);
+    }
+
+    public function test_header_logo_size_settings_are_saved_safely_and_applied_on_frontend(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        Storage::disk('public')->put('settings/header-logo.png', 'header-logo-binary');
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $setting = Setting::query()->firstOrFail();
+        $setting->update([
+            'header_logo_path' => 'settings/header-logo.png',
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('admin.header-settings.update'), [
+            'header_logo_display_mode' => 'custom',
+            'header_logo_width' => 260,
+            'header_logo_height' => 88,
+            'header_mobile_logo_width' => 180,
+            'header_logo_keep_aspect_ratio' => 1,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $fresh = $setting->fresh();
+        $this->assertSame(260, $fresh->header_logo_width);
+        $this->assertSame(88, $fresh->header_logo_height);
+        $this->assertSame(180, $fresh->header_mobile_logo_width);
+        $this->assertTrue((bool) $fresh->header_logo_keep_aspect_ratio);
+        $this->assertSame('custom', $fresh->header_logo_display_mode);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('width:min(100%, 260px);height:88px;object-fit:contain;', false);
+    }
+
+    public function test_footer_logo_size_settings_are_saved_safely_and_applied_on_frontend(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        Storage::disk('public')->put('settings/footer-logo.png', 'footer-logo-binary');
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $setting = Setting::query()->firstOrFail();
+        $setting->update([
+            'footer_logo_path' => 'settings/footer-logo.png',
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('admin.footer-settings.update'), [
+            'footer_logo_display_mode' => 'custom',
+            'footer_logo_width' => 230,
+            'footer_logo_height' => 76,
+            'footer_logo_keep_aspect_ratio' => 1,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $fresh = $setting->fresh();
+        $this->assertSame(230, $fresh->footer_logo_width);
+        $this->assertSame(76, $fresh->footer_logo_height);
+        $this->assertTrue((bool) $fresh->footer_logo_keep_aspect_ratio);
+        $this->assertSame('custom', $fresh->footer_logo_display_mode);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('width:min(100%, 230px);height:76px;object-fit:contain;', false);
+    }
+
+    public function test_header_logo_original_mode_preserves_natural_rendering_without_forced_square_style(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        Storage::disk('public')->put('settings/original-header-logo.png', 'original-header-logo');
+
+        Setting::query()->firstOrFail()->update([
+            'header_logo_path' => 'settings/original-header-logo.png',
+            'header_logo_display_mode' => 'original',
+            'header_logo_width' => 320,
+            'header_logo_height' => 120,
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('width:auto;height:auto;max-height:none;object-fit:initial;', false)
+            ->assertDontSee('width:min(100%, 320px);height:120px;', false);
+    }
+
+    public function test_header_logo_display_mode_persists_after_save_and_reload(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)->put(route('admin.header-settings.update'), [
+            'header_logo_display_mode' => 'cover',
+            'header_logo_enabled' => '1',
+            'header_is_sticky' => '1',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $setting = Setting::query()->firstOrFail();
+        $this->assertSame('cover', $setting->header_logo_display_mode);
+        $this->assertSame('cover', $setting->logoDisplayModeFor('header'));
+
+        $this->actingAs($admin)
+            ->get(route('admin.header-settings.edit'))
+            ->assertOk()
+            ->assertSee('<option value="cover" selected>Cover</option>', false);
+    }
+
+    public function test_header_and_footer_logo_settings_are_fully_independent(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $setting = Setting::query()->firstOrFail();
+
+        $setting->update([
+            'header_logo_width' => 210,
+            'header_logo_height' => 70,
+            'header_logo_keep_aspect_ratio' => true,
+            'footer_logo_width' => 190,
+            'footer_logo_height' => 62,
+            'footer_logo_keep_aspect_ratio' => true,
+        ]);
+
+        $this->actingAs($admin)->put(route('admin.header-settings.update'), [
+            'header_logo_width' => 280,
+            'header_logo_height' => 90,
+            'header_logo_keep_aspect_ratio' => '0',
+            'header_mobile_logo_width' => 175,
+            'header_logo_enabled' => '1',
+            'header_is_sticky' => '1',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $fresh = $setting->fresh();
+        $this->assertSame(280, $fresh->header_logo_width);
+        $this->assertSame(90, $fresh->header_logo_height);
+        $this->assertFalse((bool) $fresh->header_logo_keep_aspect_ratio);
+        $this->assertSame(190, $fresh->footer_logo_width);
+        $this->assertSame(62, $fresh->footer_logo_height);
+        $this->assertTrue((bool) $fresh->footer_logo_keep_aspect_ratio);
+
+        $this->actingAs($admin)->put(route('admin.footer-settings.update'), [
+            'footer_logo_width' => 240,
+            'footer_logo_height' => 78,
+            'footer_logo_keep_aspect_ratio' => '0',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $fresh = $setting->fresh();
+        $this->assertSame(280, $fresh->header_logo_width);
+        $this->assertSame(90, $fresh->header_logo_height);
+        $this->assertFalse((bool) $fresh->header_logo_keep_aspect_ratio);
+        $this->assertSame(240, $fresh->footer_logo_width);
+        $this->assertSame(78, $fresh->footer_logo_height);
+        $this->assertFalse((bool) $fresh->footer_logo_keep_aspect_ratio);
+    }
+
+    public function test_header_settings_edit_page_reloads_saved_values_instead_of_old_ones(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)->put(route('admin.header-settings.update'), [
+            'header_logo_width' => 314,
+            'header_logo_height' => 92,
+            'header_mobile_logo_width' => 181,
+            'header_logo_keep_aspect_ratio' => '0',
+            'header_logo_enabled' => '1',
+            'header_is_sticky' => '0',
+            'header_vertical_padding' => 14,
+            'header_button_text_color' => '#123456',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->actingAs($admin)
+            ->get(route('admin.header-settings.edit'))
+            ->assertOk()
+            ->assertSee('name="header_logo_width" value="314"', false)
+            ->assertSee('name="header_logo_height" value="92"', false)
+            ->assertSee('name="header_mobile_logo_width" value="181"', false)
+            ->assertSee('name="header_vertical_padding" value="14"', false)
+            ->assertSee('name="header_button_text_color" value="#123456"', false)
+            ->assertDontSee('name="header_logo_keep_aspect_ratio" value="1" id="header_logo_keep_aspect_ratio" checked', false)
+            ->assertDontSee('name="header_is_sticky" value="1" id="header_is_sticky" checked', false);
+    }
+
+    public function test_brand_settings_can_update_text_fields_without_image_changes(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $setting = Setting::query()->firstOrFail();
+        $existingFaviconPath = $setting->favicon_path;
+
+        $response = $this->actingAs($admin)->put(route('admin.settings.update'), [
+            'site_name_en' => 'Travel Wave Updated',
+            'site_name_ar' => 'ترافل ويف الجديدة',
+            'primary_color' => '#101820',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $fresh = $setting->fresh();
+        $this->assertSame('Travel Wave Updated', $fresh->site_name_en);
+        $this->assertSame('ترافل ويف الجديدة', $fresh->site_name_ar);
+        $this->assertSame('#101820', $fresh->primary_color);
+        $this->assertSame($existingFaviconPath, $fresh->favicon_path);
     }
 
     public function test_uploaded_header_logo_is_saved_and_rendered_on_frontend(): void
@@ -1238,18 +1914,18 @@ class TravelWaveFrontendTest extends TestCase
             'header_active_link_color' => '#FF8A00',
             'header_button_color' => '#FF8A00',
             'header_button_text_color' => '#0A1E45',
-            'logo_width' => 240,
-            'mobile_logo_width' => 160,
+            'header_logo_width' => 240,
+            'header_mobile_logo_width' => 160,
             'header_vertical_padding' => 12,
             'header_logo_enabled' => '1',
             'header_is_sticky' => '1',
-            'logo' => $logo,
+            'header_logo' => $logo,
         ]);
 
         $response->assertRedirect();
         $response->assertSessionHasNoErrors();
 
-        $newPath = $setting->fresh()->logo_path;
+        $newPath = $setting->fresh()->header_logo_path;
 
         $this->assertNotNull($newPath);
         $this->assertNotSame('settings/travel-wave-logo.svg', $newPath);
@@ -1258,6 +1934,83 @@ class TravelWaveFrontendTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('/storage/' . $newPath, false);
+    }
+
+    public function test_existing_media_library_png_can_be_selected_as_header_logo_and_rendered(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        Storage::disk('public')->put('media-library/header-selected-logo.png', 'header-selected-logo');
+        MediaAsset::query()->create([
+            'title' => 'Header Selected Logo',
+            'disk' => 'public',
+            'directory' => 'media-library',
+            'file_name' => 'header-selected-logo.png',
+            'path' => 'media-library/header-selected-logo.png',
+            'mime_type' => 'image/png',
+            'extension' => 'png',
+        ]);
+
+        $this->actingAs($admin)->put(route('admin.header-settings.update'), [
+            'header_logo_existing_path' => 'media-library/header-selected-logo.png',
+            'header_logo_display_mode' => 'original',
+            'header_logo_enabled' => '1',
+            'header_is_sticky' => '1',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $setting = Setting::query()->firstOrFail();
+        $this->assertSame('media-library/header-selected-logo.png', $setting->header_logo_path);
+        $this->assertSame('media-library/header-selected-logo.png', $setting->logo_path);
+
+        $this->actingAs($admin)
+            ->get(route('admin.header-settings.edit'))
+            ->assertOk()
+            ->assertSee('/storage/media-library/header-selected-logo.png', false);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('/storage/media-library/header-selected-logo.png', false);
+    }
+
+    public function test_existing_media_library_png_can_be_selected_as_footer_logo_independently(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        Storage::disk('public')->put('media-library/footer-selected-logo.png', 'footer-selected-logo');
+        MediaAsset::query()->create([
+            'title' => 'Footer Selected Logo',
+            'disk' => 'public',
+            'directory' => 'media-library',
+            'file_name' => 'footer-selected-logo.png',
+            'path' => 'media-library/footer-selected-logo.png',
+            'mime_type' => 'image/png',
+            'extension' => 'png',
+        ]);
+
+        $this->actingAs($admin)->put(route('admin.footer-settings.update'), [
+            'footer_logo_existing_path' => 'media-library/footer-selected-logo.png',
+            'footer_logo_display_mode' => 'original',
+            'footer_logo_keep_aspect_ratio' => '1',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $setting = Setting::query()->firstOrFail();
+        $this->assertSame('media-library/footer-selected-logo.png', $setting->footer_logo_path);
+        $this->assertNotSame($setting->header_logo_path, $setting->footer_logo_path);
+
+        $this->actingAs($admin)
+            ->get(route('admin.footer-settings.edit'))
+            ->assertOk()
+            ->assertSee('/storage/media-library/footer-selected-logo.png', false);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('/storage/media-library/footer-selected-logo.png', false);
     }
 
     public function test_header_uses_main_logo_path_instead_of_footer_logo_path(): void
@@ -1269,7 +2022,7 @@ class TravelWaveFrontendTest extends TestCase
         Storage::disk('public')->put('settings/footer-logo.png', 'footer');
 
         Setting::query()->firstOrFail()->update([
-            'logo_path' => 'settings/header-logo.png',
+            'header_logo_path' => 'settings/header-logo.png',
             'footer_logo_path' => 'settings/footer-logo.png',
         ]);
 
@@ -1290,7 +2043,7 @@ class TravelWaveFrontendTest extends TestCase
         Storage::disk('public')->put('settings/prefixed-logo.png', 'header');
 
         Setting::query()->firstOrFail()->update([
-            'logo_path' => 'storage/settings/prefixed-logo.png',
+            'header_logo_path' => 'storage/settings/prefixed-logo.png',
         ]);
 
         $this->get(route('home'))
@@ -1304,7 +2057,7 @@ class TravelWaveFrontendTest extends TestCase
         $this->seed(DatabaseSeeder::class);
 
         Setting::query()->firstOrFail()->update([
-            'logo_path' => 'settings/missing-logo.svg',
+            'header_logo_path' => 'settings/missing-logo.svg',
         ]);
 
         $this->get(route('home'))
@@ -1345,5 +2098,189 @@ class TravelWaveFrontendTest extends TestCase
             ->assertSee('data-speed="900"', false)
             ->assertSee('data-pause-on-hover="false"', false)
             ->assertSee('data-loop="false"', false);
+    }
+
+    public function test_default_roles_and_permissions_are_seeded_for_admin_access(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->assertTrue(Role::query()->where('slug', 'super-admin')->exists());
+        $this->assertTrue(Permission::query()->where('slug', 'dashboard.access')->exists());
+        $this->assertTrue($admin->roles()->where('slug', 'super-admin')->exists());
+        $this->assertTrue($admin->canAccessDashboard());
+        $this->assertTrue($admin->hasPermission('users.view'));
+        $this->assertTrue($admin->hasPermission('seo.manage'));
+    }
+
+    public function test_admin_users_roles_and_permissions_pages_render_for_super_admin(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertSee('Users Management');
+
+        $this->actingAs($admin)->get(route('admin.roles.index'))
+            ->assertOk()
+            ->assertSee('Roles Management');
+
+        $this->actingAs($admin)->get(route('admin.permissions.index'))
+            ->assertOk()
+            ->assertSee('Permissions Management');
+    }
+
+    public function test_user_without_users_permission_cannot_access_users_management(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $viewerRole = Role::query()->where('slug', 'viewer-analyst')->firstOrFail();
+
+        $user = User::query()->create([
+            'name' => 'Viewer User',
+            'email' => 'viewer@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'en',
+        ]);
+        $user->roles()->sync([$viewerRole->id]);
+
+        $this->actingAs($user)
+            ->get(route('admin.users.index'))
+            ->assertForbidden();
+    }
+
+    public function test_admin_media_library_page_renders(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.media-library.index'))
+            ->assertOk()
+            ->assertSee('Media Library');
+    }
+
+    public function test_uploaded_dashboard_image_is_registered_in_media_library(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $image = UploadedFile::fake()->create('testimonial-cover.png', 120, 'image/png');
+
+        $response = $this->actingAs($admin)->post(route('admin.testimonials.store'), [
+            'client_name' => 'Media Test',
+            'client_role_en' => 'Traveler',
+            'client_role_ar' => 'مسافر',
+            'testimonial_en' => 'Helpful team.',
+            'testimonial_ar' => 'فريق متعاون.',
+            'rating' => 5,
+            'sort_order' => 20,
+            'is_active' => 1,
+            'image' => $image,
+        ]);
+
+        $response->assertRedirect(route('admin.testimonials.index'));
+        $response->assertSessionHasNoErrors();
+
+        $testimonial = \App\Models\Testimonial::query()->where('client_name', 'Media Test')->firstOrFail();
+
+        $this->assertNotNull($testimonial->image);
+        $this->assertDatabaseHas('media_assets', [
+            'path' => $testimonial->image,
+            'disk' => 'public',
+        ]);
+
+        $asset = MediaAsset::query()->where('path', $testimonial->image)->firstOrFail();
+        $this->assertSame('png', $asset->extension);
+    }
+
+    public function test_media_library_direct_upload_creates_database_record_and_lists_item(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $image = UploadedFile::fake()->create('library-upload.png', 80, 'image/png');
+
+        $this->actingAs($admin)
+            ->post(route('admin.media-library.store'), [
+                'files' => [$image],
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $asset = MediaAsset::query()->where('title', 'library-upload')->firstOrFail();
+
+        Storage::disk('public')->assertExists($asset->path);
+
+        $this->actingAs($admin)
+            ->get(route('admin.media-library.index'))
+            ->assertOk()
+            ->assertSee('library-upload');
+    }
+
+    public function test_media_library_recovers_old_storage_prefixed_paths_from_settings(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        Storage::disk('public')->put('settings/legacy-logo.png', 'legacy-logo-binary');
+
+        Setting::query()->firstOrFail()->update([
+            'logo_path' => 'storage/settings/legacy-logo.png',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.media-library.index'))
+            ->assertOk()
+            ->assertSee('legacy-logo');
+
+        $asset = MediaAsset::query()->where('path', 'settings/legacy-logo.png')->firstOrFail();
+        $this->assertTrue($asset->file_exists);
+    }
+
+    public function test_media_library_preview_route_handles_normalized_and_missing_paths(): void
+    {
+        Storage::fake('public');
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        Storage::disk('public')->put('media-library/sample-preview.png', 'preview-binary');
+
+        $asset = MediaAsset::query()->create([
+            'title' => 'Sample Preview',
+            'disk' => 'public',
+            'directory' => 'media-library',
+            'file_name' => 'sample-preview.png',
+            'path' => 'storage/media-library/sample-preview.png',
+            'extension' => 'png',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.media-library.preview', $asset))
+            ->assertOk();
+
+        $missing = MediaAsset::query()->create([
+            'title' => 'Missing Preview',
+            'disk' => 'public',
+            'directory' => 'media-library',
+            'file_name' => 'missing-preview.png',
+            'path' => 'media-library/missing-preview.png',
+            'extension' => 'png',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.media-library.preview', $missing))
+            ->assertOk()
+            ->assertHeader('content-type', 'image/svg+xml; charset=UTF-8');
     }
 }

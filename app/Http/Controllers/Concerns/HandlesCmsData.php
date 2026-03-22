@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Concerns;
 
+use App\Support\MediaLibraryService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 trait HandlesCmsData
 {
@@ -11,12 +11,16 @@ trait HandlesCmsData
     {
         if ($request->hasFile($field)) {
             $path = $request->file($field)->store($directory, 'public');
-
-            if ($current && $current !== $path && Storage::disk('public')->exists($current)) {
-                Storage::disk('public')->delete($current);
-            }
+            MediaLibraryService::registerUploadedFile($request->file($field), $path, $directory);
 
             return $path;
+        }
+
+        $selectedPath = MediaLibraryService::normalizePath((string) $request->input($field . '_existing_path', ''));
+        if ($selectedPath !== '') {
+            MediaLibraryService::syncExistingFile($selectedPath, $directory);
+
+            return $selectedPath;
         }
 
         return $current;
@@ -24,17 +28,29 @@ trait HandlesCmsData
 
     protected function uploadMultipleFiles(Request $request, string $field, string $directory, array $current = []): array
     {
-        if (! $request->hasFile($field)) {
+        $selectedExisting = collect((array) $request->input($field . '_existing_paths', []))
+            ->map(fn ($path) => MediaLibraryService::normalizePath((string) $path))
+            ->filter()
+            ->values()
+            ->all();
+
+        if (! $request->hasFile($field) && empty($selectedExisting)) {
             return $current;
         }
 
-        $paths = [];
+        $paths = $selectedExisting;
 
-        foreach ($request->file($field) as $file) {
-            $paths[] = $file->store($directory, 'public');
+        foreach ($selectedExisting as $selectedPath) {
+            MediaLibraryService::syncExistingFile($selectedPath, $directory);
         }
 
-        return $paths;
+        foreach ((array) $request->file($field, []) as $file) {
+            $path = $file->store($directory, 'public');
+            MediaLibraryService::registerUploadedFile($file, $path, $directory);
+            $paths[] = $path;
+        }
+
+        return array_values(array_unique($paths));
     }
 
     protected function mapLocalizedTextItems(?array $en, ?array $ar, string $key = 'text'): array

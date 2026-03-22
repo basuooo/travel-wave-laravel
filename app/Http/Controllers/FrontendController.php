@@ -163,6 +163,18 @@ class FrontendController extends Controller
         ]);
     }
 
+    public function pageShow(Page $page)
+    {
+        abort_unless($page->is_active, 404);
+        abort_if($page->isCorePage(), 404);
+
+        return view('frontend.pages.standard', [
+            'page' => $page,
+            'managedForms' => $this->formsForContext(LeadFormManager::contextForPageKey('page:' . $page->key)),
+            'managedMaps' => $this->mapsForContext(MapSectionManager::contextForPageKey('page:' . $page->key)),
+        ]);
+    }
+
     public function marketingLandingPage(MarketingLandingPage $landingPage, Request $request)
     {
         abort_unless($landingPage->status === MarketingLandingPage::STATUS_PUBLISHED, 404);

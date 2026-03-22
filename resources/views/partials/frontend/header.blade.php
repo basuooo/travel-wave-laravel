@@ -1,3 +1,5 @@
+@php($headerPhoneUrl = $siteSettings?->phoneCallUrl($siteSettings?->phone))
+@php($headerPhoneDisplay = ltrim((string) ($siteSettings?->phone ?? ''), '+'))
 <nav class="navbar navbar-expand-lg navbar-dark tw-navbar {{ ($siteSettings?->header_is_sticky ?? true) ? 'sticky-top' : '' }}">
     <div class="container tw-navbar-shell" style="padding-top: {{ $siteSettings?->header_vertical_padding ?? 8 }}px; padding-bottom: {{ $siteSettings?->header_vertical_padding ?? 8 }}px;">
         <a class="navbar-brand tw-navbar-brand d-flex align-items-center" href="{{ route('home') }}" aria-label="{{ $siteSettings?->localized('site_name') ?? 'Travel Wave' }}">
@@ -26,6 +28,14 @@
                         @endif
                     </li>
                 @endforeach
+                @if($siteSettings?->phone && $headerPhoneUrl)
+                    <li class="nav-item tw-navbar-phone-item">
+                        <a class="tw-navbar-phone" href="{{ $headerPhoneUrl }}" dir="ltr" aria-label="Call {{ $siteSettings?->phone }}">
+                            <span class="tw-navbar-phone-icon" aria-hidden="true">+</span>
+                            <span>{{ $headerPhoneDisplay }}</span>
+                        </a>
+                    </li>
+                @endif
                 <li class="nav-item tw-navbar-locale ms-lg-3">
                     <a class="btn btn-sm tw-btn-outline tw-locale-btn" href="{{ route('locale.switch', $currentLocale === 'ar' ? 'en' : 'ar') }}">
                         {{ $currentLocale === 'ar' ? 'English' : 'العربية' }}

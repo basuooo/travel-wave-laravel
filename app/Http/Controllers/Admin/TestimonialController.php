@@ -18,6 +18,13 @@ class TestimonialController extends Controller
         ]);
     }
 
+    public function trash()
+    {
+        return view('admin.testimonials.trash', [
+            'items' => Testimonial::onlyTrashed()->with('deletedBy')->orderByDesc('deleted_at')->paginate(15),
+        ]);
+    }
+
     public function create()
     {
         return view('admin.testimonials.form', ['item' => new Testimonial()]);
@@ -53,11 +60,39 @@ class TestimonialController extends Controller
         return redirect()->route('admin.testimonials.index')->with('success', 'Testimonial updated.');
     }
 
+    public function duplicate(Testimonial $testimonial)
+    {
+        $copy = $testimonial->replicate();
+        $copy->client_name = trim($testimonial->client_name . ' Copy');
+        $copy->is_active = false;
+        $copy->save();
+
+        return redirect()->route('admin.testimonials.edit', $copy)->with('success', 'Testimonial duplicated.');
+    }
+
     public function destroy(Testimonial $testimonial)
     {
+        $testimonial->forceFill(['deleted_by' => auth()->id()])->save();
         $testimonial->delete();
 
-        return back()->with('success', 'Testimonial deleted.');
+        return redirect()->route('admin.testimonials.index')->with('success', 'Testimonial moved to trash.');
+    }
+
+    public function restore(int $testimonial)
+    {
+        $item = Testimonial::onlyTrashed()->findOrFail($testimonial);
+        $item->restore();
+        $item->forceFill(['deleted_by' => null])->save();
+
+        return redirect()->route('admin.testimonials.trash')->with('success', 'Testimonial restored.');
+    }
+
+    public function forceDestroy(int $testimonial)
+    {
+        $item = Testimonial::onlyTrashed()->findOrFail($testimonial);
+        $item->forceDelete();
+
+        return redirect()->route('admin.testimonials.trash')->with('success', 'Testimonial deleted permanently.');
     }
 
     protected function validatedData(Request $request): array

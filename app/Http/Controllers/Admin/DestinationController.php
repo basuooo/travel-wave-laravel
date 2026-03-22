@@ -19,6 +19,13 @@ class DestinationController extends Controller
         ]);
     }
 
+    public function trash()
+    {
+        return view('admin.destinations.trash', [
+            'items' => Destination::onlyTrashed()->with('deletedBy')->orderByDesc('deleted_at')->paginate(15),
+        ]);
+    }
+
     public function create()
     {
         return view('admin.destinations.form', ['item' => new Destination()]);
@@ -52,11 +59,42 @@ class DestinationController extends Controller
         return redirect()->route('admin.destinations.index')->with('success', 'Destination updated.');
     }
 
+    public function duplicate(Destination $destination)
+    {
+        $copy = $destination->replicate();
+        $copy->title_en = trim($destination->title_en . ' Copy');
+        $copy->title_ar = trim($destination->title_ar . ' - نسخة');
+        $copy->slug = Destination::makeUniqueSlug(($destination->slug ?: $destination->title_en) . '-copy');
+        $copy->is_active = false;
+        $copy->is_featured = false;
+        $copy->save();
+
+        return redirect()->route('admin.destinations.edit', $copy)->with('success', 'Destination duplicated.');
+    }
+
     public function destroy(Destination $destination)
     {
+        $destination->forceFill(['deleted_by' => auth()->id()])->save();
         $destination->delete();
 
-        return back()->with('success', 'Destination deleted.');
+        return redirect()->route('admin.destinations.index')->with('success', 'Destination moved to trash.');
+    }
+
+    public function restore(int $destination)
+    {
+        $item = Destination::onlyTrashed()->findOrFail($destination);
+        $item->restore();
+        $item->forceFill(['deleted_by' => null])->save();
+
+        return redirect()->route('admin.destinations.trash')->with('success', 'Destination restored.');
+    }
+
+    public function forceDestroy(int $destination)
+    {
+        $item = Destination::onlyTrashed()->findOrFail($destination);
+        $item->forceDelete();
+
+        return redirect()->route('admin.destinations.trash')->with('success', 'Destination deleted permanently.');
     }
 
     protected function validatedData(Request $request, ?int $id = null): array

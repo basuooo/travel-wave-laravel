@@ -733,6 +733,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(MarketingLandingPageDemoSeeder::class);
+        $this->call(RolePermissionSeeder::class);
 
     }
 }

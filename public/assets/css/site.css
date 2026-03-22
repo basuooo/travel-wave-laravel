@@ -42,11 +42,12 @@ a:focus-visible {
 .tw-brand-logo {
     display: block;
     max-width: 100%;
-    max-height: 120px;
+    height: auto;
+    max-height: none;
 }
 
 .tw-navbar-brand .tw-brand-logo {
-    width: min(100%, var(--tw-logo-width, 220px));
+    width: auto;
 }
 
 .tw-brand-wordmark {
@@ -78,7 +79,7 @@ main > section:last-child {
 .tw-navbar-brand {
     display: inline-flex;
     align-items: center;
-    max-width: min(58vw, var(--tw-logo-width, 220px));
+    max-width: min(58vw, 420px);
     min-height: 2.75rem;
     line-height: 1.1;
     white-space: normal;
@@ -101,6 +102,47 @@ main > section:last-child {
 .tw-navbar-nav .nav-link:focus-visible {
     background: rgba(255, 140, 50, 0.16);
     color: var(--tw-header-hover);
+}
+
+.tw-navbar-phone-item {
+    display: flex;
+    align-items: center;
+}
+
+.tw-navbar-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: var(--tw-header-link);
+    text-decoration: none;
+    font-weight: 700;
+    line-height: 1;
+    transition: background-color 0.24s ease, color 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease, transform 0.24s ease;
+}
+
+.tw-navbar-phone:hover,
+.tw-navbar-phone:focus-visible {
+    color: #ffffff;
+    background: rgba(255, 140, 50, 0.18);
+    border-color: rgba(255, 140, 50, 0.34);
+    box-shadow: 0 14px 30px rgba(8, 22, 35, 0.16);
+    transform: translateY(-1px);
+}
+
+.tw-navbar-phone-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 0.92rem;
+    font-weight: 800;
 }
 
 .tw-navbar-toggler {
@@ -475,8 +517,67 @@ main > section:last-child {
     color: var(--tw-footer-hover);
 }
 
+.tw-footer-contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    text-decoration: none;
+    font-weight: 600;
+}
+
 .tw-footer-logo {
     filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.18));
+}
+
+.tw-footer-social {
+    margin-top: 1.15rem;
+}
+
+.tw-footer-social-link {
+    width: 2.9rem;
+    height: 2.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--tw-footer-link);
+    text-decoration: none;
+    transition: transform 0.24s ease, background-color 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease, color 0.24s ease;
+    box-shadow: 0 12px 24px rgba(5, 16, 28, 0.12);
+}
+
+.tw-footer-social-link:hover,
+.tw-footer-social-link:focus-visible {
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(255, 140, 50, 0.92), rgba(239, 92, 0, 0.92));
+    border-color: rgba(255, 140, 50, 0.55);
+    box-shadow: 0 16px 32px rgba(255, 140, 50, 0.24);
+    transform: translateY(-2px);
+}
+
+.tw-footer-social-link svg {
+    width: 1.18rem;
+    height: 1.18rem;
+    display: block;
+}
+
+.tw-footer-whatsapp-link {
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(51, 116, 110, 0.16), rgba(18, 57, 91, 0.12));
+    border: 1px solid rgba(98, 170, 159, 0.2);
+    transition: color 0.24s ease, background 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease, transform 0.24s ease;
+}
+
+.tw-footer-whatsapp-link:hover,
+.tw-footer-whatsapp-link:focus-visible {
+    color: #ffffff;
+    background: linear-gradient(135deg, #255b5f, #12395b);
+    border-color: rgba(126, 206, 193, 0.34);
+    box-shadow: 0 14px 30px rgba(18, 57, 91, 0.22);
+    transform: translateY(-1px);
 }
 
 .tw-footer h4,
@@ -2141,6 +2242,17 @@ html[dir="rtl"] .tw-list-check li::before {
         margin-inline-start: 0 !important;
     }
 
+    .tw-navbar-phone-item {
+        width: 100%;
+        margin-top: 0.35rem;
+    }
+
+    .tw-navbar-phone {
+        width: 100%;
+        justify-content: center;
+        min-height: 3rem;
+    }
+
     .tw-locale-btn {
         width: 100%;
         min-height: 3rem;
@@ -2170,7 +2282,7 @@ html[dir="rtl"] .tw-list-check li::before {
     }
 
     .tw-navbar-brand {
-        max-width: min(calc(100% - 4.5rem), var(--tw-mobile-logo-width, 168px));
+        max-width: min(calc(100% - 4.5rem), 260px);
     }
 
     .tw-page-header,

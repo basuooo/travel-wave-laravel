@@ -8,9 +8,13 @@ use App\Models\Destination;
 use App\Models\LeadForm;
 use App\Models\MarketingLandingPage;
 use App\Models\MapSection;
+use App\Models\MediaAsset;
 use App\Models\MenuItem;
 use App\Models\Page;
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\TrackingIntegration;
+use App\Models\User;
 use App\Models\VisaCategory;
 use App\Models\VisaCountry;
 use Illuminate\Http\Request;
@@ -36,8 +40,12 @@ class AdminSearchController extends Controller
             __('admin.pages') => $this->pages($like),
             __('admin.visa_destinations') => $this->visaCountries($like),
             __('admin.destinations') => $this->destinations($like),
+            __('admin.users_management') => $this->users($like),
+            __('admin.roles_management') => $this->roles($like),
+            __('admin.permissions_management') => $this->permissions($like),
             __('admin.forms_manager') => $this->forms($like),
             __('admin.marketing_manager') => $this->marketingLandingPages($like),
+            __('admin.media_library') => $this->mediaAssets($like),
             __('admin.maps_manager') => $this->maps($like),
             __('admin.tracking_manager') => $this->tracking($like),
             __('admin.seo_manager') => $this->seo($query),
@@ -112,6 +120,66 @@ class AdminSearchController extends Controller
             ])->all();
     }
 
+    protected function users(string $like): array
+    {
+        if (! auth()->user()?->hasPermission('users.view')) {
+            return [];
+        }
+
+        return User::query()
+            ->where(fn ($query) => $query
+                ->where('name', 'like', $like)
+                ->orWhere('email', 'like', $like)
+                ->orWhere('phone', 'like', $like))
+            ->limit(8)
+            ->get()
+            ->map(fn (User $item) => [
+                'title' => $item->name,
+                'meta' => $item->email,
+                'url' => route('admin.users.edit', $item),
+            ])->all();
+    }
+
+    protected function roles(string $like): array
+    {
+        if (! auth()->user()?->hasPermission('roles.manage')) {
+            return [];
+        }
+
+        return Role::query()
+            ->where(fn ($query) => $query
+                ->where('name', 'like', $like)
+                ->orWhere('slug', 'like', $like)
+                ->orWhere('description', 'like', $like))
+            ->limit(8)
+            ->get()
+            ->map(fn (Role $item) => [
+                'title' => $item->name,
+                'meta' => $item->slug,
+                'url' => route('admin.roles.edit', $item),
+            ])->all();
+    }
+
+    protected function permissions(string $like): array
+    {
+        if (! auth()->user()?->hasPermission('permissions.manage')) {
+            return [];
+        }
+
+        return Permission::query()
+            ->where(fn ($query) => $query
+                ->where('name', 'like', $like)
+                ->orWhere('slug', 'like', $like)
+                ->orWhere('module', 'like', $like))
+            ->limit(8)
+            ->get()
+            ->map(fn (Permission $item) => [
+                'title' => $item->name,
+                'meta' => $item->slug,
+                'url' => route('admin.permissions.edit', $item),
+            ])->all();
+    }
+
     protected function maps(string $like): array
     {
         return MapSection::query()
@@ -126,6 +194,26 @@ class AdminSearchController extends Controller
                 'title' => $item->name,
                 'meta' => $item->slug,
                 'url' => route('admin.map-sections.edit', $item),
+            ])->all();
+    }
+
+    protected function mediaAssets(string $like): array
+    {
+        if (! auth()->user()?->hasPermission('media.manage')) {
+            return [];
+        }
+
+        return MediaAsset::query()
+            ->where(fn ($query) => $query
+                ->where('title', 'like', $like)
+                ->orWhere('file_name', 'like', $like)
+                ->orWhere('path', 'like', $like))
+            ->limit(8)
+            ->get()
+            ->map(fn (MediaAsset $item) => [
+                'title' => $item->title ?: $item->file_name,
+                'meta' => $item->path,
+                'url' => route('admin.media-library.index', ['q' => $item->file_name]),
             ])->all();
     }
 

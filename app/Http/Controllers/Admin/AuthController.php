@@ -23,13 +23,17 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            if (! $request->user()->is_admin) {
+            if (! $request->user()->canAccessDashboard()) {
                 Auth::logout();
 
                 return back()->withErrors([
                     'email' => 'This account is not allowed to access the admin dashboard.',
                 ]);
             }
+
+            $request->user()->forceFill([
+                'last_login_at' => now(),
+            ])->save();
 
             return redirect()->route('admin.dashboard');
         }

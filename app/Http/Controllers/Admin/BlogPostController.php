@@ -19,6 +19,13 @@ class BlogPostController extends Controller
         ]);
     }
 
+    public function trash()
+    {
+        return view('admin.blog-posts.trash', [
+            'items' => BlogPost::onlyTrashed()->with(['category', 'deletedBy'])->latest('deleted_at')->paginate(15),
+        ]);
+    }
+
     public function create()
     {
         return view('admin.blog-posts.form', [
@@ -58,11 +65,43 @@ class BlogPostController extends Controller
         return redirect()->route('admin.blog-posts.index')->with('success', 'Blog post updated.');
     }
 
+    public function duplicate(BlogPost $blog_post)
+    {
+        $copy = $blog_post->replicate();
+        $copy->title_en = trim($blog_post->title_en . ' Copy');
+        $copy->title_ar = trim($blog_post->title_ar . ' - نسخة');
+        $copy->slug = BlogPost::makeUniqueSlug(($blog_post->slug ?: $blog_post->title_en) . '-copy');
+        $copy->is_published = false;
+        $copy->is_featured = false;
+        $copy->published_at = null;
+        $copy->save();
+
+        return redirect()->route('admin.blog-posts.edit', $copy)->with('success', 'Blog post duplicated.');
+    }
+
     public function destroy(BlogPost $blog_post)
     {
+        $blog_post->forceFill(['deleted_by' => auth()->id()])->save();
         $blog_post->delete();
 
-        return back()->with('success', 'Blog post deleted.');
+        return redirect()->route('admin.blog-posts.index')->with('success', 'Blog post moved to trash.');
+    }
+
+    public function restore(int $blog_post)
+    {
+        $item = BlogPost::onlyTrashed()->findOrFail($blog_post);
+        $item->restore();
+        $item->forceFill(['deleted_by' => null])->save();
+
+        return redirect()->route('admin.blog-posts.trash')->with('success', 'Blog post restored.');
+    }
+
+    public function forceDestroy(int $blog_post)
+    {
+        $item = BlogPost::onlyTrashed()->findOrFail($blog_post);
+        $item->forceDelete();
+
+        return redirect()->route('admin.blog-posts.trash')->with('success', 'Blog post deleted permanently.');
     }
 
     protected function validatedData(Request $request, ?int $id = null): array

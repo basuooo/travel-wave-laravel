@@ -17,7 +17,7 @@
                 <input type="file" class="form-control" name="footer_logo" accept="image/*">
                 @if($setting->logoUrlFor('footer'))
                     <div class="mt-3 p-3 border rounded-4 bg-light">
-                        <img src="{{ $setting->logoUrlFor('footer') }}" alt="{{ $setting->localized('site_name') ?: 'Travel Wave' }}" class="img-fluid" style="max-height: 72px; object-fit: contain;">
+                        <img src="{{ $setting->logoUrlFor('footer') }}" alt="{{ $setting->localized('site_name') ?: 'Travel Wave' }}" class="img-fluid" style="max-height: 96px; object-fit: contain;">
                     </div>
                 @else
                     <div class="mt-3 p-3 border rounded-4 bg-light text-muted small">
@@ -34,6 +34,10 @@
             <div class="col-md-2"><label class="form-label">Heading</label><input class="form-control form-control-color w-100" type="color" name="footer_heading_color" value="{{ old('footer_heading_color', $setting->footer_heading_color ?: '#ffffff') }}"></div>
             <div class="col-md-2"><label class="form-label">Button</label><input class="form-control form-control-color w-100" type="color" name="footer_button_color" value="{{ old('footer_button_color', $setting->footer_button_color ?: '#ff8c32') }}"></div>
             <div class="col-md-3"><label class="form-label">Button Text</label><input class="form-control form-control-color w-100" type="color" name="footer_button_text_color" value="{{ old('footer_button_text_color', $setting->footer_button_text_color ?: '#ffffff') }}"></div>
+            <div class="col-md-3"><label class="form-label">Footer Logo Display Mode</label><select class="form-select" name="footer_logo_display_mode"><option value="original" @selected(old('footer_logo_display_mode', $setting->footer_logo_display_mode ?: $setting->logoDisplayModeFor('footer')) === 'original')>Original</option><option value="contain" @selected(old('footer_logo_display_mode', $setting->footer_logo_display_mode ?: $setting->logoDisplayModeFor('footer')) === 'contain')>Contain</option><option value="cover" @selected(old('footer_logo_display_mode', $setting->footer_logo_display_mode ?: $setting->logoDisplayModeFor('footer')) === 'cover')>Cover</option><option value="custom" @selected(old('footer_logo_display_mode', $setting->footer_logo_display_mode ?: $setting->logoDisplayModeFor('footer')) === 'custom')>Custom Size</option></select><div class="form-text">Original keeps the footer logo as uploaded.</div></div>
+            <div class="col-md-3"><label class="form-label">Footer Logo Width</label><input class="form-control" type="number" name="footer_logo_width" value="{{ old('footer_logo_width', $setting->footer_logo_width ?: 200) }}"><div class="form-text">Leave empty to keep the saved width or fallback to 200px.</div></div>
+            <div class="col-md-3"><label class="form-label">Footer Logo Height</label><input class="form-control" type="number" name="footer_logo_height" value="{{ old('footer_logo_height', $setting->footer_logo_height) }}"><div class="form-text">Optional. Leave empty for automatic height.</div></div>
+            <div class="col-md-3 d-flex align-items-end"><div class="form-check pb-2"><input type="hidden" name="footer_logo_keep_aspect_ratio" value="0"><input class="form-check-input" type="checkbox" name="footer_logo_keep_aspect_ratio" value="1" id="footer_logo_keep_aspect_ratio" @checked(old('footer_logo_keep_aspect_ratio', $setting->footer_logo_keep_aspect_ratio ?? true))><label class="form-check-label" for="footer_logo_keep_aspect_ratio">Keep aspect ratio</label></div></div>
             <div class="col-md-3"><label class="form-label">Footer Padding</label><input class="form-control" type="number" name="footer_vertical_padding" value="{{ old('footer_vertical_padding', $setting->footer_vertical_padding ?: 80) }}"></div>
                 </div>
             </div>
@@ -59,8 +63,12 @@
             <div class="col-md-4"><label class="form-label">WhatsApp</label><input class="form-control" name="whatsapp_number" value="{{ old('whatsapp_number', $setting->whatsapp_number) }}"></div>
             <div class="col-md-4"><label class="form-label">Facebook URL</label><input class="form-control" name="facebook_url" value="{{ old('facebook_url', $setting->facebook_url) }}"></div>
             <div class="col-md-4"><label class="form-label">Instagram URL</label><input class="form-control" name="instagram_url" value="{{ old('instagram_url', $setting->instagram_url) }}"></div>
+            <div class="col-md-4"><label class="form-label">X / Twitter URL</label><input class="form-control" name="twitter_url" value="{{ old('twitter_url', $setting->twitter_url) }}"></div>
             <div class="col-md-4"><label class="form-label">YouTube URL</label><input class="form-control" name="youtube_url" value="{{ old('youtube_url', $setting->youtube_url) }}"></div>
             <div class="col-md-4"><label class="form-label">TikTok URL</label><input class="form-control" name="tiktok_url" value="{{ old('tiktok_url', $setting->tiktok_url) }}"></div>
+            <div class="col-md-4"><label class="form-label">LinkedIn URL</label><input class="form-control" name="linkedin_url" value="{{ old('linkedin_url', $setting->linkedin_url) }}"></div>
+            <div class="col-md-4"><label class="form-label">Snapchat URL</label><input class="form-control" name="snapchat_url" value="{{ old('snapchat_url', $setting->snapchat_url) }}"></div>
+            <div class="col-md-4"><label class="form-label">Telegram URL</label><input class="form-control" name="telegram_url" value="{{ old('telegram_url', $setting->telegram_url) }}"></div>
             <div class="col-md-6"><label class="form-label">Address EN</label><textarea class="form-control" name="address_en" rows="3">{{ old('address_en', $setting->address_en) }}</textarea></div>
             <div class="col-md-6"><label class="form-label">Address AR</label><textarea class="form-control text-end" dir="rtl" name="address_ar" rows="3">{{ old('address_ar', $setting->address_ar) }}</textarea></div>
         </div>

@@ -20,10 +20,21 @@ class Setting extends Model
         'site_tagline_en',
         'site_tagline_ar',
         'logo_path',
+        'header_logo_path',
         'footer_logo_path',
         'logo_width',
         'logo_height',
+        'logo_keep_aspect_ratio',
         'mobile_logo_width',
+        'header_logo_width',
+        'header_logo_height',
+        'header_logo_keep_aspect_ratio',
+        'header_mobile_logo_width',
+        'header_logo_display_mode',
+        'footer_logo_width',
+        'footer_logo_height',
+        'footer_logo_keep_aspect_ratio',
+        'footer_logo_display_mode',
         'favicon_path',
         'contact_email',
         'phone',
@@ -36,7 +47,11 @@ class Setting extends Model
         'map_iframe',
         'facebook_url',
         'instagram_url',
+        'twitter_url',
         'youtube_url',
+        'linkedin_url',
+        'snapchat_url',
+        'telegram_url',
         'tiktok_url',
         'footer_text_en',
         'footer_text_ar',
@@ -126,7 +141,15 @@ class Setting extends Model
         'hero_slider_overlay_opacity' => 'float',
         'logo_width' => 'integer',
         'logo_height' => 'integer',
+        'logo_keep_aspect_ratio' => 'boolean',
         'mobile_logo_width' => 'integer',
+        'header_logo_width' => 'integer',
+        'header_logo_height' => 'integer',
+        'header_logo_keep_aspect_ratio' => 'boolean',
+        'header_mobile_logo_width' => 'integer',
+        'footer_logo_width' => 'integer',
+        'footer_logo_height' => 'integer',
+        'footer_logo_keep_aspect_ratio' => 'boolean',
         'header_logo_enabled' => 'boolean',
         'header_is_sticky' => 'boolean',
         'header_vertical_padding' => 'integer',
@@ -151,8 +174,8 @@ class Setting extends Model
     public function logoPathFor(string $variant = 'header'): ?string
     {
         return match ($variant) {
-            'footer' => $this->footer_logo_path ?: $this->logo_path,
-            default => $this->logo_path,
+            'footer' => $this->footer_logo_path ?: $this->header_logo_path ?: $this->logo_path,
+            default => $this->header_logo_path ?: $this->logo_path,
         };
     }
 
@@ -193,6 +216,58 @@ class Setting extends Model
         return '/storage/' . $path . '?v=' . ($this->updated_at?->timestamp ?: time());
     }
 
+    public function logoWidthFor(string $variant = 'header'): int
+    {
+        return match ($variant) {
+            'mobile' => (int) ($this->header_mobile_logo_width ?: $this->mobile_logo_width ?: $this->header_logo_width ?: $this->logo_width ?: 168),
+            'footer' => (int) ($this->footer_logo_width ?: 200),
+            default => (int) ($this->header_logo_width ?: $this->logo_width ?: 220),
+        };
+    }
+
+    public function logoHeightFor(string $variant = 'header'): ?int
+    {
+        return match ($variant) {
+            'footer' => $this->footer_logo_height ?: null,
+            default => $this->header_logo_height ?: $this->logo_height ?: null,
+        };
+    }
+
+    public function logoKeepsAspectRatio(string $variant = 'header'): bool
+    {
+        return match ($variant) {
+            'footer' => $this->footer_logo_keep_aspect_ratio ?? true,
+            default => $this->header_logo_keep_aspect_ratio ?? $this->logo_keep_aspect_ratio ?? true,
+        };
+    }
+
+    public function logoDisplayModeFor(string $variant = 'header'): string
+    {
+        $mode = match ($variant) {
+            'footer' => $this->footer_logo_display_mode,
+            default => $this->header_logo_display_mode,
+        };
+
+        $allowed = ['original', 'contain', 'cover', 'custom'];
+
+        if (is_string($mode) && in_array($mode, $allowed, true)) {
+            return $mode;
+        }
+
+        // Backward compatibility: old configured dimensions imply custom rendering.
+        if ($variant === 'footer') {
+            if ($this->footer_logo_width || $this->footer_logo_height) {
+                return 'custom';
+            }
+        } else {
+            if ($this->header_logo_width || $this->header_logo_height || $this->header_mobile_logo_width) {
+                return 'custom';
+            }
+        }
+
+        return 'original';
+    }
+
     public function floatingWhatsappMessage(): ?string
     {
         return $this->localized('floating_whatsapp_message')
@@ -222,6 +297,51 @@ class Setting extends Model
         $message = trim((string) $this->floatingWhatsappMessage());
 
         return 'https://wa.me/' . $number . ($message !== '' ? '?text=' . rawurlencode($message) : '');
+    }
+
+    public function whatsappNumberNormalized(?string $number = null): ?string
+    {
+        $number = preg_replace('/\D+/', '', (string) ($number ?? $this->whatsapp_number));
+
+        return $number !== '' ? $number : null;
+    }
+
+    public function whatsappChatUrl(?string $number = null, ?string $message = null): ?string
+    {
+        $normalized = $this->whatsappNumberNormalized($number);
+
+        if (! $normalized) {
+            return null;
+        }
+
+        $message = trim((string) ($message ?? ''));
+
+        return 'https://wa.me/' . $normalized . ($message !== '' ? '?text=' . rawurlencode($message) : '');
+    }
+
+    public function normalizedPhoneNumber(?string $number = null): ?string
+    {
+        $value = trim((string) ($number ?? $this->phone));
+
+        if ($value === '') {
+            return null;
+        }
+
+        $hasPlus = str_starts_with($value, '+');
+        $digits = preg_replace('/\D+/', '', $value);
+
+        if ($digits === '') {
+            return null;
+        }
+
+        return $hasPlus ? '+' . $digits : $digits;
+    }
+
+    public function phoneCallUrl(?string $number = null): ?string
+    {
+        $normalized = $this->normalizedPhoneNumber($number);
+
+        return $normalized ? 'tel:' . $normalized : null;
     }
 
     public function metaPixelId(): ?string

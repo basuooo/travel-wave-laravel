@@ -5,11 +5,15 @@ namespace App\Models;
 use App\Support\HasLocalizedContent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Destination extends Model
 {
     use HasFactory;
     use HasLocalizedContent;
+    use SoftDeletes;
 
     protected $fillable = [
         'title_en',
@@ -158,7 +162,35 @@ class Destination extends Model
         'show_form' => 'boolean',
         'is_featured' => 'boolean',
         'is_active' => 'boolean',
+        'deleted_at' => 'datetime',
     ];
+
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    public function frontendUrl(): ?string
+    {
+        return ($this->is_active && ! $this->trashed()) ? route('destinations.show', $this) : null;
+    }
+
+    public static function makeUniqueSlug(string $base, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($base) ?: 'destination';
+        $candidate = $base;
+        $counter = 2;
+
+        while (static::query()->withTrashed()
+            ->when($ignoreId, fn ($query) => $query->whereKeyNot($ignoreId))
+            ->where('slug', $candidate)
+            ->exists()) {
+            $candidate = $base . '-' . $counter;
+            $counter++;
+        }
+
+        return $candidate;
+    }
 
     public function repeaterValue(array $item, string $field, ?string $locale = null, mixed $fallback = ''): mixed
     {

@@ -15,6 +15,13 @@ class BlogCategoryController extends Controller
         ]);
     }
 
+    public function trash()
+    {
+        return view('admin.blog-categories.trash', [
+            'items' => BlogCategory::onlyTrashed()->with('deletedBy')->orderByDesc('deleted_at')->paginate(15),
+        ]);
+    }
+
     public function create()
     {
         return view('admin.blog-categories.form', ['item' => new BlogCategory()]);
@@ -44,11 +51,41 @@ class BlogCategoryController extends Controller
         return redirect()->route('admin.blog-categories.index')->with('success', 'Blog category updated.');
     }
 
+    public function duplicate(BlogCategory $blog_category)
+    {
+        $copy = $blog_category->replicate();
+        $copy->name_en = trim($blog_category->name_en . ' Copy');
+        $copy->name_ar = trim($blog_category->name_ar . ' - نسخة');
+        $copy->slug = BlogCategory::makeUniqueSlug(($blog_category->slug ?: $blog_category->name_en) . '-copy');
+        $copy->is_active = false;
+        $copy->save();
+
+        return redirect()->route('admin.blog-categories.edit', $copy)->with('success', 'Blog category duplicated.');
+    }
+
     public function destroy(BlogCategory $blog_category)
     {
+        $blog_category->forceFill(['deleted_by' => auth()->id()])->save();
         $blog_category->delete();
 
-        return back()->with('success', 'Blog category deleted.');
+        return redirect()->route('admin.blog-categories.index')->with('success', 'Blog category moved to trash.');
+    }
+
+    public function restore(int $blog_category)
+    {
+        $item = BlogCategory::onlyTrashed()->findOrFail($blog_category);
+        $item->restore();
+        $item->forceFill(['deleted_by' => null])->save();
+
+        return redirect()->route('admin.blog-categories.trash')->with('success', 'Blog category restored.');
+    }
+
+    public function forceDestroy(int $blog_category)
+    {
+        $item = BlogCategory::onlyTrashed()->findOrFail($blog_category);
+        $item->forceDelete();
+
+        return redirect()->route('admin.blog-categories.trash')->with('success', 'Blog category deleted permanently.');
     }
 
     protected function validatedData(Request $request, ?int $id = null): array

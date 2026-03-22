@@ -21,6 +21,17 @@ class HomeCountryStripController extends Controller
         ]);
     }
 
+    public function trash()
+    {
+        return view('admin.home-country-strip.trash', [
+            'items' => HomeCountryStripItem::onlyTrashed()
+                ->with(['visaCountry', 'deletedBy'])
+                ->orderByDesc('deleted_at')
+                ->orderBy('sort_order')
+                ->get(),
+        ]);
+    }
+
     public function create()
     {
         return view('admin.home-country-strip.form', [
@@ -63,11 +74,49 @@ class HomeCountryStripController extends Controller
         return redirect()->route('admin.home-country-strip.index')->with('success', 'Homepage country item updated.');
     }
 
+    public function duplicate(HomeCountryStripItem $home_country_strip)
+    {
+        $copy = $home_country_strip->replicate();
+        $copy->name_en = trim(($home_country_strip->name_en ?: $home_country_strip->displayName('en')) . ' Copy');
+        $copy->name_ar = trim(($home_country_strip->name_ar ?: $home_country_strip->displayName('ar')) . ' - نسخة');
+        $copy->is_active = false;
+        $copy->show_on_homepage = false;
+        $copy->sort_order = ((int) HomeCountryStripItem::withTrashed()->max('sort_order')) + 1;
+        $copy->deleted_at = null;
+        $copy->deleted_by = null;
+        $copy->save();
+
+        return redirect()->route('admin.home-country-strip.edit', $copy)->with('success', 'Homepage country item duplicated.');
+    }
+
     public function destroy(HomeCountryStripItem $home_country_strip)
     {
+        $home_country_strip->forceFill([
+            'deleted_by' => auth()->id(),
+        ])->save();
+
         $home_country_strip->delete();
 
-        return back()->with('success', 'Homepage country item deleted.');
+        return redirect()->route('admin.home-country-strip.index')->with('success', 'Homepage country item moved to trash.');
+    }
+
+    public function restore(int $home_country_strip)
+    {
+        $item = HomeCountryStripItem::onlyTrashed()->findOrFail($home_country_strip);
+        $item->restore();
+        $item->forceFill([
+            'deleted_by' => null,
+        ])->save();
+
+        return redirect()->route('admin.home-country-strip.trash')->with('success', 'Homepage country item restored.');
+    }
+
+    public function forceDestroy(int $home_country_strip)
+    {
+        $item = HomeCountryStripItem::onlyTrashed()->findOrFail($home_country_strip);
+        $item->forceDelete();
+
+        return redirect()->route('admin.home-country-strip.trash')->with('success', 'Homepage country item deleted permanently.');
     }
 
     public function updateSettings(Request $request)

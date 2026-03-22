@@ -5,11 +5,14 @@ namespace App\Models;
 use App\Support\HasLocalizedContent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class HomeCountryStripItem extends Model
 {
     use HasFactory;
     use HasLocalizedContent;
+    use SoftDeletes;
 
     protected $fillable = [
         'visa_country_id',
@@ -23,20 +26,31 @@ class HomeCountryStripItem extends Model
         'sort_order',
         'is_active',
         'show_on_homepage',
+        'deleted_by',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'show_on_homepage' => 'boolean',
+        'deleted_at' => 'datetime',
     ];
 
-    public function visaCountry()
+    public function visaCountry(): BelongsTo
     {
         return $this->belongsTo(VisaCountry::class, 'visa_country_id');
     }
 
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
     public function resolvedUrl(): string
     {
+        if ($this->trashed()) {
+            return '#';
+        }
+
         if ($this->visaCountry) {
             return route('visas.country', $this->visaCountry);
         }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\HandlesCmsData;
 use App\Http\Controllers\Controller;
 use App\Models\Page;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PageController extends Controller
 {
@@ -14,8 +15,44 @@ class PageController extends Controller
     public function index()
     {
         return view('admin.pages.index', [
-            'pages' => Page::orderBy('key')->get(),
+            'pages' => Page::query()->orderByDesc('is_active')->orderBy('key')->orderBy('title_en')->get(),
         ]);
+    }
+
+    public function trash()
+    {
+        return view('admin.pages.trash', [
+            'pages' => Page::onlyTrashed()
+                ->with('deletedBy')
+                ->orderByDesc('deleted_at')
+                ->orderBy('title_en')
+                ->get(),
+        ]);
+    }
+
+    public function create()
+    {
+        return view('admin.pages.create', [
+            'page' => new Page([
+                'is_active' => false,
+            ]),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $this->validatedData($request);
+        $data['key'] = filled($data['key'] ?? null)
+            ? trim((string) $data['key'])
+            : $this->makeUniqueKey($data['slug'] ?: $data['title_en']);
+        $data['slug'] = Page::makeUniqueSlug($data['slug'] ?: $data['title_en']);
+        $data['hero_image'] = $this->uploadFile($request, 'hero_image', 'pages');
+        $data['sections'] = $this->pageSectionsFromRequest($request, $data['key'], []);
+        $data['is_active'] = $request->boolean('is_active', false);
+
+        $page = Page::query()->create($data);
+
+        return redirect()->route('admin.pages.edit', $page)->with('success', 'Page created successfully.');
     }
 
     public function edit(Page $page)
@@ -25,10 +62,73 @@ class PageController extends Controller
 
     public function update(Request $request, Page $page)
     {
-        $data = $request->validate([
+        $data = $this->validatedData($request, $page);
+
+        $data['hero_image'] = $this->uploadFile($request, 'hero_image', 'pages', $page->hero_image);
+        $data['key'] = $page->isCorePage()
+            ? $page->key
+            : (filled($data['key'] ?? null)
+                ? trim((string) $data['key'])
+                : $this->makeUniqueKey($data['slug'] ?: $data['title_en'], $page->id));
+        $data['slug'] = Page::makeUniqueSlug($data['slug'] ?: $data['title_en'], $page->id);
+        $data['sections'] = $this->pageSectionsFromRequest($request, $data['key'], $page->sections ?? []);
+        $data['is_active'] = $request->boolean('is_active', true);
+
+        $page->update($data);
+
+        return back()->with('success', 'Page content updated successfully.');
+    }
+
+    public function duplicate(Page $page)
+    {
+        $copy = $page->replicate();
+        $copy->key = $this->makeUniqueKey($page->key . '_copy');
+        $copy->slug = Page::makeUniqueSlug(($page->slug ?: $page->key) . '-copy');
+        $copy->title_en = trim($page->title_en . ' Copy');
+        $copy->title_ar = trim($page->title_ar . ' - نسخة');
+        $copy->is_active = false;
+        $copy->save();
+
+        return redirect()->route('admin.pages.edit', $copy)->with('success', 'Page duplicated successfully.');
+    }
+
+    public function destroy(Page $page)
+    {
+        $page->forceFill([
+            'deleted_by' => $this->guardedAdminUser()?->id,
+        ])->save();
+
+        $page->delete();
+
+        return redirect()->route('admin.pages.index')->with('success', 'Page moved to trash successfully.');
+    }
+
+    public function restore(int $page)
+    {
+        $page = Page::onlyTrashed()->findOrFail($page);
+        $page->restore();
+        $page->forceFill([
+            'deleted_by' => null,
+        ])->save();
+
+        return redirect()->route('admin.pages.trash')->with('success', 'Page restored successfully.');
+    }
+
+    public function forceDestroy(int $page)
+    {
+        $page = Page::onlyTrashed()->findOrFail($page);
+        $page->forceDelete();
+
+        return redirect()->route('admin.pages.trash')->with('success', 'Page deleted permanently.');
+    }
+
+    protected function validatedData(Request $request, ?Page $page = null): array
+    {
+        return $request->validate([
+            'key' => ['nullable', 'string', 'max:255', 'alpha_dash', 'unique:pages,key' . ($page ? ',' . $page->id : '')],
             'title_en' => ['required', 'string', 'max:255'],
             'title_ar' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', 'unique:pages,slug,' . $page->id],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:pages,slug' . ($page ? ',' . $page->id : '')],
             'hero_badge_en' => ['nullable', 'string', 'max:255'],
             'hero_badge_ar' => ['nullable', 'string', 'max:255'],
             'hero_title_en' => ['nullable', 'string', 'max:255'],
@@ -51,14 +151,33 @@ class PageController extends Controller
             'meta_description_ar' => ['nullable', 'string'],
             'hero_image' => ['nullable', 'image'],
         ]);
+    }
 
-        $data['hero_image'] = $this->uploadFile($request, 'hero_image', 'pages', $page->hero_image);
-        $data['sections'] = $this->pageSectionsFromRequest($request, $page->key, $page->sections ?? []);
-        $data['is_active'] = $request->boolean('is_active', true);
+    protected function makeUniqueKey(string $value, ?int $ignoreId = null): string
+    {
+        $base = Str::of(trim($value))
+            ->lower()
+            ->replace(['-', ' '], '_')
+            ->snake()
+            ->value() ?: 'page';
+        $candidate = $base;
+        $counter = 2;
 
-        $page->update($data);
+        while (Page::query()
+            ->withTrashed()
+            ->when($ignoreId, fn ($query) => $query->whereKeyNot($ignoreId))
+            ->where('key', $candidate)
+            ->exists()) {
+            $candidate = $base . '_' . $counter;
+            $counter++;
+        }
 
-        return back()->with('success', 'Page content updated successfully.');
+        return $candidate;
+    }
+
+    protected function guardedAdminUser()
+    {
+        return auth()->user();
     }
 
     protected function pageSectionsFromRequest(Request $request, string $key, array $existing): array
