@@ -83,9 +83,11 @@ class TrackingIntegrationController extends Controller
             'item' => $item,
             'isEdit' => $isEdit,
             'typeOptions' => TrackingManager::integrationTypeOptions(),
+            'typeGroups' => TrackingManager::toolGroupOptions(),
             'placementOptions' => TrackingManager::placementOptions(),
             'visibilityModes' => TrackingManager::visibilityModeOptions(),
             'visibilityTargets' => TrackingManager::visibilityTargetOptions(),
+            'toolFieldConfig' => $this->toolFieldConfig(),
         ];
     }
 
@@ -98,6 +100,9 @@ class TrackingIntegrationController extends Controller
             'platform' => ['nullable', 'string', 'max:100'],
             'tracking_code' => ['nullable', 'string', 'max:255'],
             'script_code' => ['nullable', 'string'],
+            'settings' => ['array'],
+            'settings.conversion_label' => ['nullable', 'string', 'max:255'],
+            'settings.notes' => ['nullable', 'string'],
             'placement' => ['required', Rule::in(array_keys(TrackingManager::placementOptions()))],
             'notes' => ['nullable', 'string'],
             'visibility_mode' => ['required', Rule::in(array_keys(TrackingManager::visibilityModeOptions()))],
@@ -115,6 +120,7 @@ class TrackingIntegrationController extends Controller
             'platform' => $validated['platform'] ?? null,
             'tracking_code' => filled($validated['tracking_code'] ?? null) ? trim($validated['tracking_code']) : null,
             'script_code' => filled($validated['script_code'] ?? null) ? trim($validated['script_code']) : null,
+            'settings' => $this->normalizedSettings($request->input('settings', []), $validated['integration_type']),
             'placement' => $validated['placement'],
             'notes' => $validated['notes'] ?? null,
             'visibility_mode' => $validated['visibility_mode'],
@@ -129,8 +135,20 @@ class TrackingIntegrationController extends Controller
         $type = $validated['integration_type'];
         $code = trim((string) ($validated['tracking_code'] ?? ''));
         $script = trim((string) ($validated['script_code'] ?? ''));
+        $conversionLabel = trim((string) data_get($validated, 'settings.conversion_label', ''));
 
-        if (in_array($type, [TrackingIntegration::TYPE_GTM, TrackingIntegration::TYPE_GA4, TrackingIntegration::TYPE_META_PIXEL], true) && $code === '') {
+        if (in_array($type, [
+            TrackingIntegration::TYPE_GTM,
+            TrackingIntegration::TYPE_GA4,
+            TrackingIntegration::TYPE_META_PIXEL,
+            TrackingIntegration::TYPE_TIKTOK_PIXEL,
+            TrackingIntegration::TYPE_SNAP_PIXEL,
+            TrackingIntegration::TYPE_X_PIXEL,
+            TrackingIntegration::TYPE_LINKEDIN_INSIGHT,
+            TrackingIntegration::TYPE_PINTEREST_TAG,
+            TrackingIntegration::TYPE_GOOGLE_ADS,
+            TrackingIntegration::TYPE_MICROSOFT_CLARITY,
+        ], true) && $code === '') {
             throw ValidationException::withMessages([
                 'tracking_code' => [__('validation.required', ['attribute' => 'tracking code'])],
             ]);
@@ -159,6 +177,101 @@ class TrackingIntegrationController extends Controller
                 'tracking_code' => [__('admin.validation_meta_pixel')],
             ]);
         }
+
+        if (in_array($type, [
+            TrackingIntegration::TYPE_TIKTOK_PIXEL,
+            TrackingIntegration::TYPE_SNAP_PIXEL,
+            TrackingIntegration::TYPE_X_PIXEL,
+            TrackingIntegration::TYPE_LINKEDIN_INSIGHT,
+            TrackingIntegration::TYPE_PINTEREST_TAG,
+            TrackingIntegration::TYPE_MICROSOFT_CLARITY,
+        ], true) && $code !== '' && ! preg_match('/^[A-Za-z0-9\-_]+$/', $code)) {
+            throw ValidationException::withMessages([
+                'tracking_code' => [__('admin.validation_tracking_generic')],
+            ]);
+        }
+
+        if ($type === TrackingIntegration::TYPE_GOOGLE_ADS && $code !== '' && ! preg_match('/^(AW-)?[0-9]+$/', $code)) {
+            throw ValidationException::withMessages([
+                'tracking_code' => [__('admin.validation_google_ads')],
+            ]);
+        }
+
+        if ($type === TrackingIntegration::TYPE_GOOGLE_ADS && $conversionLabel !== '' && ! preg_match('/^[A-Za-z0-9\-_]+$/', $conversionLabel)) {
+            throw ValidationException::withMessages([
+                'settings.conversion_label' => [__('admin.validation_conversion_label')],
+            ]);
+        }
+    }
+
+    protected function normalizedSettings(array $settings, string $type): ?array
+    {
+        $normalized = collect($settings)
+            ->map(fn ($value) => is_string($value) ? trim($value) : $value)
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->all();
+
+        if ($type !== TrackingIntegration::TYPE_GOOGLE_ADS) {
+            unset($normalized['conversion_label']);
+        }
+
+        return $normalized ?: null;
+    }
+
+    protected function toolFieldConfig(): array
+    {
+        return [
+            TrackingIntegration::TYPE_GTM => [
+                'tracking_code_label' => __('admin.gtm_container_id'),
+                'tracking_code_placeholder' => 'GTM-XXXXXXX',
+            ],
+            TrackingIntegration::TYPE_GA4 => [
+                'tracking_code_label' => __('admin.ga4_measurement_id'),
+                'tracking_code_placeholder' => 'G-XXXXXXXXXX',
+            ],
+            TrackingIntegration::TYPE_META_PIXEL => [
+                'tracking_code_label' => __('admin.meta_pixel_id'),
+                'tracking_code_placeholder' => '123456789012345',
+            ],
+            TrackingIntegration::TYPE_TIKTOK_PIXEL => [
+                'tracking_code_label' => __('admin.tiktok_pixel_id'),
+                'tracking_code_placeholder' => 'C123ABC456DEF',
+            ],
+            TrackingIntegration::TYPE_SNAP_PIXEL => [
+                'tracking_code_label' => __('admin.snap_pixel_id'),
+                'tracking_code_placeholder' => '11111111-2222-3333-4444-555555555555',
+            ],
+            TrackingIntegration::TYPE_X_PIXEL => [
+                'tracking_code_label' => __('admin.x_pixel_id'),
+                'tracking_code_placeholder' => 'oel66',
+            ],
+            TrackingIntegration::TYPE_LINKEDIN_INSIGHT => [
+                'tracking_code_label' => __('admin.linkedin_partner_id'),
+                'tracking_code_placeholder' => '1234567',
+            ],
+            TrackingIntegration::TYPE_PINTEREST_TAG => [
+                'tracking_code_label' => __('admin.pinterest_tag_id'),
+                'tracking_code_placeholder' => '2612345678901',
+            ],
+            TrackingIntegration::TYPE_GOOGLE_ADS => [
+                'tracking_code_label' => __('admin.google_ads_conversion_id'),
+                'tracking_code_placeholder' => 'AW-123456789',
+                'extra_fields' => [
+                    'conversion_label' => [
+                        'label' => __('admin.google_ads_conversion_label'),
+                        'placeholder' => 'AbCdEFgHiJkLmNoP',
+                    ],
+                ],
+            ],
+            TrackingIntegration::TYPE_MICROSOFT_CLARITY => [
+                'tracking_code_label' => __('admin.microsoft_clarity_project_id'),
+                'tracking_code_placeholder' => 'abcd1234ef',
+            ],
+            TrackingIntegration::TYPE_CUSTOM_SCRIPT => [
+                'tracking_code_label' => __('admin.tracking_code'),
+                'tracking_code_placeholder' => __('admin.optional_code_reference'),
+            ],
+        ];
     }
 
     protected function uniqueSlug(string $base): string

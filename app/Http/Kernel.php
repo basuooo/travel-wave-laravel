@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin' => \App\Http\Middleware\EnsureAdmin::class,
         'permission' => \App\Http\Middleware\EnsurePermission::class,
+        'crm.followups.dispatch' => \App\Http\Middleware\DispatchCrmFollowUpReminders::class,
     ];
 }

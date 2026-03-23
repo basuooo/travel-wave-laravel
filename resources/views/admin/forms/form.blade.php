@@ -131,7 +131,7 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h2 class="h5 mb-1">Dynamic Fields</h2>
-                <p class="text-muted mb-0">Add, reorder, and control the fields shown in this form.</p>
+                <p class="text-muted mb-0">Add, reorder, and control the fields shown in this form. Each field can be enabled or hidden, required or optional, with its own label, placeholder, and validation behavior.</p>
             </div>
             <button type="button" class="btn btn-outline-primary btn-sm" id="add-form-field">Add Field</button>
         </div>

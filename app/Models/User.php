@@ -139,4 +139,9 @@ class User extends Authenticatable
 
         $this->permissionOverrides()->sync($payload);
     }
+
+    public function assignedLeads()
+    {
+        return $this->hasMany(Inquiry::class, 'assigned_user_id');
+    }
 }

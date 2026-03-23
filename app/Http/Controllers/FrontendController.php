@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use App\Models\CrmLeadSource;
+use App\Models\CrmStatus;
 use App\Models\Destination;
 use App\Models\HeroSlide;
 use App\Models\HomeCountryStripItem;
@@ -22,6 +24,7 @@ use App\Support\MapSectionManager;
 use App\Support\MetaConversionApiService;
 use App\Support\TrackingManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class FrontendController extends Controller
@@ -336,6 +339,17 @@ class FrontendController extends Controller
             'preferred_language' => $data['preferred_language'] ?? app()->getLocale(),
             'submitted_data' => $submittedData ?: null,
             'status' => 'new',
+            'country' => $data['nationality'] ?? null,
+            'crm_status_id' => $this->defaultCrmStatusId(),
+            'crm_source_id' => $this->resolveLeadSourceId($request, $data['type'] ?? null),
+            'crm_status_updated_at' => now(),
+            'crm_status_updated_by' => null,
+            'status_1_updated_at' => now(),
+            'lead_source' => $this->resolveLeadSource($request, $data['type'] ?? null),
+            'campaign_name' => $request->input('utm_campaign'),
+            'utm_source' => $request->input('utm_source'),
+            'utm_campaign' => $request->input('utm_campaign'),
+            'priority' => 'normal',
         ]);
 
         if (! empty($data['marketing_landing_page_id'])) {
@@ -396,6 +410,28 @@ class FrontendController extends Controller
         }
 
         $submittedData = $request->validate($fieldRules);
+        $country = $submittedData['country']
+            ?? $submittedData['nationality']
+            ?? $submittedData['from']
+            ?? null;
+        $destination = $submittedData['destination']
+            ?? $submittedData['country']
+            ?? $submittedData['to']
+            ?? null;
+        $serviceType = $submittedData['service_type']
+            ?? $submittedData['visa_type']
+            ?? null;
+        $travelDate = $submittedData['travel_date']
+            ?? $submittedData['departure_date']
+            ?? $submittedData['check_in_date']
+            ?? null;
+        $returnDate = $submittedData['return_date']
+            ?? $submittedData['check_out_date']
+            ?? null;
+        $travelersCount = $submittedData['travelers_count']
+            ?? $submittedData['number_of_travelers']
+            ?? $submittedData['number_of_guests']
+            ?? null;
 
         $inquiry = Inquiry::create([
             'lead_form_id' => $form->id,
@@ -406,13 +442,15 @@ class FrontendController extends Controller
             'form_category' => $form->form_category,
             'full_name' => $submittedData['full_name'] ?? null,
             'phone' => $submittedData['phone'] ?? null,
+            'whatsapp_number' => $submittedData['whatsapp_number'] ?? ($submittedData['phone'] ?? null),
             'email' => $submittedData['email'] ?? null,
             'nationality' => $submittedData['nationality'] ?? ($submittedData['from'] ?? null),
-            'destination' => $submittedData['destination'] ?? ($submittedData['country'] ?? ($submittedData['to'] ?? null)),
-            'service_type' => $submittedData['service_type'] ?? ($submittedData['visa_type'] ?? null),
-            'travel_date' => $submittedData['travel_date'] ?? ($submittedData['departure_date'] ?? ($submittedData['check_in_date'] ?? null)),
-            'return_date' => $submittedData['return_date'] ?? ($submittedData['check_out_date'] ?? null),
-            'travelers_count' => $submittedData['travelers_count'] ?? ($submittedData['number_of_travelers'] ?? ($submittedData['number_of_guests'] ?? null)),
+            'country' => $country,
+            'destination' => $destination,
+            'service_type' => $serviceType,
+            'travel_date' => $travelDate,
+            'return_date' => $returnDate,
+            'travelers_count' => $travelersCount,
             'nights_count' => $submittedData['nights_count'] ?? ($submittedData['number_of_nights'] ?? null),
             'accommodation_type' => $submittedData['accommodation_type'] ?? ($submittedData['number_of_rooms'] ?? null),
             'preferred_language' => $meta['preferred_language'] ?? app()->getLocale(),
@@ -421,6 +459,16 @@ class FrontendController extends Controller
             'message' => $submittedData['message'] ?? ($submittedData['your_message'] ?? ($submittedData['subject'] ?? null)),
             'submitted_data' => $submittedData,
             'status' => 'new',
+            'crm_status_id' => $this->defaultCrmStatusId(),
+            'crm_source_id' => $this->resolveLeadSourceId($request, $meta['type'] ?? ($form->form_category ?: 'general')),
+            'crm_status_updated_at' => now(),
+            'crm_status_updated_by' => null,
+            'status_1_updated_at' => now(),
+            'lead_source' => $this->resolveLeadSource($request, $meta['type'] ?? ($form->form_category ?: 'general')),
+            'campaign_name' => $request->input('utm_campaign'),
+            'utm_source' => $request->input('utm_source'),
+            'utm_campaign' => $request->input('utm_campaign'),
+            'priority' => 'normal',
         ]);
 
         if (! empty($meta['marketing_landing_page_id'])) {
@@ -464,6 +512,41 @@ class FrontendController extends Controller
         };
     }
 
+    protected function defaultCrmStatusId(): ?int
+    {
+        return CrmStatus::query()
+            ->where('slug', 'new-lead')
+            ->value('id');
+    }
+
+    protected function resolveLeadSource(Request $request, ?string $fallback = null): ?string
+    {
+        return Arr::first([
+            $request->input('utm_source'),
+            $request->input('source'),
+            $request->input('traffic_source'),
+            $fallback,
+            $request->headers->get('referer') ? 'referral' : null,
+            'website',
+        ], fn ($value) => filled($value));
+    }
+
+    protected function resolveLeadSourceId(Request $request, ?string $fallback = null): ?int
+    {
+        $label = $this->resolveLeadSource($request, $fallback);
+
+        if (! filled($label)) {
+            return null;
+        }
+
+        $normalized = mb_strtolower(trim((string) $label));
+
+        return CrmLeadSource::query()
+            ->whereRaw('LOWER(name_en) = ?', [$normalized])
+            ->orWhereRaw('LOWER(name_ar) = ?', [$normalized])
+            ->value('id');
+    }
+
     protected function sendMetaConversionEvent(Request $request, string $eventName, array $payload = []): bool
     {
         return app(MetaConversionApiService::class)->track($eventName, $request, [
@@ -477,14 +560,14 @@ class FrontendController extends Controller
     protected function rulesForManagedField(string $type, ?string $customRule, bool $required, array $options = []): array
     {
         if ($customRule) {
-            $rules = array_map('trim', explode('|', $customRule));
-            if ($required && !in_array('required', $rules, true)) {
-                array_unshift($rules, 'required');
-            }
+            $rules = collect(explode('|', $customRule))
+                ->map(fn ($rule) => trim((string) $rule))
+                ->filter()
+                ->reject(fn ($rule) => in_array($rule, ['required', 'nullable', 'present', 'sometimes'], true))
+                ->values()
+                ->all();
 
-            if (!$required && !in_array('nullable', $rules, true) && !in_array('required', $rules, true)) {
-                array_unshift($rules, 'nullable');
-            }
+            array_unshift($rules, $required ? 'required' : 'nullable');
 
             return $rules;
         }

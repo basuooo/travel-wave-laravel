@@ -131,6 +131,19 @@ class Setting extends Model
         'meta_conversion_api_access_token',
         'meta_conversion_api_test_event_code',
         'meta_conversion_api_default_event_source_url',
+        'chatbot_enabled',
+        'chatbot_bot_name_en',
+        'chatbot_bot_name_ar',
+        'chatbot_welcome_message_en',
+        'chatbot_welcome_message_ar',
+        'chatbot_fallback_message_en',
+        'chatbot_fallback_message_ar',
+        'chatbot_primary_language',
+        'chatbot_suggested_questions_en',
+        'chatbot_suggested_questions_ar',
+        'chatbot_show_whatsapp_handoff',
+        'chatbot_show_contact_handoff',
+        'chatbot_content_sources',
     ];
 
     protected $casts = [
@@ -169,6 +182,12 @@ class Setting extends Model
         'floating_whatsapp_show_mobile' => 'boolean',
         'floating_whatsapp_visibility_targets' => 'array',
         'meta_conversion_api_enabled' => 'boolean',
+        'chatbot_enabled' => 'boolean',
+        'chatbot_suggested_questions_en' => 'array',
+        'chatbot_suggested_questions_ar' => 'array',
+        'chatbot_show_whatsapp_handoff' => 'boolean',
+        'chatbot_show_contact_handoff' => 'boolean',
+        'chatbot_content_sources' => 'array',
     ];
 
     public function logoPathFor(string $variant = 'header'): ?string
@@ -460,5 +479,60 @@ class Setting extends Model
             'domestic-destinations' => ($context['destination_type'] ?? null) === 'domestic',
             default => false,
         };
+    }
+
+    public function chatbotBotName(): string
+    {
+        return (string) ($this->localized('chatbot_bot_name') ?: 'Travel Wave AI');
+    }
+
+    public function chatbotWelcomeMessage(): string
+    {
+        return (string) ($this->localized('chatbot_welcome_message')
+            ?: __('ui.chatbot_default_welcome'));
+    }
+
+    public function chatbotFallbackMessage(): string
+    {
+        return (string) ($this->localized('chatbot_fallback_message')
+            ?: __('ui.chatbot_default_fallback'));
+    }
+
+    public function chatbotSuggestedQuestions(): array
+    {
+        $locale = app()->getLocale();
+        $field = "chatbot_suggested_questions_{$locale}";
+        $fallbackField = 'chatbot_suggested_questions_' . config('app.fallback_locale', 'en');
+        $questions = $this->{$field} ?? $this->{$fallbackField} ?? null;
+
+        if (is_array($questions) && ! empty($questions)) {
+            return collect($questions)->filter(fn ($item) => filled($item))->values()->all();
+        }
+
+        return [
+            __('ui.chatbot_suggested_1'),
+            __('ui.chatbot_suggested_2'),
+            __('ui.chatbot_suggested_3'),
+        ];
+    }
+
+    public function chatbotContentSources(): array
+    {
+        $sources = collect($this->chatbot_content_sources ?: [])->filter()->values()->all();
+
+        return $sources !== [] ? $sources : [
+            'pages',
+            'service_pages',
+            'visa_countries',
+            'destinations',
+            'faqs',
+            'blog_posts',
+            'contact_details',
+        ];
+    }
+
+    public function shouldRenderChatbot(): bool
+    {
+        return (bool) $this->chatbot_enabled;
     }
 }

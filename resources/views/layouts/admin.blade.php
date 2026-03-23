@@ -53,10 +53,26 @@
         ])),
     ],
     [
+        'title' => __('admin.nav_crm'),
+        'items' => array_values(array_filter([
+            $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm'), 'route' => 'admin.crm.dashboard', 'match' => 'admin.crm.dashboard'] : null,
+            $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_leads'), 'route' => 'admin.crm.leads.index', 'match' => 'admin.crm.leads.*'] : null,
+            $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_pipeline'), 'route' => 'admin.crm.pipeline', 'match' => 'admin.crm.pipeline'] : null,
+            $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_followups'), 'route' => 'admin.crm.follow-ups', 'match' => 'admin.crm.follow-ups'] : null,
+            $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_tasks'), 'route' => 'admin.crm.tasks', 'match' => 'admin.crm.tasks'] : null,
+            $adminUser?->hasPermission('leads.edit') ? ['label' => __('admin.crm_statuses'), 'route' => 'admin.crm.statuses', 'match' => 'admin.crm.statuses'] : null,
+            $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_sources'), 'route' => 'admin.crm.sources', 'match' => 'admin.crm.sources'] : null,
+            $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_service_types'), 'route' => 'admin.crm.service-types', 'match' => 'admin.crm.service-types'] : null,
+            $adminUser?->hasPermission('leads.delete') ? ['label' => __('admin.crm_deleted_leads'), 'route' => 'admin.crm.leads.trash', 'match' => 'admin.crm.leads.trash'] : null,
+            $adminUser?->hasPermission('reports.view') ? ['label' => __('admin.crm_reports'), 'route' => 'admin.crm.reports', 'match' => 'admin.crm.reports'] : null,
+        ])),
+    ],
+    [
         'title' => __('admin.nav_marketing'),
         'items' => array_values(array_filter([
             $adminUser?->hasPermission('marketing.manage') ? ['label' => __('admin.marketing_manager'), 'route' => 'admin.marketing-landing-pages.index', 'match' => 'admin.marketing-landing-pages.*'] : null,
             $adminUser?->hasPermission('tracking.manage') ? ['label' => __('admin.tracking_manager'), 'route' => 'admin.tracking-integrations.index', 'match' => 'admin.tracking-integrations.*'] : null,
+            $adminUser?->hasPermission('chatbot.manage') ? ['label' => __('admin.chatbot_manager'), 'route' => 'admin.chatbot-settings.edit', 'match' => 'admin.chatbot-settings.*'] : null,
         ])),
     ],
     [
@@ -73,6 +89,27 @@
         ])),
     ],
 ])
+@php($notificationsEnabled = $adminUser && \Illuminate\Support\Facades\Schema::hasTable('notifications'))
+@php($adminNotifications = $notificationsEnabled ? $adminUser->notifications()->latest()->limit(8)->get() : collect())
+@php($unreadNotificationCount = $notificationsEnabled ? $adminUser->unreadNotifications()->count() : 0)
+@php($followUpPopupNotifications = $notificationsEnabled ? $adminUser->unreadNotifications()->where('type', \App\Notifications\CrmFollowUpReminderNotification::class)->latest()->take(5)->get()->map(function ($notification) {
+    $data = $notification->data ?? [];
+
+    return [
+        'id' => $notification->id,
+        'title' => $data['title_' . app()->getLocale()] ?? ($data['title_ar'] ?? $data['title_en'] ?? __('admin.notifications')),
+        'lead_name' => $data['lead_name'] ?? null,
+        'phone' => $data['phone'] ?? null,
+        'whatsapp_number' => $data['whatsapp_number'] ?? null,
+        'scheduled_at' => $data['scheduled_at'] ?? null,
+        'status_reason' => $data['status_reason_' . app()->getLocale()] ?? ($data['status_reason_ar'] ?? $data['status_reason_en'] ?? null),
+        'note' => $data['follow_up_note'] ?? null,
+        'assigned_user_name' => $data['assigned_user_name'] ?? null,
+        'url' => $data['url'] ?? route('admin.crm.dashboard'),
+        'follow_up_update_url' => $data['follow_up_update_url'] ?? null,
+        'read_url' => route('admin.notifications.read', $notification->id),
+    ];
+}) : collect())
 <div class="container-fluid">
     <div class="row">
         <aside class="col-lg-2 admin-sidebar text-white p-3">
@@ -116,6 +153,51 @@
                         <input type="text" name="q" class="form-control" placeholder="{{ __('admin.search_placeholder') }}" value="{{ request('q') }}">
                     </form>
                     <button type="button" class="admin-icon-button" aria-label="Notifications">◦</button>
+                    <div class="admin-notification-shell" data-admin-notification-shell>
+                        <button type="button" class="admin-icon-button admin-notification-toggle" aria-label="{{ __('admin.notifications') }}" data-admin-notification-toggle>
+                            <span aria-hidden="true">&#128276;</span>
+                            @if($unreadNotificationCount > 0)
+                                <span class="admin-notification-badge" data-admin-notification-count>{{ $unreadNotificationCount }}</span>
+                            @endif
+                        </button>
+                        <div class="admin-notification-panel" hidden data-admin-notification-panel>
+                            <div class="admin-notification-panel__header">
+                                <strong>{{ __('admin.notifications') }}</strong>
+                                <div class="admin-notification-panel__header-actions">
+                                    @if($unreadNotificationCount > 0)
+                                        <span class="badge text-bg-danger" data-admin-notification-count-text>{{ $unreadNotificationCount }}</span>
+                                    @endif
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-notifications-read-all="{{ route('admin.notifications.read-all') }}">{{ __('admin.crm_notifications_read_all') }}</button>
+                                </div>
+                            </div>
+                            <div class="admin-notification-panel__filters">
+                                <button type="button" class="btn btn-sm btn-outline-secondary is-active" data-notification-filter="all">{{ __('admin.crm_notifications_filter_all') }}</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-notification-filter="unread">{{ __('admin.crm_notifications_filter_unread') }}</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-notification-filter="read">{{ __('admin.crm_notifications_filter_read') }}</button>
+                            </div>
+                            <div class="admin-notification-panel__list">
+                                @forelse($adminNotifications as $notification)
+                                    @php($notificationData = $notification->data ?? [])
+                                    @php($notificationTitle = $notificationData['title_' . app()->getLocale()] ?? ($notificationData['title_ar'] ?? $notificationData['title_en'] ?? __('admin.notifications')))
+                                    <div class="admin-notification-item {{ is_null($notification->read_at) ? 'is-unread' : 'is-read' }}" data-notification-item="{{ $notification->id }}" data-notification-state="{{ is_null($notification->read_at) ? 'unread' : 'read' }}">
+                                        <a href="{{ $notificationData['url'] ?? route('admin.crm.dashboard') }}" class="admin-notification-item__body" data-notification-link data-notification-read-url="{{ route('admin.notifications.read', $notification->id) }}">
+                                            <strong>{{ $notificationTitle }}</strong>
+                                            @if(!empty($notificationData['lead_name']))
+                                                <span>{{ $notificationData['lead_name'] }}</span>
+                                            @endif
+                                            <small>{{ optional($notification->created_at)->diffForHumans() }}</small>
+                                        </a>
+                                        <span class="admin-notification-dot" aria-hidden="true"></span>
+                                        @if(is_null($notification->read_at))
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-notification-read="{{ route('admin.notifications.read', $notification->id) }}">{{ __('admin.crm_notification_mark_read') }}</button>
+                                        @endif
+                                    </div>
+                                @empty
+                                    <div class="text-muted small">{{ __('admin.no_notifications') }}</div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
                     <a class="btn btn-outline-secondary btn-sm" href="{{ route('locale.switch', 'en') }}">EN</a>
                     <a class="btn btn-outline-secondary btn-sm" href="{{ route('locale.switch', 'ar') }}">AR</a>
                     <div class="admin-user-chip">
@@ -146,6 +228,56 @@
         </div>
     </div>
 </div>
+@if($followUpPopupNotifications->isNotEmpty())
+    <div class="admin-followup-popup" hidden data-admin-followup-popup data-notifications='@json($followUpPopupNotifications)' data-csrf="{{ csrf_token() }}">
+        <div class="admin-followup-popup__backdrop"></div>
+        <div class="admin-followup-popup__dialog">
+            <div class="admin-followup-popup__eyebrow">{{ __('admin.crm_follow_up_popup_title') }}</div>
+            <h3 data-followup-popup-title></h3>
+            <div class="admin-followup-popup__grid">
+                <div>
+                    <span>{{ __('admin.full_name') }}</span>
+                    <strong data-followup-popup-lead>-</strong>
+                </div>
+                <div>
+                    <span>{{ __('admin.phone') }}</span>
+                    <strong data-followup-popup-phone>-</strong>
+                </div>
+                <div>
+                    <span>{{ __('admin.crm_follow_up_time') }}</span>
+                    <strong data-followup-popup-time>-</strong>
+                </div>
+                <div>
+                    <span>{{ __('admin.assigned_to') }}</span>
+                    <strong data-followup-popup-seller>-</strong>
+                </div>
+            </div>
+            <div class="admin-followup-popup__note">
+                <span>{{ __('admin.crm_follow_up_note') }}</span>
+                <p data-followup-popup-note>{{ __('admin.crm_follow_up_popup_empty_note') }}</p>
+            </div>
+            <div class="admin-followup-popup__quick-actions">
+                <a href="#" class="btn btn-outline-secondary" data-followup-popup-call>{{ __('admin.crm_popup_call') }}</a>
+                <a href="#" class="btn btn-outline-secondary" target="_blank" rel="noopener noreferrer" data-followup-popup-whatsapp>{{ __('admin.crm_popup_whatsapp') }}</a>
+                <button type="button" class="btn btn-outline-secondary" data-followup-popup-open>{{ __('admin.crm_popup_open_lead') }}</button>
+            </div>
+            <div class="admin-followup-popup__actions">
+                <button type="button" class="btn btn-outline-secondary" data-followup-popup-dismiss>{{ __('admin.crm_popup_close') }}</button>
+                <div class="admin-followup-popup__snooze">
+                    <select class="form-select" data-followup-popup-snooze-minutes>
+                        <option value="15">{{ __('admin.crm_15_minutes') }}</option>
+                        <option value="30">{{ __('admin.crm_30_minutes') }}</option>
+                        <option value="60">{{ __('admin.crm_1_hour') }}</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary" data-followup-popup-snooze>{{ __('admin.crm_popup_snooze') }}</button>
+                </div>
+                <button type="button" class="btn btn-outline-primary" data-followup-popup-complete>{{ __('admin.mark_completed') }}</button>
+                <button type="button" class="btn btn-primary" data-followup-popup-reschedule>{{ __('admin.reschedule') }}</button>
+            </div>
+            <div class="admin-followup-popup__footer" data-followup-popup-counter></div>
+        </div>
+    </div>
+@endif
 @if($adminUser?->hasPermission('media.manage'))
     <div class="admin-media-modal" id="admin-media-modal" hidden
          data-list-url="{{ route('admin.media-library.library') }}"
@@ -354,5 +486,314 @@
     });
     </script>
 @endif
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = @json(csrf_token());
+    const notificationShell = document.querySelector('[data-admin-notification-shell]');
+    const notificationToggle = document.querySelector('[data-admin-notification-toggle]');
+    const notificationPanel = document.querySelector('[data-admin-notification-panel]');
+    const readAllButton = document.querySelector('[data-notifications-read-all]');
+    const filterButtons = Array.from(document.querySelectorAll('[data-notification-filter]'));
+    const popup = document.querySelector('[data-admin-followup-popup]');
+
+    const updateNotificationCount = (count) => {
+        document.querySelectorAll('[data-admin-notification-count]').forEach((badge) => {
+            badge.textContent = count;
+            badge.hidden = count < 1;
+        });
+
+        document.querySelectorAll('[data-admin-notification-count-text]').forEach((badge) => {
+            badge.textContent = count;
+            badge.hidden = count < 1;
+        });
+    };
+
+    const markNotificationRead = async (url) => {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Unable to mark notification as read.');
+        }
+
+        return response.json();
+    };
+
+    const setNotificationReadState = (item, isRead = true) => {
+        if (!item) {
+            return;
+        }
+
+        item.dataset.notificationState = isRead ? 'read' : 'unread';
+        item.classList.toggle('is-unread', !isRead);
+        item.classList.toggle('is-read', isRead);
+        item.querySelector('[data-notification-read]')?.remove();
+    };
+
+    const applyNotificationFilter = (filter) => {
+        document.querySelectorAll('[data-notification-item]').forEach((item) => {
+            const state = item.dataset.notificationState || 'read';
+            const matches = filter === 'all' || filter === state;
+            item.hidden = !matches;
+        });
+
+        filterButtons.forEach((button) => {
+            button.classList.toggle('is-active', button.dataset.notificationFilter === filter);
+        });
+    };
+
+    notificationToggle?.addEventListener('click', () => {
+        if (!notificationPanel) {
+            return;
+        }
+
+        notificationPanel.hidden = !notificationPanel.hidden;
+    });
+
+    readAllButton?.addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        try {
+            const payload = await markNotificationRead(readAllButton.dataset.notificationsReadAll);
+            document.querySelectorAll('[data-notification-item]').forEach((item) => setNotificationReadState(item, true));
+            updateNotificationCount(payload.unread_count ?? 0);
+            applyNotificationFilter(document.querySelector('[data-notification-filter].is-active')?.dataset.notificationFilter || 'all');
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+    filterButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            applyNotificationFilter(button.dataset.notificationFilter || 'all');
+        });
+    });
+
+    document.addEventListener('click', async (event) => {
+        const readButton = event.target.closest('[data-notification-read]');
+        const notificationLink = event.target.closest('[data-notification-link]');
+
+        if (readButton) {
+            event.preventDefault();
+
+            try {
+                const payload = await markNotificationRead(readButton.dataset.notificationRead);
+                setNotificationReadState(readButton.closest('[data-notification-item]'), true);
+                updateNotificationCount(payload.unread_count ?? 0);
+                applyNotificationFilter(document.querySelector('[data-notification-filter].is-active')?.dataset.notificationFilter || 'all');
+            } catch (error) {
+                console.error(error);
+            }
+
+            return;
+        }
+
+        if (notificationLink) {
+            const targetUrl = notificationLink.getAttribute('href');
+
+            if (notificationLink.dataset.notificationReadUrl) {
+                event.preventDefault();
+
+                try {
+                    const payload = await markNotificationRead(notificationLink.dataset.notificationReadUrl);
+                    setNotificationReadState(notificationLink.closest('[data-notification-item]'), true);
+                    updateNotificationCount(payload.unread_count ?? 0);
+                    window.location.href = targetUrl;
+                } catch (error) {
+                    console.error(error);
+                    window.location.href = targetUrl;
+                }
+            }
+
+            return;
+        }
+
+        if (notificationShell && !notificationShell.contains(event.target)) {
+            if (notificationPanel) {
+                notificationPanel.hidden = true;
+            }
+        }
+    });
+
+    applyNotificationFilter('all');
+
+    if (!popup) {
+        return;
+    }
+
+    const queue = JSON.parse(popup.dataset.notifications || '[]');
+    const popupTitle = popup.querySelector('[data-followup-popup-title]');
+    const popupLead = popup.querySelector('[data-followup-popup-lead]');
+    const popupPhone = popup.querySelector('[data-followup-popup-phone]');
+    const popupTime = popup.querySelector('[data-followup-popup-time]');
+    const popupSeller = popup.querySelector('[data-followup-popup-seller]');
+    const popupNote = popup.querySelector('[data-followup-popup-note]');
+    const popupCounter = popup.querySelector('[data-followup-popup-counter]');
+    const dismissButton = popup.querySelector('[data-followup-popup-dismiss]');
+    const completeButton = popup.querySelector('[data-followup-popup-complete]');
+    const openLeadButton = popup.querySelector('[data-followup-popup-open]');
+    const callButton = popup.querySelector('[data-followup-popup-call]');
+    const whatsappButton = popup.querySelector('[data-followup-popup-whatsapp]');
+    const snoozeButton = popup.querySelector('[data-followup-popup-snooze]');
+    const snoozeMinutesField = popup.querySelector('[data-followup-popup-snooze-minutes]');
+    const rescheduleButton = popup.querySelector('[data-followup-popup-reschedule]');
+    const emptyNoteText = @json(__('admin.crm_follow_up_popup_empty_note'));
+    const moreRemindersText = @json(__('admin.crm_follow_up_popup_more'));
+    const currentSellerName = @json($adminUser?->name ?: 'Travel Wave');
+    const whatsappMessage = `اهلا وسهلا بحضرتك معاك ${currentSellerName} من Travel Wave`;
+    let currentIndex = 0;
+
+    const currentItem = () => queue[currentIndex] || null;
+    const normalizePhone = (value) => (value || '').replace(/[^\d+]/g, '');
+    const telLink = (value) => {
+        const normalized = normalizePhone(value);
+        return normalized ? `tel:${normalized}` : '';
+    };
+    const whatsappLink = (value) => {
+        const normalized = normalizePhone(value).replace(/^\+/, '');
+        return normalized ? `https://wa.me/${normalized}?text=${encodeURIComponent(whatsappMessage)}` : '';
+    };
+
+    const renderPopup = () => {
+        const item = currentItem();
+
+        if (!item) {
+            popup.hidden = true;
+            return;
+        }
+
+        popup.hidden = false;
+        popupTitle.textContent = item.title || '';
+        popupLead.textContent = item.lead_name || '-';
+        popupPhone.textContent = item.phone || '-';
+        popupTime.textContent = item.scheduled_at ? new Date(item.scheduled_at).toLocaleString() : '-';
+        popupSeller.textContent = item.assigned_user_name || '-';
+        popupNote.textContent = item.note || emptyNoteText;
+        popupCounter.textContent = queue.length > 1 ? moreRemindersText.replace(':count', String(queue.length - currentIndex)) : '';
+        completeButton.hidden = !item.follow_up_update_url;
+        callButton.href = telLink(item.phone);
+        callButton.classList.toggle('disabled', !callButton.href);
+        whatsappButton.href = whatsappLink(item.whatsapp_number || item.phone);
+        whatsappButton.classList.toggle('disabled', !whatsappButton.href);
+    };
+
+    const advancePopup = () => {
+        currentIndex += 1;
+        renderPopup();
+    };
+
+    dismissButton?.addEventListener('click', async () => {
+        const item = currentItem();
+        if (!item) {
+            return;
+        }
+
+        try {
+            const payload = await markNotificationRead(item.read_url);
+            updateNotificationCount(payload.unread_count ?? 0);
+            advancePopup();
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+    openLeadButton?.addEventListener('click', () => {
+        const item = currentItem();
+        if (!item?.url) {
+            return;
+        }
+
+        window.location.href = item.url;
+    });
+
+    rescheduleButton?.addEventListener('click', () => {
+        const item = currentItem();
+        if (!item?.url) {
+            return;
+        }
+
+        window.location.href = item.url;
+    });
+
+    completeButton?.addEventListener('click', async () => {
+        const item = currentItem();
+
+        if (!item?.follow_up_update_url) {
+            return;
+        }
+
+        const body = new FormData();
+        body.append('_method', 'PUT');
+        body.append('action', 'complete');
+        body.append('completion_note', @json(__('admin.crm_follow_up_completed_from_popup')));
+
+        try {
+            const response = await fetch(item.follow_up_update_url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body,
+            });
+
+            if (!response.ok) {
+                throw new Error('Unable to complete follow-up.');
+            }
+
+            const payload = await markNotificationRead(item.read_url);
+            updateNotificationCount(payload.unread_count ?? 0);
+            advancePopup();
+        } catch (error) {
+            console.error(error);
+            window.location.href = item.url;
+        }
+    });
+
+    snoozeButton?.addEventListener('click', async () => {
+        const item = currentItem();
+
+        if (!item?.follow_up_update_url) {
+            return;
+        }
+
+        const body = new FormData();
+        body.append('_method', 'PUT');
+        body.append('action', 'snooze');
+        body.append('snooze_minutes', snoozeMinutesField?.value || '15');
+
+        try {
+            const response = await fetch(item.follow_up_update_url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body,
+            });
+
+            if (!response.ok) {
+                throw new Error('Unable to snooze follow-up.');
+            }
+
+            const payload = await markNotificationRead(item.read_url);
+            updateNotificationCount(payload.unread_count ?? 0);
+            advancePopup();
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+    renderPopup();
+});
+</script>
 </body>
 </html>

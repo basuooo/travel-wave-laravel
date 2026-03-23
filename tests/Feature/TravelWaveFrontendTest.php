@@ -4,6 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\HeroSlide;
 use App\Models\Inquiry;
+use App\Models\ChatbotInteraction;
+use App\Models\ChatbotKnowledgeItem;
+use App\Models\CrmFollowUp;
 use App\Models\LeadForm;
 use App\Models\LeadFormAssignment;
 use App\Models\LeadFormField;
@@ -531,8 +534,15 @@ class TravelWaveFrontendTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.tracking-integrations.create'))
             ->assertOk()
-            ->assertSee('Tracking ID / Code')
-            ->assertSee('Visibility Rules');
+            ->assertSee('GTM Container ID')
+            ->assertSee('Visibility Rules')
+            ->assertSee('TikTok Pixel')
+            ->assertSee('Snap Pixel')
+            ->assertSee('X / Twitter Pixel')
+            ->assertSee('LinkedIn Insight Tag')
+            ->assertSee('Pinterest Tag')
+            ->assertSee('Google Ads Conversion Tracking')
+            ->assertSee('Microsoft Clarity');
     }
 
     public function test_admin_seo_manager_pages_render(): void
@@ -639,6 +649,67 @@ class TravelWaveFrontendTest extends TestCase
             ->assertOk()
             ->assertSee('https://www.googletagmanager.com/gtag/js?id=G-TEST1234', false)
             ->assertSee("gtag('config', 'G-TEST1234');", false);
+    }
+
+    public function test_frontend_renders_extended_tracking_tools_from_dashboard(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        TrackingIntegration::query()->create([
+            'name' => 'TikTok Pixel',
+            'slug' => 'tiktok-pixel',
+            'integration_type' => TrackingIntegration::TYPE_TIKTOK_PIXEL,
+            'platform' => 'TikTok',
+            'tracking_code' => 'C123ABC456DEF',
+            'placement' => 'standard',
+            'visibility_mode' => 'all',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        TrackingIntegration::query()->create([
+            'name' => 'LinkedIn Insight',
+            'slug' => 'linkedin-insight',
+            'integration_type' => TrackingIntegration::TYPE_LINKEDIN_INSIGHT,
+            'platform' => 'LinkedIn',
+            'tracking_code' => '1234567',
+            'placement' => 'standard',
+            'visibility_mode' => 'all',
+            'sort_order' => 2,
+            'is_active' => true,
+        ]);
+
+        TrackingIntegration::query()->create([
+            'name' => 'Google Ads',
+            'slug' => 'google-ads',
+            'integration_type' => TrackingIntegration::TYPE_GOOGLE_ADS,
+            'platform' => 'Google Ads',
+            'tracking_code' => 'AW-123456789',
+            'settings' => ['conversion_label' => 'AbCdEFgHiJkLmNoP'],
+            'placement' => 'standard',
+            'visibility_mode' => 'all',
+            'sort_order' => 3,
+            'is_active' => true,
+        ]);
+
+        TrackingIntegration::query()->create([
+            'name' => 'Microsoft Clarity',
+            'slug' => 'microsoft-clarity',
+            'integration_type' => TrackingIntegration::TYPE_MICROSOFT_CLARITY,
+            'platform' => 'Microsoft',
+            'tracking_code' => 'clarity123',
+            'placement' => 'standard',
+            'visibility_mode' => 'all',
+            'sort_order' => 4,
+            'is_active' => true,
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee("ttq.load('C123ABC456DEF');", false)
+            ->assertSee("window._linkedin_data_partner_ids.push('1234567');", false)
+            ->assertSee('https://www.googletagmanager.com/gtag/js?id=AW-123456789', false)
+            ->assertSee('(window, document, "clarity", "script", "clarity123");', false);
     }
 
     public function test_public_robots_and_sitemap_routes_render_from_seo_manager(): void
@@ -1101,6 +1172,141 @@ class TravelWaveFrontendTest extends TestCase
             'source_page' => 'about',
             'display_position' => 'below_hero',
             'full_name' => 'Managed Lead',
+        ]);
+    }
+
+    public function test_managed_form_field_requirement_and_visibility_follow_dashboard_configuration(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $form = LeadForm::query()->create([
+            'name' => 'Configurable Lead Form',
+            'slug' => 'configurable-lead-form',
+            'form_category' => 'contact',
+            'title_en' => 'Configurable Form',
+            'title_ar' => 'نموذج قابل للتحكم',
+            'submit_text_en' => 'Send',
+            'submit_text_ar' => 'أرسل',
+            'success_message_en' => 'Managed form success',
+            'success_message_ar' => 'تم الإرسال',
+            'is_active' => true,
+        ]);
+
+        $form->fields()->createMany([
+            [
+                'field_key' => 'full_name',
+                'type' => 'text',
+                'label_en' => 'Full Name',
+                'label_ar' => 'الاسم الكامل',
+                'is_required' => true,
+                'is_enabled' => true,
+                'sort_order' => 1,
+            ],
+            [
+                'field_key' => 'phone',
+                'type' => 'phone',
+                'label_en' => 'Phone',
+                'label_ar' => 'رقم الهاتف',
+                'is_required' => true,
+                'is_enabled' => true,
+                'sort_order' => 2,
+            ],
+            [
+                'field_key' => 'email',
+                'type' => 'email',
+                'label_en' => 'Email',
+                'label_ar' => 'البريد الإلكتروني',
+                'validation_rule' => 'required|email|max:255',
+                'is_required' => false,
+                'is_enabled' => true,
+                'sort_order' => 3,
+            ],
+        ]);
+
+        $assignment = $form->assignments()->create([
+            'assignment_type' => 'page_key',
+            'target_key' => 'about',
+            'display_position' => 'below_hero',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $this->get(route('about'))
+            ->assertOk()
+            ->assertSee('name="email"', false);
+
+        $optionalResponse = $this->from(route('about'))->post(route('inquiries.store'), [
+            'lead_form_id' => $form->id,
+            'lead_form_assignment_id' => $assignment->id,
+            'type' => 'contact',
+            'source_page' => 'about',
+            'display_position' => 'below_hero',
+            'preferred_language' => 'en',
+            'success_message' => 'Managed form success',
+            'full_name' => 'Optional Email Lead',
+            'phone' => '+20 100 555 0001',
+        ]);
+
+        $optionalResponse->assertRedirect(route('about'));
+        $optionalResponse->assertSessionHas('success', 'Managed form success');
+        $this->assertDatabaseHas('inquiries', [
+            'lead_form_id' => $form->id,
+            'full_name' => 'Optional Email Lead',
+            'email' => null,
+        ]);
+
+        $emailField = LeadFormField::query()
+            ->where('lead_form_id', $form->id)
+            ->where('field_key', 'email')
+            ->firstOrFail();
+
+        $emailField->update([
+            'is_required' => true,
+            'is_enabled' => true,
+        ]);
+
+        $requiredResponse = $this->from(route('about'))->post(route('inquiries.store'), [
+            'lead_form_id' => $form->id,
+            'lead_form_assignment_id' => $assignment->id,
+            'type' => 'contact',
+            'source_page' => 'about',
+            'display_position' => 'below_hero',
+            'preferred_language' => 'en',
+            'success_message' => 'Managed form success',
+            'full_name' => 'Required Email Lead',
+            'phone' => '+20 100 555 0002',
+        ]);
+
+        $requiredResponse->assertRedirect(route('about'));
+        $requiredResponse->assertSessionHasErrors(['email']);
+
+        $emailField->update([
+            'is_required' => false,
+            'is_enabled' => false,
+        ]);
+
+        $this->get(route('about'))
+            ->assertOk()
+            ->assertDontSee('name="email"', false);
+
+        $hiddenResponse = $this->from(route('about'))->post(route('inquiries.store'), [
+            'lead_form_id' => $form->id,
+            'lead_form_assignment_id' => $assignment->id,
+            'type' => 'contact',
+            'source_page' => 'about',
+            'display_position' => 'below_hero',
+            'preferred_language' => 'en',
+            'success_message' => 'Managed form success',
+            'full_name' => 'Hidden Email Lead',
+            'phone' => '+20 100 555 0003',
+        ]);
+
+        $hiddenResponse->assertRedirect(route('about'));
+        $hiddenResponse->assertSessionHas('success', 'Managed form success');
+        $this->assertDatabaseHas('inquiries', [
+            'lead_form_id' => $form->id,
+            'full_name' => 'Hidden Email Lead',
+            'email' => null,
         ]);
     }
 
@@ -2282,5 +2488,1033 @@ class TravelWaveFrontendTest extends TestCase
             ->get(route('admin.media-library.preview', $missing))
             ->assertOk()
             ->assertHeader('content-type', 'image/svg+xml; charset=UTF-8');
+    }
+
+    public function test_admin_chatbot_settings_page_renders_and_can_be_updated(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.chatbot-settings.edit'))
+            ->assertOk()
+            ->assertSee('AI Chatbot')
+            ->assertSee('Rebuild Knowledge');
+
+        $this->actingAs($admin)
+            ->put(route('admin.chatbot-settings.update'), [
+                'chatbot_enabled' => '1',
+                'chatbot_bot_name_en' => 'Travel Wave Copilot',
+                'chatbot_bot_name_ar' => 'مساعد ترافل ويف',
+                'chatbot_primary_language' => 'ar',
+                'chatbot_welcome_message_ar' => 'أهلًا بك في Travel Wave.',
+                'chatbot_fallback_message_ar' => 'لا أملك إجابة مؤكدة الآن.',
+                'chatbot_suggested_questions_ar' => "ما خطوات تأشيرة فرنسا؟\nكيف أتواصل معكم؟",
+                'chatbot_show_whatsapp_handoff' => '1',
+                'chatbot_show_contact_handoff' => '1',
+                'chatbot_content_sources' => ['pages', 'visa_countries', 'contact_details'],
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('settings', [
+            'chatbot_enabled' => 1,
+            'chatbot_bot_name_en' => 'Travel Wave Copilot',
+            'chatbot_primary_language' => 'ar',
+        ]);
+    }
+
+    public function test_chatbot_knowledge_can_be_rebuilt_from_dashboard(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->post(route('admin.chatbot-settings.rebuild'))
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertGreaterThan(0, ChatbotKnowledgeItem::query()->count());
+        $this->assertDatabaseHas('chatbot_knowledge_items', [
+            'source_type' => 'contact_details',
+            'locale' => 'ar',
+        ]);
+    }
+
+    public function test_chatbot_ask_endpoint_returns_grounded_contact_answer(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Setting::query()->firstOrFail()->update([
+            'chatbot_enabled' => true,
+            'phone' => '+20 106 050 0236',
+            'whatsapp_number' => '201060500236',
+            'contact_email' => 'hello@travelwave.test',
+        ]);
+
+        ChatbotKnowledgeItem::query()->create([
+            'source_type' => 'contact_details',
+            'source_id' => null,
+            'source_key' => 'site-contact',
+            'locale' => 'ar',
+            'title' => 'بيانات التواصل',
+            'summary' => 'الهاتف وواتساب والبريد الإلكتروني.',
+            'content' => 'الهاتف +20 106 050 0236 واتساب 201060500236 البريد hello@travelwave.test',
+            'url' => route('contact'),
+            'sort_order' => 1,
+        ]);
+
+        $this->postJson(route('chatbot.ask'), [
+            'question' => 'ما رقم الواتساب؟',
+            'locale' => 'ar',
+        ])
+            ->assertOk()
+            ->assertJsonPath('was_answered', true)
+            ->assertJsonPath('handoff.contact_url', route('contact'))
+            ->assertJsonPath('interaction_id', 1);
+
+        $this->assertDatabaseHas('chatbot_interactions', [
+            'question' => 'ما رقم الواتساب؟',
+            'was_answered' => 1,
+        ]);
+    }
+
+    public function test_frontend_chatbot_widget_renders_when_enabled(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Setting::query()->firstOrFail()->update([
+            'chatbot_enabled' => true,
+            'chatbot_bot_name_en' => 'Travel Wave Assistant',
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('data-chatbot', false)
+            ->assertSee('Travel Wave Assistant');
+    }
+
+    public function test_crm_dashboard_pages_render_for_admin(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.dashboard'))
+            ->assertOk()
+            ->assertSee('CRM');
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.index'))
+            ->assertOk()
+            ->assertSee('Leads');
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.service-types'))
+            ->assertOk()
+            ->assertSee('Service Types');
+    }
+
+    public function test_frontend_inquiry_is_created_with_default_crm_fields(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $this->post(route('inquiries.store') . '?utm_source=meta&utm_campaign=france_visa_2026', [
+            'type' => 'visa',
+            'full_name' => 'CRM Lead',
+            'phone' => '01060500236',
+            'whatsapp_number' => '201060500236',
+            'nationality' => 'Egypt',
+            'destination' => 'France',
+            'service_type' => 'Schengen',
+        ])->assertRedirect();
+
+        $lead = Inquiry::query()->where('full_name', 'CRM Lead')->firstOrFail();
+
+        $this->assertSame('201060500236', $lead->whatsapp_number);
+        $this->assertSame('Egypt', $lead->country);
+        $this->assertSame('meta', $lead->lead_source);
+        $this->assertSame('france_visa_2026', $lead->utm_campaign);
+        $this->assertNotNull($lead->crm_status_id);
+        $this->assertNotNull($lead->crm_status_updated_at);
+        $this->assertSame('new-lead', $lead->crmStatus?->slug);
+    }
+
+    public function test_crm_lead_can_be_updated_with_one_main_status_and_logged_in_history(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $status = \App\Models\CrmStatus::query()->where('slug', 'documents-complete')->firstOrFail();
+        $source = \App\Models\CrmLeadSource::query()->where('slug', 'facebook-message')->firstOrFail();
+        $defaultStatusId = \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id');
+
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'CRM Update Lead',
+            'phone' => '01000000000',
+            'status' => 'new',
+            'crm_status_id' => $defaultStatusId,
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.crm.leads.update', $lead), [
+                'full_name' => 'CRM Update Lead',
+                'phone' => '01000000000',
+                'crm_status_id' => $status->id,
+                'crm_source_id' => $source->id,
+                'assigned_user_id' => $admin->id,
+                'country' => 'Egypt',
+                'destination' => 'France',
+                'service_type' => 'Tourism Visa',
+                'travelers_count' => 3,
+                'campaign_name' => 'Campaign A',
+                'total_price' => 10000,
+                'expenses' => 2500,
+                'priority' => 'high',
+                'follow_up_result' => 'Reached on WhatsApp',
+                'status_change_note' => 'Customer completed documents.',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $lead->refresh();
+
+        $this->assertSame($status->id, $lead->crm_status_id);
+        $this->assertSame($source->id, $lead->crm_source_id);
+        $this->assertSame($admin->id, $lead->assigned_user_id);
+        $this->assertSame('Egypt', $lead->country);
+        $this->assertSame('France', $lead->destination);
+        $this->assertSame('Tourism Visa', $lead->service_type);
+        $this->assertSame(3, $lead->travelers_count);
+        $this->assertSame('7500.00', $lead->net_price);
+        $this->assertSame($admin->id, $lead->crm_status_updated_by);
+        $this->assertDatabaseHas('crm_status_updates', [
+            'inquiry_id' => $lead->id,
+            'status_level' => 'main',
+            'new_status_id' => $status->id,
+            'changed_by' => $admin->id,
+            'note' => 'Customer completed documents.',
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.notes.store', $lead), [
+                'body' => 'Customer asked for follow-up tomorrow.',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('crm_lead_notes', [
+            'inquiry_id' => $lead->id,
+            'body' => 'Customer asked for follow-up tomorrow.',
+        ]);
+    }
+
+    public function test_crm_admin_can_trash_restore_and_force_delete_leads(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Trash CRM Lead',
+            'phone' => '01011111111',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.crm.leads.destroy', $lead))
+            ->assertRedirect(route('admin.crm.leads.index'));
+
+        $this->assertSoftDeleted('inquiries', ['id' => $lead->id]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.trash'))
+            ->assertOk()
+            ->assertSee('Trash CRM Lead');
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.restore', $lead->id))
+            ->assertRedirect(route('admin.crm.leads.trash'));
+
+        $this->assertDatabaseHas('inquiries', [
+            'id' => $lead->id,
+            'deleted_at' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.crm.leads.destroy', $lead))
+            ->assertRedirect(route('admin.crm.leads.index'));
+
+        $this->actingAs($admin)
+            ->delete(route('admin.crm.leads.force-destroy', $lead->id))
+            ->assertRedirect(route('admin.crm.leads.trash'));
+
+        $this->assertDatabaseMissing('inquiries', ['id' => $lead->id]);
+    }
+
+    public function test_sales_role_cannot_delete_crm_leads(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $role = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $user = User::query()->create([
+            'name' => 'Sales User',
+            'email' => 'sales@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+        $user->roles()->sync([$role->id]);
+
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Protected CRM Lead',
+            'phone' => '01011111111',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('admin.crm.leads.destroy', $lead))
+            ->assertForbidden();
+    }
+
+    public function test_seller_can_only_view_assigned_crm_leads(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $role = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+
+        $sellerA = User::query()->create([
+            'name' => 'Seller A',
+            'email' => 'seller-a@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+        $sellerA->roles()->sync([$role->id]);
+
+        $sellerB = User::query()->create([
+            'name' => 'Seller B',
+            'email' => 'seller-b@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+        $sellerB->roles()->sync([$role->id]);
+
+        $assignedToA = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Lead For A',
+            'phone' => '01010000001',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+            'assigned_user_id' => $sellerA->id,
+        ]);
+
+        $assignedToB = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Lead For B',
+            'phone' => '01010000002',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+            'assigned_user_id' => $sellerB->id,
+        ]);
+
+        $unassigned = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Unassigned Lead',
+            'phone' => '01010000003',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $this->actingAs($sellerA)
+            ->get(route('admin.crm.leads.index'))
+            ->assertOk()
+            ->assertSee('Lead For A')
+            ->assertDontSee('Lead For B')
+            ->assertDontSee('Unassigned Lead');
+
+        $this->actingAs($sellerA)
+            ->get(route('admin.crm.leads.show', $assignedToA))
+            ->assertOk()
+            ->assertSee('Lead For A');
+
+        $this->actingAs($sellerA)
+            ->get(route('admin.crm.leads.show', $assignedToB))
+            ->assertForbidden();
+
+        $this->actingAs($sellerA)
+            ->get(route('admin.crm.leads.show', $unassigned))
+            ->assertForbidden();
+    }
+
+    public function test_admin_can_bulk_assign_change_status_and_trash_crm_leads(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $sellerRole = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Bulk Seller',
+            'email' => 'bulk-seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+        $seller->roles()->sync([$sellerRole->id]);
+
+        $leadOne = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Bulk Lead One',
+            'phone' => '01020000001',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+        $leadTwo = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Bulk Lead Two',
+            'phone' => '01020000002',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $qualified = \App\Models\CrmStatus::query()->where('slug', 'documents-complete')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.bulk-update'), [
+                'lead_ids' => [$leadOne->id, $leadTwo->id],
+                'action' => 'assign',
+                'bulk_assigned_user_id' => $seller->id,
+                'bulk_note' => 'Assigned from admin queue.',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame($seller->id, $leadOne->fresh()->assigned_user_id);
+        $this->assertSame($seller->id, $leadTwo->fresh()->assigned_user_id);
+        $this->assertDatabaseHas('crm_lead_assignments', [
+            'inquiry_id' => $leadOne->id,
+            'new_assigned_user_id' => $seller->id,
+            'changed_by' => $admin->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.bulk-update'), [
+                'lead_ids' => [$leadOne->id, $leadTwo->id],
+                'action' => 'status',
+                'bulk_status_id' => $qualified->id,
+                'bulk_note' => 'Bulk qualified.',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame($qualified->id, $leadOne->fresh()->crm_status_id);
+        $this->assertSame($qualified->id, $leadTwo->fresh()->crm_status_id);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.bulk-update'), [
+                'lead_ids' => [$leadOne->id, $leadTwo->id],
+                'action' => 'trash',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertSoftDeleted('inquiries', ['id' => $leadOne->id]);
+        $this->assertSoftDeleted('inquiries', ['id' => $leadTwo->id]);
+    }
+
+    public function test_admin_can_bulk_update_seller_and_status_together(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $sellerRole = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Combined Seller',
+            'email' => 'combined-seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+        $seller->roles()->sync([$sellerRole->id]);
+
+        $targetStatus = \App\Models\CrmStatus::query()->where('slug', 'documents-complete')->firstOrFail();
+
+        $leadOne = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Combo Lead One',
+            'phone' => '01030000001',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $leadTwo = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Combo Lead Two',
+            'phone' => '01030000002',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.bulk-update'), [
+                'lead_ids' => [$leadOne->id, $leadTwo->id],
+                'bulk_assigned_user_id' => $seller->id,
+                'bulk_status_id' => $targetStatus->id,
+                'bulk_note' => 'Combined bulk update.',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame($seller->id, $leadOne->fresh()->assigned_user_id);
+        $this->assertSame($targetStatus->id, $leadOne->fresh()->crm_status_id);
+        $this->assertSame($seller->id, $leadTwo->fresh()->assigned_user_id);
+        $this->assertSame($targetStatus->id, $leadTwo->fresh()->crm_status_id);
+
+        $this->assertDatabaseHas('crm_lead_assignments', [
+            'inquiry_id' => $leadOne->id,
+            'new_assigned_user_id' => $seller->id,
+            'changed_by' => $admin->id,
+        ]);
+
+        $this->assertDatabaseHas('crm_status_updates', [
+            'inquiry_id' => $leadOne->id,
+            'new_status_id' => $targetStatus->id,
+            'changed_by' => $admin->id,
+            'note' => 'Combined bulk update.',
+        ]);
+    }
+
+    public function test_call_later_status_requires_scheduling_and_creates_follow_up_record(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $callLater = \App\Models\CrmStatus::query()->where('slug', 'call-later')->firstOrFail();
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Call Later Lead',
+            'phone' => '01012345678',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.crm.leads.update', $lead), [
+                'full_name' => 'Call Later Lead',
+                'phone' => '01012345678',
+                'crm_status_id' => $callLater->id,
+                'assigned_user_id' => $admin->id,
+                'scheduled_follow_up_date' => now()->addDay()->format('Y-m-d'),
+                'scheduled_follow_up_time' => '14:30',
+                'follow_up_reminder_offset' => '30',
+                'follow_up_schedule_note' => 'Customer asked to be called tomorrow afternoon.',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $followUp = CrmFollowUp::query()->where('inquiry_id', $lead->id)->firstOrFail();
+        $this->assertSame(CrmFollowUp::STATUS_PENDING, $followUp->status);
+        $this->assertSame($admin->id, $followUp->assigned_user_id);
+        $this->assertSame(30, $followUp->reminder_offset_minutes);
+        $this->assertSame('Customer asked to be called tomorrow afternoon.', $followUp->note);
+        $this->assertSame('call-later', $lead->fresh()->crmStatus?->slug);
+    }
+
+    public function test_call_later_follow_up_dispatches_internal_notifications_to_seller_and_admin(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $salesRole = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Seller User',
+            'email' => 'seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+        $seller->roles()->sync([$salesRole->id]);
+
+        $callLater = \App\Models\CrmStatus::query()->where('slug', 'call-later')->firstOrFail();
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Reminder Lead',
+            'phone' => '01099999999',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $scheduledAt = now()->addHour();
+
+        $this->actingAs($admin)
+            ->put(route('admin.crm.leads.update', $lead), [
+                'full_name' => 'Reminder Lead',
+                'phone' => '01099999999',
+                'crm_status_id' => $callLater->id,
+                'assigned_user_id' => $seller->id,
+                'scheduled_follow_up_date' => $scheduledAt->format('Y-m-d'),
+                'scheduled_follow_up_time' => $scheduledAt->format('H:i'),
+                'follow_up_reminder_offset' => '30',
+            ])
+            ->assertRedirect();
+
+        $followUp = CrmFollowUp::query()->where('inquiry_id', $lead->id)->firstOrFail();
+
+        $this->travelTo($followUp->remind_at->copy()->addMinute());
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.dashboard'))
+            ->assertOk();
+
+        $this->assertDatabaseHas('notifications', [
+            'notifiable_type' => User::class,
+            'notifiable_id' => $admin->id,
+        ]);
+
+        $this->assertDatabaseHas('notifications', [
+            'notifiable_type' => User::class,
+            'notifiable_id' => $seller->id,
+        ]);
+
+        $this->assertNotNull($followUp->fresh()->reminder_sent_at);
+    }
+
+    public function test_call_later_reminder_renders_dashboard_popup_and_can_be_dismissed(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $salesRole = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Popup Seller',
+            'email' => 'popup-seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+        $seller->roles()->sync([$salesRole->id]);
+
+        $callLater = \App\Models\CrmStatus::query()->where('slug', 'call-later')->firstOrFail();
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Popup Lead',
+            'phone' => '01055555555',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $scheduledAt = now()->addHour();
+
+        $this->actingAs($admin)
+            ->put(route('admin.crm.leads.update', $lead), [
+                'full_name' => 'Popup Lead',
+                'phone' => '01055555555',
+                'crm_status_id' => $callLater->id,
+                'assigned_user_id' => $seller->id,
+                'scheduled_follow_up_date' => $scheduledAt->format('Y-m-d'),
+                'scheduled_follow_up_time' => $scheduledAt->format('H:i'),
+                'follow_up_reminder_offset' => '30',
+                'follow_up_schedule_note' => 'Popup reminder note.',
+            ])
+            ->assertRedirect();
+
+        $followUp = CrmFollowUp::query()->where('inquiry_id', $lead->id)->firstOrFail();
+
+        $this->travelTo($followUp->remind_at->copy()->addMinute());
+
+        $this->actingAs($seller)
+            ->get(route('admin.crm.dashboard'))
+            ->assertOk()
+            ->assertSee('data-admin-followup-popup', false)
+            ->assertSee('Popup Lead');
+
+        $notification = $seller->unreadNotifications()->where('type', \App\Notifications\CrmFollowUpReminderNotification::class)->latest()->firstOrFail();
+
+        $this->actingAs($seller)
+            ->post(route('admin.notifications.read', $notification->id), [], ['Accept' => 'application/json'])
+            ->assertOk()
+            ->assertJson(['status' => 'ok']);
+
+        $this->assertNotNull($notification->fresh()->read_at);
+    }
+
+    public function test_call_later_follow_up_can_be_snoozed_from_popup_workflow(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $callLater = \App\Models\CrmStatus::query()->where('slug', 'call-later')->firstOrFail();
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Snooze Lead',
+            'phone' => '01066666666',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.crm.leads.update', $lead), [
+                'full_name' => 'Snooze Lead',
+                'phone' => '01066666666',
+                'crm_status_id' => $callLater->id,
+                'assigned_user_id' => $admin->id,
+                'scheduled_follow_up_date' => now()->addDay()->format('Y-m-d'),
+                'scheduled_follow_up_time' => '16:00',
+                'follow_up_reminder_offset' => '30',
+            ])
+            ->assertRedirect();
+
+        $followUp = CrmFollowUp::query()->where('inquiry_id', $lead->id)->firstOrFail();
+        $previousRemindAt = $followUp->remind_at;
+
+        $this->actingAs($admin)
+            ->putJson(route('admin.crm.follow-ups.update', $followUp), [
+                'action' => 'snooze',
+                'snooze_minutes' => 15,
+            ])
+            ->assertOk()
+            ->assertJson(['status' => 'ok']);
+
+        $followUp->refresh();
+
+        $this->assertNull($followUp->reminder_sent_at);
+        $this->assertTrue($followUp->remind_at->greaterThan(now()->addMinutes(14)));
+        $this->assertTrue($followUp->remind_at->notEqualTo($previousRemindAt));
+    }
+
+    public function test_crm_lead_supports_dynamic_service_type_subtype_and_destination_fields(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Dynamic Type Lead',
+            'phone' => '01012312312',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $serviceType = \App\Models\CrmServiceType::query()->where('slug', 'external-visas')->firstOrFail();
+        $subtype = \App\Models\CrmServiceSubtype::query()->where('slug', 'european-union')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->put(route('admin.crm.leads.update', $lead), [
+                'full_name' => 'Dynamic Type Lead',
+                'phone' => '01012312312',
+                'crm_status_id' => $lead->crm_status_id,
+                'crm_service_type_id' => $serviceType->id,
+                'crm_service_subtype_id' => $subtype->id,
+                'service_country_name' => 'France',
+                'country' => 'Egypt',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $lead->refresh();
+
+        $this->assertSame($serviceType->id, $lead->crm_service_type_id);
+        $this->assertSame($subtype->id, $lead->crm_service_subtype_id);
+        $this->assertSame('France', $lead->service_country_name);
+        $this->assertSame('France', $lead->destination);
+        $this->assertSame('France', $lead->country);
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.show', $lead))
+            ->assertOk()
+            ->assertSee('France')
+            ->assertSee($serviceType->localizedName())
+            ->assertSee($subtype->localizedName());
+    }
+
+    public function test_call_later_status_is_active_and_visible_in_crm_status_dropdown(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Dropdown Lead',
+            'phone' => '01077777777',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $status = \App\Models\CrmStatus::query()->where('slug', 'call-later')->firstOrFail();
+
+        $this->assertTrue((bool) $status->is_active);
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.show', $lead))
+            ->assertOk()
+            ->assertSee($status->localizedName());
+    }
+
+    public function test_crm_whatsapp_links_include_logged_in_seller_name_message(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'WhatsApp Lead',
+            'phone' => '01011111111',
+            'whatsapp_number' => '+20 101 234 5678',
+            'status' => 'new',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+        ]);
+
+        $expectedMessage = rawurlencode('اهلا وسهلا بحضرتك معاك ' . $admin->name . ' من Travel Wave');
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.index'))
+            ->assertOk()
+            ->assertSee('https://wa.me/201012345678?text=' . $expectedMessage, false);
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.show', $lead))
+            ->assertOk()
+            ->assertSee('https://wa.me/201012345678?text=' . $expectedMessage, false);
+    }
+
+    public function test_admin_can_mark_individual_and_all_notifications_as_read(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $callLater = \App\Models\CrmStatus::query()->where('slug', 'call-later')->firstOrFail();
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Notification Lead',
+            'phone' => '01022222222',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.crm.leads.update', $lead), [
+                'full_name' => 'Notification Lead',
+                'phone' => '01022222222',
+                'crm_status_id' => $callLater->id,
+                'assigned_user_id' => $admin->id,
+                'scheduled_follow_up_date' => now()->addDay()->format('Y-m-d'),
+                'scheduled_follow_up_time' => '11:30',
+                'follow_up_reminder_offset' => '30',
+            ])
+            ->assertRedirect();
+
+        $followUp = CrmFollowUp::query()->where('inquiry_id', $lead->id)->firstOrFail();
+        $this->travelTo($followUp->remind_at->copy()->addMinute());
+
+        $this->actingAs($admin)->get(route('admin.crm.dashboard'))->assertOk();
+
+        $notification = $admin->unreadNotifications()->latest()->firstOrFail();
+
+        $this->actingAs($admin)
+            ->post(route('admin.notifications.read', $notification->id), [], ['Accept' => 'application/json'])
+            ->assertOk()
+            ->assertJson(['status' => 'ok']);
+
+        $this->assertNotNull($notification->fresh()->read_at);
+
+        $admin->notify(new \App\Notifications\CrmFollowUpReminderNotification($followUp));
+        $admin->notify(new \App\Notifications\CrmFollowUpReminderNotification($followUp));
+
+        $this->assertGreaterThan(0, $admin->fresh()->unreadNotifications()->count());
+
+        $this->actingAs($admin)
+            ->post(route('admin.notifications.read-all'), [], ['Accept' => 'application/json'])
+            ->assertOk()
+            ->assertJson([
+                'status' => 'ok',
+                'unread_count' => 0,
+            ]);
+
+        $this->assertSame(0, $admin->fresh()->unreadNotifications()->count());
+    }
+
+    public function test_admin_can_preview_and_import_crm_leads_from_csv(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $csv = implode("\n", [
+            'اسم العميل,رقم الموبايل,رقم الواتساب,الإيميل,الحالة,النوع,تصنيف النوع,الدولة,العدد,ملاحظات,ملاحظات أخرى,السعر الإجمالي,المصروفات,السعر الصافي,مصدر الليد,البائع / المسؤول',
+            'عميل مستورد,01088888888,01088888888,imported@example.com,ليد جديد,تأشيرات خارجية,الاتحاد الأوروبي,إسبانيا,2,ملاحظة أولى,ملاحظة ثانية,10000,1500,8500,Facebook (lead Generation),Admin',
+        ]);
+
+        $file = UploadedFile::fake()->createWithContent('crm-import.csv', $csv);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.import.preview'), [
+                'duplicate_mode' => 'skip',
+                'duplicate_detector' => 'phone',
+                'import_file' => $file,
+            ])
+            ->assertRedirect(route('admin.crm.leads.transfer'));
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.import'))
+            ->assertRedirect(route('admin.crm.leads.transfer'));
+
+        $this->assertDatabaseHas('inquiries', [
+            'full_name' => 'عميل مستورد',
+            'phone' => '01088888888',
+            'whatsapp_number' => '01088888888',
+            'email' => 'imported@example.com',
+        ]);
+    }
+
+    public function test_admin_can_detect_duplicate_leads_by_phone_and_download_duplicate_report(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Existing Lead',
+            'phone' => '01044444444',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+            'status' => 'new',
+        ]);
+
+        $csv = implode("\n", [
+            'اسم العميل,رقم الموبايل,رقم الواتساب,الإيميل,الحالة',
+            'عميل صالح 1,01055555555,01055555555,valid1@example.com,ليد جديد',
+            'عميل مكرر قاعدة البيانات,01044444444,01044444444,duplicate-db@example.com,ليد جديد',
+            'عميل صالح 2,01066666666,01066666666,valid2@example.com,ليد جديد',
+            'عميل مكرر داخل الملف 1,01077777777,01077777777,file-1@example.com,ليد جديد',
+            'عميل مكرر داخل الملف 2,01077777777,01088888881,file-2@example.com,ليد جديد',
+        ]);
+
+        $file = UploadedFile::fake()->createWithContent('crm-duplicate-import.csv', $csv);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.import.preview'), [
+                'duplicate_mode' => 'skip',
+                'duplicate_detector' => 'phone',
+                'import_file' => $file,
+            ])
+            ->assertRedirect(route('admin.crm.leads.transfer'));
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.import'))
+            ->assertRedirect(route('admin.crm.leads.transfer'));
+
+        $this->assertDatabaseHas('inquiries', [
+            'full_name' => 'عميل صالح 1',
+            'phone' => '01055555555',
+        ]);
+
+        $this->assertDatabaseHas('inquiries', [
+            'full_name' => 'عميل صالح 2',
+            'phone' => '01066666666',
+        ]);
+
+        $this->assertSame(1, Inquiry::query()->where('phone', '01044444444')->count());
+        $this->assertSame(1, Inquiry::query()->where('phone', '01077777777')->count());
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.import.report', ['report' => 'duplicates', 'format' => 'xlsx']))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    }
+
+    public function test_admin_can_merge_duplicate_leads_during_import_and_apply_merged_status(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $existingLead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Lead To Merge',
+            'phone' => '01099911122',
+            'whatsapp_number' => '01099911122',
+            'email' => 'old@example.com',
+            'admin_notes' => 'Old note',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+            'status' => 'new',
+        ]);
+
+        $csv = implode("\n", [
+            'اسم العميل,رقم الموبايل,رقم الواتساب,الإيميل,الحالة,ملاحظات',
+            'Lead To Merge Updated,01099911122,01099911122,new@example.com,ليد جديد,Fresh note',
+        ]);
+
+        $file = UploadedFile::fake()->createWithContent('crm-merge-import.csv', $csv);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.import.preview'), [
+                'duplicate_mode' => 'merge_existing',
+                'duplicate_detector' => 'phone',
+                'import_file' => $file,
+            ])
+            ->assertRedirect(route('admin.crm.leads.transfer'));
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.import'))
+            ->assertRedirect(route('admin.crm.leads.transfer'));
+
+        $existingLead->refresh();
+        $mergedStatusId = \App\Models\CrmStatus::query()->where('slug', 'merged')->value('id');
+
+        $this->assertSame('Lead To Merge Updated', $existingLead->full_name);
+        $this->assertSame('new@example.com', $existingLead->email);
+        $this->assertSame('Fresh note', $existingLead->admin_notes);
+        $this->assertSame($mergedStatusId, $existingLead->crm_status_id);
+        $this->assertSame(1, Inquiry::query()->where('phone', '01099911122')->count());
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.import.report', ['report' => 'merged', 'format' => 'xlsx']))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    }
+
+    public function test_only_admin_scope_can_export_crm_leads(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $salesRole = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Export Seller',
+            'email' => 'export-seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+        $seller->roles()->sync([$salesRole->id]);
+
+        Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Export Lead',
+            'phone' => '01033333333',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.export'), [
+                'format' => 'csv',
+                'fields' => ['full_name', 'phone', 'crm_status'],
+            ])
+            ->assertOk()
+            ->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+        $this->actingAs($seller)
+            ->post(route('admin.crm.leads.export'), [
+                'format' => 'csv',
+                'fields' => ['full_name', 'phone'],
+            ])
+            ->assertForbidden();
     }
 }

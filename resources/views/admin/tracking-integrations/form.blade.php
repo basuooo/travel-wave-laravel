@@ -2,6 +2,10 @@
 
 @php
     $selectedTargets = old('visibility_targets', $item->visibility_targets ?? []);
+    $selectedType = old('integration_type', $item->integration_type);
+    $selectedToolConfig = $toolFieldConfig[$selectedType] ?? [];
+    $trackingCodeLabel = $selectedToolConfig['tracking_code_label'] ?? __('admin.tracking_code');
+    $trackingCodePlaceholder = $selectedToolConfig['tracking_code_placeholder'] ?? '';
 @endphp
 
 @section('page_title', $isEdit ? __('admin.edit_tracking') : __('admin.create_tracking'))
@@ -27,9 +31,13 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">{{ __('admin.type') }}</label>
-                <select name="integration_type" class="form-select">
-                    @foreach($typeOptions as $value => $label)
-                        <option value="{{ $value }}" @selected(old('integration_type', $item->integration_type) === $value)>{{ $label }}</option>
+                <select name="integration_type" class="form-select" id="tracking-integration-type">
+                    @foreach($typeGroups as $groupLabel => $groupOptions)
+                        <optgroup label="{{ $groupLabel }}">
+                            @foreach($groupOptions as $value => $label)
+                                <option value="{{ $value }}" @selected($selectedType === $value)>{{ $label }}</option>
+                            @endforeach
+                        </optgroup>
                     @endforeach
                 </select>
             </div>
@@ -38,8 +46,15 @@
                 <input type="text" name="platform" class="form-control" value="{{ old('platform', $item->platform) }}" placeholder="Google / Meta / TikTok">
             </div>
             <div class="col-md-4">
-                <label class="form-label">{{ __('admin.tracking_code') }}</label>
-                <input type="text" name="tracking_code" class="form-control" value="{{ old('tracking_code', $item->tracking_code) }}" placeholder="GTM-XXXX / G-XXXX / 123456789">
+                <label class="form-label" id="tracking-code-label">{{ $trackingCodeLabel }}</label>
+                <input
+                    type="text"
+                    name="tracking_code"
+                    id="tracking-code-input"
+                    class="form-control"
+                    value="{{ old('tracking_code', $item->tracking_code) }}"
+                    placeholder="{{ $trackingCodePlaceholder }}"
+                >
             </div>
             <div class="col-md-4">
                 <label class="form-label">{{ __('admin.placement') }}</label>
@@ -58,6 +73,20 @@
                     <input type="hidden" name="is_active" value="0">
                     <input type="checkbox" name="is_active" value="1" class="form-check-input" id="tracking-active" @checked(old('is_active', $item->is_active ?? true))>
                     <label class="form-check-label" for="tracking-active">{{ __('admin.active') }}</label>
+                </div>
+            </div>
+            <div class="col-12 tracking-extra-fields" data-extra-for="google_ads" @if($selectedType !== \App\Models\TrackingIntegration::TYPE_GOOGLE_ADS) style="display:none" @endif>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ __('admin.google_ads_conversion_label') }}</label>
+                        <input
+                            type="text"
+                            name="settings[conversion_label]"
+                            class="form-control"
+                            value="{{ old('settings.conversion_label', data_get($item->settings, 'conversion_label')) }}"
+                            placeholder="AbCdEFgHiJkLmNoP"
+                        >
+                    </div>
                 </div>
             </div>
             <div class="col-12">
@@ -105,3 +134,34 @@
     </div>
 </form>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const typeSelect = document.getElementById('tracking-integration-type');
+        const trackingCodeLabel = document.getElementById('tracking-code-label');
+        const trackingCodeInput = document.getElementById('tracking-code-input');
+        const extraFields = document.querySelectorAll('.tracking-extra-fields');
+        const config = @json($toolFieldConfig);
+
+        function normalizeType(type) {
+            return type === 'google_ads' ? 'google_ads' : type;
+        }
+
+        function updateTrackingFields() {
+            const type = typeSelect.value;
+            const toolConfig = config[type] || {};
+
+            trackingCodeLabel.textContent = toolConfig.tracking_code_label || @json(__('admin.tracking_code'));
+            trackingCodeInput.placeholder = toolConfig.tracking_code_placeholder || '';
+
+            extraFields.forEach((section) => {
+                section.style.display = section.dataset.extraFor === normalizeType(type) ? '' : 'none';
+            });
+        }
+
+        typeSelect.addEventListener('change', updateTrackingFields);
+        updateTrackingFields();
+    });
+</script>
+@endpush

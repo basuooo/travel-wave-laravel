@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BlogPost;
+use App\Models\ChatbotInteraction;
 use App\Models\Destination;
+use App\Models\Inquiry;
 use App\Models\LeadForm;
 use App\Models\MarketingLandingPage;
 use App\Models\MapSection;
@@ -17,8 +19,8 @@ use App\Models\TrackingIntegration;
 use App\Models\User;
 use App\Models\VisaCategory;
 use App\Models\VisaCountry;
+use App\Support\CrmLeadAccess;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 
 class AdminSearchController extends Controller
 {
@@ -44,10 +46,12 @@ class AdminSearchController extends Controller
             __('admin.roles_management') => $this->roles($like),
             __('admin.permissions_management') => $this->permissions($like),
             __('admin.forms_manager') => $this->forms($like),
+            __('admin.crm') => $this->crmLeads($like),
             __('admin.marketing_manager') => $this->marketingLandingPages($like),
             __('admin.media_library') => $this->mediaAssets($like),
             __('admin.maps_manager') => $this->maps($like),
             __('admin.tracking_manager') => $this->tracking($like),
+            __('admin.chatbot_manager') => $this->chatbot($query),
             __('admin.seo_manager') => $this->seo($query),
             __('admin.blog_posts') => $this->blogPosts($like),
             __('admin.navigation') => $this->menuItems($like),
@@ -117,6 +121,30 @@ class AdminSearchController extends Controller
                 'title' => $item->name,
                 'meta' => $item->slug,
                 'url' => route('admin.forms.edit', $item),
+            ])->all();
+    }
+
+    protected function crmLeads(string $like): array
+    {
+        if (! auth()->user()?->hasPermission('leads.view')) {
+            return [];
+        }
+
+        return CrmLeadAccess::applyVisibilityScope(Inquiry::query(), auth()->user())
+            ->where(fn ($query) => $query
+                ->where('full_name', 'like', $like)
+                ->orWhere('phone', 'like', $like)
+                ->orWhere('whatsapp_number', 'like', $like)
+                ->orWhere('country', 'like', $like)
+                ->orWhere('campaign_name', 'like', $like)
+                ->orWhere('lead_source', 'like', $like))
+            ->latest()
+            ->limit(8)
+            ->get()
+            ->map(fn (Inquiry $item) => [
+                'title' => $item->full_name ?: __('admin.crm_leads'),
+                'meta' => $item->phone ?: ($item->country ?: ($item->campaign_name ?: $item->lead_source)),
+                'url' => route('admin.crm.leads.show', $item),
             ])->all();
     }
 
@@ -304,13 +332,14 @@ class AdminSearchController extends Controller
     protected function settingsShortcuts(string $query): array
     {
         $items = collect([
-            ['title' => __('admin.brand_settings'), 'keywords' => ['settings', 'brand', 'branding', 'الإعدادات', 'العلامة'], 'url' => route('admin.settings.edit')],
+            ['title' => __('admin.brand_settings'), 'keywords' => ['settings', 'brand', 'branding', 'الاعدادات', 'العلامة'], 'url' => route('admin.settings.edit')],
             ['title' => __('admin.header_settings'), 'keywords' => ['header', 'الهيدر'], 'url' => route('admin.header-settings.edit')],
             ['title' => __('admin.footer_settings'), 'keywords' => ['footer', 'الفوتر'], 'url' => route('admin.footer-settings.edit')],
             ['title' => __('admin.floating_whatsapp'), 'keywords' => ['whatsapp', 'واتساب'], 'url' => route('admin.floating-whatsapp-settings.edit')],
             ['title' => __('admin.hero_slider'), 'keywords' => ['hero', 'slider', 'banner', 'البانر'], 'url' => route('admin.hero-slides.index')],
             ['title' => __('admin.homepage_country_strip'), 'keywords' => ['countries', 'destinations', 'الوجهات'], 'url' => route('admin.home-country-strip.index')],
             ['title' => __('admin.tracking_manager'), 'keywords' => ['tracking', 'analytics', 'pixel', 'gtm', 'ga4', 'التتبع'], 'url' => route('admin.tracking-integrations.index')],
+            ['title' => __('admin.chatbot_manager'), 'keywords' => ['chatbot', 'assistant', 'ai', 'bot', 'روبوت', 'مساعد', 'شات'], 'url' => route('admin.chatbot-settings.edit')],
             ['title' => __('admin.seo_manager'), 'keywords' => ['seo', 'sitemap', 'robots', 'schema', 'redirect', 'سيو', 'خريطة الموقع', 'روبوتس'], 'url' => route('admin.seo.dashboard')],
             ['title' => __('admin.maps_manager'), 'keywords' => ['maps', 'map', 'الخريطة'], 'url' => route('admin.map-sections.index')],
         ]);
@@ -338,6 +367,19 @@ class AdminSearchController extends Controller
             ['title' => __('admin.seo_global_settings'), 'meta' => __('admin.settings'), 'url' => route('admin.seo.settings')],
             ['title' => __('admin.seo_meta_manager'), 'meta' => __('admin.seo_meta_manager'), 'url' => route('admin.seo.meta.index')],
             ['title' => __('admin.seo_redirects_manager'), 'meta' => __('admin.seo_redirects_manager'), 'url' => route('admin.seo.redirects.index')],
+        ])->filter(fn (array $item) => str_contains(mb_strtolower($item['title']), $needle))
+            ->values()
+            ->all();
+    }
+
+    protected function chatbot(string $query): array
+    {
+        $needle = mb_strtolower($query);
+        $unansweredCount = ChatbotInteraction::query()->where('was_answered', false)->count();
+
+        return collect([
+            ['title' => __('admin.chatbot_manager'), 'meta' => __('admin.settings'), 'url' => route('admin.chatbot-settings.edit')],
+            ['title' => __('admin.chatbot_logs'), 'meta' => $unansweredCount > 0 ? __('admin.unanswered_questions_count', ['count' => $unansweredCount]) : __('admin.chatbot_manager'), 'url' => route('admin.chatbot-settings.edit') . '#chatbot-logs'],
         ])->filter(fn (array $item) => str_contains(mb_strtolower($item['title']), $needle))
             ->values()
             ->all();

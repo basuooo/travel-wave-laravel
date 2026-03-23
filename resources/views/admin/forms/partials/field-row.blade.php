@@ -57,6 +57,7 @@
                 <input type="hidden" name="fields[{{ $index }}][is_required]" value="0">
                 <input type="checkbox" name="fields[{{ $index }}][is_required]" value="1" class="form-check-input" id="field-required-{{ $index }}" @checked(!empty($field['is_required']))>
                 <label class="form-check-label" for="field-required-{{ $index }}">Required</label>
+                <div class="form-text">If enabled, this field must be filled before submission.</div>
             </div>
         </div>
         <div class="col-md-3">
@@ -64,6 +65,7 @@
                 <input type="hidden" name="fields[{{ $index }}][is_enabled]" value="0">
                 <input type="checkbox" name="fields[{{ $index }}][is_enabled]" value="1" class="form-check-input" id="field-enabled-{{ $index }}" @checked(!isset($field['is_enabled']) || !empty($field['is_enabled']))>
                 <label class="form-check-label" for="field-enabled-{{ $index }}">Enabled</label>
+                <div class="form-text">Disable it to hide the field from the frontend form completely.</div>
             </div>
         </div>
         <div class="col-md-6 d-flex align-items-end justify-content-end">

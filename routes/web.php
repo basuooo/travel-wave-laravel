@@ -4,6 +4,10 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\AdminSearchController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogPostController;
+use App\Http\Controllers\Admin\ChatbotSettingController;
+use App\Http\Controllers\Admin\CrmController;
+use App\Http\Controllers\Admin\CrmLeadController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DestinationController;
 use App\Http\Controllers\Admin\FooterSettingController;
@@ -30,6 +34,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VisaCategoryController;
 use App\Http\Controllers\Admin\VisaCountryController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\SeoPublicController;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +58,7 @@ Route::get('/campaigns/{landingPage:slug}', [FrontendController::class, 'marketi
 Route::post('/campaigns/{landingPage:slug}/events', [FrontendController::class, 'trackMarketingLandingPageEvent'])->name('marketing.landing-pages.events.store');
 Route::post('/inquiries', [FrontendController::class, 'storeInquiry'])->name('inquiries.store');
 Route::post('/tracking/meta/events', [FrontendController::class, 'trackMetaEvent'])->name('tracking.meta.events.store');
+Route::post('/chatbot/ask', [ChatbotController::class, 'ask'])->name('chatbot.ask');
 Route::get('/robots.txt', [SeoPublicController::class, 'robots'])->name('seo.robots');
 Route::get('/sitemap.xml', [SeoPublicController::class, 'sitemapIndex'])->name('seo.sitemap.index');
 Route::get('/sitemap-{file}.xml', [SeoPublicController::class, 'sitemapFile'])->where('file', '[A-Za-z0-9\-]+')->name('seo.sitemap.file');
@@ -63,10 +69,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/login', [AuthController::class, 'login'])->name('login.store');
     });
 
-    Route::middleware(['auth', 'admin'])->group(function () {
+    Route::middleware(['auth', 'admin', 'crm.followups.dispatch'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/', [DashboardController::class, 'index'])->middleware('permission:dashboard.access')->name('dashboard');
         Route::get('/search', [AdminSearchController::class, 'index'])->middleware('permission:dashboard.access')->name('search');
+        Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.read-all');
+        Route::post('/notifications/{notification}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
 
         Route::resource('users', UserController::class)->except(['show']);
         Route::resource('roles', RoleController::class)->except(['show']);
@@ -83,6 +91,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/floating-whatsapp-settings', [FloatingWhatsappSettingController::class, 'update'])->name('floating-whatsapp-settings.update');
             Route::get('/meta-conversion-api-settings', [MetaConversionApiSettingController::class, 'edit'])->name('meta-conversion-api-settings.edit');
             Route::put('/meta-conversion-api-settings', [MetaConversionApiSettingController::class, 'update'])->name('meta-conversion-api-settings.update');
+        });
+
+        Route::middleware('permission:chatbot.manage')->group(function () {
+            Route::get('/chatbot-settings', [ChatbotSettingController::class, 'edit'])->name('chatbot-settings.edit');
+            Route::put('/chatbot-settings', [ChatbotSettingController::class, 'update'])->name('chatbot-settings.update');
+            Route::post('/chatbot-settings/rebuild-knowledge', [ChatbotSettingController::class, 'rebuildKnowledge'])->name('chatbot-settings.rebuild');
         });
 
         Route::middleware('permission:seo.manage')->group(function () {
@@ -202,7 +216,51 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('permission:leads.view')->group(function () {
             Route::get('/inquiries', [InquiryController::class, 'index'])->name('inquiries.index');
             Route::get('/inquiries/{inquiry}', [InquiryController::class, 'show'])->name('inquiries.show');
+            Route::prefix('crm')->name('crm.')->group(function () {
+                Route::get('/', [CrmController::class, 'dashboard'])->name('dashboard');
+                Route::get('/leads', [CrmLeadController::class, 'index'])->name('leads.index');
+                Route::get('/leads/trash', [CrmLeadController::class, 'trash'])->middleware('permission:leads.delete')->name('leads.trash');
+                Route::get('/leads/transfer', [CrmLeadController::class, 'transfer'])->middleware('permission:leads.edit')->name('leads.transfer');
+                Route::get('/leads/{lead}', [CrmLeadController::class, 'show'])->name('leads.show');
+                Route::get('/pipeline', [CrmController::class, 'pipeline'])->name('pipeline');
+                Route::get('/follow-ups', [CrmController::class, 'followUps'])->name('follow-ups');
+                Route::get('/tasks', [CrmController::class, 'tasks'])->name('tasks');
+                Route::get('/statuses', [CrmController::class, 'statuses'])->name('statuses');
+                Route::get('/sources', [CrmController::class, 'sources'])->name('sources');
+                Route::get('/service-types', [CrmController::class, 'serviceTypes'])->name('service-types');
+                Route::get('/reports', [CrmController::class, 'reports'])->middleware('permission:reports.view')->name('reports');
+            });
         });
         Route::put('/inquiries/{inquiry}', [InquiryController::class, 'update'])->middleware('permission:leads.edit')->name('inquiries.update');
+        Route::middleware('permission:leads.edit')->prefix('crm')->name('crm.')->group(function () {
+            Route::post('/leads/import/preview', [CrmLeadController::class, 'previewImport'])->name('leads.import.preview');
+            Route::post('/leads/import', [CrmLeadController::class, 'import'])->name('leads.import');
+            Route::get('/leads/import/template', [CrmLeadController::class, 'downloadTemplate'])->name('leads.import.template');
+            Route::get('/leads/import/report/{report}', [CrmLeadController::class, 'downloadImportReport'])->name('leads.import.report');
+            Route::put('/leads/{lead}', [CrmLeadController::class, 'update'])->name('leads.update');
+            Route::post('/leads/bulk', [CrmLeadController::class, 'bulkUpdate'])->name('leads.bulk-update');
+            Route::post('/leads/{lead}/notes', [CrmLeadController::class, 'storeNote'])->name('leads.notes.store');
+            Route::post('/leads/{lead}/tasks', [CrmLeadController::class, 'storeTask'])->name('leads.tasks.store');
+            Route::put('/follow-ups/{followUp}', [CrmLeadController::class, 'updateFollowUp'])->name('follow-ups.update');
+            Route::put('/tasks/{task}', [CrmController::class, 'updateTask'])->name('tasks.update');
+            Route::post('/statuses', [CrmController::class, 'storeStatus'])->name('statuses.store');
+            Route::put('/statuses/{status}', [CrmController::class, 'updateStatus'])->name('statuses.update');
+            Route::post('/sources', [CrmController::class, 'storeSource'])->name('sources.store');
+            Route::put('/sources/{source}', [CrmController::class, 'updateSource'])->name('sources.update');
+            Route::post('/service-types', [CrmController::class, 'storeServiceType'])->name('service-types.store');
+            Route::put('/service-types/{serviceType}', [CrmController::class, 'updateServiceType'])->name('service-types.update');
+            Route::delete('/service-types/{serviceType}', [CrmController::class, 'destroyServiceType'])->name('service-types.destroy');
+            Route::post('/service-subtypes', [CrmController::class, 'storeServiceSubtype'])->name('service-subtypes.store');
+            Route::put('/service-subtypes/{serviceSubtype}', [CrmController::class, 'updateServiceSubtype'])->name('service-subtypes.update');
+            Route::delete('/service-subtypes/{serviceSubtype}', [CrmController::class, 'destroyServiceSubtype'])->name('service-subtypes.destroy');
+        });
+        Route::middleware('permission:leads.export')->prefix('crm')->name('crm.')->group(function () {
+            Route::post('/leads/export', [CrmLeadController::class, 'export'])->name('leads.export');
+        });
+        Route::middleware('permission:leads.delete')->prefix('crm')->name('crm.')->group(function () {
+            Route::delete('/leads/{lead}', [CrmLeadController::class, 'destroy'])->name('leads.destroy');
+            Route::post('/leads/{lead}/restore', [CrmLeadController::class, 'restore'])->name('leads.restore');
+            Route::delete('/leads/{lead}/force-delete', [CrmLeadController::class, 'forceDestroy'])->name('leads.force-destroy');
+        });
     });
 });

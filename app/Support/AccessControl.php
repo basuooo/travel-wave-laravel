@@ -60,10 +60,12 @@ class AccessControl
             'marketing' => [
                 ['slug' => 'marketing.manage', 'name' => 'Manage Marketing', 'description' => 'Access marketing dashboards and campaign tools.'],
                 ['slug' => 'landing_pages.manage', 'name' => 'Manage Landing Pages', 'description' => 'Create and manage marketing landing pages.'],
+                ['slug' => 'chatbot.manage', 'name' => 'Manage AI Chatbot', 'description' => 'Manage the website AI assistant, knowledge base, and chatbot logs.'],
             ],
             'leads' => [
                 ['slug' => 'leads.view', 'name' => 'View Leads', 'description' => 'View inquiries and leads.'],
                 ['slug' => 'leads.edit', 'name' => 'Manage Leads', 'description' => 'Update lead status and internal notes.'],
+                ['slug' => 'leads.delete', 'name' => 'Delete Leads', 'description' => 'Move leads to trash, restore them, or delete them permanently when allowed.'],
                 ['slug' => 'leads.export', 'name' => 'Export Leads', 'description' => 'Export leads for sales and reporting.'],
             ],
         ];
@@ -96,8 +98,8 @@ class AccessControl
                     'dashboard.access', 'reports.view', 'settings.manage', 'pages.view', 'pages.create', 'pages.edit', 'pages.delete', 'pages.publish',
                     'destinations.manage', 'blog.manage', 'media.manage', 'menu.manage', 'testimonials.manage', 'forms.manage',
                     'forms.submissions.view', 'forms.submissions.edit', 'maps.manage', 'tracking.manage', 'utm.manage',
-                    'seo.manage', 'seo.meta.manage', 'seo.redirects.manage', 'seo.sitemap.manage', 'marketing.manage', 'landing_pages.manage',
-                    'leads.view', 'leads.edit', 'leads.export',
+                    'seo.manage', 'seo.meta.manage', 'seo.redirects.manage', 'seo.sitemap.manage', 'marketing.manage', 'landing_pages.manage', 'chatbot.manage',
+                    'leads.view', 'leads.edit', 'leads.delete', 'leads.export',
                 ],
             ],
             [
@@ -105,7 +107,7 @@ class AccessControl
                 'slug' => 'marketing-manager',
                 'description' => 'Manage landing pages, campaigns, UTM links, tracking, and marketing performance.',
                 'permissions' => [
-                    'dashboard.access', 'reports.view', 'marketing.manage', 'landing_pages.manage', 'tracking.manage',
+                    'dashboard.access', 'reports.view', 'marketing.manage', 'landing_pages.manage', 'tracking.manage', 'chatbot.manage',
                     'utm.manage', 'forms.manage', 'forms.submissions.view', 'leads.view',
                 ],
             ],

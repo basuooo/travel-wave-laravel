@@ -12,6 +12,13 @@ class TrackingIntegration extends Model
     public const TYPE_GTM = 'gtm';
     public const TYPE_GA4 = 'ga4';
     public const TYPE_META_PIXEL = 'meta_pixel';
+    public const TYPE_TIKTOK_PIXEL = 'tiktok_pixel';
+    public const TYPE_SNAP_PIXEL = 'snap_pixel';
+    public const TYPE_X_PIXEL = 'x_pixel';
+    public const TYPE_LINKEDIN_INSIGHT = 'linkedin_insight';
+    public const TYPE_PINTEREST_TAG = 'pinterest_tag';
+    public const TYPE_GOOGLE_ADS = 'google_ads';
+    public const TYPE_MICROSOFT_CLARITY = 'microsoft_clarity';
     public const TYPE_CUSTOM_SCRIPT = 'custom_script';
 
     protected $fillable = [
@@ -21,6 +28,7 @@ class TrackingIntegration extends Model
         'platform',
         'tracking_code',
         'script_code',
+        'settings',
         'placement',
         'notes',
         'visibility_mode',
@@ -31,6 +39,7 @@ class TrackingIntegration extends Model
 
     protected $casts = [
         'visibility_targets' => 'array',
+        'settings' => 'array',
         'sort_order' => 'integer',
         'is_active' => 'boolean',
     ];

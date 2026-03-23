@@ -90,6 +90,7 @@
 
     @include('partials.frontend.footer')
     @include('partials.frontend.floating-whatsapp')
+    @include('partials.frontend.chatbot-widget')
     @include('partials.frontend.tracking-scripts', ['integrations' => $bodyEndTrackingIntegrations, 'placement' => 'body_end'])
 
     @if($metaCapiEnabled)

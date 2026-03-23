@@ -6,6 +6,7 @@ use App\Models\MenuItem;
 use App\Models\Setting;
 use App\Support\SeoManager;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -46,6 +47,13 @@ class AppServiceProvider extends ServiceProvider
                 ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('sort_order')])
                 ->orderBy('sort_order')
                 ->get();
+            $adminNotifications = collect();
+            $adminUnreadNotificationsCount = 0;
+
+            if (auth()->check() && Schema::hasTable('notifications')) {
+                $adminNotifications = auth()->user()->notifications()->latest()->limit(6)->get();
+                $adminUnreadNotificationsCount = auth()->user()->unreadNotifications()->count();
+            }
 
             $view->with([
                 'siteSettings' => $settings,
@@ -53,6 +61,8 @@ class AppServiceProvider extends ServiceProvider
                 'seoMetaData' => $seoManager->resolveForRequest(request()),
                 'headerMenuItems' => $headerMenu,
                 'footerMenuItems' => $footerMenu,
+                'adminNotifications' => $adminNotifications,
+                'adminUnreadNotificationsCount' => $adminUnreadNotificationsCount,
             ]);
         });
     }

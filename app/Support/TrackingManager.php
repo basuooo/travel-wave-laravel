@@ -18,7 +18,41 @@ class TrackingManager
             TrackingIntegration::TYPE_GTM => 'Google Tag Manager',
             TrackingIntegration::TYPE_GA4 => 'Google Analytics 4',
             TrackingIntegration::TYPE_META_PIXEL => 'Meta Pixel',
+            TrackingIntegration::TYPE_TIKTOK_PIXEL => 'TikTok Pixel',
+            TrackingIntegration::TYPE_SNAP_PIXEL => 'Snap Pixel',
+            TrackingIntegration::TYPE_X_PIXEL => 'X / Twitter Pixel',
+            TrackingIntegration::TYPE_LINKEDIN_INSIGHT => 'LinkedIn Insight Tag',
+            TrackingIntegration::TYPE_PINTEREST_TAG => 'Pinterest Tag',
+            TrackingIntegration::TYPE_GOOGLE_ADS => 'Google Ads Conversion Tracking',
+            TrackingIntegration::TYPE_MICROSOFT_CLARITY => 'Microsoft Clarity',
             TrackingIntegration::TYPE_CUSTOM_SCRIPT => 'Custom Script / Pixel',
+        ];
+    }
+
+    public static function toolGroupOptions(): array
+    {
+        return [
+            'Google Tools' => [
+                TrackingIntegration::TYPE_GTM => self::integrationTypeOptions()[TrackingIntegration::TYPE_GTM],
+                TrackingIntegration::TYPE_GA4 => self::integrationTypeOptions()[TrackingIntegration::TYPE_GA4],
+                TrackingIntegration::TYPE_GOOGLE_ADS => self::integrationTypeOptions()[TrackingIntegration::TYPE_GOOGLE_ADS],
+            ],
+            'Meta Tools' => [
+                TrackingIntegration::TYPE_META_PIXEL => self::integrationTypeOptions()[TrackingIntegration::TYPE_META_PIXEL],
+            ],
+            'Social Ad Platforms' => [
+                TrackingIntegration::TYPE_TIKTOK_PIXEL => self::integrationTypeOptions()[TrackingIntegration::TYPE_TIKTOK_PIXEL],
+                TrackingIntegration::TYPE_SNAP_PIXEL => self::integrationTypeOptions()[TrackingIntegration::TYPE_SNAP_PIXEL],
+                TrackingIntegration::TYPE_X_PIXEL => self::integrationTypeOptions()[TrackingIntegration::TYPE_X_PIXEL],
+                TrackingIntegration::TYPE_LINKEDIN_INSIGHT => self::integrationTypeOptions()[TrackingIntegration::TYPE_LINKEDIN_INSIGHT],
+                TrackingIntegration::TYPE_PINTEREST_TAG => self::integrationTypeOptions()[TrackingIntegration::TYPE_PINTEREST_TAG],
+            ],
+            'Heatmaps / Analytics' => [
+                TrackingIntegration::TYPE_MICROSOFT_CLARITY => self::integrationTypeOptions()[TrackingIntegration::TYPE_MICROSOFT_CLARITY],
+            ],
+            'Custom Scripts' => [
+                TrackingIntegration::TYPE_CUSTOM_SCRIPT => self::integrationTypeOptions()[TrackingIntegration::TYPE_CUSTOM_SCRIPT],
+            ],
         ];
     }
 
@@ -201,7 +235,14 @@ class TrackingManager
             TrackingIntegration::TYPE_GTM => in_array($placement, ['head', 'body_open'], true)
                 && in_array($configuredPlacement, ['standard', $placement], true),
             TrackingIntegration::TYPE_GA4,
-            TrackingIntegration::TYPE_META_PIXEL => $placement === 'head'
+            TrackingIntegration::TYPE_META_PIXEL,
+            TrackingIntegration::TYPE_TIKTOK_PIXEL,
+            TrackingIntegration::TYPE_SNAP_PIXEL,
+            TrackingIntegration::TYPE_X_PIXEL,
+            TrackingIntegration::TYPE_LINKEDIN_INSIGHT,
+            TrackingIntegration::TYPE_PINTEREST_TAG,
+            TrackingIntegration::TYPE_GOOGLE_ADS,
+            TrackingIntegration::TYPE_MICROSOFT_CLARITY => $placement === 'head'
                 && in_array($configuredPlacement, ['standard', 'head'], true),
             TrackingIntegration::TYPE_CUSTOM_SCRIPT => $configuredPlacement === $placement,
             default => false,
