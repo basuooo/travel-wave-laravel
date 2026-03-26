@@ -161,6 +161,10 @@ class DestinationPageSystemSeeder extends Seeder
         array $servicesAr,
         array $pricingAr
     ): array {
+        $heroSlideOne = 'hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png';
+        $heroSlideTwo = 'hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png';
+        $heroSlideThree = 'hero-slides/AHA77CWYemeYDheAtHSRseA0io46WT0GuRkU8Vfh.jpg';
+
         return [
             'slug' => $slug,
             'title_en' => $titleEn,
@@ -181,10 +185,10 @@ class DestinationPageSystemSeeder extends Seeder
             'hero_secondary_cta_text_en' => 'View Highlights',
             'hero_secondary_cta_text_ar' => 'استعرض المزايا',
             'hero_secondary_cta_url' => '#destination-highlights',
-            'hero_image' => 'hero-slides/slide-3.svg',
+            'hero_image' => $heroSlideThree,
             'hero_mobile_image' => 'hero-slides/slide-3.svg',
-            'featured_image' => 'hero-slides/slide-3.svg',
-            'about_image' => 'hero-slides/slide-1.svg',
+            'featured_image' => $heroSlideThree,
+            'about_image' => $heroSlideOne,
             'quick_info_title_en' => 'Quick Info',
             'quick_info_title_ar' => 'معلومات سريعة',
             'quick_info_items' => [
@@ -281,7 +285,7 @@ class DestinationPageSystemSeeder extends Seeder
             'cta_secondary_button_en' => 'WhatsApp',
             'cta_secondary_button_ar' => 'واتساب',
             'cta_secondary_url' => 'https://wa.me/201000000000',
-            'cta_background_image' => 'hero-slides/slide-2.svg',
+            'cta_background_image' => $heroSlideTwo,
             'form_title_en' => 'Ask About ' . $titleEn,
             'form_title_ar' => 'استفسر عن ' . $titleAr,
             'form_subtitle_en' => 'Send your details and Travel Wave will help with a suitable package.',
@@ -294,6 +298,9 @@ class DestinationPageSystemSeeder extends Seeder
 
     protected function visaPage(string $slug, string $nameEn, string $nameAr, string $flag, string $supportAr): array
     {
+        $heroSlideOne = 'hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png';
+        $heroSlideTwo = 'hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png';
+
         return [
             'slug' => $slug,
             'name_en' => $nameEn,
@@ -309,8 +316,8 @@ class DestinationPageSystemSeeder extends Seeder
             'hero_cta_text_en' => 'Start ' . $nameEn . ' Visa Request',
             'hero_cta_text_ar' => 'ابدأ طلب تأشيرة ' . $nameAr,
             'hero_cta_url' => '#destination-form',
-            'hero_image' => 'hero-slides/slide-2.svg',
-            'hero_mobile_image' => 'hero-slides/slide-2.svg',
+            'hero_image' => $heroSlideTwo,
+            'hero_mobile_image' => $heroSlideTwo,
             'flag_image' => $flag,
             'overview_en' => $nameEn . ' remains one of the popular Schengen destinations and usually benefits from a clear, well-structured file before the appointment stage.',
             'overview_ar' => 'تعد ' . $nameAr . ' من الوجهات الشائعة ضمن شنغن، ويستفيد طلبها عادة من ملف واضح ومنظم قبل مرحلة الموعد.',
@@ -399,7 +406,7 @@ class DestinationPageSystemSeeder extends Seeder
             'cta_button_en' => 'Start Now',
             'cta_button_ar' => 'ابدأ الآن',
             'cta_url' => '#destination-form',
-            'final_cta_background_image' => 'hero-slides/slide-1.svg',
+            'final_cta_background_image' => $heroSlideOne,
             'final_cta_is_active' => true,
         ];
     }

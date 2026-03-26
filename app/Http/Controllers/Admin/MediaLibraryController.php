@@ -20,7 +20,9 @@ class MediaLibraryController extends Controller
     {
         MediaLibraryService::syncKnownReferences();
 
-        $query = MediaAsset::query()->latest();
+        $query = MediaAsset::query()
+            ->select(['id', 'title', 'alt_text', 'disk', 'file_name', 'path', 'extension', 'size', 'is_favorite', 'created_at'])
+            ->latest();
 
         if ($search = trim((string) $request->query('q'))) {
             $query->where(function ($builder) use ($search) {
@@ -34,17 +36,20 @@ class MediaLibraryController extends Controller
             $query->where('extension', $extension);
         }
 
+        $items = $query->paginate(20)->withQueryString();
+
         return view('admin.media-library.index', [
-            'items' => $query->paginate(24)->withQueryString(),
+            'items' => $items,
             'extensions' => MediaAsset::query()->whereNotNull('extension')->distinct()->orderBy('extension')->pluck('extension'),
+            'usageCounts' => MediaLibraryService::usageCounts($items->getCollection()->pluck('path')->all()),
         ]);
     }
 
     public function library(Request $request)
     {
-        MediaLibraryService::syncKnownReferences();
-
-        $query = MediaAsset::query()->latest();
+        $query = MediaAsset::query()
+            ->select(['id', 'title', 'file_name', 'path', 'disk', 'mime_type', 'extension', 'size', 'width', 'height', 'created_at'])
+            ->latest();
 
         if ($search = trim((string) $request->query('q'))) {
             $query->where(function ($builder) use ($search) {
@@ -54,24 +59,39 @@ class MediaLibraryController extends Controller
             });
         }
 
+        $items = $query->paginate(20);
+        $usageCounts = MediaLibraryService::usageCounts($items->getCollection()->pluck('path')->all());
+
         return response()->json([
-            'items' => $query->limit(60)->get()->map(function (MediaAsset $asset) {
+            'items' => $items->getCollection()->map(function (MediaAsset $asset) use ($usageCounts) {
                 return [
                     'id' => $asset->id,
                     'title' => $asset->title,
                     'file_name' => $asset->file_name,
                     'path' => $asset->path,
-                    'url' => $asset->url,
+                    'url' => $asset->public_url,
                     'public_url' => $asset->public_url,
-                    'exists' => $asset->file_exists,
                     'mime_type' => $asset->mime_type,
                     'extension' => $asset->extension,
                     'size' => $asset->size,
-                    'dimensions' => trim(implode(' × ', array_filter([$asset->width, $asset->height]))),
+                    'dimensions' => trim(implode(' x ', array_filter([$asset->width, $asset->height]))),
                     'uploaded_at' => optional($asset->created_at)->format('Y-m-d H:i'),
-                    'usage' => MediaLibraryService::usageReferences($asset->path),
+                    'usage_count' => $usageCounts[MediaLibraryService::normalizePath((string) $asset->path)] ?? 0,
                 ];
             })->values(),
+            'pagination' => [
+                'current_page' => $items->currentPage(),
+                'last_page' => $items->lastPage(),
+                'per_page' => $items->perPage(),
+                'total' => $items->total(),
+            ],
+        ]);
+    }
+
+    public function usage(MediaAsset $media_library)
+    {
+        return response()->json([
+            'items' => MediaLibraryService::usageDetails($media_library->path),
         ]);
     }
 
@@ -91,7 +111,7 @@ class MediaLibraryController extends Controller
                 'title' => $asset?->title,
                 'file_name' => $asset?->file_name,
                 'path' => $asset?->path ?: MediaLibraryService::normalizePath($path),
-                'url' => $asset?->url ?: Storage::disk('public')->url(MediaLibraryService::normalizePath($path)),
+                'url' => $asset?->public_url ?: Storage::disk('public')->url(MediaLibraryService::normalizePath($path)),
             ];
         })->values();
 

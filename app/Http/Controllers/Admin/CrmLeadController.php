@@ -12,11 +12,19 @@ use App\Models\CrmLeadSource;
 use App\Models\CrmServiceSubtype;
 use App\Models\CrmServiceType;
 use App\Models\Inquiry;
+use App\Models\UtmCampaign;
 use App\Models\User;
+use App\Support\AccountingCalculatorService;
+use App\Support\AuditLogService;
+use App\Support\AdminNotificationCenterService;
 use App\Support\CrmLeadAccess;
+use App\Support\CrmDelayedLeadService;
 use App\Support\CrmLeadTransferService;
+use App\Support\WorkflowAutomationService;
 use App\Support\SimpleSpreadsheet;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CrmLeadController extends Controller
@@ -35,6 +43,56 @@ class CrmLeadController extends Controller
             'serviceTypes' => $this->activeServiceTypes(),
             'users' => $this->assignableUsers(),
             'canViewAllLeads' => CrmLeadAccess::canViewAll($viewer),
+            'delayedLeadsCount' => $this->delayedLeadsCount(),
+        ]);
+    }
+
+    public function delayed(Request $request, CrmDelayedLeadService $delayedLeadService)
+    {
+        $viewer = auth()->user();
+        $query = Inquiry::query()
+            ->with([
+                'crmStatus',
+                'crmSource',
+                'assignedUser',
+            ]);
+
+        $query = CrmLeadAccess::applyVisibilityScope($query, $viewer);
+        $query = $delayedLeadService->applyDelayedScope($query);
+
+        if ($request->filled('q')) {
+            $needle = '%' . trim((string) $request->query('q')) . '%';
+            $query->where(function ($builder) use ($needle) {
+                $builder->where('full_name', 'like', $needle)
+                    ->orWhere('phone', 'like', $needle)
+                    ->orWhere('whatsapp_number', 'like', $needle)
+                    ->orWhere('email', 'like', $needle)
+                    ->orWhere('country', 'like', $needle)
+                    ->orWhere('destination', 'like', $needle);
+            });
+        }
+
+        if ($request->filled('assigned_user_id')) {
+            if ($request->string('assigned_user_id')->toString() === 'unassigned') {
+                $query->whereNull('assigned_user_id');
+            } else {
+                $query->where('assigned_user_id', $request->integer('assigned_user_id'));
+            }
+        }
+
+        if ($request->filled('crm_status_id')) {
+            $query->where('crm_status_id', $request->integer('crm_status_id'));
+        }
+
+        $items = $query->paginate(20)->withQueryString();
+        $items->setCollection($delayedLeadService->annotate($items->getCollection()));
+
+        return view('admin.crm.leads.delayed', [
+            'items' => $items,
+            'statuses' => $this->activeStatuses(),
+            'users' => $this->assignableUsers(),
+            'canViewAllLeads' => CrmLeadAccess::canViewAll($viewer),
+            'delayedLeadsCount' => $this->delayedLeadsCount(),
         ]);
     }
 
@@ -60,6 +118,78 @@ class CrmLeadController extends Controller
             ]),
             'canExportLeads' => $this->canExportLeads($request->user()),
         ]);
+    }
+
+    public function create()
+    {
+        return view('admin.crm.leads.create', [
+            'statuses' => $this->activeStatuses(),
+            'defaultStatus' => $this->defaultCrmStatus(),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $auditLogService = app(AuditLogService::class);
+        $data = $request->validate([
+            'full_name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:50'],
+            'whatsapp_number' => ['nullable', 'string', 'max:50'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'country' => ['nullable', 'string', 'max:255'],
+            'destination' => ['nullable', 'string', 'max:255'],
+            'admin_notes' => ['nullable', 'string'],
+            'crm_status_id' => ['nullable', 'exists:crm_statuses,id'],
+        ]);
+
+        $this->guardManualLeadDuplicates($data);
+
+        $status = ! empty($data['crm_status_id'])
+            ? CrmStatus::query()->find($data['crm_status_id'])
+            : $this->defaultCrmStatus();
+
+        $manualSource = $this->ensureManualSource();
+        $now = now();
+
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => $data['full_name'],
+            'phone' => $data['phone'],
+            'whatsapp_number' => $data['whatsapp_number'] ?? null,
+            'email' => $data['email'] ?? null,
+            'country' => $data['country'] ?? null,
+            'destination' => $data['destination'] ?? ($data['country'] ?? null),
+            'admin_notes' => $data['admin_notes'] ?? null,
+            'crm_status_id' => $status?->id,
+            'status' => $status?->slug ?? 'new',
+            'crm_source_id' => $manualSource?->id,
+            'lead_source' => 'manual',
+            'source_page' => 'admin-manual',
+            'crm_status_updated_at' => $status ? $now : null,
+            'crm_status_updated_by' => $status ? auth()->id() : null,
+            'status_1_updated_at' => $status ? $now : null,
+            'status_1_updated_by' => $status ? auth()->id() : null,
+        ]);
+
+        $auditLogService->log(
+            $request->user(),
+            'crm_leads',
+            'created',
+            $lead,
+            [
+                'title' => __('admin.crm_lead_created'),
+                'description' => $lead->full_name,
+                'new_values' => $this->leadAuditValues($lead),
+                'changed_fields' => array_keys($this->leadAuditValues($lead)),
+            ]
+        );
+        app(WorkflowAutomationService::class)->dispatch(WorkflowAutomationService::TRIGGER_LEAD_CREATED, $lead->fresh(['crmStatus', 'crmSource', 'assignedUser']), [
+            'actor' => $request->user(),
+        ]);
+
+        return redirect()
+            ->route('admin.crm.leads.index')
+            ->with('success', __('admin.crm_lead_created'));
     }
 
     public function previewImport(Request $request, CrmLeadTransferService $transferService)
@@ -245,10 +375,17 @@ class CrmLeadController extends Controller
             'crmFollowUps.assignedUser',
             'crmFollowUps.creator',
             'crmFollowUps.completedBy',
+            'documents.category',
+            'documents.uploader',
             'crmStatusUpdates.oldStatus',
             'crmStatusUpdates.newStatus',
             'crmStatusUpdates.user',
             'marketingLandingPage',
+            'utmCampaign.owner',
+            'crmCustomer.assignedUser',
+            'accountingAccount.payments.creator',
+            'accountingAccount.expenses.category',
+            'accountingAccount.expenses.subcategory',
         ]);
 
         return view('admin.crm.leads.show', [
@@ -257,15 +394,23 @@ class CrmLeadController extends Controller
             'sources' => $this->activeSources(),
             'serviceTypes' => $this->activeServiceTypes(),
             'users' => $this->assignableUsers(),
+            'campaigns' => $this->activeMarketingCampaigns(),
             'canViewAllLeads' => CrmLeadAccess::canViewAll(auth()->user()),
+            'canManageAccounting' => auth()->user()?->hasPermission('accounting.manage') ?? false,
         ]);
     }
 
-    public function update(Request $request, Inquiry $lead)
+    public function update(
+        Request $request,
+        Inquiry $lead,
+        AdminNotificationCenterService $notificationCenterService,
+        AccountingCalculatorService $accountingCalculatorService
+    )
     {
+        $auditLogService = app(AuditLogService::class);
         $this->authorizeLeadVisibility($lead);
-
-        $data = $request->validate([
+        $beforeAudit = $this->leadAuditValues($lead->loadMissing(['crmStatus', 'crmSource', 'assignedUser']));
+        $rules = [
             'full_name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:255'],
             'whatsapp_number' => ['nullable', 'string', 'max:255'],
@@ -285,7 +430,9 @@ class CrmLeadController extends Controller
             'country' => ['nullable', 'string', 'max:255'],
             'lead_source' => ['nullable', 'string', 'max:255'],
             'campaign_name' => ['nullable', 'string', 'max:255'],
+            'utm_campaign_id' => ['nullable', 'exists:utm_campaigns,id'],
             'utm_source' => ['nullable', 'string', 'max:255'],
+            'utm_medium' => ['nullable', 'string', 'max:255'],
             'utm_campaign' => ['nullable', 'string', 'max:255'],
             'priority' => ['nullable', 'in:low,normal,high,urgent'],
             'travel_date' => ['nullable', 'date'],
@@ -298,18 +445,39 @@ class CrmLeadController extends Controller
             'total_price' => ['nullable', 'numeric', 'min:0'],
             'expenses' => ['nullable', 'numeric', 'min:0'],
             'net_price' => ['nullable', 'numeric'],
+            'total_amount' => ['nullable', 'numeric', 'min:0'],
+            'paid_amount' => ['nullable', 'numeric', 'min:0'],
             'status_change_note' => ['nullable', 'string'],
             'scheduled_follow_up_date' => ['nullable', 'date'],
             'scheduled_follow_up_time' => ['nullable', 'date_format:H:i'],
             'follow_up_reminder_offset' => ['nullable', 'in:15,30,60,1440'],
             'follow_up_schedule_note' => ['nullable', 'string'],
-        ]);
+        ];
+
+        $data = $request->validate($rules);
+        $canManageAccounting = $request->user()?->hasPermission('accounting.manage') ?? false;
+
+        if (! $canManageAccounting) {
+            unset($data['total_amount'], $data['paid_amount']);
+        }
 
         $updates = $data;
         $updates['crm_status2_id'] = null;
         $updates['status_2_updated_at'] = null;
         $updates['status_2_updated_by'] = null;
         $updates['crm_service_subtype_id'] = $data['crm_service_subtype_id'] ?? null;
+
+        if (! empty($data['utm_campaign_id'])) {
+            $linkedCampaign = UtmCampaign::query()->find($data['utm_campaign_id']);
+
+            if ($linkedCampaign) {
+                $updates['utm_campaign_id'] = $linkedCampaign->id;
+                $updates['campaign_name'] = $linkedCampaign->display_name;
+                $updates['utm_source'] = $data['utm_source'] ?? $linkedCampaign->utm_source;
+                $updates['utm_medium'] = $data['utm_medium'] ?? $linkedCampaign->utm_medium;
+                $updates['utm_campaign'] = $data['utm_campaign'] ?? $linkedCampaign->utm_campaign;
+            }
+        }
 
         $selectedSource = ! empty($data['crm_source_id'])
             ? CrmLeadSource::query()->find($data['crm_source_id'])
@@ -340,12 +508,6 @@ class CrmLeadController extends Controller
             $selectedServiceSubtype,
             $data
         ));
-
-        if (! array_key_exists('net_price', $data) || $data['net_price'] === null) {
-            $totalPrice = (float) ($data['total_price'] ?? $lead->total_price ?? 0);
-            $expenses = (float) ($data['expenses'] ?? $lead->expenses ?? 0);
-            $updates['net_price'] = $totalPrice - $expenses;
-        }
 
         $now = now();
         $userId = auth()->id();
@@ -388,16 +550,63 @@ class CrmLeadController extends Controller
 
         $updates['status'] = $status?->slug ?? $lead->status;
 
-        $lead->update($updates);
+        $originalAssignedUserId = (int) ($lead->assigned_user_id ?? 0);
+        $originalPaidAmount = round((float) ($lead->paid_amount ?? 0), 2);
+        $legacyPricing = $this->normalizeLegacyPricing($lead, $data);
+        $accountingPayload = $this->normalizeAccountingSummaryPayload($lead, $data, $canManageAccounting);
+
+        $lead = DB::transaction(function () use (
+            $lead,
+            $updates,
+            $legacyPricing,
+            $accountingPayload,
+            $canManageAccounting,
+            $accountingCalculatorService,
+            $notificationCenterService,
+            $request,
+            $originalPaidAmount
+        ) {
+            $lead->update(array_merge($updates, $legacyPricing, $accountingPayload['lead_updates']));
+            $lead->refresh();
+
+            if (! $canManageAccounting || ! $accountingPayload['should_sync']) {
+                return $lead;
+            }
+
+            $account = $accountingCalculatorService->syncLeadAccount($lead, auth()->id());
+            $paymentDelta = round($accountingPayload['paid_amount'] - $originalPaidAmount, 2);
+
+            if ($paymentDelta > 0) {
+                $payment = $account->payments()->create([
+                    'created_by' => auth()->id(),
+                    'amount' => $paymentDelta,
+                    'payment_date' => now()->toDateString(),
+                    'payment_type' => 'payment',
+                    'note' => __('admin.accounting_payment_synced_from_crm'),
+                ]);
+
+                $account = $accountingCalculatorService->syncLeadPaymentSummary($lead->fresh(), $accountingPayload['paid_amount'], auth()->id());
+                $notificationCenterService->createAccountingPaymentNotification($account->fresh(['assignedUser', 'inquiry']), $payment->fresh(), $request->user());
+            } elseif ($paymentDelta !== 0.0 || $accountingPayload['total_amount_changed']) {
+                $accountingCalculatorService->syncLeadPaymentSummary($lead->fresh(), $accountingPayload['paid_amount'], auth()->id());
+            }
+
+            return $lead->fresh(['assignedUser', 'crmStatus']);
+        });
 
         if ($assignmentChanged) {
             $this->logAssignmentChange(
                 $lead,
-                $lead->getOriginal('assigned_user_id'),
+                $originalAssignedUserId ?: null,
                 $lead->assigned_user_id,
                 auth()->id(),
                 $now,
                 null
+            );
+            $notificationCenterService->createLeadAssignedNotification(
+                $lead->fresh(['assignedUser', 'crmStatus']),
+                $originalAssignedUserId,
+                $request->user()
             );
         }
 
@@ -410,6 +619,66 @@ class CrmLeadController extends Controller
                     'status' => CrmFollowUp::STATUS_CANCELLED,
                     'cancelled_at' => now(),
                 ]);
+        }
+
+        $lead->loadMissing(['crmStatus', 'crmSource', 'assignedUser']);
+        $afterAudit = $this->leadAuditValues($lead);
+        $diff = $auditLogService->diff($beforeAudit, $afterAudit);
+        $generalChangedFields = array_values(array_diff($diff['changed_fields'], ['crm_status_id', 'assigned_user_id']));
+
+        if ($generalChangedFields !== []) {
+            $auditLogService->log(
+                $request->user(),
+                'crm_leads',
+                'updated',
+                $lead,
+                [
+                    'title' => __('admin.crm_lead_updated'),
+                    'description' => $lead->full_name,
+                    'old_values' => array_intersect_key($diff['old_values'], array_flip($generalChangedFields)),
+                    'new_values' => array_intersect_key($diff['new_values'], array_flip($generalChangedFields)),
+                    'changed_fields' => $generalChangedFields,
+                ]
+            );
+        }
+
+        if ($statusChanged) {
+            $auditLogService->log(
+                $request->user(),
+                'crm_leads',
+                'status_changed',
+                $lead,
+                [
+                    'title' => __('admin.audit_action_status_changed'),
+                    'description' => $lead->full_name,
+                    'old_values' => ['crm_status_id' => $beforeAudit['crm_status_id'] ?? null],
+                    'new_values' => ['crm_status_id' => $afterAudit['crm_status_id'] ?? null],
+                    'changed_fields' => ['crm_status_id'],
+                ]
+            );
+        }
+
+        if ($assignmentChanged) {
+            $auditLogService->log(
+                $request->user(),
+                'crm_leads',
+                $originalAssignedUserId ? 'reassigned' : 'assigned',
+                $lead,
+                [
+                    'title' => __('admin.audit_action_reassigned'),
+                    'description' => $lead->full_name,
+                    'old_values' => ['assigned_user_id' => $beforeAudit['assigned_user_id'] ?? null],
+                    'new_values' => ['assigned_user_id' => $afterAudit['assigned_user_id'] ?? null],
+                    'changed_fields' => ['assigned_user_id'],
+                ]
+            );
+        }
+
+        if ($statusChanged) {
+            app(WorkflowAutomationService::class)->dispatch(WorkflowAutomationService::TRIGGER_LEAD_STATUS_CHANGED, $lead->fresh(['crmStatus', 'crmSource', 'assignedUser']), [
+                'actor' => $request->user(),
+                'new_status_id' => $lead->crm_status_id,
+            ]);
         }
 
         return redirect()
@@ -480,8 +749,22 @@ class CrmLeadController extends Controller
 
     public function destroy(Inquiry $lead)
     {
+        $auditLogService = app(AuditLogService::class);
         $this->ensureDeletionPermission();
         $this->authorizeLeadVisibility($lead);
+
+        $auditLogService->log(
+            auth()->user(),
+            'crm_leads',
+            'deleted',
+            $lead,
+            [
+                'title' => __('admin.crm_lead_trashed'),
+                'description' => $lead->full_name,
+                'old_values' => $this->leadAuditValues($lead),
+                'changed_fields' => ['deleted_at'],
+            ]
+        );
 
         $lead->deleted_by = auth()->id();
         $lead->save();
@@ -492,6 +775,7 @@ class CrmLeadController extends Controller
 
     public function restore(int $lead)
     {
+        $auditLogService = app(AuditLogService::class);
         $this->ensureDeletionPermission();
 
         $item = Inquiry::withTrashed()->findOrFail($lead);
@@ -499,16 +783,40 @@ class CrmLeadController extends Controller
         $item->restore();
         $item->forceFill(['deleted_by' => null])->save();
 
+        $auditLogService->log(
+            auth()->user(),
+            'crm_leads',
+            'restored',
+            $item->fresh(),
+            [
+                'title' => __('admin.crm_lead_restored'),
+                'description' => $item->full_name,
+            ]
+        );
+
         return redirect()->route('admin.crm.leads.trash')->with('success', __('admin.crm_lead_restored'));
     }
 
     public function forceDestroy(int $lead)
     {
+        $auditLogService = app(AuditLogService::class);
         $this->ensureDeletionPermission();
 
         $item = Inquiry::withTrashed()->findOrFail($lead);
         $this->authorizeLeadVisibility($item);
         abort_unless($item->trashed(), 404);
+
+        $auditLogService->log(
+            auth()->user(),
+            'crm_leads',
+            'force_deleted',
+            $item,
+            [
+                'title' => __('admin.crm_lead_deleted_permanently'),
+                'description' => $item->full_name,
+                'old_values' => $this->leadAuditValues($item),
+            ]
+        );
         $item->forceDelete();
 
         return redirect()->route('admin.crm.leads.trash')->with('success', __('admin.crm_lead_deleted_permanently'));
@@ -539,13 +847,30 @@ class CrmLeadController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'assigned_user_id' => ['nullable', 'exists:users,id'],
+            'assigned_user_id' => ['required', 'exists:users,id'],
+            'task_type' => ['nullable', 'in:lead,general,team'],
+            'category' => ['nullable', 'in:' . implode(',', array_keys(CrmTask::categoryOptions()))],
+            'priority' => ['nullable', 'in:low,medium,high,urgent'],
+            'status' => ['nullable', 'in:new,in_progress,waiting,completed,cancelled'],
             'due_at' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string'],
         ]);
 
-        $lead->crmTasks()->create($data + [
+        $task = $lead->crmTasks()->create($data + [
             'created_by' => auth()->id(),
-            'status' => 'open',
+            'task_type' => $data['task_type'] ?? CrmTask::TYPE_LEAD,
+            'category' => $data['category'] ?? CrmTask::CATEGORY_CUSTOMER_FOLLOWUP,
+            'priority' => $data['priority'] ?? CrmTask::PRIORITY_MEDIUM,
+            'status' => $data['status'] ?? CrmTask::STATUS_NEW,
+            'completed_at' => ($data['status'] ?? CrmTask::STATUS_NEW) === CrmTask::STATUS_COMPLETED ? now() : null,
+            'last_activity_at' => now(),
+        ]);
+
+        $task->activities()->create([
+            'user_id' => auth()->id(),
+            'action_type' => 'created',
+            'new_value' => $task->status,
+            'note' => $data['notes'] ?? null,
         ]);
 
         return redirect()
@@ -617,10 +942,12 @@ class CrmLeadController extends Controller
             ]);
         }
 
-        foreach ($visibleLeads as $lead) {
-            if ($hasAssignmentChange) {
-                $oldAssigned = $lead->assigned_user_id;
+        $notificationCenterService = app(AdminNotificationCenterService::class);
 
+        foreach ($visibleLeads as $lead) {
+            $oldAssigned = $lead->assigned_user_id;
+
+            if ($hasAssignmentChange) {
                 if ((int) $oldAssigned !== (int) $newAssignedUserId) {
                     $lead->assigned_user_id = $newAssignedUserId;
                     $this->logAssignmentChange($lead, $oldAssigned, $newAssignedUserId, auth()->id(), now(), $data['bulk_note'] ?? null);
@@ -649,6 +976,14 @@ class CrmLeadController extends Controller
 
             if ($lead->isDirty()) {
                 $lead->save();
+
+                if ($hasAssignmentChange && (int) $oldAssigned !== (int) $lead->assigned_user_id) {
+                    $notificationCenterService->createLeadAssignedNotification(
+                        $lead->fresh(['assignedUser', 'crmStatus']),
+                        (int) $oldAssigned,
+                        $request->user()
+                    );
+                }
             }
         }
 
@@ -672,9 +1007,10 @@ class CrmLeadController extends Controller
                 'crmServiceType',
                 'crmServiceSubtype',
                 'assignedUser',
-                'crmStatusUpdatedBy',
-                'deletedBy',
-            ])
+            'crmStatusUpdatedBy',
+            'deletedBy',
+            'utmCampaign',
+        ])
             ->latest();
 
         $query = CrmLeadAccess::applyVisibilityScope($query, auth()->user());
@@ -746,6 +1082,16 @@ class CrmLeadController extends Controller
             ->get();
     }
 
+    protected function defaultCrmStatus(): ?CrmStatus
+    {
+        return CrmStatus::query()
+            ->where('is_active', true)
+            ->orderByDesc('is_default')
+            ->orderByRaw("case when slug = 'new-lead' then 0 else 1 end")
+            ->orderBy('sort_order')
+            ->first();
+    }
+
     protected function activeSources()
     {
         return CrmLeadSource::query()
@@ -769,6 +1115,22 @@ class CrmLeadController extends Controller
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
+    }
+
+    protected function activeMarketingCampaigns()
+    {
+        return UtmCampaign::query()
+            ->orderBy('display_name')
+            ->get();
+    }
+
+    protected function delayedLeadsCount(): int
+    {
+        $service = app(CrmDelayedLeadService::class);
+
+        return $service
+            ->applyDelayedScope(CrmLeadAccess::applyVisibilityScope(Inquiry::query(), auth()->user()))
+            ->count();
     }
 
     protected function logStatusUpdate(Inquiry $lead, $oldStatusId, $newStatusId, ?int $userId, $changedAt, ?string $note): void
@@ -914,6 +1276,90 @@ class CrmLeadController extends Controller
         return $payload;
     }
 
+    protected function normalizeLegacyPricing(Inquiry $lead, array $data): array
+    {
+        $hasTotalPrice = array_key_exists('total_price', $data);
+        $hasExpenses = array_key_exists('expenses', $data);
+        $hasNetPrice = array_key_exists('net_price', $data);
+
+        if (! $hasTotalPrice && ! $hasExpenses && ! $hasNetPrice) {
+            return [];
+        }
+
+        $totalPrice = $hasTotalPrice
+            ? ($data['total_price'] !== null ? round((float) $data['total_price'], 2) : null)
+            : ($lead->total_price !== null ? round((float) $lead->total_price, 2) : null);
+
+        $expenses = $hasExpenses
+            ? ($data['expenses'] !== null ? round((float) $data['expenses'], 2) : null)
+            : ($lead->expenses !== null ? round((float) $lead->expenses, 2) : null);
+
+        if ($hasNetPrice && $data['net_price'] !== null) {
+            $netPrice = round((float) $data['net_price'], 2);
+        } elseif ($totalPrice !== null && $expenses !== null) {
+            $netPrice = round($totalPrice - $expenses, 2);
+        } else {
+            $netPrice = $lead->net_price !== null ? round((float) $lead->net_price, 2) : null;
+        }
+
+        return [
+            'total_price' => $totalPrice,
+            'expenses' => $expenses,
+            'net_price' => $netPrice,
+        ];
+    }
+
+    protected function normalizeAccountingSummaryPayload(Inquiry $lead, array $data, bool $canManageAccounting): array
+    {
+        if (! $canManageAccounting) {
+            return [
+                'should_sync' => false,
+                'paid_amount' => round((float) ($lead->paid_amount ?? 0), 2),
+                'lead_updates' => [],
+                'total_amount_changed' => false,
+            ];
+        }
+
+        $hasTotalAmount = array_key_exists('total_amount', $data);
+        $hasPaidAmount = array_key_exists('paid_amount', $data);
+
+        if (! $hasTotalAmount && ! $hasPaidAmount) {
+            return [
+                'should_sync' => false,
+                'paid_amount' => round((float) ($lead->paid_amount ?? 0), 2),
+                'lead_updates' => [],
+                'total_amount_changed' => false,
+            ];
+        }
+
+        $totalAmount = $hasTotalAmount
+            ? round((float) ($data['total_amount'] ?? 0), 2)
+            : round((float) ($lead->total_amount ?? 0), 2);
+        $paidAmount = $hasPaidAmount
+            ? round((float) ($data['paid_amount'] ?? 0), 2)
+            : round((float) ($lead->paid_amount ?? 0), 2);
+
+        if ($paidAmount > $totalAmount) {
+            throw ValidationException::withMessages([
+                'paid_amount' => __('admin.accounting_paid_amount_exceeds_total'),
+            ]);
+        }
+
+        return [
+            'should_sync' => true,
+            'paid_amount' => $paidAmount,
+            'total_amount_changed' => $totalAmount !== round((float) ($lead->total_amount ?? 0), 2),
+            'lead_updates' => [
+                'total_amount' => $totalAmount,
+                'paid_amount' => $paidAmount,
+                'remaining_amount' => max(0, round($totalAmount - $paidAmount, 2)),
+                'payment_status' => $paidAmount <= 0
+                    ? 'unpaid'
+                    : ($paidAmount >= $totalAmount ? 'fully_paid' : 'partially_paid'),
+            ],
+        ];
+    }
+
     protected function authorizeLeadTransfer(?User $user, bool $export = false): void
     {
         if ($export) {
@@ -930,6 +1376,53 @@ class CrmLeadController extends Controller
         return (bool) ($user && CrmLeadAccess::canViewAll($user) && $user->hasPermission('leads.export'));
     }
 
+    protected function guardManualLeadDuplicates(array $data): void
+    {
+        if (! blank($data['phone'] ?? null)) {
+            $duplicate = Inquiry::query()->where('phone', trim((string) $data['phone']))->first();
+
+            if ($duplicate) {
+                throw ValidationException::withMessages([
+                    'phone' => __('admin.crm_duplicate_phone_exists'),
+                ]);
+            }
+        }
+
+        if (! blank($data['whatsapp_number'] ?? null)) {
+            $duplicate = Inquiry::query()->where('whatsapp_number', trim((string) $data['whatsapp_number']))->first();
+
+            if ($duplicate) {
+                throw ValidationException::withMessages([
+                    'whatsapp_number' => __('admin.crm_duplicate_whatsapp_exists'),
+                ]);
+            }
+        }
+
+        if (blank($data['phone'] ?? null) && blank($data['whatsapp_number'] ?? null) && ! blank($data['full_name'] ?? null)) {
+            $duplicate = Inquiry::query()->where('full_name', trim((string) $data['full_name']))->first();
+
+            if ($duplicate) {
+                throw ValidationException::withMessages([
+                    'full_name' => __('admin.crm_duplicate_name_exists'),
+                ]);
+            }
+        }
+    }
+
+    protected function ensureManualSource(): ?CrmLeadSource
+    {
+        return CrmLeadSource::query()->firstOrCreate(
+            ['slug' => 'manual'],
+            [
+                'name_en' => 'Manual',
+                'name_ar' => 'يدوي',
+                'is_default' => false,
+                'is_active' => true,
+                'sort_order' => 999,
+            ]
+        );
+    }
+
     protected function csvDownloadResponse(string $filename, array $headers, array $rows): StreamedResponse
     {
         return response()->streamDownload(function () use ($headers, $rows) {
@@ -944,5 +1437,27 @@ class CrmLeadController extends Controller
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    protected function leadAuditValues(Inquiry $lead): array
+    {
+        return [
+            'full_name' => $lead->full_name,
+            'phone' => $lead->phone,
+            'whatsapp_number' => $lead->whatsapp_number,
+            'email' => $lead->email,
+            'crm_status_id' => $lead->crmStatus?->localizedName() ?? $lead->crm_status_id,
+            'crm_source_id' => $lead->crmSource?->localizedName() ?? $lead->crm_source_id,
+            'assigned_user_id' => $lead->assignedUser?->name ?? $lead->assigned_user_id,
+            'priority' => $lead->priority,
+            'destination' => $lead->destination,
+            'travel_date' => optional($lead->travel_date)?->toDateString(),
+            'next_follow_up_at' => optional($lead->next_follow_up_at)?->toDateTimeString(),
+            'follow_up_result' => $lead->follow_up_result,
+            'total_amount' => $lead->total_amount,
+            'paid_amount' => $lead->paid_amount,
+            'remaining_amount' => $lead->remaining_amount,
+            'payment_status' => $lead->localizedPaymentStatus(),
+        ];
     }
 }

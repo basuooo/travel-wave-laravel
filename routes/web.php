@@ -2,24 +2,37 @@
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\AdminSearchController;
+use App\Http\Controllers\Admin\AccountingController;
+use App\Http\Controllers\Admin\AccountingTreasuryController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\ChatbotSettingController;
 use App\Http\Controllers\Admin\CrmController;
+use App\Http\Controllers\Admin\CrmInformationController;
 use App\Http\Controllers\Admin\CrmLeadController;
+use App\Http\Controllers\Admin\CrmCustomerController;
+use App\Http\Controllers\Admin\CrmDocumentController;
+use App\Http\Controllers\Admin\CrmDocumentCategoryController;
+use App\Http\Controllers\Admin\CrmTaskController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DestinationController;
 use App\Http\Controllers\Admin\FooterSettingController;
 use App\Http\Controllers\Admin\FloatingWhatsappSettingController;
+use App\Http\Controllers\Admin\GoalsCommissionController;
 use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\HeaderSettingController;
 use App\Http\Controllers\Admin\HomeCountryStripController;
 use App\Http\Controllers\Admin\InquiryController;
+use App\Http\Controllers\Admin\KpiDashboardController;
+use App\Http\Controllers\Admin\KnowledgeBaseCategoryController;
+use App\Http\Controllers\Admin\KnowledgeBaseController;
 use App\Http\Controllers\Admin\LeadFormController;
 use App\Http\Controllers\Admin\MarketingLandingPageController;
 use App\Http\Controllers\Admin\MediaLibraryController;
 use App\Http\Controllers\Admin\MapSectionController;
+use App\Http\Controllers\Admin\MarketingCampaignController;
 use App\Http\Controllers\Admin\MetaConversionApiSettingController;
 use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Admin\PageController;
@@ -32,6 +45,8 @@ use App\Http\Controllers\Admin\TrackingIntegrationController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UtmController;
+use App\Http\Controllers\Admin\WorkflowAutomationController;
 use App\Http\Controllers\Admin\VisaCategoryController;
 use App\Http\Controllers\Admin\VisaCountryController;
 use App\Http\Controllers\ChatbotController;
@@ -72,9 +87,47 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['auth', 'admin', 'crm.followups.dispatch'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/', [DashboardController::class, 'index'])->middleware('permission:dashboard.access')->name('dashboard');
+        Route::get('/kpi-dashboard', [KpiDashboardController::class, 'index'])->middleware('permission:reports.view')->name('kpi.dashboard');
         Route::get('/search', [AdminSearchController::class, 'index'])->middleware('permission:dashboard.access')->name('search');
+        Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.read-all');
         Route::post('/notifications/{notification}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->middleware('permission:audit_logs.view')->name('audit-logs.index');
+        Route::get('/audit-logs/{auditLog}', [AuditLogController::class, 'show'])->middleware('permission:audit_logs.view')->name('audit-logs.show');
+        Route::middleware('permission:goals_commissions.view')->prefix('goals-commissions')->name('goals-commissions.')->group(function () {
+            Route::get('/targets', [GoalsCommissionController::class, 'targetsIndex'])->name('targets.index');
+            Route::get('/targets/create', [GoalsCommissionController::class, 'targetsCreate'])->middleware('permission:goals_commissions.manage')->name('targets.create');
+            Route::post('/targets', [GoalsCommissionController::class, 'targetsStore'])->middleware('permission:goals_commissions.manage')->name('targets.store');
+            Route::get('/targets/{goalTarget}', [GoalsCommissionController::class, 'targetsShow'])->name('targets.show');
+            Route::get('/targets/{goalTarget}/edit', [GoalsCommissionController::class, 'targetsEdit'])->middleware('permission:goals_commissions.manage')->name('targets.edit');
+            Route::put('/targets/{goalTarget}', [GoalsCommissionController::class, 'targetsUpdate'])->middleware('permission:goals_commissions.manage')->name('targets.update');
+
+            Route::get('/commissions', [GoalsCommissionController::class, 'commissionsIndex'])->name('commissions.index');
+            Route::post('/commissions', [GoalsCommissionController::class, 'commissionsStore'])->middleware('permission:goals_commissions.manage')->name('commissions.store');
+            Route::get('/commissions/{commissionStatement}', [GoalsCommissionController::class, 'commissionsShow'])->name('commissions.show');
+        });
+        Route::middleware('permission:workflow_automations.view')->prefix('workflow-automations')->name('workflow-automations.')->group(function () {
+            Route::get('/', [WorkflowAutomationController::class, 'index'])->name('index');
+            Route::get('/logs', [WorkflowAutomationController::class, 'executionLogs'])->name('logs');
+            Route::get('/create', [WorkflowAutomationController::class, 'create'])->middleware('permission:workflow_automations.manage')->name('create');
+            Route::post('/', [WorkflowAutomationController::class, 'store'])->middleware('permission:workflow_automations.manage')->name('store');
+            Route::get('/{workflowAutomation}', [WorkflowAutomationController::class, 'show'])->name('show');
+            Route::get('/{workflowAutomation}/edit', [WorkflowAutomationController::class, 'edit'])->middleware('permission:workflow_automations.manage')->name('edit');
+            Route::put('/{workflowAutomation}', [WorkflowAutomationController::class, 'update'])->middleware('permission:workflow_automations.manage')->name('update');
+            Route::patch('/{workflowAutomation}/toggle', [WorkflowAutomationController::class, 'toggle'])->middleware('permission:workflow_automations.manage')->name('toggle');
+        });
+        Route::middleware('permission:knowledge_base.view')->prefix('knowledge-base')->name('knowledge-base.')->group(function () {
+            Route::get('/', [KnowledgeBaseController::class, 'index'])->name('index');
+            Route::get('/create', [KnowledgeBaseController::class, 'create'])->middleware('permission:knowledge_base.manage')->name('create');
+            Route::post('/', [KnowledgeBaseController::class, 'store'])->middleware('permission:knowledge_base.manage')->name('store');
+            Route::get('/categories', [KnowledgeBaseCategoryController::class, 'index'])->middleware('permission:knowledge_base.categories.manage')->name('categories.index');
+            Route::post('/categories', [KnowledgeBaseCategoryController::class, 'store'])->middleware('permission:knowledge_base.categories.manage')->name('categories.store');
+            Route::put('/categories/{category}', [KnowledgeBaseCategoryController::class, 'update'])->middleware('permission:knowledge_base.categories.manage')->name('categories.update');
+            Route::delete('/categories/{category}', [KnowledgeBaseCategoryController::class, 'destroy'])->middleware('permission:knowledge_base.categories.manage')->name('categories.destroy');
+            Route::get('/{article}', [KnowledgeBaseController::class, 'show'])->name('show');
+            Route::get('/{article}/edit', [KnowledgeBaseController::class, 'edit'])->middleware('permission:knowledge_base.manage')->name('edit');
+            Route::put('/{article}', [KnowledgeBaseController::class, 'update'])->middleware('permission:knowledge_base.manage')->name('update');
+        });
 
         Route::resource('users', UserController::class)->except(['show']);
         Route::resource('roles', RoleController::class)->except(['show']);
@@ -127,6 +180,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/media-library', [MediaLibraryController::class, 'index'])->name('media-library.index');
             Route::post('/media-library', [MediaLibraryController::class, 'store'])->name('media-library.store');
             Route::get('/media-library/library', [MediaLibraryController::class, 'library'])->name('media-library.library');
+            Route::get('/media-library/{media_library}/usage', [MediaLibraryController::class, 'usage'])->name('media-library.usage');
             Route::get('/media-library/{media_library}/preview', [MediaLibraryController::class, 'preview'])->name('media-library.preview');
             Route::put('/media-library/{media_library}', [MediaLibraryController::class, 'update'])->name('media-library.update');
             Route::delete('/media-library/{media_library}', [MediaLibraryController::class, 'destroy'])->name('media-library.destroy');
@@ -188,6 +242,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('permission:marketing.manage')->group(function () {
             Route::post('/marketing-landing-pages/{marketing_landing_page}/duplicate', [MarketingLandingPageController::class, 'duplicate'])->name('marketing-landing-pages.duplicate');
             Route::resource('marketing-landing-pages', MarketingLandingPageController::class);
+            Route::prefix('marketing-campaigns')->name('marketing-campaigns.')->group(function () {
+                Route::get('/', [MarketingCampaignController::class, 'index'])->name('index');
+                Route::get('/create', [MarketingCampaignController::class, 'create'])->name('create');
+                Route::post('/', [MarketingCampaignController::class, 'store'])->name('store');
+                Route::get('/{marketingCampaign}', [MarketingCampaignController::class, 'show'])->name('show');
+                Route::get('/{marketingCampaign}/edit', [MarketingCampaignController::class, 'edit'])->name('edit');
+                Route::put('/{marketingCampaign}', [MarketingCampaignController::class, 'update'])->name('update');
+            });
         });
 
         Route::middleware('permission:maps.manage')->group(function () {
@@ -198,6 +260,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('permission:tracking.manage')->group(function () {
             Route::post('/tracking-integrations/{tracking_integration}/duplicate', [TrackingIntegrationController::class, 'duplicate'])->name('tracking-integrations.duplicate');
             Route::resource('tracking-integrations', TrackingIntegrationController::class);
+        });
+
+        Route::middleware('permission:utm.manage')->prefix('utm')->name('utm.')->group(function () {
+            Route::get('/', [UtmController::class, 'dashboard'])->name('dashboard');
+            Route::get('/campaigns', [UtmController::class, 'index'])->name('index');
+            Route::get('/campaigns/create', [UtmController::class, 'create'])->name('create');
+            Route::post('/campaigns', [UtmController::class, 'store'])->name('store');
+            Route::get('/campaigns/{campaign}/edit', [UtmController::class, 'edit'])->name('edit');
+            Route::put('/campaigns/{campaign}', [UtmController::class, 'update'])->name('update');
         });
 
         Route::middleware('permission:pages.edit')->group(function () {
@@ -219,20 +290,53 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('crm')->name('crm.')->group(function () {
                 Route::get('/', [CrmController::class, 'dashboard'])->name('dashboard');
                 Route::get('/leads', [CrmLeadController::class, 'index'])->name('leads.index');
+                Route::get('/customers', [CrmCustomerController::class, 'index'])->middleware('permission:customers.view')->name('customers.index');
+                Route::get('/customers/create', [CrmCustomerController::class, 'create'])->middleware('permission:customers.manage')->name('customers.create');
+                Route::get('/customers/{customer}', [CrmCustomerController::class, 'show'])->middleware('permission:customers.view')->name('customers.show');
+                Route::get('/customers/{customer}/edit', [CrmCustomerController::class, 'edit'])->middleware('permission:customers.manage')->name('customers.edit');
+                Route::get('/information', [CrmInformationController::class, 'index'])->name('information.index');
+                Route::get('/information/create', [CrmInformationController::class, 'create'])->middleware('permission:information.manage')->name('information.create');
+                Route::get('/information/{information}', [CrmInformationController::class, 'show'])->name('information.show');
+                Route::post('/information/{information}/acknowledge', [CrmInformationController::class, 'acknowledge'])->name('information.acknowledge');
+                Route::get('/leads/delayed', [CrmLeadController::class, 'delayed'])->name('leads.delayed');
                 Route::get('/leads/trash', [CrmLeadController::class, 'trash'])->middleware('permission:leads.delete')->name('leads.trash');
                 Route::get('/leads/transfer', [CrmLeadController::class, 'transfer'])->middleware('permission:leads.edit')->name('leads.transfer');
+                Route::get('/leads/create', [CrmLeadController::class, 'create'])->middleware('permission:leads.edit')->name('leads.create');
                 Route::get('/leads/{lead}', [CrmLeadController::class, 'show'])->name('leads.show');
                 Route::get('/pipeline', [CrmController::class, 'pipeline'])->name('pipeline');
                 Route::get('/follow-ups', [CrmController::class, 'followUps'])->name('follow-ups');
-                Route::get('/tasks', [CrmController::class, 'tasks'])->name('tasks');
+                Route::get('/tasks', [CrmTaskController::class, 'index'])->name('tasks.index');
+                Route::get('/tasks/list', [CrmTaskController::class, 'list'])->name('tasks.list');
+                Route::get('/tasks/my', [CrmTaskController::class, 'myTasks'])->name('tasks.my');
+                Route::get('/tasks/today', [CrmTaskController::class, 'today'])->name('tasks.today');
+                Route::get('/tasks/delayed', [CrmTaskController::class, 'delayed'])->name('tasks.delayed');
+                Route::get('/tasks/completed', [CrmTaskController::class, 'completed'])->name('tasks.completed');
+                Route::get('/tasks/board', [CrmTaskController::class, 'board'])->name('tasks.board');
+                Route::get('/tasks/reports', [CrmTaskController::class, 'reports'])->middleware('permission:reports.view')->name('tasks.reports');
+                Route::get('/tasks/create', [CrmTaskController::class, 'create'])->name('tasks.create');
+                Route::get('/tasks/{task}', [CrmTaskController::class, 'show'])->name('tasks.show');
+                Route::get('/tasks/{task}/edit', [CrmTaskController::class, 'edit'])->middleware('permission:leads.edit')->name('tasks.edit');
                 Route::get('/statuses', [CrmController::class, 'statuses'])->name('statuses');
                 Route::get('/sources', [CrmController::class, 'sources'])->name('sources');
                 Route::get('/service-types', [CrmController::class, 'serviceTypes'])->name('service-types');
                 Route::get('/reports', [CrmController::class, 'reports'])->middleware('permission:reports.view')->name('reports');
+                Route::get('/reports-2', [CrmController::class, 'reports2'])->middleware('permission:reports.view')->name('reports2');
             });
+        });
+        Route::middleware('permission:documents.view')->prefix('documents')->name('documents.')->group(function () {
+            Route::get('/', [CrmDocumentController::class, 'index'])->name('index');
+            Route::get('/create', [CrmDocumentController::class, 'create'])->middleware('permission:documents.manage')->name('create');
+            Route::get('/categories', [CrmDocumentCategoryController::class, 'index'])->middleware('permission:documents.categories.manage')->name('categories.index');
+            Route::get('/{document}', [CrmDocumentController::class, 'show'])->name('show');
+            Route::get('/{document}/preview', [CrmDocumentController::class, 'preview'])->name('preview');
+            Route::get('/{document}/download', [CrmDocumentController::class, 'download'])->name('download');
         });
         Route::put('/inquiries/{inquiry}', [InquiryController::class, 'update'])->middleware('permission:leads.edit')->name('inquiries.update');
         Route::middleware('permission:leads.edit')->prefix('crm')->name('crm.')->group(function () {
+            Route::post('/leads', [CrmLeadController::class, 'store'])->name('leads.store');
+            Route::post('/customers', [CrmCustomerController::class, 'store'])->middleware('permission:customers.manage')->name('customers.store');
+            Route::put('/customers/{customer}', [CrmCustomerController::class, 'update'])->middleware('permission:customers.manage')->name('customers.update');
+            Route::post('/information', [CrmInformationController::class, 'store'])->middleware('permission:information.manage')->name('information.store');
             Route::post('/leads/import/preview', [CrmLeadController::class, 'previewImport'])->name('leads.import.preview');
             Route::post('/leads/import', [CrmLeadController::class, 'import'])->name('leads.import');
             Route::get('/leads/import/template', [CrmLeadController::class, 'downloadTemplate'])->name('leads.import.template');
@@ -242,7 +346,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/leads/{lead}/notes', [CrmLeadController::class, 'storeNote'])->name('leads.notes.store');
             Route::post('/leads/{lead}/tasks', [CrmLeadController::class, 'storeTask'])->name('leads.tasks.store');
             Route::put('/follow-ups/{followUp}', [CrmLeadController::class, 'updateFollowUp'])->name('follow-ups.update');
-            Route::put('/tasks/{task}', [CrmController::class, 'updateTask'])->name('tasks.update');
+            Route::post('/tasks', [CrmTaskController::class, 'store'])->name('tasks.store');
+            Route::put('/tasks/{task}', [CrmTaskController::class, 'update'])->name('tasks.update');
+            Route::patch('/tasks/{task}/status', [CrmTaskController::class, 'updateStatus'])->name('tasks.status');
             Route::post('/statuses', [CrmController::class, 'storeStatus'])->name('statuses.store');
             Route::put('/statuses/{status}', [CrmController::class, 'updateStatus'])->name('statuses.update');
             Route::post('/sources', [CrmController::class, 'storeSource'])->name('sources.store');
@@ -261,6 +367,55 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/leads/{lead}', [CrmLeadController::class, 'destroy'])->name('leads.destroy');
             Route::post('/leads/{lead}/restore', [CrmLeadController::class, 'restore'])->name('leads.restore');
             Route::delete('/leads/{lead}/force-delete', [CrmLeadController::class, 'forceDestroy'])->name('leads.force-destroy');
+        });
+        Route::middleware('permission:documents.manage')->prefix('documents')->name('documents.')->group(function () {
+            Route::post('/', [CrmDocumentController::class, 'store'])->name('store');
+            Route::delete('/{document}', [CrmDocumentController::class, 'destroy'])->name('destroy');
+        });
+        Route::middleware('permission:documents.categories.manage')->prefix('documents/categories')->name('documents.categories.')->group(function () {
+            Route::post('/', [CrmDocumentCategoryController::class, 'store'])->name('store');
+            Route::put('/{category}', [CrmDocumentCategoryController::class, 'update'])->name('update');
+            Route::delete('/{category}', [CrmDocumentCategoryController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::middleware('permission:accounting.view')->prefix('accounting')->name('accounting.')->group(function () {
+            Route::get('/', [AccountingController::class, 'dashboard'])->name('dashboard');
+            Route::get('/customers', [AccountingController::class, 'customers'])->name('customers.index');
+            Route::get('/customers/{account}', [AccountingController::class, 'customer'])->name('customers.show');
+            Route::get('/treasuries', [AccountingTreasuryController::class, 'index'])->name('treasuries.index');
+            Route::get('/general-expenses', [AccountingController::class, 'generalExpenses'])->name('general-expenses.index');
+            Route::get('/employees', [AccountingController::class, 'employees'])->name('employees.index');
+            Route::get('/settings', [AccountingController::class, 'settings'])->middleware('permission:accounting.manage')->name('settings');
+            Route::get('/reports', [AccountingController::class, 'reports'])->middleware('permission:accounting.reports.view')->name('reports');
+        });
+
+        Route::middleware('permission:accounting.manage')->prefix('accounting')->name('accounting.')->group(function () {
+            Route::get('/treasuries/create', [AccountingTreasuryController::class, 'create'])->name('treasuries.create');
+            Route::post('/treasuries', [AccountingTreasuryController::class, 'store'])->name('treasuries.store');
+            Route::get('/treasuries/{treasury}/edit', [AccountingTreasuryController::class, 'edit'])->whereNumber('treasury')->name('treasuries.edit');
+            Route::put('/treasuries/{treasury}', [AccountingTreasuryController::class, 'update'])->whereNumber('treasury')->name('treasuries.update');
+            Route::post('/customers/{account}/payments', [AccountingController::class, 'storePayment'])->name('customers.payments.store');
+            Route::post('/customers/{account}/expenses', [AccountingController::class, 'storeCustomerExpense'])->name('customers.expenses.store');
+            Route::delete('/customer-expenses/{expense}', [AccountingController::class, 'destroyCustomerExpense'])->name('customers.expenses.destroy');
+            Route::post('/general-expenses', [AccountingController::class, 'storeGeneralExpense'])->name('general-expenses.store');
+            Route::put('/general-expenses/{expense}', [AccountingController::class, 'updateGeneralExpense'])->name('general-expenses.update');
+            Route::delete('/general-expenses/{expense}', [AccountingController::class, 'destroyGeneralExpense'])->name('general-expenses.destroy');
+            Route::post('/employees/transactions', [AccountingController::class, 'storeEmployeeTransaction'])->name('employees.transactions.store');
+            Route::put('/employees/transactions/{transaction}', [AccountingController::class, 'updateEmployeeTransaction'])->name('employees.transactions.update');
+            Route::delete('/employees/transactions/{transaction}', [AccountingController::class, 'destroyEmployeeTransaction'])->name('employees.transactions.destroy');
+            Route::post('/settings/customer-categories', [AccountingController::class, 'storeExpenseCategory'])->name('settings.customer-categories.store');
+            Route::put('/settings/customer-categories/{category}', [AccountingController::class, 'updateExpenseCategory'])->name('settings.customer-categories.update');
+            Route::delete('/settings/customer-categories/{category}', [AccountingController::class, 'destroyExpenseCategory'])->name('settings.customer-categories.destroy');
+            Route::post('/settings/customer-subcategories', [AccountingController::class, 'storeExpenseSubcategory'])->name('settings.customer-subcategories.store');
+            Route::put('/settings/customer-subcategories/{subcategory}', [AccountingController::class, 'updateExpenseSubcategory'])->name('settings.customer-subcategories.update');
+            Route::delete('/settings/customer-subcategories/{subcategory}', [AccountingController::class, 'destroyExpenseSubcategory'])->name('settings.customer-subcategories.destroy');
+            Route::post('/settings/general-categories', [AccountingController::class, 'storeGeneralExpenseCategory'])->name('settings.general-categories.store');
+            Route::put('/settings/general-categories/{category}', [AccountingController::class, 'updateGeneralExpenseCategory'])->name('settings.general-categories.update');
+            Route::delete('/settings/general-categories/{category}', [AccountingController::class, 'destroyGeneralExpenseCategory'])->name('settings.general-categories.destroy');
+        });
+
+        Route::middleware('permission:accounting.view')->prefix('accounting')->name('accounting.')->group(function () {
+            Route::get('/treasuries/{treasury}', [AccountingTreasuryController::class, 'show'])->whereNumber('treasury')->name('treasuries.show');
         });
     });
 });

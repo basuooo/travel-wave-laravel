@@ -32,7 +32,7 @@
         'checklist' => data_get($servicePage, 'contact.checklist', []),
         'type' => data_get($servicePage, 'contact.type', 'general'),
         'source' => data_get($servicePage, 'contact.source', $page->localized('title')),
-        'submit_text' => data_get($servicePage, 'contact.submit_text', 'أرسل الطلب'),
+        'submit_text' => data_get($servicePage, 'contact.submit_text', __('ui.send_request')),
         'fields' => data_get($servicePage, 'contact.fields', []),
     ] : []);
 @endphp
@@ -211,3 +211,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 @endsection
+

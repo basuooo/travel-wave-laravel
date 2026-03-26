@@ -14,6 +14,8 @@ use App\Models\CrmTask;
 use App\Models\Inquiry;
 use App\Models\User;
 use App\Support\CrmLeadAccess;
+use App\Support\CrmDelayedLeadService;
+use App\Support\CrmReportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -25,6 +27,9 @@ class CrmController extends Controller
         $leadQuery = CrmLeadAccess::applyVisibilityScope(Inquiry::query(), auth()->user());
         $statuses = $this->activeStatuses();
         $updatesByUser = $this->updatesByUser($request);
+        $delayedLeadCount = app(CrmDelayedLeadService::class)
+            ->applyDelayedScope(CrmLeadAccess::applyVisibilityScope(Inquiry::query(), auth()->user()))
+            ->count();
 
         return view('admin.crm.dashboard', [
             'summary' => [
@@ -36,6 +41,7 @@ class CrmController extends Controller
                 'due_today' => $this->visibleFollowUpsQuery()->whereDate('scheduled_at', today())->where('status', CrmFollowUp::STATUS_PENDING)->count(),
                 'deleted' => CrmLeadAccess::applyVisibilityScope(Inquiry::onlyTrashed(), auth()->user())->count(),
                 'overdue_followups' => $this->visibleFollowUpsQuery()->where('status', CrmFollowUp::STATUS_PENDING)->where('scheduled_at', '<', now())->count(),
+                'delayed' => $delayedLeadCount,
             ],
             'statusCounts' => $statuses->map(fn (CrmStatus $status) => [
                 'status' => $status,
@@ -423,59 +429,83 @@ class CrmController extends Controller
         return back()->with('success', __('admin.crm_service_subtype_deleted'));
     }
 
-    public function reports()
+    public function reports(Request $request, CrmReportService $reportService)
     {
+        return view('admin.crm.reports', $reportService->build($request, auth()->user()) + [
+            'statuses' => $this->activeStatuses(),
+            'sources' => $this->activeSources(),
+            'users' => $this->assignableUsers(),
+            'canViewAllLeads' => CrmLeadAccess::canViewAll(auth()->user()),
+        ]);
+    }
+
+    public function reports2(Request $request)
+    {
+        $data = $request->validate([
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
+            'seller_id' => ['nullable', 'integer', 'exists:users,id'],
+        ]);
+
         $statuses = $this->activeStatuses();
-        $visibleLeadBase = CrmLeadAccess::applyVisibilityScope(Inquiry::query(), auth()->user());
+        $sellers = $this->reportSalesUsers();
+        $selectedSellerId = isset($data['seller_id']) ? (int) $data['seller_id'] : null;
 
-        $sourceCounts = CrmLeadSource::query()
-            ->get()
-            ->map(fn (CrmLeadSource $source) => (object) [
-                'name' => $source->localizedName(),
-                'leads_count' => (clone $visibleLeadBase)->where('crm_source_id', $source->id)->count(),
-            ])->filter(fn ($row) => $row->leads_count > 0)->sortByDesc('leads_count')->take(10)->values();
+        if (! CrmLeadAccess::canViewAll(auth()->user())) {
+            $selectedSellerId = auth()->id();
+        }
 
-        $userCounts = User::query()
-            ->orderBy('name')
-            ->get()
-            ->map(fn (User $user) => (object) [
-                'name' => $user->name,
-                'assigned_leads_count' => (clone $visibleLeadBase)->where('assigned_user_id', $user->id)->count(),
-            ])->filter(fn ($row) => $row->assigned_leads_count > 0)->sortByDesc('assigned_leads_count')->take(10)->values();
+        $query = CrmLeadAccess::applyVisibilityScope(Inquiry::query(), auth()->user());
 
-        $countryCounts = (clone $visibleLeadBase)
-            ->select('country', DB::raw('COUNT(*) as total'))
-            ->whereNotNull('country')
-            ->groupBy('country')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->get();
+        if (! empty($data['from'])) {
+            $query->where('created_at', '>=', $request->date('from')->startOfDay());
+        }
 
-        return view('admin.crm.reports', [
-            'summary' => [
-                'total' => (clone $visibleLeadBase)->count(),
-                'no_answer' => $this->countBySlug('no-answer'),
-                'complete' => $this->countBySlug('documents-complete'),
-                'duplicate' => $this->countBySlug('duplicate'),
-                'conversion_rate' => $this->conversionRate(),
-                'follow_ups_due' => $this->visibleFollowUpsQuery()->whereDate('scheduled_at', today())->where('status', CrmFollowUp::STATUS_PENDING)->count(),
-                'today_updates' => CrmStatusUpdate::query()->whereHas('inquiry', fn ($query) => CrmLeadAccess::applyVisibilityScope($query, auth()->user()))->whereDate('changed_at', today())->count(),
-                'yesterday_updates' => CrmStatusUpdate::query()->whereHas('inquiry', fn ($query) => CrmLeadAccess::applyVisibilityScope($query, auth()->user()))->whereDate('changed_at', today()->copy()->subDay())->count(),
+        if (! empty($data['to'])) {
+            $query->where('created_at', '<=', $request->date('to')->endOfDay());
+        }
+
+        if ($selectedSellerId) {
+            $query->where('assigned_user_id', $selectedSellerId);
+        }
+
+        $counts = (clone $query)
+            ->select('crm_status_id', DB::raw('COUNT(*) as aggregate'))
+            ->whereNotNull('crm_status_id')
+            ->groupBy('crm_status_id')
+            ->pluck('aggregate', 'crm_status_id');
+
+        $rows = $statuses->map(fn (CrmStatus $status) => [
+            'status' => $status,
+            'count' => (int) ($counts[$status->id] ?? 0),
+        ]);
+
+        return view('admin.crm.reports2', [
+            'rows' => $rows,
+            'statuses' => $statuses,
+            'sellers' => $sellers,
+            'filters' => [
+                'from' => $data['from'] ?? null,
+                'to' => $data['to'] ?? null,
+                'seller_id' => $selectedSellerId,
             ],
-            'statusCounts' => $statuses->map(fn (CrmStatus $status) => (object) [
-                'label_localized' => $status->localizedName(),
-                'total' => CrmLeadAccess::applyVisibilityScope(Inquiry::query(), auth()->user())->where('crm_status_id', $status->id)->count(),
-            ])->filter(fn ($row) => $row->total > 0)->values(),
-            'countryCounts' => $countryCounts,
-            'userCounts' => $userCounts,
-            'sourceCounts' => $sourceCounts,
-            'updatesByUser' => $this->updatesByUser(new Request()),
+            'canViewAllLeads' => CrmLeadAccess::canViewAll(auth()->user()),
+            'selectedSeller' => $selectedSellerId ? $sellers->firstWhere('id', $selectedSellerId) : null,
+            'totalLeads' => $rows->sum('count'),
         ]);
     }
 
     protected function activeStatuses()
     {
         return CrmStatus::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+    }
+
+    protected function activeSources()
+    {
+        return CrmLeadSource::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
@@ -539,5 +569,24 @@ class CrmController extends Controller
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
+    }
+
+    protected function reportSalesUsers()
+    {
+        $users = $this->assignableUsers()->loadMissing('roles');
+
+        $salesUsers = $users->filter(function (User $user) {
+            return $user->roles->contains(fn ($role) => $role->slug === 'sales-leads-manager');
+        })->values();
+
+        if ($salesUsers->isEmpty()) {
+            $salesUsers = $users->filter(fn (User $user) => $user->hasPermission('leads.edit'))->values();
+        }
+
+        if (! CrmLeadAccess::canViewAll(auth()->user())) {
+            return $salesUsers->where('id', auth()->id())->values();
+        }
+
+        return $salesUsers;
     }
 }

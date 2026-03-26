@@ -7,31 +7,18 @@
 @php($sliderSettings = $heroSliderSettings)
 @php($bannerMode = $sliderSettings?->hero_slider_layout_mode ?? 'custom-1408')
 @php($safeZoneClass = in_array($bannerMode, ['full-width', 'fullscreen-hero'], true) ? 'container-fluid' : 'container-xxl')
-@php($homeSearchText = app()->getLocale() === 'ar'
-    ? [
-        'eyebrow' => 'اختر خدمتك بسرعة',
-        'title' => 'ابدأ من الخدمة المناسبة ثم انتقل مباشرة إلى الصفحة المطلوبة',
-        'subtitle' => 'اختيار ذكي للتأشيرات الخارجية والرحلات الداخلية والطيران والفنادق من مكان واحد.',
-        'service' => 'اختر الخدمة',
-        'region' => 'اختر المنطقة',
-        'country' => 'اختر الدولة',
-        'destination' => 'اختر الوجهة',
-        'button' => 'اذهب الآن',
-        'placeholder' => 'اختر',
-        'invalid' => 'اختر خدمة ومساراً صالحاً أولاً',
-    ]
-    : [
-        'eyebrow' => 'Find The Right Service',
-        'title' => 'Start with the right service and jump straight to the page you need',
-        'subtitle' => 'A smarter selection bar for visas, domestic trips, flights, and hotels in one place.',
-        'service' => 'Select service',
-        'region' => 'Select region',
-        'country' => 'Select country',
-        'destination' => 'Select destination',
-        'button' => 'Search Now',
-        'placeholder' => 'Select',
-        'invalid' => 'Choose a valid service and destination first',
-    ])
+@php($homeSearchText = [
+    'eyebrow' => __('ui.home_search_eyebrow'),
+    'title' => __('ui.home_search_title'),
+    'subtitle' => __('ui.home_search_subtitle'),
+    'service' => __('ui.home_search_service'),
+    'region' => __('ui.home_search_region'),
+    'country' => __('ui.home_search_country'),
+    'destination' => __('ui.home_search_destination'),
+    'button' => __('ui.home_search_button'),
+    'placeholder' => __('ui.home_search_placeholder'),
+    'invalid' => __('ui.home_search_invalid'),
+])
 
 @include('partials.frontend.form-zone', ['assignments' => $managedForms['top'] ?? [], 'position' => 'top', 'sourcePage' => 'home'])
 @include('partials.frontend.map-zone', ['assignments' => $managedMaps['top'] ?? [], 'position' => 'top'])
@@ -58,9 +45,11 @@
                 @php($ctaText = trim((string) $slide->localized('cta_text')))
                 @php($desktopImage = asset('storage/' . $slide->image_path))
                 @php($mobileImage = asset('storage/' . ($slide->mobile_image_path ?: $slide->image_path)))
+                @php($desktopPosition = $slide->framingCssPosition('desktop_banner'))
+                @php($mobilePosition = $slide->framingCssPosition('mobile_banner'))
                 @php($hasSlideContent = $headline !== '' || $subtitle !== '' || ($ctaText !== '' && filled($slide->cta_link)))
                 <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                    <div class="tw-home-slide" style="--slide-desktop-image: url('{{ $desktopImage }}'); --slide-mobile-image: url('{{ $mobileImage }}');">
+                    <div class="tw-home-slide" style="--slide-desktop-image: url('{{ $desktopImage }}'); --slide-mobile-image: url('{{ $mobileImage }}'); --slide-desktop-position: {{ $desktopPosition }}; --slide-mobile-position: {{ $mobilePosition }};">
                         @if($hasSlideContent)
                             <div class="tw-home-slide-overlay" style="--slide-overlay: {{ $sliderSettings?->hero_slider_overlay_opacity ?? 0.45 }}"></div>
                             <div class="tw-home-slide-stage position-relative h-100">
@@ -331,7 +320,7 @@
     <div class="row g-4">
         <div class="col-lg-6">
             <div class="tw-card p-4 h-100">
-                <h2 class="tw-section-title h2 mb-4">Why Travel Wave</h2>
+                <h2 class="tw-section-title h2 mb-4">{{ __('ui.why_travel_wave') }}</h2>
                 <div class="row g-3">
                     @foreach(($sections['why_choose_us'] ?? []) as $item)
                         <div class="col-12">
@@ -346,7 +335,7 @@
         </div>
         <div class="col-lg-6">
             <div class="tw-card p-4 h-100">
-                <h2 class="tw-section-title h2 mb-4">How It Works</h2>
+                <h2 class="tw-section-title h2 mb-4">{{ __('ui.how_it_works') }}</h2>
                 @foreach(($sections['how_it_works'] ?? []) as $item)
                     <div class="d-flex gap-3 mb-3">
                         <div class="tw-icon-badge">{{ $loop->iteration }}</div>
@@ -748,3 +737,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 @endsection
+

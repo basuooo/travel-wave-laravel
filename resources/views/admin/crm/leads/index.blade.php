@@ -75,7 +75,14 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
         <h2 class="h5 mb-0">{{ __('admin.crm_leads') }}</h2>
         <div class="d-flex flex-wrap gap-2">
+            <a href="{{ route('admin.crm.leads.delayed') }}" class="btn btn-outline-danger btn-sm">
+                {{ __('admin.crm_delayed_leads') }}
+                @if(($delayedLeadsCount ?? 0) > 0)
+                    <span class="badge text-bg-danger ms-1">{{ $delayedLeadsCount }}</span>
+                @endif
+            </a>
             @if(auth()->user()?->hasPermission('leads.edit') && $canViewAllLeads)
+                <a href="{{ route('admin.crm.leads.create') }}" class="btn btn-primary btn-sm">{{ __('admin.crm_add_lead') }}</a>
                 <a href="{{ route('admin.crm.leads.transfer', request()->query()) }}" class="btn btn-outline-secondary btn-sm">{{ __('admin.crm_import_export') }}</a>
             @endif
             @if(auth()->user()?->hasPermission('leads.export') && $canViewAllLeads)

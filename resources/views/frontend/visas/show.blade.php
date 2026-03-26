@@ -28,34 +28,20 @@
         $supportSummary = '';
 
         if ($whyChooseTitles->isNotEmpty()) {
-            if (app()->getLocale() === 'ar') {
-                $supportSummary = 'تساعدك Travel Wave في ' . $whyChooseTitles->join('، ');
-            } else {
-                $supportSummary = 'Travel Wave helps with ' . $whyChooseTitles->join(', ');
-            }
+            $supportSummary = __('ui.visa_summary_support', [
+                'items' => $whyChooseTitles->join(app()->getLocale() === 'ar' ? '� ' : ', '),
+            ]);
         }
 
         $summaryBullets = collect(array_filter([
-            $visaTypeSummary
-                ? (app()->getLocale() === 'ar'
-                    ? 'تأشيرة ' . $country->localized('name') . ' تندرج غالبًا ضمن ' . $visaTypeSummary . '.'
-                    : $country->localized('name') . ' visa usually falls under ' . $visaTypeSummary . '.')
-                : null,
+            $visaTypeSummary ? __('ui.visa_summary_falls_under', ['country' => $country->localized('name'), 'type' => $visaTypeSummary]) : null,
             collect($country->highlights ?: [])
                 ->filter(fn ($item) => filled($country->repeaterValue($item, 'text')))
                 ->sortBy('sort_order')
                 ->map(fn ($item) => $country->repeaterValue($item, 'text'))
                 ->first(),
-            $stayDurationSummary
-                ? (app()->getLocale() === 'ar'
-                    ? 'تسمح عادة بإقامة تصل إلى ' . $stayDurationSummary . '.'
-                    : 'It usually allows stays of ' . $stayDurationSummary . '.')
-                : null,
-            $processingTimeSummary
-                ? (app()->getLocale() === 'ar'
-                    ? 'مدة المعالجة غالبًا ' . $processingTimeSummary . '.'
-                    : 'Processing usually takes ' . $processingTimeSummary . '.')
-                : null,
+            $stayDurationSummary ? __('ui.visa_summary_stay_duration', ['duration' => $stayDurationSummary]) : null,
+            $processingTimeSummary ? __('ui.visa_summary_processing_time', ['time' => $processingTimeSummary]) : null,
             $supportSummary ? rtrim($supportSummary, '. ') . '.' : null,
         ]))->values();
     }
@@ -381,3 +367,5 @@
 </section>
 @endif
 @endsection
+
+

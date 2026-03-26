@@ -31,6 +31,15 @@
                 <dt class="col-sm-4">{{ __('admin.country') }}</dt><dd class="col-sm-8">{{ $lead->country ?: $lead->nationality ?: '-' }}</dd>
                 <dt class="col-sm-4">{{ __('admin.crm_number_of_persons') }}</dt><dd class="col-sm-8">{{ $lead->travelers_count ?: '-' }}</dd>
                 <dt class="col-sm-4">{{ __('admin.source') }}</dt><dd class="col-sm-8">{{ $lead->crmSource?->localizedName() ?: ($lead->lead_source ?: '-') }}</dd>
+                <dt class="col-sm-4">{{ __('admin.marketing_campaign') }}</dt>
+                <dd class="col-sm-8">
+                    @if($lead->utmCampaign)
+                        <a href="{{ route('admin.marketing-campaigns.show', $lead->utmCampaign) }}" class="admin-table-link">{{ $lead->utmCampaign->display_name }}</a>
+                        <div class="small text-muted">{{ $lead->utmCampaign->platform ?: '-' }} / {{ $lead->utmCampaign->utm_medium ?: '-' }}</div>
+                    @else
+                        {{ $lead->campaign_name ?: '-' }}
+                    @endif
+                </dd>
                 <dt class="col-sm-4">{{ __('admin.assigned_to') }}</dt><dd class="col-sm-8">{{ $lead->assignedUser?->name ?: '-' }}</dd>
                 <dt class="col-sm-4">{{ __('admin.crm_updated_by') }}</dt><dd class="col-sm-8">{{ $lead->crmStatusUpdatedBy?->name ?: '-' }} / {{ optional($lead->statusChangedAt())->format('Y-m-d H:i') ?: '-' }}</dd>
                 <dt class="col-sm-4">{{ __('admin.created_date') }}</dt><dd class="col-sm-8">{{ optional($lead->created_at)->format('Y-m-d H:i') ?: '-' }}</dd>
@@ -38,6 +47,89 @@
                 <dt class="col-sm-4">{{ __('admin.comment') }}</dt><dd class="col-sm-8">{{ $lead->admin_notes ?: '-' }}</dd>
                 <dt class="col-sm-4">{{ __('admin.crm_additional_notes') }}</dt><dd class="col-sm-8">{{ $lead->additional_notes ?: '-' }}</dd>
             </dl>
+        </div>
+
+        <div class="card admin-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h2 class="h5 mb-0">{{ __('admin.crm_customers') }}</h2>
+                @if($lead->crmCustomer)
+                    <a href="{{ route('admin.crm.customers.show', $lead->crmCustomer) }}" class="btn btn-sm btn-outline-primary">{{ __('admin.view') }}</a>
+                @elseif(auth()->user()?->hasPermission('customers.manage'))
+                    <a href="{{ route('admin.crm.customers.create', ['inquiry_id' => $lead->id]) }}" class="btn btn-sm btn-primary">{{ __('admin.convert_to_customer') }}</a>
+                @endif
+            </div>
+            @if($lead->crmCustomer)
+                <div class="alert alert-light border mb-0 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="fw-semibold">{{ $lead->crmCustomer->full_name }}</div>
+                        <div class="text-muted small">
+                            {{ __('admin.customer_code') }}: {{ $lead->crmCustomer->customer_code ?: '-' }}
+                            / {{ __('admin.customer_stage') }}: {{ $lead->crmCustomer->localizedStage() }}
+                        </div>
+                    </div>
+                    <a href="{{ route('admin.crm.customers.show', $lead->crmCustomer) }}" class="btn btn-primary btn-sm">{{ __('admin.view') }}</a>
+                </div>
+            @else
+                <div class="alert alert-warning mb-0 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="fw-semibold">{{ __('admin.customer_not_created_yet') }}</div>
+                        <div class="text-muted small">{{ __('admin.customer_conversion_hint') }}</div>
+                    </div>
+                    @if(auth()->user()?->hasPermission('customers.manage'))
+                        <a href="{{ route('admin.crm.customers.create', ['inquiry_id' => $lead->id]) }}" class="btn btn-primary btn-sm">{{ __('admin.convert_to_customer') }}</a>
+                    @endif
+                </div>
+            @endif
+        </div>
+
+        <div class="card admin-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h2 class="h5 mb-0">{{ __('admin.accounting_customer_accounts') }}</h2>
+                @if($lead->accountingAccount)
+                    <a href="{{ route('admin.accounting.customers.show', $lead->accountingAccount) }}" class="btn btn-sm btn-outline-primary">{{ __('admin.view') }}</a>
+                @endif
+            </div>
+            @if($lead->accountingAccount)
+                <div class="alert alert-light border mb-0 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="fw-semibold">{{ __('admin.accounting_customer_accounts') }}</div>
+                        <div class="text-muted small">{{ __('admin.crm_salesman') }}: {{ $lead->assignedUser?->name ?: '-' }}</div>
+                    </div>
+                    <a href="{{ route('admin.accounting.customers.show', $lead->accountingAccount) }}" class="btn btn-primary btn-sm">{{ __('admin.view') }}</a>
+                </div>
+            @else
+                <div class="text-muted">{{ __('admin.no_data') }}</div>
+            @endif
+        </div>
+
+        <div class="card admin-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h2 class="h5 mb-0">{{ __('admin.documents') }}</h2>
+                <div class="d-flex gap-2">
+                    <span class="badge text-bg-light">{{ $lead->documents->count() }}</span>
+                    @if(auth()->user()?->hasPermission('documents.manage'))
+                        <a href="{{ route('admin.documents.create', ['documentable_type' => 'inquiry', 'documentable_id' => $lead->id]) }}" class="btn btn-sm btn-outline-primary">{{ __('admin.upload_document') }}</a>
+                    @endif
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>{{ __('admin.document_title') }}</th><th>{{ __('admin.document_category') }}</th><th>{{ __('admin.uploaded_by') }}</th><th>{{ __('admin.uploaded_at') }}</th><th class="text-end">{{ __('admin.actions') }}</th></tr></thead>
+                    <tbody>
+                    @forelse($lead->documents as $document)
+                        <tr>
+                            <td><div class="fw-semibold">{{ $document->title }}</div><div class="small text-muted">{{ $document->original_file_name }}</div></td>
+                            <td>{{ $document->category?->localizedName() ?: '-' }}</td>
+                            <td>{{ $document->uploader?->name ?: '-' }}</td>
+                            <td>{{ optional($document->uploaded_at)->format('Y-m-d H:i') ?: '-' }}</td>
+                            <td class="text-end"><div class="d-inline-flex gap-2"><a href="{{ route('admin.documents.show', $document) }}" class="btn btn-sm btn-outline-primary">{{ __('admin.view') }}</a><a href="{{ route('admin.documents.download', $document) }}" class="btn btn-sm btn-outline-secondary">{{ __('admin.download') }}</a></div></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" class="text-center text-muted py-4">{{ __('admin.no_documents') }}</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="card admin-card p-4 mb-4">
@@ -157,38 +249,76 @@
         </div>
 
         <div class="card admin-card p-4">
-            <h2 class="h5 mb-3">{{ __('admin.crm_tasks') }}</h2>
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <h2 class="h5 mb-0">{{ __('admin.crm_tasks') }}</h2>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('admin.crm.tasks.index', ['inquiry_id' => $lead->id, 'linked_state' => 'linked']) }}" class="btn btn-sm btn-outline-dark">كل مهام الليد</a>
+                    <a href="{{ route('admin.crm.tasks.create', ['inquiry_id' => $lead->id]) }}" class="btn btn-sm btn-outline-primary">{{ __('admin.crm_task_create') }}</a>
+                </div>
+            </div>
+            @php($leadOpenTasks = $lead->crmTasks->whereNotIn('status', [\App\Models\CrmTask::STATUS_COMPLETED, \App\Models\CrmTask::STATUS_CANCELLED]))
+            @php($leadDelayedTasks = $lead->crmTasks->filter(fn($task) => $task->isDelayed()))
+            @php($leadCompletedTasks = $lead->crmTasks->where('status', \App\Models\CrmTask::STATUS_COMPLETED))
+            @php($latestLeadTask = $lead->crmTasks->sortByDesc('last_activity_at')->first())
+            <div class="row g-3 mb-4">
+                <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">مهام مفتوحة</div><div class="fs-4 fw-semibold">{{ $leadOpenTasks->count() }}</div></div></div>
+                <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">مهام متأخرة</div><div class="fs-4 fw-semibold text-danger">{{ $leadDelayedTasks->count() }}</div></div></div>
+                <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">مهام مكتملة</div><div class="fs-4 fw-semibold text-success">{{ $leadCompletedTasks->count() }}</div></div></div>
+                <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">آخر مهمة</div><div class="fw-semibold">{{ $latestLeadTask?->title ?: '-' }}</div><div class="small text-muted mt-1">{{ optional($latestLeadTask?->last_activity_at)->format('Y-m-d H:i') ?: '-' }}</div></div></div>
+            </div>
+            @if($leadDelayedTasks->isNotEmpty())
+                <div class="alert alert-danger py-2 px-3">
+                    يوجد {{ $leadDelayedTasks->count() }} مهمة متأخرة مرتبطة بهذا الليد.
+                </div>
+            @endif
             <form method="post" action="{{ route('admin.crm.leads.tasks.store', $lead) }}" class="row g-3 mb-4">
                 @csrf
                 <div class="col-md-4"><input class="form-control" name="title" placeholder="{{ __('admin.title') }}"></div>
-                <div class="col-md-3"><select class="form-select" name="assigned_user_id"><option value="">{{ __('admin.assigned_to') }}</option>@foreach($users as $user)<option value="{{ $user->id }}">{{ $user->name }}</option>@endforeach</select></div>
-                <div class="col-md-3"><input type="datetime-local" class="form-control" name="due_at"></div>
+                <div class="col-md-2"><select class="form-select" name="task_type">@foreach(\App\Models\CrmTask::typeOptions() as $value => $label)<option value="{{ $value }}" @selected($value === \App\Models\CrmTask::TYPE_LEAD)>{{ $label[app()->getLocale() === 'ar' ? 'ar' : 'en'] }}</option>@endforeach</select></div>
+                <div class="col-md-2"><select class="form-select" name="category"><option value="">التصنيف</option>@foreach(\App\Models\CrmTask::categoryOptions() as $value => $label)<option value="{{ $value }}" @selected($value === \App\Models\CrmTask::CATEGORY_CUSTOMER_FOLLOWUP)>{{ $label[app()->getLocale() === 'ar' ? 'ar' : 'en'] }}</option>@endforeach</select></div>
+                <div class="col-md-2"><select class="form-select" name="priority">@foreach(\App\Models\CrmTask::priorityOptions() as $value => $label)<option value="{{ $value }}" @selected($value === \App\Models\CrmTask::PRIORITY_MEDIUM)>{{ $label[app()->getLocale() === 'ar' ? 'ar' : 'en'] }}</option>@endforeach</select></div>
+                <div class="col-md-2"><select class="form-select" name="assigned_user_id" required><option value="">{{ __('admin.assigned_to') }}</option>@foreach($users as $user)<option value="{{ $user->id }}" @selected((int) $lead->assigned_user_id === (int) $user->id)>{{ $user->name }}</option>@endforeach</select></div>
                 <div class="col-md-2"><button class="btn btn-primary w-100">{{ __('admin.add_task') }}</button></div>
+                <div class="col-md-4"><input type="datetime-local" class="form-control" name="due_at"></div>
+                <div class="col-md-4"><select class="form-select" name="status">@foreach(\App\Models\CrmTask::statusOptions() as $value => $label)<option value="{{ $value }}" @selected($value === \App\Models\CrmTask::STATUS_NEW)>{{ $label[app()->getLocale() === 'ar' ? 'ar' : 'en'] }}</option>@endforeach</select></div>
+                <div class="col-md-4"><input class="form-control" name="notes" placeholder="{{ __('admin.notes') }}"></div>
                 <div class="col-12"><textarea class="form-control" name="description" rows="2" placeholder="{{ __('admin.description') }}"></textarea></div>
             </form>
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
-                    <thead><tr><th>{{ __('admin.title') }}</th><th>{{ __('admin.assigned_to') }}</th><th>{{ __('admin.status') }}</th><th>{{ __('admin.next_follow_up') }}</th><th></th></tr></thead>
+                    <thead><tr><th>{{ __('admin.title') }}</th><th>التصنيف</th><th>{{ __('admin.priority') }}</th><th>{{ __('admin.assigned_to') }}</th><th>{{ __('admin.status') }}</th><th>{{ __('admin.crm_task_due_date') }}</th><th></th></tr></thead>
                     <tbody>
                         @forelse($lead->crmTasks as $task)
                             <tr>
-                                <td><div class="fw-semibold">{{ $task->title }}</div><div class="text-muted small">{{ $task->description }}</div></td>
+                                <td><div class="fw-semibold">{{ $task->title }}</div><div class="text-muted small">{{ $task->description }}</div>@if($task->overdueLabel())<div class="small text-danger fw-semibold mt-1">{{ $task->overdueLabel() }}</div>@endif</td>
+                                <td>@if($task->category)<span class="badge text-bg-{{ $task->categoryBadgeClass() }}">{{ $task->localizedCategory() }}</span>@else<span class="text-muted">-</span>@endif</td>
+                                <td><span class="badge" style="{{ $task->priorityBadgeStyle() }}">{{ $task->localizedPriority() }}</span></td>
                                 <td>{{ $task->assignedUser?->name ?: '-' }}</td>
                                 <td>
                                     <form method="post" action="{{ route('admin.crm.tasks.update', $task) }}" class="d-flex gap-2">
                                         @csrf
                                         @method('PUT')
+                                        <input type="hidden" name="title" value="{{ $task->title }}">
+                                        <input type="hidden" name="description" value="{{ $task->description }}">
+                                        <input type="hidden" name="notes" value="{{ $task->notes }}">
+                                        <input type="hidden" name="task_type" value="{{ $task->task_type }}">
+                                        <input type="hidden" name="category" value="{{ $task->category }}">
+                                        <input type="hidden" name="priority" value="{{ $task->priority }}">
+                                        <input type="hidden" name="assigned_user_id" value="{{ $task->assigned_user_id }}">
+                                        <input type="hidden" name="inquiry_id" value="{{ $task->inquiry_id }}">
+                                        <input type="hidden" name="due_at" value="{{ optional($task->due_at)->format('Y-m-d H:i:s') }}">
+                                        <input type="hidden" name="return_to_lead" value="1">
                                         <select class="form-select form-select-sm" name="status">
-                                            @foreach(['open', 'in_progress', 'completed', 'cancelled'] as $status)
-                                                <option value="{{ $status }}" @selected($task->status === $status)>{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
+                                            @foreach(\App\Models\CrmTask::statusOptions() as $status => $label)
+                                                <option value="{{ $status }}" @selected($task->status === $status)>{{ $label[app()->getLocale() === 'ar' ? 'ar' : 'en'] }}</option>
                                             @endforeach
                                         </select>
                                 </td>
                                 <td>{{ optional($task->due_at)->format('Y-m-d H:i') ?: '-' }}</td>
-                                <td class="text-end"><button class="btn btn-sm btn-outline-secondary">{{ __('admin.update') }}</button></form></td>
+                                <td class="text-end"><div class="d-inline-flex gap-2"><button class="btn btn-sm btn-outline-secondary">{{ __('admin.update') }}</button><a href="{{ route('admin.crm.tasks.show', $task) }}" class="btn btn-sm btn-outline-primary">{{ __('admin.view') }}</a></div></form></td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="text-muted">{{ __('admin.crm_no_tasks') }}</td></tr>
+                            <tr><td colspan="7" class="text-muted">{{ __('admin.crm_no_tasks') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -263,12 +393,20 @@
 
                 <div class="col-md-6"><label class="form-label">{{ __('admin.crm_number_of_persons') }}</label><input type="number" class="form-control" name="travelers_count" value="{{ old('travelers_count', $lead->travelers_count) }}"></div>
                 <div class="col-md-6"><label class="form-label">{{ __('admin.country') }}</label><input class="form-control" name="country" value="{{ old('country', $lead->country) }}"></div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ __('admin.marketing_campaign') }}</label>
+                    <select class="form-select" name="utm_campaign_id">
+                        <option value="">{{ __('admin.all') }}</option>
+                        @foreach($campaigns as $campaign)
+                            <option value="{{ $campaign->id }}" @selected((int) old('utm_campaign_id', $lead->utm_campaign_id) === (int) $campaign->id)>{{ $campaign->display_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="col-md-6"><label class="form-label">{{ __('admin.campaign_name') }}</label><input class="form-control" name="campaign_name" value="{{ old('campaign_name', $lead->campaign_name) }}"></div>
                 <div class="col-md-6"><label class="form-label">UTM Source</label><input class="form-control" name="utm_source" value="{{ old('utm_source', $lead->utm_source) }}"></div>
+                <div class="col-md-6"><label class="form-label">UTM Medium</label><input class="form-control" name="utm_medium" value="{{ old('utm_medium', $lead->utm_medium) }}"></div>
                 <div class="col-md-6"><label class="form-label">UTM Campaign</label><input class="form-control" name="utm_campaign" value="{{ old('utm_campaign', $lead->utm_campaign) }}"></div>
                 <div class="col-md-6"><label class="form-label">{{ __('admin.crm_total_price') }}</label><input type="number" step="0.01" class="form-control" name="total_price" value="{{ old('total_price', $lead->total_price) }}"></div>
-                <div class="col-md-6"><label class="form-label">{{ __('admin.crm_expenses') }}</label><input type="number" step="0.01" class="form-control" name="expenses" value="{{ old('expenses', $lead->expenses) }}"></div>
-                <div class="col-md-6"><label class="form-label">{{ __('admin.crm_net_price') }}</label><input type="number" step="0.01" class="form-control" name="net_price" value="{{ old('net_price', $lead->net_price) }}"></div>
                 <div class="col-md-6"><label class="form-label">{{ __('admin.travel_date') }}</label><input type="date" class="form-control" name="travel_date" value="{{ old('travel_date', optional($lead->travel_date)->format('Y-m-d')) }}"></div>
                 <div class="col-md-6"><label class="form-label">{{ __('admin.last_follow_up') }}</label><input type="datetime-local" class="form-control" name="last_follow_up_at" value="{{ old('last_follow_up_at', optional($lead->last_follow_up_at)->format('Y-m-d\\TH:i')) }}"></div>
                 <div class="col-md-6"><label class="form-label">{{ __('admin.next_follow_up') }}</label><input type="datetime-local" class="form-control" name="next_follow_up_at" value="{{ old('next_follow_up_at', optional($lead->next_follow_up_at)->format('Y-m-d\\TH:i')) }}"></div>

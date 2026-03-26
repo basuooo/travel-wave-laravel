@@ -12,6 +12,15 @@
     <div class="col-md-2"><div class="card admin-card p-3 h-100"><div class="text-muted small">{{ __('admin.crm_duplicate_leads') }}</div><div class="h3 mb-0">{{ $summary['duplicate'] }}</div></div></div>
     <div class="col-md-2"><div class="card admin-card p-3 h-100"><div class="text-muted small">{{ __('admin.crm_followups_due_today') }}</div><div class="h3 mb-0">{{ $summary['due_today'] }}</div></div></div>
 </div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <a href="{{ route('admin.crm.leads.delayed') }}" class="card admin-card p-3 h-100 text-decoration-none text-reset border-danger">
+            <div class="text-danger small">{{ __('admin.crm_delayed_leads') }}</div>
+            <div class="h3 mb-1 text-danger">{{ $summary['delayed'] }}</div>
+            <div class="text-muted small">{{ __('admin.crm_delayed_leads_desc') }}</div>
+        </a>
+    </div>
+</div>
 
 <div class="row g-4">
     <div class="col-lg-7">

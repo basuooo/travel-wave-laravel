@@ -30,6 +30,7 @@ class HeroSlideController extends Controller
         $data = $this->validatedData($request);
         $data['image_path'] = $this->uploadFile($request, 'image', 'hero-slides');
         $data['mobile_image_path'] = $this->uploadFile($request, 'mobile_image', 'hero-slides');
+        $data['image_framing'] = $this->normalizedImageFraming($request);
         $data['is_active'] = $request->boolean('is_active');
 
         HeroSlide::create($data);
@@ -52,6 +53,7 @@ class HeroSlideController extends Controller
         $data = $this->validatedData($request, false);
         $data['image_path'] = $this->uploadFile($request, 'image', 'hero-slides', $hero_slide->image_path);
         $data['mobile_image_path'] = $this->uploadFile($request, 'mobile_image', 'hero-slides', $hero_slide->mobile_image_path);
+        $data['image_framing'] = $this->normalizedImageFraming($request);
         $data['is_active'] = $request->boolean('is_active');
 
         $hero_slide->update($data);
@@ -100,6 +102,27 @@ class HeroSlideController extends Controller
             'sort_order' => ['nullable', 'integer'],
             'image' => $imageRules,
             'mobile_image' => ['nullable', 'image'],
+            'image_framing' => ['nullable', 'array'],
+            'image_framing.*.x' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'image_framing.*.y' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ]);
+    }
+
+    protected function normalizedImageFraming(Request $request): array
+    {
+        $framing = collect((array) $request->input('image_framing', []))
+            ->only(HeroSlide::FRAME_TARGETS)
+            ->map(function ($values) {
+                return [
+                    'x' => max(0, min(100, round((float) data_get($values, 'x', 50), 2))),
+                    'y' => max(0, min(100, round((float) data_get($values, 'y', 50), 2))),
+                ];
+            })
+            ->all();
+
+        return empty($framing) ? [
+            'desktop_banner' => ['x' => 50, 'y' => 50],
+            'mobile_banner' => ['x' => 50, 'y' => 50],
+        ] : $framing;
     }
 }

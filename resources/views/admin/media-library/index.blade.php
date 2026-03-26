@@ -48,7 +48,7 @@
         @forelse($items as $item)
             <article class="admin-media-card">
                 <div class="admin-media-card__preview">
-                    <img src="{{ $item->url }}" alt="{{ $item->alt_text ?: $item->title }}"
+                    <img src="{{ $item->public_url }}" alt="{{ $item->alt_text ?: $item->title }}"
                          onerror="this.onerror=null;this.closest('.admin-media-card__preview').classList.add('is-missing');this.src='data:image/svg+xml;charset=UTF-8,{{ rawurlencode("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"640\" height=\"420\" viewBox=\"0 0 640 420\"><rect width=\"640\" height=\"420\" rx=\"28\" fill=\"#F5F6FB\"/><rect x=\"88\" y=\"92\" width=\"464\" height=\"236\" rx=\"20\" fill=\"#FFFFFF\" stroke=\"#E7E9F2\" stroke-width=\"2\"/><circle cx=\"188\" cy=\"172\" r=\"34\" fill=\"#ECE9FF\"/><path d=\"M166 282L258 204L332 258L392 214L474 282H166Z\" fill=\"#EDEFFD\"/><text x=\"320\" y=\"360\" text-anchor=\"middle\" fill=\"#7C859D\" font-family=\"Segoe UI, Arial, sans-serif\" font-size=\"22\">Preview unavailable</text></svg>") }}'">
                 </div>
                 <div class="admin-media-card__body">
@@ -56,9 +56,9 @@
                     <div class="small text-muted">{{ $item->file_name }}</div>
                     <div class="small text-muted">{{ strtoupper($item->extension ?: '—') }} · {{ $item->created_at?->format('Y-m-d') }}</div>
                     <div class="small text-muted">{{ number_format(($item->size ?? 0) / 1024, 1) }} KB</div>
-                    @php($usage = \App\Support\MediaLibraryService::usageReferences($item->path))
-                    <div class="small mt-2 {{ empty($usage) ? 'text-muted' : 'text-success' }}">
-                        {{ empty($usage) ? __('admin.media_unused') : __('admin.media_used_in', ['count' => collect($usage)->sum('count')]) }}
+                    @php($usageCount = $usageCounts[\App\Support\MediaLibraryService::normalizePath((string) $item->path)] ?? 0)
+                    <div class="small mt-2 {{ $usageCount < 1 ? 'text-muted' : 'text-success' }}">
+                        {{ $usageCount < 1 ? __('admin.media_unused') : __('admin.media_used_in', ['count' => $usageCount]) }}
                     </div>
                     <div class="d-flex gap-2 flex-wrap mt-3">
                         <button type="button" class="btn btn-outline-secondary btn-sm" onclick="navigator.clipboard.writeText('{{ $item->public_url }}')">{{ __('admin.copy_url') }}</button>
@@ -71,7 +71,7 @@
                         <form method="post" action="{{ route('admin.media-library.destroy', $item) }}" onsubmit="return confirm('{{ __('admin.confirm_delete') }}')">
                             @csrf
                             @method('delete')
-                            <button class="btn btn-outline-danger btn-sm" @disabled(!empty($usage))>{{ __('admin.delete') }}</button>
+                            <button class="btn btn-outline-danger btn-sm" @disabled($usageCount > 0)>{{ __('admin.delete') }}</button>
                         </form>
                     </div>
                 </div>

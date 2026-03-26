@@ -30,7 +30,7 @@
                             <label class="form-label">{{ $field['label'] ?? '' }}</label>
                             @if(($field['type'] ?? 'text') === 'select')
                                 <select name="{{ $field['name'] }}" class="form-select" @if(!empty($field['required'])) required @endif>
-                                    <option value="">{{ $field['placeholder'] ?? 'اختر' }}</option>
+                                    <option value="">{{ $field['placeholder'] ?? __('ui.home_search_placeholder') }}</option>
                                     @foreach(($field['options'] ?? []) as $option)
                                         <option value="{{ $option['value'] ?? $option['label'] }}">{{ $option['label'] ?? '' }}</option>
                                     @endforeach
@@ -44,7 +44,7 @@
                     @endforeach
 
                     <div class="col-12">
-                        <button type="submit" class="btn btn-primary btn-lg tw-btn-primary">{{ $section['submit_text'] ?? 'Submit' }}</button>
+                        <button type="submit" class="btn btn-primary btn-lg tw-btn-primary">{{ $section['submit_text'] ?? __('ui.send_request') }}</button>
                     </div>
                 </form>
             </div>

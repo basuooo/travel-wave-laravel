@@ -24,6 +24,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
+        $heroSlideOne = 'hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png';
+        $heroSlideTwo = 'hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png';
+        $heroSlideThree = 'hero-slides/AHA77CWYemeYDheAtHSRseA0io46WT0GuRkU8Vfh.jpg';
+        $headerLogo = 'settings/PCcL15rNg2aOwPEisbjcjDAg95DNHyGzERBvzhm8.png';
+        $favicon = 'settings/cyBFoWR1Xbhefdk05xxPFszwiQOiPpzeaJcMrmKO.png';
+
         User::query()->updateOrCreate(
             ['email' => 'admin@travelwave.test'],
             [
@@ -41,7 +47,9 @@ class DatabaseSeeder extends Seeder
                 'site_tagline_en' => 'Visas, flights, hotels, and travel planning in one place.',
                 'site_tagline_ar' => 'التأشيرات والطيران والفنادق وتخطيط الرحلات في مكان واحد.',
                 'logo_path' => 'settings/travel-wave-logo.svg',
+                'header_logo_path' => $headerLogo,
                 'footer_logo_path' => 'settings/travel-wave-logo.svg',
+                'favicon_path' => $favicon,
                 'logo_width' => 220,
                 'mobile_logo_width' => 164,
                 'contact_email' => 'info@travelwave.com',
@@ -66,9 +74,9 @@ class DatabaseSeeder extends Seeder
                 'button_color' => '#ff8c32',
                 'button_hover_color' => '#ef5c00',
                 'link_hover_color' => '#ff8c32',
-                'header_background_color' => '#12395b',
-                'header_text_color' => '#ffffff',
-                'header_link_color' => '#ffffff',
+                'header_background_color' => '#ffffff',
+                'header_text_color' => '#050000',
+                'header_link_color' => '#000000',
                 'header_hover_color' => '#ff8c32',
                 'header_active_link_color' => '#ff8c32',
                 'header_button_color' => '#ff8c32',
@@ -129,8 +137,8 @@ class DatabaseSeeder extends Seeder
         foreach ([
             [
                 'sort_order' => 1,
-                'image_path' => 'hero-slides/slide-1.svg',
-                'mobile_image_path' => 'hero-slides/slide-1.svg',
+                'image_path' => $heroSlideOne,
+                'mobile_image_path' => $heroSlideOne,
                 'headline_en' => 'Luxury journeys shaped around your next visa, flight, and stay',
                 'headline_ar' => 'رحلات راقية نصممها حول تأشيرتك ورحلتك الجوية وإقامتك',
                 'subtitle_en' => 'Travel Wave combines visa support, premium bookings, and responsive trip planning in one smooth customer journey.',
@@ -142,8 +150,8 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'sort_order' => 2,
-                'image_path' => 'hero-slides/slide-2.svg',
-                'mobile_image_path' => 'hero-slides/slide-2.svg',
+                'image_path' => $heroSlideTwo,
+                'mobile_image_path' => $heroSlideTwo,
                 'headline_en' => 'Europe, Gulf, and Asia visa services with a clearer path',
                 'headline_ar' => 'خدمات تأشيرات أوروبا والخليج وآسيا بمسار أوضح',
                 'subtitle_en' => 'From file preparation to booking coordination, we help you move with confidence and less last-minute pressure.',
@@ -155,7 +163,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'sort_order' => 3,
-                'image_path' => 'hero-slides/slide-3.svg',
+                'image_path' => $heroSlideThree,
                 'mobile_image_path' => 'hero-slides/slide-3.svg',
                 'headline_en' => 'Discover Egypt and beyond with polished travel packages',
                 'headline_ar' => 'اكتشف مصر وخارجها عبر باقات سفر مصممة باحتراف',

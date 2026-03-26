@@ -24,6 +24,17 @@ html[dir="rtl"] body {
     text-align: right;
 }
 
+.container,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl,
+.container-xxl {
+    max-width: 100%;
+    width: 100%;
+    padding-inline: clamp(1rem, 2.6vw, 2.5rem);
+}
+
 img,
 iframe {
     max-width: 100%;
@@ -48,6 +59,7 @@ a:focus-visible {
 
 .tw-navbar-brand .tw-brand-logo {
     width: auto;
+    max-height: 52px;
 }
 
 .tw-brand-wordmark {
@@ -79,10 +91,20 @@ main > section:last-child {
 .tw-navbar-brand {
     display: inline-flex;
     align-items: center;
-    max-width: min(58vw, 420px);
-    min-height: 2.75rem;
+    max-width: min(46vw, 260px);
+    min-height: 0;
     line-height: 1.1;
     white-space: normal;
+}
+
+@media (max-width: 991.98px) {
+    .tw-navbar-brand {
+        max-width: min(62vw, 220px);
+    }
+
+    .tw-navbar-brand .tw-brand-logo {
+        max-height: 44px;
+    }
 }
 
 .tw-navbar-nav .nav-link {
@@ -228,7 +250,7 @@ main > section:last-child {
     position: relative;
     min-height: 656px;
     background-image: var(--slide-desktop-image);
-    background-position: center center;
+    background-position: var(--slide-desktop-position, center center);
     background-size: cover;
     background-repeat: no-repeat;
 }
@@ -2304,7 +2326,7 @@ html[dir="rtl"] .tw-list-check li::before {
     .tw-home-slide {
         min-height: 440px;
         background-image: var(--slide-mobile-image, var(--slide-desktop-image));
-        background-position: center center;
+        background-position: var(--slide-mobile-position, var(--slide-desktop-position, center center));
     }
 
     .tw-home-slide-stage {

@@ -144,4 +144,54 @@ class User extends Authenticatable
     {
         return $this->hasMany(Inquiry::class, 'assigned_user_id');
     }
+
+    public function assignedCustomers()
+    {
+        return $this->hasMany(CrmCustomer::class, 'assigned_user_id');
+    }
+
+    public function crmInformationRecipients()
+    {
+        return $this->hasMany(CrmInformationRecipient::class);
+    }
+
+    public function accountingCustomerAccounts()
+    {
+        return $this->hasMany(AccountingCustomerAccount::class, 'assigned_user_id');
+    }
+
+    public function accountingEmployeeTransactions()
+    {
+        return $this->hasMany(AccountingEmployeeTransaction::class);
+    }
+
+    public function crmDocuments()
+    {
+        return $this->hasMany(CrmDocument::class, 'uploaded_by');
+    }
+
+    public function auditLogs()
+    {
+        return $this->hasMany(AuditLog::class, 'user_id');
+    }
+
+    public function goalTargets()
+    {
+        return $this->hasMany(GoalTarget::class);
+    }
+
+    public function commissionStatements()
+    {
+        return $this->hasMany(CommissionStatement::class);
+    }
+
+    public function utmOwnedCampaigns()
+    {
+        return $this->hasMany(UtmCampaign::class, 'owner_user_id');
+    }
+
+    public function utmCreatedCampaigns()
+    {
+        return $this->hasMany(UtmCampaign::class, 'created_by');
+    }
 }

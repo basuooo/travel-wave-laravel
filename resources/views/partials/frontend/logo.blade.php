@@ -13,7 +13,7 @@
     $logoStyle = 'display:block;max-width:100%;';
 
     if ($displayMode === 'original') {
-        $logoStyle .= 'width:auto;height:auto;max-height:none;object-fit:initial;';
+        $logoStyle .= 'width:auto;height:auto;object-fit:contain;';
     } elseif ($displayMode === 'contain') {
         if ($logoWidth) {
             $logoStyle .= 'width:min(100%, ' . (int) $logoWidth . 'px);';

@@ -36,7 +36,6 @@ class MediaAsset extends Model
     protected $appends = [
         'url',
         'public_url',
-        'file_exists',
     ];
 
     public function uploader()
@@ -47,7 +46,7 @@ class MediaAsset extends Model
     public function getUrlAttribute(): string
     {
         if (Route::has('admin.media-library.preview')) {
-            return route('admin.media-library.preview', $this);
+            return route('admin.media-library.preview', $this, false);
         }
 
         return $this->public_url;
@@ -55,7 +54,18 @@ class MediaAsset extends Model
 
     public function getPublicUrlAttribute(): string
     {
-        return Storage::disk($this->disk ?: 'public')->url($this->normalized_path);
+        $disk = $this->disk ?: 'public';
+        $path = $this->normalized_path;
+
+        if ($path === '') {
+            return '';
+        }
+
+        if ($disk === 'public') {
+            return '/storage/' . ltrim($path, '/');
+        }
+
+        return Storage::disk($disk)->url($path);
     }
 
     public function getFileExistsAttribute(): bool

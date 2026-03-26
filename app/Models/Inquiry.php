@@ -56,7 +56,24 @@ class Inquiry extends Model
         'travel_destination',
         'hotel_destination',
         'utm_source',
+        'utm_medium',
         'utm_campaign',
+        'utm_id',
+        'utm_term',
+        'utm_content',
+        'utm_campaign_id',
+        'landing_page',
+        'referrer',
+        'first_touch_at',
+        'last_touch_at',
+        'first_utm_source',
+        'first_utm_medium',
+        'first_utm_campaign',
+        'first_utm_id',
+        'first_utm_term',
+        'first_utm_content',
+        'first_landing_page',
+        'first_referrer',
         'priority',
         'last_follow_up_at',
         'next_follow_up_at',
@@ -66,6 +83,10 @@ class Inquiry extends Model
         'total_price',
         'expenses',
         'net_price',
+        'total_amount',
+        'paid_amount',
+        'remaining_amount',
+        'payment_status',
         'deleted_by',
     ];
 
@@ -82,17 +103,23 @@ class Inquiry extends Model
         'status_2_updated_by' => 'integer',
         'crm_status_updated_by' => 'integer',
         'assigned_user_id' => 'integer',
+        'utm_campaign_id' => 'integer',
         'deleted_by' => 'integer',
         'travelers_count' => 'integer',
         'nights_count' => 'integer',
         'status_1_updated_at' => 'datetime',
         'status_2_updated_at' => 'datetime',
         'crm_status_updated_at' => 'datetime',
+        'first_touch_at' => 'datetime',
+        'last_touch_at' => 'datetime',
         'last_follow_up_at' => 'datetime',
         'next_follow_up_at' => 'datetime',
         'total_price' => 'decimal:2',
         'expenses' => 'decimal:2',
         'net_price' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+        'remaining_amount' => 'decimal:2',
         'deleted_at' => 'datetime',
     ];
 
@@ -124,6 +151,11 @@ class Inquiry extends Model
     public function crmSource()
     {
         return $this->belongsTo(CrmLeadSource::class, 'crm_source_id');
+    }
+
+    public function utmCampaign()
+    {
+        return $this->belongsTo(UtmCampaign::class, 'utm_campaign_id');
     }
 
     public function crmServiceType()
@@ -161,9 +193,24 @@ class Inquiry extends Model
         return $this->belongsTo(User::class, 'deleted_by');
     }
 
+    public function accountingAccount()
+    {
+        return $this->hasOne(AccountingCustomerAccount::class, 'inquiry_id');
+    }
+
+    public function crmCustomer()
+    {
+        return $this->hasOne(CrmCustomer::class, 'inquiry_id');
+    }
+
     public function crmNotes()
     {
         return $this->hasMany(CrmLeadNote::class)->latest();
+    }
+
+    public function documents()
+    {
+        return $this->morphMany(CrmDocument::class, 'documentable')->latest('uploaded_at');
     }
 
     public function crmTasks()
@@ -285,5 +332,14 @@ class Inquiry extends Model
         }
 
         return 'https://wa.me/' . $number . '?text=' . rawurlencode($this->whatsappGreetingMessage($sellerName));
+    }
+
+    public function localizedPaymentStatus(): string
+    {
+        return match ($this->payment_status) {
+            'fully_paid' => app()->getLocale() === 'ar' ? 'مدفوع بالكامل' : 'Fully Paid',
+            'partially_paid' => app()->getLocale() === 'ar' ? 'مدفوع جزئيًا' : 'Partially Paid',
+            default => app()->getLocale() === 'ar' ? 'غير مدفوع' : 'Unpaid',
+        };
     }
 }

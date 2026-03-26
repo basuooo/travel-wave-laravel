@@ -10,6 +10,12 @@
 <body class="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 @php($adminUser = auth()->user())
 @php($currentRoute = request()->route()?->getName())
+@php($notificationCenter = app(\App\Support\AdminNotificationCenterService::class))
+@php($crmInformationEnabled = $adminUser && \Illuminate\Support\Facades\Schema::hasTable('crm_information') && \Illuminate\Support\Facades\Schema::hasTable('crm_information_recipients'))
+@php($crmCustomersEnabled = $adminUser && \Illuminate\Support\Facades\Schema::hasTable('crm_customers'))
+@php($crmDocumentsEnabled = $adminUser && \Illuminate\Support\Facades\Schema::hasTable('crm_documents') && \Illuminate\Support\Facades\Schema::hasTable('crm_document_categories'))
+@php($pendingInformationCount = $crmInformationEnabled ? \App\Models\CrmInformationRecipient::query()->where('user_id', $adminUser->id)->whereNull('acknowledged_at')->count() : 0)
+@php($crmInformationLabel = __('admin.crm_information') . ($pendingInformationCount > 0 ? ' (' . $pendingInformationCount . ')' : ''))
 @php($sidebarSections = [
     [
         'title' => __('admin.nav_users_permissions'),
@@ -57,22 +63,41 @@
         'items' => array_values(array_filter([
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm'), 'route' => 'admin.crm.dashboard', 'match' => 'admin.crm.dashboard'] : null,
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_leads'), 'route' => 'admin.crm.leads.index', 'match' => 'admin.crm.leads.*'] : null,
+            ($crmCustomersEnabled && $adminUser?->hasPermission('customers.view')) ? ['label' => __('admin.crm_customers'), 'route' => 'admin.crm.customers.index', 'match' => 'admin.crm.customers.*'] : null,
+            ($crmDocumentsEnabled && $adminUser?->hasPermission('documents.view')) ? ['label' => __('admin.documents'), 'route' => 'admin.documents.index', 'match' => 'admin.documents.*'] : null,
+            $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_delayed_leads'), 'route' => 'admin.crm.leads.delayed', 'match' => 'admin.crm.leads.delayed'] : null,
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_pipeline'), 'route' => 'admin.crm.pipeline', 'match' => 'admin.crm.pipeline'] : null,
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_followups'), 'route' => 'admin.crm.follow-ups', 'match' => 'admin.crm.follow-ups'] : null,
-            $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_tasks'), 'route' => 'admin.crm.tasks', 'match' => 'admin.crm.tasks'] : null,
+            $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_tasks'), 'route' => 'admin.crm.tasks.index', 'match' => 'admin.crm.tasks.*'] : null,
+            $adminUser?->hasPermission('leads.view') ? ['label' => $crmInformationLabel ?? __('admin.crm_information'), 'route' => 'admin.crm.information.index', 'match' => 'admin.crm.information.*'] : null,
             $adminUser?->hasPermission('leads.edit') ? ['label' => __('admin.crm_statuses'), 'route' => 'admin.crm.statuses', 'match' => 'admin.crm.statuses'] : null,
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_sources'), 'route' => 'admin.crm.sources', 'match' => 'admin.crm.sources'] : null,
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_service_types'), 'route' => 'admin.crm.service-types', 'match' => 'admin.crm.service-types'] : null,
             $adminUser?->hasPermission('leads.delete') ? ['label' => __('admin.crm_deleted_leads'), 'route' => 'admin.crm.leads.trash', 'match' => 'admin.crm.leads.trash'] : null,
             $adminUser?->hasPermission('reports.view') ? ['label' => __('admin.crm_reports'), 'route' => 'admin.crm.reports', 'match' => 'admin.crm.reports'] : null,
+            $adminUser?->hasPermission('reports.view') ? ['label' => __('admin.crm_reports2'), 'route' => 'admin.crm.reports2', 'match' => 'admin.crm.reports2'] : null,
         ])),
     ],
     [
         'title' => __('admin.nav_marketing'),
         'items' => array_values(array_filter([
+            $adminUser?->hasPermission('marketing.manage') ? ['label' => __('admin.marketing_campaigns'), 'route' => 'admin.marketing-campaigns.index', 'match' => 'admin.marketing-campaigns.*'] : null,
             $adminUser?->hasPermission('marketing.manage') ? ['label' => __('admin.marketing_manager'), 'route' => 'admin.marketing-landing-pages.index', 'match' => 'admin.marketing-landing-pages.*'] : null,
             $adminUser?->hasPermission('tracking.manage') ? ['label' => __('admin.tracking_manager'), 'route' => 'admin.tracking-integrations.index', 'match' => 'admin.tracking-integrations.*'] : null,
+            $adminUser?->hasPermission('utm.manage') ? ['label' => __('admin.utm_analytics'), 'route' => 'admin.utm.dashboard', 'match' => 'admin.utm.*'] : null,
             $adminUser?->hasPermission('chatbot.manage') ? ['label' => __('admin.chatbot_manager'), 'route' => 'admin.chatbot-settings.edit', 'match' => 'admin.chatbot-settings.*'] : null,
+        ])),
+    ],
+    [
+        'title' => __('admin.nav_accounting'),
+        'items' => array_values(array_filter([
+            $adminUser?->hasPermission('accounting.view') ? ['label' => __('admin.accounting_dashboard'), 'route' => 'admin.accounting.dashboard', 'match' => 'admin.accounting.dashboard'] : null,
+            $adminUser?->hasPermission('accounting.view') ? ['label' => __('admin.accounting_customer_accounts'), 'route' => 'admin.accounting.customers.index', 'match' => 'admin.accounting.customers.*'] : null,
+            $adminUser?->hasPermission('accounting.view') ? ['label' => __('admin.accounting_treasuries'), 'route' => 'admin.accounting.treasuries.index', 'match' => 'admin.accounting.treasuries.*'] : null,
+            $adminUser?->hasPermission('accounting.view') ? ['label' => __('admin.accounting_general_expenses'), 'route' => 'admin.accounting.general-expenses.index', 'match' => 'admin.accounting.general-expenses.*'] : null,
+            $adminUser?->hasPermission('accounting.view') ? ['label' => __('admin.accounting_employees'), 'route' => 'admin.accounting.employees.index', 'match' => 'admin.accounting.employees.*'] : null,
+            $adminUser?->hasPermission('accounting.reports.view') ? ['label' => __('admin.accounting_reports'), 'route' => 'admin.accounting.reports', 'match' => 'admin.accounting.reports'] : null,
+            $adminUser?->hasPermission('accounting.manage') ? ['label' => __('admin.accounting_settings'), 'route' => 'admin.accounting.settings', 'match' => 'admin.accounting.settings'] : null,
         ])),
     ],
     [
@@ -90,7 +115,7 @@
     ],
 ])
 @php($notificationsEnabled = $adminUser && \Illuminate\Support\Facades\Schema::hasTable('notifications'))
-@php($adminNotifications = $notificationsEnabled ? $adminUser->notifications()->latest()->limit(8)->get() : collect())
+@php($adminNotifications = $notificationsEnabled ? $notificationCenter->presentNotifications($adminUser->notifications()->latest()->limit(8)->get()) : collect())
 @php($unreadNotificationCount = $notificationsEnabled ? $adminUser->unreadNotifications()->count() : 0)
 @php($followUpPopupNotifications = $notificationsEnabled ? $adminUser->unreadNotifications()->where('type', \App\Notifications\CrmFollowUpReminderNotification::class)->latest()->take(5)->get()->map(function ($notification) {
     $data = $notification->data ?? [];
@@ -123,6 +148,24 @@
             <nav class="nav flex-column gap-1">
                 @if($adminUser?->hasPermission('dashboard.access'))
                     <a class="nav-link rounded px-3 py-2 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">{{ __('admin.dashboard') }}</a>
+                    @if($adminUser?->hasPermission('reports.view'))
+                        <a class="nav-link rounded px-3 py-2 {{ request()->routeIs('admin.kpi.*') ? 'active' : '' }}" href="{{ route('admin.kpi.dashboard') }}">{{ __('admin.kpi_dashboard') }}</a>
+                    @endif
+                    @if($adminUser?->hasPermission('knowledge_base.view'))
+                        <a class="nav-link rounded px-3 py-2 {{ request()->routeIs('admin.knowledge-base.*') ? 'active' : '' }}" href="{{ route('admin.knowledge-base.index') }}">{{ __('admin.knowledge_base') }}</a>
+                    @endif
+                    @if($adminUser?->hasPermission('audit_logs.view'))
+                        <a class="nav-link rounded px-3 py-2 {{ request()->routeIs('admin.audit-logs.*') ? 'active' : '' }}" href="{{ route('admin.audit-logs.index') }}">{{ __('admin.audit_log') }}</a>
+                    @endif
+                @if($adminUser?->hasPermission('workflow_automations.view'))
+                    <a class="nav-link rounded px-3 py-2 {{ request()->routeIs('admin.workflow-automations.*') ? 'active' : '' }}" href="{{ route('admin.workflow-automations.index') }}">{{ __('admin.workflow_automations') }}</a>
+                @endif
+                @if($adminUser?->hasPermission('goals_commissions.view'))
+                    <a class="nav-link rounded px-3 py-2 {{ request()->routeIs('admin.goals-commissions.*') ? 'active' : '' }}" href="{{ route('admin.goals-commissions.targets.index') }}">{{ __('admin.goals_commissions') }}</a>
+                @endif
+                <a class="nav-link rounded px-3 py-2 {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}" href="{{ route('admin.notifications.index') }}">
+                        {{ __('admin.notifications') }}@if($unreadNotificationCount > 0) ({{ $unreadNotificationCount }})@endif
+                    </a>
                 @endif
                 @foreach($sidebarSections as $section)
                     @continue(empty($section['items']))
@@ -177,24 +220,29 @@
                             </div>
                             <div class="admin-notification-panel__list">
                                 @forelse($adminNotifications as $notification)
-                                    @php($notificationData = $notification->data ?? [])
-                                    @php($notificationTitle = $notificationData['title_' . app()->getLocale()] ?? ($notificationData['title_ar'] ?? $notificationData['title_en'] ?? __('admin.notifications')))
-                                    <div class="admin-notification-item {{ is_null($notification->read_at) ? 'is-unread' : 'is-read' }}" data-notification-item="{{ $notification->id }}" data-notification-state="{{ is_null($notification->read_at) ? 'unread' : 'read' }}">
-                                        <a href="{{ $notificationData['url'] ?? route('admin.crm.dashboard') }}" class="admin-notification-item__body" data-notification-link data-notification-read-url="{{ route('admin.notifications.read', $notification->id) }}">
-                                            <strong>{{ $notificationTitle }}</strong>
-                                            @if(!empty($notificationData['lead_name']))
-                                                <span>{{ $notificationData['lead_name'] }}</span>
+                                    <div class="admin-notification-item {{ $notification['is_read'] ? 'is-read' : 'is-unread' }}" data-notification-item="{{ $notification['id'] }}" data-notification-state="{{ $notification['is_read'] ? 'read' : 'unread' }}">
+                                        <a href="{{ $notification['url'] ?? route('admin.dashboard') }}" class="admin-notification-item__body" data-notification-link data-notification-read-url="{{ route('admin.notifications.read', $notification['id']) }}">
+                                            <strong>{{ $notification['title'] }}</strong>
+                                            <span class="d-flex align-items-center gap-2 flex-wrap">
+                                                <span class="badge text-bg-{{ $notification['severity'] }}">{{ $notification['severity_label'] }}</span>
+                                                <span class="badge text-bg-light">{{ $notification['type_label'] }}</span>
+                                            </span>
+                                            @if(!empty($notification['message']))
+                                                <span>{{ $notification['message'] }}</span>
                                             @endif
-                                            <small>{{ optional($notification->created_at)->diffForHumans() }}</small>
+                                            <small>{{ optional($notification['created_at'])->diffForHumans() }}</small>
                                         </a>
                                         <span class="admin-notification-dot" aria-hidden="true"></span>
-                                        @if(is_null($notification->read_at))
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-notification-read="{{ route('admin.notifications.read', $notification->id) }}">{{ __('admin.crm_notification_mark_read') }}</button>
+                                        @if(! $notification['is_read'])
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-notification-read="{{ route('admin.notifications.read', $notification['id']) }}">{{ __('admin.crm_notification_mark_read') }}</button>
                                         @endif
                                     </div>
                                 @empty
                                     <div class="text-muted small">{{ __('admin.no_notifications') }}</div>
                                 @endforelse
+                            </div>
+                            <div class="admin-notification-panel__footer">
+                                <a href="{{ route('admin.notifications.index') }}" class="btn btn-sm btn-primary w-100">{{ __('admin.view_all') }}</a>
                             </div>
                         </div>
                     </div>
@@ -282,6 +330,7 @@
     <div class="admin-media-modal" id="admin-media-modal" hidden
          data-list-url="{{ route('admin.media-library.library') }}"
          data-upload-url="{{ route('admin.media-library.store') }}"
+         data-usage-url-template="{{ route('admin.media-library.usage', ['media_library' => '__MEDIA__']) }}"
          data-csrf="{{ csrf_token() }}">
         <div class="admin-media-modal__backdrop" data-media-close></div>
         <div class="admin-media-modal__dialog">
@@ -306,6 +355,11 @@
                 </aside>
             </div>
             <div class="admin-media-modal__footer">
+                <div class="d-flex align-items-center gap-2" id="admin-media-pagination">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="admin-media-prev">{{ __('admin.previous') }}</button>
+                    <span class="small text-muted" id="admin-media-page-label">{{ __('admin.media_page_label', ['current' => 1, 'last' => 1]) }}</span>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="admin-media-next">{{ __('admin.next') }}</button>
+                </div>
                 <button type="button" class="btn btn-outline-secondary" data-media-close>{{ __('admin.cancel') }}</button>
                 <button type="button" class="btn btn-primary" id="admin-media-confirm">{{ __('admin.confirm_selection') }}</button>
             </div>
@@ -317,14 +371,21 @@
         if (!modal) return;
         const listUrl = modal.dataset.listUrl;
         const uploadUrl = modal.dataset.uploadUrl;
+        const usageUrlTemplate = modal.dataset.usageUrlTemplate;
         const csrf = modal.dataset.csrf;
         const grid = document.getElementById('admin-media-grid');
         const details = document.getElementById('admin-media-details');
         const confirmButton = document.getElementById('admin-media-confirm');
         const searchInput = document.getElementById('admin-media-search');
         const uploadInput = document.getElementById('admin-media-upload');
+        const prevPageButton = document.getElementById('admin-media-prev');
+        const nextPageButton = document.getElementById('admin-media-next');
+        const pageLabel = document.getElementById('admin-media-page-label');
         let pickerState = { input: null, multiple: false, selected: [] };
         let currentItems = [];
+        let currentPage = 1;
+        let lastPage = 1;
+        const usageCache = new Map();
 
         const selectedText = @json(__('admin.media_select_prompt'));
         const usageLabel = @json(__('admin.usage'));
@@ -336,6 +397,21 @@
         const noMediaText = @json(__('admin.no_media_assets'));
         const selectFromLibraryText = @json(__('admin.select_from_library'));
         const orUploadNewText = @json(__('admin.or_upload_new'));
+        const usageLocationsText = @json(__('admin.media_usage_locations'));
+        const usageLoadingText = @json(__('admin.media_usage_loading'));
+        const usageErrorText = @json(__('admin.media_usage_error'));
+        const usageNoneText = @json(__('admin.media_usage_none'));
+        const usageOpenText = @json(__('admin.media_usage_open'));
+        const usageRecordText = @json(__('admin.media_usage_record'));
+        const usageCountTemplate = @json(__('admin.media_used_in', ['count' => '__COUNT__']));
+        const pageLabelTemplate = @json(__('admin.media_page_label', ['current' => '__CURRENT__', 'last' => '__LAST__']));
+
+        const escapeHtml = (value) => String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
 
         const ensurePreviewShell = (input) => {
             if (input.dataset.mediaEnhanced === '1') return input.parentElement.querySelector('.admin-media-picker');
@@ -374,19 +450,54 @@
             selectedBox.innerHTML = selected.map((item) => `<div class="admin-media-picker__item"><img src="${item.url}" alt="${item.title || item.file_name}"><div><strong>${item.title || item.file_name}</strong><span>${item.file_name}</span></div></div>`).join('');
         };
 
+        const renderUsageEntries = (entries) => {
+            if (!entries.length) {
+                return `<div class="admin-media-usage-empty">${usageNoneText}</div>`;
+            }
+
+            return `<div class="admin-media-usage-list">${entries.map((entry) => {
+                const action = entry.admin_url
+                    ? `<a href="${entry.admin_url}" class="btn btn-outline-secondary btn-sm">${usageOpenText}</a>`
+                    : '';
+
+                return `<div class="admin-media-usage-item"><div class="admin-media-usage-item__meta"><strong>${escapeHtml(entry.source)}</strong><span>${escapeHtml(entry.field)}</span><span>${usageRecordText}: ${escapeHtml(entry.label)}</span></div>${action}</div>`;
+            }).join('')}</div>`;
+        };
+
+        const renderUsagePanel = (item) => {
+            if (item.usage_count < 1) {
+                return `<div class="mt-3"><strong>${usageLabel}:</strong><br><span class="text-muted">${unusedLabel}</span></div>`;
+            }
+
+            const cachedUsage = usageCache.get(item.id);
+            let usageContent = '';
+
+            if (cachedUsage === 'loading') {
+                usageContent = `<div class="admin-media-usage-empty">${usageLoadingText}</div>`;
+            } else if (cachedUsage === 'error') {
+                usageContent = `<div class="admin-media-usage-empty">${usageErrorText}</div>`;
+            } else if (Array.isArray(cachedUsage)) {
+                usageContent = renderUsageEntries(cachedUsage);
+            }
+
+            const usageCountText = usageCountTemplate.replace('__COUNT__', item.usage_count);
+            return `<div class="mt-3"><strong>${usageLabel}:</strong><br><button type="button" class="btn btn-link p-0 admin-media-usage-trigger" data-media-usage-id="${item.id}">${usageCountText}</button><div class="mt-2"><strong>${usageLocationsText}</strong></div>${usageContent}</div>`;
+        };
+
         const renderDetails = (item) => {
             if (!item) {
                 details.innerHTML = `<div class="text-muted">${selectedText}</div>`;
                 return;
             }
 
-            const usageText = (item.usage || []).length ? item.usage.map((entry) => `${entry.source} · ${entry.field} (${entry.count})`).join('<br>') : unusedLabel;
-            details.innerHTML = `<div class="admin-media-details-card"><img src="${item.url}" alt="${item.title || item.file_name}"><h4>${item.title || item.file_name}</h4><div class="small text-muted">${item.file_name}</div><div class="small text-muted">${item.path}</div><hr><div><strong>${typeLabel}:</strong> ${item.extension || '—'}</div><div><strong>${sizeLabel}:</strong> ${item.size ? (item.size / 1024).toFixed(1) + ' KB' : '—'}</div><div><strong>${dimensionsLabel}:</strong> ${item.dimensions || '—'}</div><div><strong>${createdLabel}:</strong> ${item.uploaded_at || '—'}</div><div class="mt-3"><strong>${usageLabel}:</strong><br>${usageText}</div></div>`;
+            const usagePanel = renderUsagePanel(item);
+            details.innerHTML = `<div class="admin-media-details-card"><img src="${item.url}" alt="${escapeHtml(item.title || item.file_name)}"><h4>${escapeHtml(item.title || item.file_name)}</h4><div class="small text-muted">${escapeHtml(item.file_name)}</div><div class="small text-muted">${escapeHtml(item.path)}</div><hr><div><strong>${typeLabel}:</strong> ${escapeHtml(item.extension || '—')}</div><div><strong>${sizeLabel}:</strong> ${item.size ? `${(item.size / 1024).toFixed(1)} KB` : '—'}</div><div><strong>${dimensionsLabel}:</strong> ${escapeHtml(item.dimensions || '—')}</div><div><strong>${createdLabel}:</strong> ${escapeHtml(item.uploaded_at || '—')}</div>${usagePanel}</div>`;
         };
 
         const renderGrid = () => {
             if (!currentItems.length) {
                 grid.innerHTML = `<div class="text-muted">${noMediaText}</div>`;
+                renderPagination();
                 renderDetails(null);
                 return;
             }
@@ -397,14 +508,51 @@
             }).join('');
         };
 
-        const fetchMedia = async (query = '') => {
+        const renderPagination = () => {
+            if (!pageLabel || !prevPageButton || !nextPageButton) return;
+            pageLabel.textContent = pageLabelTemplate
+                .replace('__CURRENT__', currentPage)
+                .replace('__LAST__', lastPage);
+            prevPageButton.disabled = currentPage <= 1;
+            nextPageButton.disabled = currentPage >= lastPage;
+        };
+
+        const fetchMedia = async (query = '', page = 1) => {
             const url = new URL(listUrl, window.location.origin);
             if (query) url.searchParams.set('q', query);
+            url.searchParams.set('page', page);
             const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
             const payload = await response.json();
             currentItems = payload.items || [];
+            currentPage = payload.pagination?.current_page || 1;
+            lastPage = payload.pagination?.last_page || 1;
             renderGrid();
+            renderPagination();
             renderDetails(currentItems[0] || null);
+        };
+
+        const fetchUsageDetails = async (item) => {
+            if (!item || item.usage_count < 1) return;
+            if (Array.isArray(usageCache.get(item.id)) || usageCache.get(item.id) === 'error') {
+                renderDetails(item);
+                return;
+            }
+
+            usageCache.set(item.id, 'loading');
+            renderDetails(item);
+
+            try {
+                const response = await fetch(usageUrlTemplate.replace('__MEDIA__', item.id), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                const payload = await response.json();
+                usageCache.set(item.id, payload.items || []);
+            } catch (error) {
+                usageCache.set(item.id, 'error');
+            }
+
+            const currentItem = currentItems.find((entry) => entry.id === item.id) || item;
+            renderDetails(currentItem);
         };
 
         const openModal = async (input) => {
@@ -412,7 +560,7 @@
             modal.hidden = false;
             document.body.classList.add('admin-media-modal-open');
             searchInput.value = '';
-            await fetchMedia();
+            await fetchMedia('', 1);
         };
 
         const closeModal = () => {
@@ -433,6 +581,15 @@
 
             if (event.target.matches('[data-media-close]')) {
                 closeModal();
+            }
+
+            const usageTrigger = event.target.closest('.admin-media-usage-trigger');
+            if (usageTrigger) {
+                const item = currentItems.find((entry) => entry.id === Number(usageTrigger.dataset.mediaUsageId));
+                if (item) {
+                    fetchUsageDetails(item);
+                }
+                return;
             }
 
             const card = event.target.closest('.admin-media-modal__item');
@@ -460,7 +617,19 @@
         let searchTimer = null;
         searchInput.addEventListener('input', () => {
             clearTimeout(searchTimer);
-            searchTimer = setTimeout(() => fetchMedia(searchInput.value), 250);
+            searchTimer = setTimeout(() => fetchMedia(searchInput.value, 1), 250);
+        });
+
+        prevPageButton?.addEventListener('click', () => {
+            if (currentPage > 1) {
+                fetchMedia(searchInput.value, currentPage - 1);
+            }
+        });
+
+        nextPageButton?.addEventListener('click', () => {
+            if (currentPage < lastPage) {
+                fetchMedia(searchInput.value, currentPage + 1);
+            }
         });
 
         uploadInput.addEventListener('change', async () => {
@@ -478,7 +647,7 @@
                 const payload = await response.json();
                 const uploaded = payload.items || [];
                 pickerState.selected = pickerState.multiple ? uploaded : uploaded.slice(0, 1);
-                await fetchMedia(searchInput.value);
+                await fetchMedia(searchInput.value, 1);
             }
 
             uploadInput.value = '';
@@ -492,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const notificationShell = document.querySelector('[data-admin-notification-shell]');
     const notificationToggle = document.querySelector('[data-admin-notification-toggle]');
     const notificationPanel = document.querySelector('[data-admin-notification-panel]');
-    const readAllButton = document.querySelector('[data-notifications-read-all]');
+    const readAllButtons = Array.from(document.querySelectorAll('[data-notifications-read-all]'));
     const filterButtons = Array.from(document.querySelectorAll('[data-notification-filter]'));
     const popup = document.querySelector('[data-admin-followup-popup]');
 
@@ -519,7 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (!response.ok) {
-            throw new Error('Unable to mark notification as read.');
+            throw new Error(@json(__('admin.admin_notifications_mark_read_error')));
         }
 
         return response.json();
@@ -556,17 +725,19 @@ document.addEventListener('DOMContentLoaded', () => {
         notificationPanel.hidden = !notificationPanel.hidden;
     });
 
-    readAllButton?.addEventListener('click', async (event) => {
-        event.preventDefault();
+    readAllButtons.forEach((readAllButton) => {
+        readAllButton.addEventListener('click', async (event) => {
+            event.preventDefault();
 
-        try {
-            const payload = await markNotificationRead(readAllButton.dataset.notificationsReadAll);
-            document.querySelectorAll('[data-notification-item]').forEach((item) => setNotificationReadState(item, true));
-            updateNotificationCount(payload.unread_count ?? 0);
-            applyNotificationFilter(document.querySelector('[data-notification-filter].is-active')?.dataset.notificationFilter || 'all');
-        } catch (error) {
-            console.error(error);
-        }
+            try {
+                const payload = await markNotificationRead(readAllButton.dataset.notificationsReadAll);
+                document.querySelectorAll('[data-notification-item]').forEach((item) => setNotificationReadState(item, true));
+                updateNotificationCount(payload.unread_count ?? 0);
+                applyNotificationFilter(document.querySelector('[data-notification-filter].is-active')?.dataset.notificationFilter || 'all');
+            } catch (error) {
+                console.error(error);
+            }
+        });
     });
 
     filterButtons.forEach((button) => {
@@ -646,7 +817,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyNoteText = @json(__('admin.crm_follow_up_popup_empty_note'));
     const moreRemindersText = @json(__('admin.crm_follow_up_popup_more'));
     const currentSellerName = @json($adminUser?->name ?: 'Travel Wave');
-    const whatsappMessage = `اهلا وسهلا بحضرتك معاك ${currentSellerName} من Travel Wave`;
+    const whatsappMessage = @json(__('admin.admin_followup_whatsapp_message', ['name' => $adminUser?->name ?: 'Travel Wave']));
     let currentIndex = 0;
 
     const currentItem = () => queue[currentIndex] || null;
@@ -745,7 +916,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                throw new Error('Unable to complete follow-up.');
+                throw new Error(@json(__('admin.admin_followup_complete_error')));
             }
 
             const payload = await markNotificationRead(item.read_url);
@@ -781,7 +952,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                throw new Error('Unable to snooze follow-up.');
+                throw new Error(@json(__('admin.admin_followup_snooze_error')));
             }
 
             const payload = await markNotificationRead(item.read_url);
@@ -797,3 +968,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+

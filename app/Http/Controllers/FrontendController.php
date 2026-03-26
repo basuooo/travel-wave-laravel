@@ -23,6 +23,7 @@ use App\Support\LeadFormManager;
 use App\Support\MapSectionManager;
 use App\Support\MetaConversionApiService;
 use App\Support\TrackingManager;
+use App\Support\UtmAttributionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -183,6 +184,7 @@ class FrontendController extends Controller
         abort_unless($landingPage->status === MarketingLandingPage::STATUS_PUBLISHED, 404);
 
         $request->session()->start();
+        app(UtmAttributionService::class)->captureLandingPageTouch($request, $landingPage);
 
         MarketingLandingPageEvent::query()->create([
             'marketing_landing_page_id' => $landingPage->id,
@@ -346,11 +348,8 @@ class FrontendController extends Controller
             'crm_status_updated_by' => null,
             'status_1_updated_at' => now(),
             'lead_source' => $this->resolveLeadSource($request, $data['type'] ?? null),
-            'campaign_name' => $request->input('utm_campaign'),
-            'utm_source' => $request->input('utm_source'),
-            'utm_campaign' => $request->input('utm_campaign'),
             'priority' => 'normal',
-        ]);
+        ] + app(UtmAttributionService::class)->attributesForInquiry($request));
 
         if (! empty($data['marketing_landing_page_id'])) {
             MarketingLandingPageEvent::query()->create([
@@ -465,11 +464,8 @@ class FrontendController extends Controller
             'crm_status_updated_by' => null,
             'status_1_updated_at' => now(),
             'lead_source' => $this->resolveLeadSource($request, $meta['type'] ?? ($form->form_category ?: 'general')),
-            'campaign_name' => $request->input('utm_campaign'),
-            'utm_source' => $request->input('utm_source'),
-            'utm_campaign' => $request->input('utm_campaign'),
             'priority' => 'normal',
-        ]);
+        ] + app(UtmAttributionService::class)->attributesForInquiry($request));
 
         if (! empty($meta['marketing_landing_page_id'])) {
             MarketingLandingPageEvent::query()->create([
@@ -692,6 +688,113 @@ class FrontendController extends Controller
 
     protected function aboutPageContent(): array
     {
+        if (app()->getLocale() !== 'ar') {
+            return [
+                'direction' => 'ltr',
+                'page_title' => 'About Us | Travel Wave',
+                'hero' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Travel Wave',
+                    'title' => 'About Us',
+                    'subtitle' => 'Travel Wave is a trusted partner in travel and visa services, combining clear follow-up, practical organization, and a polished customer experience.',
+                    'background_image' => asset('storage/hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png'),
+                    'breadcrumbs' => [
+                        ['label' => __('ui.home'), 'url' => route('home')],
+                        ['label' => 'About Us', 'url' => null],
+                    ],
+                ],
+                'story' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Travel Wave Identity',
+                    'title' => 'A Journey Built on Clarity and Trust',
+                    'description' => 'We believe travel and visa services should feel organized, reassuring, and easy to understand. That is why we design a smoother experience across visas, domestic trips, flights, and hotels.',
+                    'image' => asset('storage/hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png'),
+                    'points' => [
+                        'Integrated solutions from first inquiry to final delivery.',
+                        'Clear communication and practical next steps for every client.',
+                        'A more professional experience across bookings, files, and follow-up.',
+                    ],
+                ],
+                'mission' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Brand Foundation',
+                    'title' => 'Vision, Mission, and Values',
+                    'subtitle' => 'We aim to deliver a more refined and organized travel experience through clear service, thoughtful details, and genuine client care.',
+                    'columns' => 'col-md-6 col-xl-4',
+                    'variant' => 'vision',
+                    'items' => [
+                        ['icon' => 'VS', 'title' => 'Our Vision', 'text' => 'To be one of the most trusted names in travel and visa services through a premium and transparent experience.'],
+                        ['icon' => 'MS', 'title' => 'Our Mission', 'text' => 'To simplify travel and visa journeys through better organization, suitable options, and reliable support.'],
+                        ['icon' => 'VL', 'title' => 'Our Values', 'text' => 'Clarity, commitment, precision, responsiveness, and attention to detail shape every part of our service.'],
+                    ],
+                ],
+                'why_choose' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Why Us',
+                    'title' => 'Why Clients Choose Us',
+                    'columns' => 'col-md-6 col-xl-4',
+                    'variant' => 'feature',
+                    'items' => [
+                        ['icon' => 'EX', 'title' => 'Travel and Visa Experience', 'text' => 'A stronger understanding of travel files, bookings, and client needs creates a smoother process.'],
+                        ['icon' => 'FO', 'title' => 'Detailed Follow-Up', 'text' => 'We focus on important details and explain what is needed before the next major step.'],
+                        ['icon' => 'BO', 'title' => 'Better Booking Coordination', 'text' => 'We align flights, hotels, and supporting services with the purpose of the trip.'],
+                        ['icon' => 'SU', 'title' => 'Ongoing Support', 'text' => 'Clearer communication and closer follow-up help reduce hesitation and increase confidence.'],
+                        ['icon' => 'FL', 'title' => 'Flexible Solutions', 'text' => 'We suggest options that fit budget, destination, and service type.'],
+                        ['icon' => 'SP', 'title' => 'Speed with Clarity', 'text' => 'Organized priorities and practical steps make progress faster and easier.'],
+                    ],
+                ],
+                'services' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Travel Wave Services',
+                    'title' => 'A Look at Our Services',
+                    'subtitle' => 'A connected service portfolio built to support the full client journey from planning to execution.',
+                    'columns' => 'col-md-6 col-xl-3',
+                    'variant' => 'service',
+                    'items' => [
+                        ['icon' => 'VS', 'title' => 'External Visas', 'text' => 'File preparation, document review, and submission guidance.', 'link_label' => 'View Service', 'url' => route('visas.index')],
+                        ['icon' => 'DT', 'title' => 'Domestic Tourism', 'text' => 'Organized local travel programs with clearer trip planning.', 'link_label' => 'View Service', 'url' => route('destinations.index')],
+                        ['icon' => 'FL', 'title' => 'Flight Bookings', 'text' => 'Flexible local and international flight booking support.', 'link_label' => 'View Service', 'url' => route('flights')],
+                        ['icon' => 'HT', 'title' => 'Hotel Bookings', 'text' => 'Accommodation options with clearer recommendations and coordination.', 'link_label' => 'View Service', 'url' => route('hotels')],
+                    ],
+                ],
+                'stats' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Trust Indicators',
+                    'title' => 'Numbers That Reflect Experience',
+                    'items' => [
+                        ['value' => '+12K', 'label' => 'Clients Served', 'text' => 'Travel requests, inquiries, and case files handled professionally.'],
+                        ['value' => '+35', 'label' => 'Active Destinations & Services', 'text' => 'Across visas, trips, and travel-related services.'],
+                        ['value' => '+8K', 'label' => 'Visa Requests', 'text' => 'Files prepared and followed up with stronger organization.'],
+                        ['value' => '94%', 'label' => 'Client Satisfaction', 'text' => 'A confidence indicator shaped by clarity and reliable follow-up.'],
+                    ],
+                ],
+                'professionalism' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Professional Mindset',
+                    'title' => 'A Team Built Around Premium Service',
+                    'description' => 'Our workflow balances speed, precision, and attention to detail so every client feels their request is handled with care and professionalism.',
+                    'image' => asset('storage/hero-slides/slide-3.svg'),
+                    'points' => [
+                        'A focused team that understands service flow and execution needs.',
+                        'Clearer coordination between all service elements to reduce confusion.',
+                        'Attention to the small details that improve the full experience.',
+                    ],
+                    'reverse' => true,
+                ],
+                'cta' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Start With Us',
+                    'title' => 'Ready for a More Professional Travel Experience?',
+                    'description' => 'Reach out to Travel Wave and let us help you choose the right service and organize the next step with confidence.',
+                    'background_image' => asset('storage/hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png'),
+                    'buttons' => [
+                        ['text' => 'Start Now', 'url' => route('contact'), 'variant' => 'primary'],
+                        ['text' => 'Contact Us', 'url' => route('contact') . '#premium-contact-form', 'variant' => 'outline'],
+                    ],
+                ],
+            ];
+        }
+
         return [
             'direction' => 'rtl',
             'page_title' => 'من نحن | Travel Wave',
@@ -700,7 +803,7 @@ class FrontendController extends Controller
                 'eyebrow' => 'Travel Wave',
                 'title' => 'من نحن',
                 'subtitle' => 'Travel Wave شريك موثوق في خدمات السفر والتأشيرات، نجمع بين التنظيم العملي، والمتابعة الواضحة، والتجربة الراقية التي تمنح العميل ثقة أكبر في كل خطوة.',
-                'background_image' => asset('storage/hero-slides/slide-1.svg'),
+                'background_image' => asset('storage/hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png'),
                 'breadcrumbs' => [
                     ['label' => 'الرئيسية', 'url' => route('home')],
                     ['label' => 'من نحن', 'url' => null],
@@ -711,7 +814,7 @@ class FrontendController extends Controller
                 'eyebrow' => 'هوية Travel Wave',
                 'title' => 'رحلة مبنية على الوضوح والثقة',
                 'description' => 'نؤمن في Travel Wave أن خدمات السفر والتأشيرات لا يجب أن تكون معقدة أو مرهقة. لذلك نصمم تجربة أكثر ترتيبًا ووضوحًا لمساعدة العملاء في التأشيرات الخارجية، والسياحة الداخلية، وحجوزات الطيران، وحجوزات الفنادق، مع اهتمام حقيقي بالتفاصيل وجودة الخدمة.',
-                'image' => asset('storage/hero-slides/slide-2.svg'),
+                'image' => asset('storage/hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png'),
                 'points' => [
                     'حلول متكاملة تبدأ من الاستفسار وحتى إتمام الخدمة.',
                     'لغة واضحة وخطوات عملية تناسب احتياج كل عميل.',
@@ -801,7 +904,7 @@ class FrontendController extends Controller
                 'eyebrow' => 'ابدأ رحلتك معنا',
                 'title' => 'جاهز لتبدأ تجربة سفر أكثر وضوحًا واحترافية؟',
                 'description' => 'تواصل مع Travel Wave ودعنا نساعدك في اختيار الخدمة المناسبة وترتيب الخطوة التالية بثقة أكبر.',
-                'background_image' => asset('storage/hero-slides/slide-2.svg'),
+                'background_image' => asset('storage/hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png'),
                 'buttons' => [
                     ['text' => 'ابدأ الآن', 'url' => route('contact'), 'variant' => 'primary'],
                     ['text' => 'تواصل معنا', 'url' => route('contact') . '#premium-contact-form', 'variant' => 'outline'],
@@ -817,6 +920,130 @@ class FrontendController extends Controller
             ? 'https://wa.me/' . preg_replace('/\D+/', '', $settings->whatsapp_number)
             : route('contact');
 
+        if (app()->getLocale() !== 'ar') {
+            return [
+                'direction' => 'ltr',
+                'page_title' => 'Contact Us | Travel Wave',
+                'hero' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Travel Wave Support',
+                    'title' => 'Contact Us',
+                    'subtitle' => 'For inquiries, bookings, visa services, and travel planning, the Travel Wave team is ready to help with clearer steps and faster support.',
+                    'background_image' => asset('storage/hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png'),
+                    'breadcrumbs' => [
+                        ['label' => __('ui.home'), 'url' => route('home')],
+                        ['label' => 'Contact Us', 'url' => null],
+                    ],
+                ],
+                'contact_info' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Contact Details',
+                    'title' => 'Choose the Best Way to Reach Us',
+                    'columns' => 'col-md-6 col-xl-4',
+                    'variant' => 'contact',
+                    'items' => array_values(array_filter([
+                        $settings?->phone ? ['icon' => 'PH', 'title' => 'Phone', 'text' => $settings->phone, 'meta' => $settings->secondary_phone, 'url' => 'tel:' . $settings->phone, 'link_label' => 'Call Now'] : null,
+                        $settings?->whatsapp_number ? ['icon' => 'WA', 'title' => 'WhatsApp', 'text' => $settings->whatsapp_number, 'meta' => 'Fast replies for inquiries and follow-up', 'url' => $whatsAppUrl, 'link_label' => 'Message Us'] : null,
+                        $settings?->contact_email ? ['icon' => 'EM', 'title' => 'Email', 'text' => $settings->contact_email, 'meta' => 'For general inquiries and requests', 'url' => 'mailto:' . $settings->contact_email, 'link_label' => 'Send Email'] : null,
+                        $settings?->localized('address') ? ['icon' => 'AD', 'title' => 'Address', 'text' => $settings->localized('address'), 'meta' => 'Visit us or use it as a location reference', 'url' => '#contact-location', 'link_label' => 'View Location'] : null,
+                        $settings?->localized('working_hours') ? ['icon' => 'HR', 'title' => 'Working Hours', 'text' => $settings->localized('working_hours'), 'meta' => 'Regular support and follow-up schedule', 'url' => '#premium-contact-form', 'link_label' => 'Send Inquiry'] : null,
+                    ])),
+                ],
+                'form' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Contact Form',
+                    'title' => 'Send Your Inquiry to Travel Wave',
+                    'subtitle' => 'Share your request details and we will help you choose the right service and next step more clearly.',
+                    'checklist' => [
+                        'Support with visas and travel service requests.',
+                        'Better coordination for flights, hotels, and travel planning.',
+                        'Clearer follow-up for inquiries and custom requests.',
+                    ],
+                    'type' => 'contact',
+                    'source' => 'Contact Us',
+                    'config' => [
+                        'title' => 'Start Your Message Now',
+                        'subtitle' => 'Fill in the main details and the Travel Wave team will contact you shortly.',
+                        'submit_text' => 'Send Now',
+                        'success_message' => 'Your message has been sent successfully. The Travel Wave team will contact you soon.',
+                        'visible_fields' => ['email', 'service_type', 'destination', 'message'],
+                        'labels' => [
+                            'full_name' => 'Name',
+                            'phone' => 'Phone Number',
+                            'email' => 'Email Address',
+                            'service_type' => 'Service Type',
+                            'destination' => 'Destination',
+                            'message' => 'Message / Notes',
+                        ],
+                        'placeholders' => [
+                            'full_name' => 'Enter your full name',
+                            'phone' => 'Enter your phone number',
+                            'email' => 'example@email.com',
+                            'destination' => 'Example: France, Sharm El Sheikh, Dubai',
+                            'message' => 'Write your request details or inquiry here',
+                        ],
+                        'field_options' => [
+                            'service_type' => [
+                                ['value' => 'External Visas', 'label' => 'External Visas'],
+                                ['value' => 'Domestic Tourism', 'label' => 'Domestic Tourism'],
+                                ['value' => 'Flight Bookings', 'label' => 'Flight Bookings'],
+                                ['value' => 'Hotel Bookings', 'label' => 'Hotel Bookings'],
+                                ['value' => 'Custom Request', 'label' => 'Custom Request'],
+                            ],
+                        ],
+                    ],
+                ],
+                'quick_help' => [
+                    'enabled' => true,
+                    'eyebrow' => 'How We Can Help',
+                    'title' => 'You Can Contact Us About',
+                    'columns' => 'col-md-6 col-xl-4',
+                    'variant' => 'help',
+                    'items' => [
+                        ['icon' => 'VS', 'title' => 'Visa Inquiries', 'text' => 'Document review, application steps, and visa preparation support.'],
+                        ['icon' => 'DT', 'title' => 'Domestic Trips', 'text' => 'Local travel programs, stays, transfers, and trip planning.'],
+                        ['icon' => 'FL', 'title' => 'Flight Booking', 'text' => 'Support choosing routes and the key details needed for booking.'],
+                        ['icon' => 'HT', 'title' => 'Hotel Booking', 'text' => 'Accommodation recommendations based on destination, budget, and trip type.'],
+                        ['icon' => 'FU', 'title' => 'Request Follow-Up', 'text' => 'Clear next steps and structured follow-up on your service request.'],
+                    ],
+                ],
+                'map' => [
+                    'enabled' => filled($settings?->map_iframe),
+                    'eyebrow' => 'Location',
+                    'title' => 'Visit Us or Use the Map as a Reference',
+                    'description' => 'You can use the map details to reach our office or as a direct location reference when needed.',
+                    'embed_code' => $settings?->map_iframe,
+                    'details' => array_values(array_filter([
+                        $settings?->localized('address') ? ['label' => 'Address', 'value' => $settings->localized('address')] : null,
+                        $settings?->localized('working_hours') ? ['label' => 'Working Hours', 'value' => $settings->localized('working_hours')] : null,
+                    ])),
+                ],
+                'faq' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Quick Answers',
+                    'title' => 'Common Contact Questions',
+                    'items' => [
+                        ['question' => 'What are your working hours?', 'answer' => $settings?->localized('working_hours') ?: 'Support is available during official working hours with timely responses for incoming inquiries.'],
+                        ['question' => 'What is the fastest way to contact you?', 'answer' => 'The fastest option is usually phone or WhatsApp depending on the type of inquiry and the service needed.'],
+                        ['question' => 'Can I contact you through WhatsApp?', 'answer' => 'Yes, WhatsApp is available for quick questions, initial requests, and early follow-up.'],
+                        ['question' => 'Can I request a custom service?', 'answer' => 'Yes, you can send a special request and the Travel Wave team will guide you to the most suitable option.'],
+                        ['question' => 'How quickly do you respond?', 'answer' => 'We aim to reply as quickly as possible depending on timing and service type.'],
+                    ],
+                ],
+                'cta' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Start Contacting Us Now',
+                    'title' => 'Need a Faster Reply and a Clearer Next Step?',
+                    'description' => 'Contact Travel Wave now and let us help you organize the right service with more confidence and less confusion.',
+                    'background_image' => asset('storage/hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png'),
+                    'buttons' => [
+                        ['text' => 'Message Us Now', 'url' => $whatsAppUrl, 'variant' => 'primary'],
+                        ['text' => 'Start Your Request', 'url' => '#premium-contact-form', 'variant' => 'outline'],
+                    ],
+                ],
+            ];
+        }
+
         return [
             'direction' => 'rtl',
             'page_title' => 'تواصل معنا | Travel Wave',
@@ -825,7 +1052,7 @@ class FrontendController extends Controller
                 'eyebrow' => 'Travel Wave Support',
                 'title' => 'تواصل معنا',
                 'subtitle' => 'للاستفسارات، والحجوزات، وخدمات التأشيرات، وخطط السفر المختلفة، فريق Travel Wave جاهز لمساعدتك بخطوات أوضح واستجابة أسرع.',
-                'background_image' => asset('storage/hero-slides/slide-2.svg'),
+                'background_image' => asset('storage/hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png'),
                 'breadcrumbs' => [
                     ['label' => 'الرئيسية', 'url' => route('home')],
                     ['label' => 'تواصل معنا', 'url' => null],
@@ -931,7 +1158,7 @@ class FrontendController extends Controller
                 'eyebrow' => 'ابدأ التواصل الآن',
                 'title' => 'هل ترغب في رد أسرع وخطوة أوضح؟',
                 'description' => 'تواصل مع Travel Wave الآن ودعنا نساعدك في ترتيب الخدمة المناسبة لك بثقة أكبر وتجربة أكثر راحة.',
-                'background_image' => asset('storage/hero-slides/slide-1.svg'),
+                'background_image' => asset('storage/hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png'),
                 'buttons' => [
                     ['text' => 'راسلنا الآن', 'url' => $whatsAppUrl, 'variant' => 'primary'],
                     ['text' => 'ابدأ طلبك', 'url' => '#premium-contact-form', 'variant' => 'outline'],
@@ -945,6 +1172,109 @@ class FrontendController extends Controller
     protected function domesticServicePage($destinations): array
     {
         $popular = $destinations->take(6)->values();
+
+        if (app()->getLocale() !== 'ar') {
+            return [
+                'theme' => 'domestic',
+                'direction' => 'ltr',
+                'page_title' => 'Domestic Tourism',
+                'title' => 'Domestic Tourism',
+                'hero' => [
+                    'badge' => 'Premium Local Trips',
+                    'title' => 'Domestic Tourism',
+                    'text' => 'Enjoy the best local destinations through organized programs and smoother travel planning with Travel Wave.',
+                    'primary_cta' => ['label' => 'Book Your Trip Now', 'url' => '#service-contact'],
+                    'secondary_cta' => ['label' => 'Browse Programs', 'url' => '#service-packages'],
+                    'image' => $popular->first()?->hero_image ? asset('storage/' . $popular->first()->hero_image) : null,
+                ],
+                'search' => [
+                    'fields' => [
+                        ['name' => 'destination', 'label' => 'Destination', 'options' => $popular->map(fn ($item) => ['label' => $item->localized('title'), 'url' => route('destinations.show', $item)])->all()],
+                        ['name' => 'duration', 'label' => 'Trip Duration', 'options' => [['label' => '3 Days', 'url' => route('destinations.index')], ['label' => '4 Days', 'url' => route('destinations.index')], ['label' => '5 Days', 'url' => route('destinations.index')], ['label' => 'Full Week', 'url' => route('destinations.index')]]],
+                        ['name' => 'trip_type', 'label' => 'Trip Type', 'options' => [['label' => 'Family', 'url' => route('destinations.index')], ['label' => 'Beach', 'url' => route('destinations.index')], ['label' => 'Relaxation & Resorts', 'url' => route('destinations.index')], ['label' => 'Cultural', 'url' => route('destinations.index')]]],
+                    ],
+                    'button' => 'Search Now',
+                    'default_url' => route('destinations.index'),
+                ],
+                'popular' => [
+                    'eyebrow' => 'Featured Local Destinations',
+                    'title' => 'Top Domestic Destinations',
+                    'text' => 'A curated selection of local destinations that combine comfort, organization, and flexible travel programs.',
+                    'items' => $popular->map(fn ($item, $index) => [
+                        'title' => $item->localized('title'),
+                        'subtitle' => ['Beach stays and leisure', 'Flexible family escapes', 'Seasonal travel programs', 'Comfortable stays and varied experiences', 'Short and easy getaways', 'A great destination for relaxation'][$index % 6],
+                        'meta' => ['3 nights / 4 days', 'Stay and transfers', 'Packages from EGP 4,500', 'Confirmed bookings', 'Seasonal offers', 'Flexible planning'][$index % 6],
+                        'image' => $item->hero_image ? asset('storage/' . $item->hero_image) : null,
+                        'button' => 'View Details',
+                        'url' => route('destinations.show', $item),
+                        'badge' => ['Domestic Trip', 'Most Requested', 'Stay Included', 'Flexible Plan'][$index % 4],
+                    ])->all(),
+                ],
+                'features_title' => 'Why Choose Our Domestic Programs?',
+                'features' => [
+                    ['tag' => '01', 'title' => 'Varied Programs', 'text' => 'Options tailored for couples, families, groups, and quick leisure escapes.'],
+                    ['tag' => '02', 'title' => 'Complete Coordination', 'text' => 'Clear organization for stays, transfers, and the main trip details.'],
+                    ['tag' => '03', 'title' => 'Reliable Booking', 'text' => 'Clear confirmations for hotels and services based on the selected program.'],
+                    ['tag' => '04', 'title' => 'Balanced Pricing', 'text' => 'Packages designed to balance value, quality, and flexibility.'],
+                    ['tag' => '05', 'title' => 'Ongoing Follow-Up', 'text' => 'Our team stays with you from booking until the trip begins.'],
+                    ['tag' => '06', 'title' => 'Seasonal Offers', 'text' => 'Fresh opportunities on popular destinations during the best times of year.'],
+                ],
+                'packages' => [
+                    'title' => 'Featured Domestic Packages',
+                    'items' => [
+                        ['title' => 'Sharm El Sheikh Gold Package', 'meta' => '4 days / 3 nights', 'highlights' => ['5-star hotel', 'Breakfast and dinner', 'Local transfers'], 'price' => 'From EGP 6,900', 'button' => 'View Package'],
+                        ['title' => 'Hurghada Family Package', 'meta' => '5 days / 4 nights', 'highlights' => ['Family-friendly program', 'Private beach', 'Daily activities'], 'price' => 'From EGP 8,250', 'button' => 'View Package'],
+                        ['title' => 'Luxor and Aswan Package', 'meta' => '6 days / 5 nights', 'highlights' => ['Cultural and leisure mix', 'Comfortable stay', 'Organized schedule'], 'price' => 'From EGP 9,800', 'button' => 'View Package'],
+                    ],
+                ],
+                'steps' => ['Choose destination', 'Select package', 'Complete booking', 'Receive confirmation', 'Get ready to travel'],
+                'steps_title' => 'Booking Steps',
+                'grid' => [
+                    'title' => 'Domestic Travel Destinations',
+                    'items' => $destinations->take(10)->map(fn ($item) => [
+                        'title' => $item->localized('title'),
+                        'chip' => 'Domestic Trip',
+                        'text' => $item->localized('excerpt') ?: 'A comfortable destination suited to leisure and family trips.',
+                        'url' => route('destinations.show', $item),
+                    ])->all(),
+                ],
+                'quick_info' => [
+                    ['title' => 'Best Travel Times', 'value' => 'Spring, summer, and long holidays are ideal for many domestic programs.'],
+                    ['title' => 'Program Duration', 'value' => 'From quick 3-day trips to full-week programs and longer escapes.'],
+                    ['title' => 'Booking Methods', 'value' => 'You can book by phone, WhatsApp, or direct inquiry through the page.'],
+                    ['title' => 'Available Offers', 'value' => 'Seasonal offers and tailored packages for families and groups are available.'],
+                ],
+                'cta' => [
+                    'eyebrow' => 'Your Next Trip Starts Here',
+                    'title' => 'Book Your Next Domestic Trip Now',
+                    'text' => 'Enjoy a more organized local travel experience with clearer accommodation options and easier booking support through Travel Wave.',
+                    'primary' => ['label' => 'Book Now', 'url' => '#service-contact'],
+                    'secondary' => ['label' => 'WhatsApp Us', 'url' => 'https://wa.me/201000000000'],
+                ],
+                'faqs' => [
+                    ['q' => 'What are the top destinations available?', 'a' => 'It depends on the trip style, but Sharm El Sheikh, Hurghada, the North Coast, Luxor, and Aswan remain among the most requested options.'],
+                    ['q' => 'Do programs include accommodation?', 'a' => 'Yes, many programs include accommodation, and hotel category details are clarified during selection.'],
+                    ['q' => 'Are family trips available?', 'a' => 'Yes, there are packages designed specifically for families with more flexible accommodation and activity options.'],
+                    ['q' => 'Can the program be customized?', 'a' => 'In many cases, the program can be adjusted based on duration, budget, and trip type.'],
+                    ['q' => 'How can I book?', 'a' => 'You can submit a request through the form or contact the Travel Wave team directly.'],
+                ],
+                'contact' => [
+                    'title' => 'Start Your Domestic Trip Booking',
+                    'text' => 'Send your details and we will help you choose the destination and program that fit you best.',
+                    'checklist' => ['Suggested best-fit program', 'Stay and booking coordination', 'Follow-up until final confirmation'],
+                    'type' => 'destination',
+                    'source' => 'Domestic Tourism',
+                    'fields' => [
+                        ['name' => 'full_name', 'label' => 'Name', 'type' => 'text', 'required' => true],
+                        ['name' => 'phone', 'label' => 'Phone Number', 'type' => 'text', 'required' => true],
+                        ['name' => 'destination', 'label' => 'Requested Destination', 'type' => 'select', 'options' => $destinations->take(10)->map(fn ($item) => ['value' => $item->localized('title'), 'label' => $item->localized('title')])->all()],
+                        ['name' => 'travelers_count', 'label' => 'Number of Travelers', 'type' => 'number'],
+                        ['name' => 'travel_date', 'label' => 'Travel Date', 'type' => 'date'],
+                        ['name' => 'message', 'label' => 'Notes', 'type' => 'textarea'],
+                    ],
+                ],
+            ];
+        }
 
         return [
             'theme' => 'domestic',
@@ -1055,6 +1385,151 @@ class FrontendController extends Controller
         $heroImage = $heroCountry?->hero_image
             ? asset('storage/' . $heroCountry->hero_image)
             : ($heroCountry?->intro_image ? asset('storage/' . $heroCountry->intro_image) : null);
+
+        if (app()->getLocale() !== 'ar') {
+            return [
+                'page_title' => 'External Visa Services',
+                'direction' => 'ltr',
+                'hero' => [
+                    'enabled' => true,
+                    'badge' => 'Premium Visa Platform',
+                    'title' => 'External Visa Services',
+                    'subtitle' => 'We make the visa journey clearer from first consultation to file preparation, bookings, and follow-up in a more professional Travel Wave experience.',
+                    'background_image' => $heroImage,
+                    'buttons' => [
+                        ['label' => 'Start Now', 'url' => '#service-form', 'variant' => 'primary'],
+                        ['label' => 'Browse Destinations', 'url' => '#service-featured', 'variant' => 'outline'],
+                    ],
+                    'metrics' => [
+                        ['value' => '+24', 'label' => 'Available destinations', 'text' => 'A broad range of visa destinations across Europe, Asia, the Arab world, and North America.'],
+                        ['value' => '15-30', 'label' => 'Business days', 'text' => 'Typical processing ranges depending on destination and file readiness.'],
+                        ['value' => '360°', 'label' => 'Full support', 'text' => 'File review, bookings, guidance, and follow-up through submission.'],
+                    ],
+                ],
+                'search_box' => [
+                    'enabled' => true,
+                    'default_url' => route('visas.index'),
+                    'button' => 'Search Now',
+                    'fields' => [
+                        ['name' => 'service_type', 'label' => 'Service Type', 'placeholder' => 'Choose service type', 'options' => [['label' => 'Tourist Visa', 'url' => route('visas.index')], ['label' => 'Family Visit', 'url' => route('visas.index')], ['label' => 'Business Visa', 'url' => route('visas.index')], ['label' => 'Appointment Support', 'url' => route('visas.index')]]],
+                        ['name' => 'destination', 'label' => 'Destination', 'placeholder' => 'Choose destination', 'options' => $countries->map(fn ($country) => ['label' => $country->localized('name'), 'url' => route('visas.country', $country)])->all()],
+                        ['name' => 'visa_type', 'label' => 'Visa Type', 'placeholder' => 'Choose visa type', 'options' => [['label' => 'Short-Stay Schengen', 'url' => route('visas.index')], ['label' => 'Family Visit', 'url' => route('visas.index')], ['label' => 'Business Travel', 'url' => route('visas.index')], ['label' => 'Multiple Entry', 'url' => route('visas.index')]]],
+                    ],
+                ],
+                'featured_section' => [
+                    'enabled' => true,
+                    'section_id' => 'service-featured',
+                    'eyebrow' => 'Most Requested',
+                    'title' => 'Popular Visa Destinations',
+                    'subtitle' => 'Selected destination cards with quick highlights and direct access to details.',
+                    'slider' => ['autoplay' => true, 'interval' => 3600],
+                    'items' => $popularCountries->map(fn ($country, $index) => [
+                        'title' => $country->localized('name'),
+                        'subtitle' => $country->localized('visa_type') ?: 'Visa Service',
+                        'meta' => $country->localized('processing_time') ?: 'Around 15 to 30 business days',
+                        'badge' => ['Most Requested', 'Schengen', 'Short Stay', 'Premium Support'][$index % 4],
+                        'image' => $country->hero_image ? asset('storage/' . $country->hero_image) : ($country->intro_image ? asset('storage/' . $country->intro_image) : null),
+                        'button' => 'View Details',
+                        'url' => route('visas.country', $country),
+                    ])->all(),
+                ],
+                'features_section' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Why Travel Wave',
+                    'title' => 'Why Clients Choose Us for Visa Support',
+                    'subtitle' => 'A clearer and more structured service experience for every visa file.',
+                    'items' => [
+                        ['tag' => '01', 'title' => 'Document Review', 'text' => 'We inspect the file, identify gaps, and flag improvements before submission.'],
+                        ['tag' => '02', 'title' => 'Case Follow-Up', 'text' => 'Structured follow-up from preparation through post-submission updates.'],
+                        ['tag' => '03', 'title' => 'Booking Coordination', 'text' => 'Support in arranging flights and hotels that fit the travel plan.'],
+                        ['tag' => '04', 'title' => 'Trip Planning', 'text' => 'A clearer travel plan helps present a more professional file.'],
+                        ['tag' => '05', 'title' => 'Faster Execution', 'text' => 'Clearer steps and quicker preparation for forms and key documents.'],
+                        ['tag' => '06', 'title' => 'Full Submission Support', 'text' => 'Guidance, appointment support, and follow-up until the final step.'],
+                    ],
+                ],
+                'cards_section' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Support Services',
+                    'title' => 'Flexible Service Packages Based on Your Need',
+                    'subtitle' => 'Choose the level of support that fits your destination and visa type.',
+                    'items' => [
+                        ['title' => 'Pre-Submission File Review', 'meta' => 'For ready files that need a careful review', 'highlights' => ['Document review', 'Trip data alignment', 'Clear notes before submission'], 'price' => 'Quoted by destination and file size', 'button' => 'Request Service', 'url' => '#service-form'],
+                        ['title' => 'Complete Preparation Support', 'meta' => 'From first step to organizing the main file', 'highlights' => ['Full guidance', 'File organization', 'Booking and requirement coordination'], 'price' => 'Flexible plan by visa type', 'button' => 'Request Service', 'url' => '#service-form'],
+                        ['title' => 'Appointment and Follow-Up Support', 'meta' => 'For clients needing practical support through appointment and submission flow', 'highlights' => ['Appointment support', 'Step-by-step follow-up', 'Clearer pre-submission answers'], 'price' => 'Quoted by destination and center', 'button' => 'Request Service', 'url' => '#service-form'],
+                    ],
+                ],
+                'steps_section' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Clear Process',
+                    'title' => 'How the Service Works With Us',
+                    'subtitle' => 'A structured journey from first contact to submission and follow-up.',
+                    'items' => [
+                        ['title' => 'Choose Destination', 'text' => 'We help define the right country and visa type for your travel purpose.'],
+                        ['title' => 'Send Documents', 'text' => 'You share the key documents and travel details needed for the file.'],
+                        ['title' => 'Review the File', 'text' => 'We inspect the file and clarify what should be completed or improved.'],
+                        ['title' => 'Book the Appointment', 'text' => 'We prepare the appointment stage and explain what comes before submission.'],
+                        ['title' => 'Submit and Follow Up', 'text' => 'The application moves forward with clearer follow-up on status and next steps.'],
+                    ],
+                ],
+                'grid_section' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Destination Network',
+                    'title' => 'Destinations You Can Start With Now',
+                    'subtitle' => 'A group of popular destinations that can be managed through Travel Wave.',
+                    'items' => $countries->take(10)->map(fn ($country) => ['title' => $country->localized('name'), 'chip' => $country->localized('visa_type') ?: 'Visa Service', 'text' => $country->localized('excerpt') ?: 'A structured service for preparing the file and clarifying the essential next steps.', 'url' => route('visas.country', $country)])->all(),
+                ],
+                'quick_info_section' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Quick Facts',
+                    'title' => 'What Clients Need Before Starting',
+                    'items' => [
+                        ['title' => 'Processing Time', 'value' => 'Usually 15 to 30 business days depending on destination and season.', 'tone' => 'navy'],
+                        ['title' => 'Fees', 'value' => 'They vary by country, consular fees, and the required service scope.', 'tone' => 'royal'],
+                        ['title' => 'Required Documents', 'value' => 'Passport, photos, financial proof, bookings, and supporting documents by case.', 'tone' => 'amber'],
+                        ['title' => 'File Readiness', 'value' => 'It improves when information, supporting documents, and travel plan are consistent.', 'tone' => 'slate'],
+                    ],
+                ],
+                'cta_section' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Start with Confidence',
+                    'title' => 'Start Your Visa File With Clearer Steps and Better Support',
+                    'description' => 'We offer a more organized and reassuring experience from consultation to file preparation, bookings, fees, and expected timelines.',
+                    'buttons' => [
+                        ['label' => 'Book Your Consultation', 'url' => '#service-form', 'variant' => 'primary'],
+                        ['label' => 'WhatsApp Us', 'url' => 'https://wa.me/201000000000', 'variant' => 'light-outline'],
+                    ],
+                ],
+                'faq_section' => [
+                    'enabled' => true,
+                    'eyebrow' => 'FAQ',
+                    'title' => 'Quick Answers Before You Start',
+                    'items' => [
+                        ['question' => 'How long does processing take?', 'answer' => 'It depends on the destination and season, but many files fall within 15 to 30 business days.'],
+                        ['question' => 'What documents are required?', 'answer' => 'Requirements vary by destination and visa type, but often include passport, photos, financial proof, and travel bookings.'],
+                        ['question' => 'Do you help after submission?', 'answer' => 'Yes, Travel Wave continues follow-up and clarifies the next step after submission.'],
+                        ['question' => 'Can you help with bookings?', 'answer' => 'Yes, we assist with flights and hotel bookings when needed for the file.'],
+                        ['question' => 'When is the best time to apply?', 'answer' => 'Earlier is better, especially before peak travel periods or when appointment slots are limited.'],
+                    ],
+                ],
+                'form_section' => [
+                    'enabled' => true,
+                    'eyebrow' => 'Inquiry Form',
+                    'title' => 'Start With a Premium Consultation',
+                    'subtitle' => 'Leave your details and our team will guide you on the right next steps for your destination and visa type.',
+                    'checklist' => ['Clear first consultation', 'Guidance for documents and bookings', 'Follow-up after inquiry'],
+                    'type' => 'visa',
+                    'source' => 'External Visas',
+                    'submit_text' => 'Submit Inquiry',
+                    'fields' => [
+                        ['name' => 'full_name', 'label' => 'Name', 'type' => 'text', 'required' => true, 'placeholder' => 'Enter your full name'],
+                        ['name' => 'phone', 'label' => 'Phone Number', 'type' => 'text', 'required' => true, 'placeholder' => 'Phone or WhatsApp number'],
+                        ['name' => 'destination', 'label' => 'Destination', 'type' => 'select', 'placeholder' => 'Choose destination', 'options' => $countries->map(fn ($country) => ['value' => $country->localized('name'), 'label' => $country->localized('name')])->all()],
+                        ['name' => 'service_type', 'label' => 'Visa Type', 'type' => 'select', 'placeholder' => 'Choose type', 'options' => [['value' => 'Tourist Visa', 'label' => 'Tourist Visa'], ['value' => 'Family Visit', 'label' => 'Family Visit'], ['value' => 'Business Visa', 'label' => 'Business Visa'], ['value' => 'Schengen', 'label' => 'Schengen']]],
+                        ['name' => 'message', 'label' => 'Notes', 'type' => 'textarea', 'placeholder' => 'Share any important travel or file details'],
+                    ],
+                ],
+            ];
+        }
 
         return [
             'page_title' => 'خدمات التأشيرات الخارجية',
@@ -1203,6 +1678,112 @@ class FrontendController extends Controller
 
     protected function flightServicePage(): array
     {
+        if (app()->getLocale() !== 'ar') {
+            return [
+                'theme' => 'flights',
+                'direction' => 'ltr',
+                'page_title' => 'Flight Bookings',
+                'title' => 'Flights',
+                'hero' => [
+                    'badge' => 'Fast and Reliable Booking Solutions',
+                    'title' => 'Flight Bookings',
+                    'text' => 'We provide clearer local and international flight options so you can reach the right route with the service and timing that fit you best.',
+                    'primary_cta' => ['label' => 'Book Your Flight', 'url' => '#service-contact'],
+                    'secondary_cta' => ['label' => 'Browse Routes', 'url' => '#service-popular'],
+                    'image' => null,
+                ],
+                'search' => [
+                    'fields' => [
+                        ['name' => 'from', 'label' => 'From', 'options' => [['label' => 'Cairo', 'url' => route('flights')], ['label' => 'Alexandria', 'url' => route('flights')], ['label' => 'Jeddah', 'url' => route('flights')], ['label' => 'Dubai', 'url' => route('flights')]]],
+                        ['name' => 'to', 'label' => 'To', 'options' => [['label' => 'Jeddah', 'url' => route('flights')], ['label' => 'Dubai', 'url' => route('flights')], ['label' => 'Istanbul', 'url' => route('flights')], ['label' => 'Paris', 'url' => route('flights')], ['label' => 'London', 'url' => route('flights')]]],
+                        ['name' => 'travel_date', 'label' => 'Travel Date', 'options' => [['label' => 'This Week', 'url' => route('flights')], ['label' => 'Next Week', 'url' => route('flights')], ['label' => 'This Month', 'url' => route('flights')]]],
+                        ['name' => 'travelers', 'label' => 'Travelers', 'options' => [['label' => '1 Traveler', 'url' => route('flights')], ['label' => '2 Travelers', 'url' => route('flights')], ['label' => '3 Travelers', 'url' => route('flights')], ['label' => '4+ Travelers', 'url' => route('flights')]]],
+                    ],
+                    'button' => 'Search for a Flight',
+                    'default_url' => route('flights'),
+                ],
+                'popular' => [
+                    'eyebrow' => 'Popular Routes',
+                    'title' => 'Top Flight Routes',
+                    'text' => 'Frequently requested routes for individuals, families, and business travel.',
+                    'items' => collect([
+                        ['title' => 'Cairo → Jeddah', 'subtitle' => 'Direct and seasonal routes', 'meta' => 'From EGP 8,900', 'badge' => 'Most Requested'],
+                        ['title' => 'Cairo → Dubai', 'subtitle' => 'Flexible options throughout the week', 'meta' => 'From EGP 9,500', 'badge' => 'Flexible'],
+                        ['title' => 'Cairo → Riyadh', 'subtitle' => 'Good for work trips and visits', 'meta' => 'From EGP 8,700', 'badge' => 'Fast'],
+                        ['title' => 'Cairo → Istanbul', 'subtitle' => 'A popular route for tourism and shopping', 'meta' => 'From EGP 10,200', 'badge' => 'Daily'],
+                        ['title' => 'Cairo → Paris', 'subtitle' => 'Strong European options', 'meta' => 'From EGP 16,800', 'badge' => 'International'],
+                        ['title' => 'Cairo → London', 'subtitle' => 'Regular flights with multiple options', 'meta' => 'From EGP 18,500', 'badge' => 'Premium'],
+                    ])->map(fn ($item) => $item + ['button' => 'View Details', 'url' => '#service-contact', 'image' => null])->all(),
+                ],
+                'features_title' => 'Why Book Flights With Us?',
+                'features' => [
+                    ['tag' => '01', 'title' => 'Better Options', 'text' => 'We help compare suitable routes based on schedule and budget.'],
+                    ['tag' => '02', 'title' => 'Fast Support', 'text' => 'Quicker help for inquiries, bookings, and available changes.'],
+                    ['tag' => '03', 'title' => 'Competitive Prices', 'text' => 'Balanced options for individuals, families, and repeat travel.'],
+                    ['tag' => '04', 'title' => 'Booking Follow-Up', 'text' => 'We confirm the key booking details with greater clarity.'],
+                    ['tag' => '05', 'title' => 'Flexible Bookings', 'text' => 'Support choosing between direct and connecting flight options.'],
+                    ['tag' => '06', 'title' => 'Trusted Service', 'text' => 'More reliable execution with clearer booking details and requirements.'],
+                ],
+                'packages' => [
+                    'title' => 'Flight Services',
+                    'items' => [
+                        ['title' => 'Domestic Flights', 'meta' => 'For local cities and quick transfers', 'highlights' => ['Flexible schedules', 'Clear booking', 'Budget options'], 'price' => 'Flexible pricing by date', 'button' => 'Request Service'],
+                        ['title' => 'International Flights', 'meta' => 'For tourism, business, and visits', 'highlights' => ['Multiple destinations', 'Selection support', 'Clearer coordination'], 'price' => 'Offers vary by destination', 'button' => 'Request Service'],
+                        ['title' => 'Family and Business Bookings', 'meta' => 'Better coordination for groups and organized travel files', 'highlights' => ['Accurate names and data', 'Booking follow-up', 'Flexible solutions'], 'price' => 'Quoted by group size and service type', 'button' => 'Request Service'],
+                    ],
+                ],
+                'steps' => ['Choose route', 'Select date', 'Choose traveler count', 'Confirm details', 'Receive booking'],
+                'steps_title' => 'Flight Booking Steps',
+                'grid' => [
+                    'title' => 'Available Flight Services',
+                    'items' => [
+                        ['title' => 'Domestic Flights', 'chip' => 'Local', 'text' => 'Flexible solutions for moving between local cities quickly and clearly.', 'url' => '#service-contact'],
+                        ['title' => 'International Flights', 'chip' => 'International', 'text' => 'Multiple outbound destinations with options that fit time and budget.', 'url' => '#service-contact'],
+                        ['title' => 'Round-Trip Bookings', 'chip' => 'Complete', 'text' => 'Better planning for departure and return within one booking flow.', 'url' => '#service-contact'],
+                        ['title' => 'Family Bookings', 'chip' => 'Family', 'text' => 'Options better suited to families and larger travel groups.', 'url' => '#service-contact'],
+                        ['title' => 'Business Travel', 'chip' => 'Business', 'text' => 'Faster solutions for recurring work trips and strict schedules.', 'url' => '#service-contact'],
+                        ['title' => 'Seasonal Offers', 'chip' => 'Offers', 'text' => 'Closer tracking of available offers during the times you need.', 'url' => '#service-contact'],
+                    ],
+                ],
+                'quick_info' => [
+                    ['title' => 'Booking Policies', 'value' => 'They vary by airline, fare type, and change or cancellation rules.'],
+                    ['title' => 'Baggage', 'value' => 'Allowed baggage depends on route and chosen airline.'],
+                    ['title' => 'Changes', 'value' => 'Some bookings allow changes depending on carrier policy and fare conditions.'],
+                    ['title' => 'Special Offers', 'value' => 'Some routes and dates may include special offers depending on availability.'],
+                ],
+                'cta' => [
+                    'eyebrow' => 'Book Faster with Confidence',
+                    'title' => 'Start Your Flight Booking Now',
+                    'text' => 'Choose your route and let Travel Wave organize the booking with clearer support and easier follow-up.',
+                    'primary' => ['label' => 'Start Booking', 'url' => '#service-contact'],
+                    'secondary' => ['label' => 'WhatsApp Us', 'url' => 'https://wa.me/201000000000'],
+                ],
+                'faqs' => [
+                    ['q' => 'Do you handle domestic and international flights?', 'a' => 'Yes, we support both domestic and international flight booking requests.'],
+                    ['q' => 'Can bookings be changed?', 'a' => 'That depends on the airline, fare type, and the carrier rules attached to the booking.'],
+                    ['q' => 'Are there flight offers?', 'a' => 'Offers may be available on some routes and dates based on real-time availability.'],
+                    ['q' => 'Can I book for a family?', 'a' => 'Yes, family bookings can be coordinated with traveler count and route requirements in mind.'],
+                    ['q' => 'What details are needed for booking?', 'a' => 'Passenger names, route, date, and traveler count are the main starting details.'],
+                ],
+                'contact' => [
+                    'title' => 'Request the Right Flight Booking',
+                    'text' => 'Send your details and we will help you choose the best route and follow through with the booking.',
+                    'checklist' => ['Suggested best-fit flights', 'Support with core details', 'Follow-up until confirmation'],
+                    'type' => 'flights',
+                    'source' => 'Flights',
+                    'fields' => [
+                        ['name' => 'full_name', 'label' => 'Name', 'type' => 'text', 'required' => true],
+                        ['name' => 'phone', 'label' => 'Phone Number', 'type' => 'text', 'required' => true],
+                        ['name' => 'nationality', 'label' => 'From', 'type' => 'text'],
+                        ['name' => 'destination', 'label' => 'To', 'type' => 'text'],
+                        ['name' => 'travel_date', 'label' => 'Travel Date', 'type' => 'date'],
+                        ['name' => 'travelers_count', 'label' => 'Number of Travelers', 'type' => 'number'],
+                        ['name' => 'message', 'label' => 'Notes', 'type' => 'textarea'],
+                    ],
+                ],
+            ];
+        }
+
         return [
             'theme' => 'flights',
             'title' => 'الطيران',
@@ -1308,6 +1889,115 @@ class FrontendController extends Controller
 
     protected function hotelServicePage(): array
     {
+        if (app()->getLocale() !== 'ar') {
+            return [
+                'direction' => 'ltr',
+                'page_title' => 'Hotel Bookings',
+                'theme' => 'hotels',
+                'title' => 'Hotels',
+                'hero' => [
+                    'badge' => 'Smarter stays with more comfort',
+                    'title' => 'Hotel Bookings',
+                    'text' => 'We help you secure the right stay with better comfort, practical options, and pricing that fits individual and family trips.',
+                    'primary_cta' => ['label' => 'Book Your Stay', 'url' => '#service-contact'],
+                    'secondary_cta' => ['label' => 'Browse Hotels', 'url' => '#service-popular'],
+                    'image' => null,
+                ],
+                'search' => [
+                    'fields' => [
+                        ['name' => 'destination', 'label' => 'Destination', 'options' => [['label' => 'Sharm El Sheikh', 'url' => route('hotels')], ['label' => 'Hurghada', 'url' => route('hotels')], ['label' => 'Dubai', 'url' => route('hotels')], ['label' => 'Makkah', 'url' => route('hotels')], ['label' => 'Istanbul', 'url' => route('hotels')], ['label' => 'Paris', 'url' => route('hotels')]]],
+                        ['name' => 'check_in', 'label' => 'Check-in', 'options' => [['label' => 'This week', 'url' => route('hotels')], ['label' => 'Next week', 'url' => route('hotels')], ['label' => 'This month', 'url' => route('hotels')]]],
+                        ['name' => 'check_out', 'label' => 'Check-out', 'options' => [['label' => 'After 2 nights', 'url' => route('hotels')], ['label' => 'After 4 nights', 'url' => route('hotels')], ['label' => 'After one week', 'url' => route('hotels')]]],
+                        ['name' => 'rooms', 'label' => 'Rooms', 'options' => [['label' => '1 room', 'url' => route('hotels')], ['label' => '2 rooms', 'url' => route('hotels')], ['label' => '3 rooms', 'url' => route('hotels')]]],
+                        ['name' => 'guests', 'label' => 'Guests', 'options' => [['label' => '2 guests', 'url' => route('hotels')], ['label' => '4 guests', 'url' => route('hotels')], ['label' => '6+ guests', 'url' => route('hotels')]]],
+                    ],
+                    'button' => 'Search Now',
+                    'default_url' => route('hotels'),
+                ],
+                'popular' => [
+                    'eyebrow' => 'Featured stays',
+                    'title' => 'Popular hotel destinations',
+                    'text' => 'A curated selection of hotel destinations with accommodation options that match different travel plans and budgets.',
+                    'items' => collect([
+                        ['title' => 'Sharm El Sheikh Hotels', 'subtitle' => 'Beach resorts and relaxing stays', 'meta' => 'High ratings and family-friendly options', 'badge' => 'Beach'],
+                        ['title' => 'Hurghada Hotels', 'subtitle' => 'Comfortable stays for leisure and sea activities', 'meta' => 'Flexible choices across budgets', 'badge' => 'Popular'],
+                        ['title' => 'Dubai Hotels', 'subtitle' => 'Premium stays in strong city locations', 'meta' => 'Business and leisure options', 'badge' => 'Premium'],
+                        ['title' => 'Makkah Hotels', 'subtitle' => 'Comfortable stays close to key areas', 'meta' => 'Organized and flexible booking options', 'badge' => 'Best location'],
+                        ['title' => 'Istanbul Hotels', 'subtitle' => 'Wide variety across districts and hotel tiers', 'meta' => 'Family and solo travel options', 'badge' => 'Variety'],
+                        ['title' => 'Paris Hotels', 'subtitle' => 'Suitable stays for European travel plans', 'meta' => 'Fast confirmations and multiple options', 'badge' => 'Europe'],
+                    ])->map(fn ($item) => $item + ['button' => 'View details', 'url' => '#service-contact', 'image' => null])->all(),
+                ],
+                'features_title' => 'Why book hotels with us?',
+                'features' => [
+                    ['tag' => '01', 'title' => 'More accommodation options', 'text' => 'A broader selection of hotels, resorts, and stay types for different travel needs.'],
+                    ['tag' => '02', 'title' => 'Better price guidance', 'text' => 'We help shortlist options that balance price, location, and service level.'],
+                    ['tag' => '03', 'title' => 'Suitable locations', 'text' => 'We help choose the right hotel based on destination, area, and trip purpose.'],
+                    ['tag' => '04', 'title' => 'Booking support', 'text' => 'Clear confirmation of booking details and accommodation preferences before finalizing.'],
+                    ['tag' => '05', 'title' => 'Comfort-focused stays', 'text' => 'Options suited for families, individuals, business trips, and leisure travel.'],
+                    ['tag' => '06', 'title' => 'Faster confirmation flow', 'text' => 'A smoother process based on availability and the room setup you need.'],
+                ],
+                'packages' => [
+                    'title' => 'Accommodation categories',
+                    'items' => [
+                        ['title' => 'Budget Hotels', 'meta' => 'Practical stays for cost-conscious travel plans', 'highlights' => ['Better cost control', 'Suitable locations', 'Straightforward booking'], 'price' => 'Pricing varies by destination', 'button' => 'Request this option'],
+                        ['title' => '4 and 5 Star Hotels', 'meta' => 'Higher comfort and stronger service levels', 'highlights' => ['Better facilities', 'Premium service', 'Flexible room options'], 'price' => 'Seasonal options available', 'button' => 'Request this option'],
+                        ['title' => 'Resorts and Hotel Apartments', 'meta' => 'Family-friendly options and longer stays', 'highlights' => ['Wider spaces', 'More flexibility', 'Family-oriented choices'], 'price' => 'Pricing depends on duration', 'button' => 'Request this option'],
+                    ],
+                ],
+                'steps' => ['Choose the destination', 'Set the dates', 'Select the stay type', 'Confirm the booking', 'Receive confirmation'],
+                'steps_title' => 'How hotel booking works',
+                'grid' => [
+                    'title' => 'Hotel and stay types',
+                    'items' => [
+                        ['title' => 'Budget Hotels', 'chip' => 'Budget', 'text' => 'A practical option for shorter trips and tighter travel budgets.', 'url' => '#service-contact'],
+                        ['title' => '4 Star Hotels', 'chip' => 'Comfort', 'text' => 'A strong balance between price, location, and core services.', 'url' => '#service-contact'],
+                        ['title' => '5 Star Hotels', 'chip' => 'Premium', 'text' => 'A more refined stay experience with higher comfort and service.', 'url' => '#service-contact'],
+                        ['title' => 'Resorts', 'chip' => 'Leisure', 'text' => 'Suitable options for holidays, relaxation, and beach-focused trips.', 'url' => '#service-contact'],
+                        ['title' => 'Hotel Apartments', 'chip' => 'Flexible', 'text' => 'A wider and more practical choice for families or longer stays.', 'url' => '#service-contact'],
+                        ['title' => 'Family Stays', 'chip' => 'Family', 'text' => 'Options better suited for larger groups and family requirements.', 'url' => '#service-contact'],
+                    ],
+                ],
+                'quick_info' => [
+                    ['title' => 'Stay types', 'value' => 'Budget hotels, 4 and 5 star hotels, resorts, and hotel apartments.'],
+                    ['title' => 'Booking policy', 'value' => 'Policies vary by hotel, rate type, and cancellation or amendment terms.'],
+                    ['title' => 'Available benefits', 'value' => 'Benefits differ by hotel and may include breakfast, view, location, or facilities.'],
+                    ['title' => 'Payment options', 'value' => 'Payment depends on the booking type, confirmation terms, and supplier policy.'],
+                ],
+                'cta' => [
+                    'eyebrow' => 'Your stay starts here',
+                    'title' => 'Book your stay with more confidence and comfort',
+                    'text' => 'Get clearer hotel options and a smoother booking process with Travel Wave, and let our team help you choose the most suitable stay.',
+                    'primary' => ['label' => 'Book Now', 'url' => '#service-contact'],
+                    'secondary' => ['label' => 'WhatsApp Us', 'url' => 'https://wa.me/201000000000'],
+                ],
+                'faqs' => [
+                    ['q' => 'Do you offer both budget and premium hotels?', 'a' => 'Yes. We support multiple hotel categories to match different budgets and trip types.'],
+                    ['q' => 'Can families book through this service?', 'a' => 'Yes. There are suitable options for families based on room size, space, and service needs.'],
+                    ['q' => 'Do you support multiple destinations?', 'a' => 'Yes. We can help with both local and international hotel bookings across several destinations.'],
+                    ['q' => 'Is the booking confirmed immediately?', 'a' => 'Availability and final confirmation depend on the selected hotel and booking timing.'],
+                    ['q' => 'Can you help choose the right hotel?', 'a' => 'Yes. We recommend suitable options based on destination, budget, guest count, and trip type.'],
+                ],
+                'contact' => [
+                    'title' => 'Start your hotel booking request',
+                    'text' => 'Send us your preferred stay details and we will help you shortlist the most suitable hotel options.',
+                    'checklist' => ['Suggested accommodation options', 'Clearer comparison between alternatives', 'Follow-up until booking confirmation'],
+                    'type' => 'hotels',
+                    'source' => 'Hotels',
+                    'fields' => [
+                        ['name' => 'full_name', 'label' => 'Full Name', 'type' => 'text', 'required' => true, 'placeholder' => 'Enter your full name'],
+                        ['name' => 'phone', 'label' => 'Phone', 'type' => 'text', 'required' => true, 'placeholder' => 'Enter your phone number'],
+                        ['name' => 'destination', 'label' => 'Destination', 'type' => 'text', 'placeholder' => 'Where would you like to stay?'],
+                        ['name' => 'travel_date', 'label' => 'Check-in Date', 'type' => 'date'],
+                        ['name' => 'return_date', 'label' => 'Check-out Date', 'type' => 'date'],
+                        ['name' => 'accommodation_type', 'label' => 'Accommodation Type', 'type' => 'text', 'placeholder' => 'Hotel, resort, apartment...'],
+                        ['name' => 'travelers_count', 'label' => 'Guests', 'type' => 'number', 'placeholder' => 'Number of guests'],
+                        ['name' => 'message', 'label' => 'Notes', 'type' => 'textarea', 'placeholder' => 'Tell us your preferred area, hotel category, or any special request'],
+                    ],
+                    'submit_text' => 'Send Request',
+                ],
+            ];
+        }
+
         return [
             'theme' => 'hotels',
             'title' => 'الفنادق',

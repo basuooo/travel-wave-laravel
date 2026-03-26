@@ -10,6 +10,9 @@ class FranceVisaTemplateSeeder extends Seeder
 {
     public function run()
     {
+        $heroSlideOne = 'hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png';
+        $heroSlideTwo = 'hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png';
+
         $category = VisaCategory::query()->firstOrCreate(
             ['slug' => 'european-union'],
             [
@@ -42,8 +45,8 @@ class FranceVisaTemplateSeeder extends Seeder
                 'hero_cta_text_ar' => 'ابدأ طلب تأشيرة فرنسا',
                 'hero_cta_url' => '#visa-inquiry',
                 'hero_overlay_opacity' => 0.50,
-                'hero_image' => 'hero-slides/slide-2.svg',
-                'hero_mobile_image' => 'hero-slides/slide-2.svg',
+                'hero_image' => $heroSlideTwo,
+                'hero_mobile_image' => $heroSlideTwo,
                 'flag_image' => 'visa-countries/france-flag.svg',
                 'overview_en' => 'France remains one of the most requested Schengen destinations for tourism, family visits, and business travel. This page is structured to give applicants a fast understanding of the visa type, the expected process, and how Travel Wave helps reduce confusion before submission.',
                 'overview_ar' => 'تظل فرنسا من أكثر وجهات شنغن طلبا للسياحة والزيارات العائلية ورحلات الأعمال. تم تصميم هذه الصفحة لتمنح المتقدم فهما سريعا لنوع التأشيرة والخطوات المتوقعة وكيف تساعد Travel Wave في تقليل أي ارتباك قبل التقديم.',
@@ -57,7 +60,7 @@ class FranceVisaTemplateSeeder extends Seeder
                     ['title_en' => 'Stay Duration', 'title_ar' => 'مدة الإقامة', 'value_en' => 'Up to 90 days', 'value_ar' => 'حتى 90 يوما', 'icon' => 'SD', 'sort_order' => 3, 'is_active' => true],
                     ['title_en' => 'Approx. Fees', 'title_ar' => 'الرسوم التقريبية', 'value_en' => 'Quoted after review', 'value_ar' => 'تحدد بعد المراجعة', 'icon' => 'FE', 'sort_order' => 4, 'is_active' => true],
                 ],
-                'intro_image' => 'hero-slides/slide-1.svg',
+                'intro_image' => $heroSlideOne,
                 'introduction_title_en' => 'France Visa Overview',
                 'introduction_title_ar' => 'نظرة عامة على تأشيرة فرنسا',
                 'introduction_badge_en' => 'Travel Wave Guided Support',
@@ -164,13 +167,13 @@ class FranceVisaTemplateSeeder extends Seeder
                 'cta_button_en' => 'Apply with Travel Wave',
                 'cta_button_ar' => 'قدّم مع Travel Wave',
                 'cta_url' => '#visa-inquiry',
-                'final_cta_background_image' => 'hero-slides/slide-1.svg',
+                'final_cta_background_image' => $heroSlideOne,
                 'final_cta_is_active' => true,
                 'meta_title_en' => 'France Visa Services | Travel Wave',
                 'meta_title_ar' => 'خدمات تأشيرة فرنسا | Travel Wave',
                 'meta_description_en' => 'Explore Travel Wave France visa support, required documents, steps, fees, FAQs, and inquiry options in a premium reusable visa template.',
                 'meta_description_ar' => 'اكتشف خدمات Travel Wave لتأشيرة فرنسا والمستندات والخطوات والرسوم والأسئلة الشائعة ونموذج الاستفسار في قالب تأشيرات قابل لإعادة الاستخدام.',
-                'og_image' => 'hero-slides/slide-2.svg',
+                'og_image' => $heroSlideTwo,
                 'is_active' => true,
                 'is_featured' => true,
                 'sort_order' => 1,

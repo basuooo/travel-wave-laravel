@@ -11,6 +11,22 @@ class AccessControl
                 ['slug' => 'dashboard.access', 'name' => 'Dashboard Access', 'description' => 'Access the admin dashboard and authenticated admin area.'],
                 ['slug' => 'reports.view', 'name' => 'View Reports', 'description' => 'View dashboard reports and high-level analytics.'],
             ],
+            'audit' => [
+                ['slug' => 'audit_logs.view', 'name' => 'View Audit Logs', 'description' => 'View immutable audit records for sensitive operational actions across the system.'],
+            ],
+            'workflow_automations' => [
+                ['slug' => 'workflow_automations.view', 'name' => 'View Workflow Automations', 'description' => 'View workflow automation rules and execution traces.'],
+                ['slug' => 'workflow_automations.manage', 'name' => 'Manage Workflow Automations', 'description' => 'Create, edit, enable, and disable controlled workflow rules.'],
+            ],
+            'goals_commissions' => [
+                ['slug' => 'goals_commissions.view', 'name' => 'View Goals & Commissions', 'description' => 'View seller targets, commission statements, and performance ranking.'],
+                ['slug' => 'goals_commissions.manage', 'name' => 'Manage Goals & Commissions', 'description' => 'Create targets, generate commission statements, and manage performance setup.'],
+            ],
+            'knowledge_base' => [
+                ['slug' => 'knowledge_base.view', 'name' => 'View Knowledge Base', 'description' => 'View published internal knowledge base articles and operational reference content.'],
+                ['slug' => 'knowledge_base.manage', 'name' => 'Manage Knowledge Base', 'description' => 'Create, edit, publish, and archive knowledge base articles.'],
+                ['slug' => 'knowledge_base.categories.manage', 'name' => 'Manage Knowledge Base Categories', 'description' => 'Manage reusable categories used by the knowledge base module.'],
+            ],
             'users' => [
                 ['slug' => 'users.view', 'name' => 'View Users', 'description' => 'View the users list and user profile details.'],
                 ['slug' => 'users.create', 'name' => 'Create Users', 'description' => 'Create new dashboard users.'],
@@ -67,6 +83,21 @@ class AccessControl
                 ['slug' => 'leads.edit', 'name' => 'Manage Leads', 'description' => 'Update lead status and internal notes.'],
                 ['slug' => 'leads.delete', 'name' => 'Delete Leads', 'description' => 'Move leads to trash, restore them, or delete them permanently when allowed.'],
                 ['slug' => 'leads.export', 'name' => 'Export Leads', 'description' => 'Export leads for sales and reporting.'],
+                ['slug' => 'information.manage', 'name' => 'Manage CRM Information', 'description' => 'Create and review targeted CRM information notices and acknowledgements.'],
+            ],
+            'customers' => [
+                ['slug' => 'customers.view', 'name' => 'View Customers', 'description' => 'View converted customers and active customer cases.'],
+                ['slug' => 'customers.manage', 'name' => 'Manage Customers', 'description' => 'Convert leads to customers and update customer case data.'],
+            ],
+            'documents' => [
+                ['slug' => 'documents.view', 'name' => 'View Documents', 'description' => 'View operational documents linked to CRM records.'],
+                ['slug' => 'documents.manage', 'name' => 'Manage Documents', 'description' => 'Upload, download, and delete documents for allowed CRM records.'],
+                ['slug' => 'documents.categories.manage', 'name' => 'Manage Document Categories', 'description' => 'Manage reusable document categories used by the documents module.'],
+            ],
+            'accounting' => [
+                ['slug' => 'accounting.view', 'name' => 'View Accounting', 'description' => 'View accounting dashboard, customer accounting, expenses, and payroll records.'],
+                ['slug' => 'accounting.manage', 'name' => 'Manage Accounting', 'description' => 'Manage collections, expenses, payroll entries, and accounting settings.'],
+                ['slug' => 'accounting.reports.view', 'name' => 'View Accounting Reports', 'description' => 'View detailed accounting and finance reports.'],
             ],
         ];
     }
@@ -99,7 +130,13 @@ class AccessControl
                     'destinations.manage', 'blog.manage', 'media.manage', 'menu.manage', 'testimonials.manage', 'forms.manage',
                     'forms.submissions.view', 'forms.submissions.edit', 'maps.manage', 'tracking.manage', 'utm.manage',
                     'seo.manage', 'seo.meta.manage', 'seo.redirects.manage', 'seo.sitemap.manage', 'marketing.manage', 'landing_pages.manage', 'chatbot.manage',
-                    'leads.view', 'leads.edit', 'leads.delete', 'leads.export',
+                    'audit_logs.view',
+                    'workflow_automations.view', 'workflow_automations.manage',
+                    'goals_commissions.view', 'goals_commissions.manage',
+                    'knowledge_base.view', 'knowledge_base.manage', 'knowledge_base.categories.manage',
+                    'leads.view', 'leads.edit', 'leads.delete', 'leads.export', 'information.manage', 'customers.view', 'customers.manage',
+                    'documents.view', 'documents.manage', 'documents.categories.manage',
+                    'accounting.view', 'accounting.manage', 'accounting.reports.view',
                 ],
             ],
             [
@@ -108,7 +145,7 @@ class AccessControl
                 'description' => 'Manage landing pages, campaigns, UTM links, tracking, and marketing performance.',
                 'permissions' => [
                     'dashboard.access', 'reports.view', 'marketing.manage', 'landing_pages.manage', 'tracking.manage', 'chatbot.manage',
-                    'utm.manage', 'forms.manage', 'forms.submissions.view', 'leads.view',
+                    'utm.manage', 'forms.manage', 'forms.submissions.view', 'leads.view', 'knowledge_base.view',
                 ],
             ],
             [
@@ -125,7 +162,7 @@ class AccessControl
                 'description' => 'Manage content pages, destinations, blog content, testimonials, and menus.',
                 'permissions' => [
                     'dashboard.access', 'pages.view', 'pages.create', 'pages.edit', 'pages.publish', 'destinations.manage',
-                    'blog.manage', 'media.manage', 'menu.manage', 'testimonials.manage',
+                    'blog.manage', 'media.manage', 'menu.manage', 'testimonials.manage', 'knowledge_base.view', 'knowledge_base.manage',
                 ],
             ],
             [
@@ -133,7 +170,9 @@ class AccessControl
                 'slug' => 'sales-leads-manager',
                 'description' => 'Monitor and update leads, submissions, and sales-related follow-up records.',
                 'permissions' => [
-                    'dashboard.access', 'reports.view', 'leads.view', 'leads.edit', 'leads.export', 'forms.submissions.view', 'forms.submissions.edit',
+                    'dashboard.access', 'reports.view', 'leads.view', 'leads.edit', 'leads.export', 'forms.submissions.view', 'forms.submissions.edit', 'information.manage',
+                    'customers.view', 'customers.manage', 'documents.view', 'documents.manage', 'knowledge_base.view', 'knowledge_base.manage',
+                    'workflow_automations.view', 'goals_commissions.view',
                 ],
             ],
             [
@@ -141,7 +180,8 @@ class AccessControl
                 'slug' => 'viewer-analyst',
                 'description' => 'Read-only access to dashboards, reports, and approved admin areas.',
                 'permissions' => [
-                    'dashboard.access', 'reports.view', 'pages.view', 'leads.view', 'forms.submissions.view',
+                    'dashboard.access', 'reports.view', 'pages.view', 'leads.view', 'forms.submissions.view', 'knowledge_base.view',
+                    'workflow_automations.view', 'goals_commissions.view',
                 ],
             ],
         ];

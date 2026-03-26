@@ -37,11 +37,12 @@
                     </li>
                 @endif
                 <li class="nav-item tw-navbar-locale ms-lg-3">
-                    <a class="btn btn-sm tw-btn-outline tw-locale-btn" href="{{ route('locale.switch', $currentLocale === 'ar' ? 'en' : 'ar') }}">
-                        {{ $currentLocale === 'ar' ? 'English' : 'العربية' }}
+                    <a class="nav-link" href="{{ route('locale.switch', $currentLocale === 'ar' ? 'en' : 'ar') }}">
+                        {{ $currentLocale === 'ar' ? __('ui.language_english') : __('ui.language_arabic') }}
                     </a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+

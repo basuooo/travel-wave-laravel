@@ -6,6 +6,8 @@ use App\Models\HeroSlide;
 use App\Models\Inquiry;
 use App\Models\ChatbotInteraction;
 use App\Models\ChatbotKnowledgeItem;
+use App\Models\AccountingCustomerAccount;
+use App\Models\CrmInformation;
 use App\Models\CrmFollowUp;
 use App\Models\LeadForm;
 use App\Models\LeadFormAssignment;
@@ -20,6 +22,9 @@ use App\Models\SeoRedirect;
 use App\Models\SeoSetting;
 use App\Models\Setting;
 use App\Models\TrackingIntegration;
+use App\Models\UtmCampaign;
+use App\Models\UtmVisit;
+use App\Notifications\AdminDatabaseNotification;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -3373,6 +3378,628 @@ class TravelWaveFrontendTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_open_manual_crm_lead_create_page_and_store_a_manual_lead(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.index'))
+            ->assertOk()
+            ->assertSee('Add Lead');
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.create'))
+            ->assertOk()
+            ->assertSee('Save Lead');
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.store'), [
+                'full_name' => 'Manual Lead',
+                'phone' => '01012121212',
+                'whatsapp_number' => '01012121212',
+                'email' => 'manual@example.com',
+                'country' => 'Egypt',
+                'destination' => 'Cairo',
+                'admin_notes' => 'Created manually from dashboard.',
+                'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+            ])
+            ->assertRedirect(route('admin.crm.leads.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('inquiries', [
+            'full_name' => 'Manual Lead',
+            'phone' => '01012121212',
+            'whatsapp_number' => '01012121212',
+            'email' => 'manual@example.com',
+            'lead_source' => 'manual',
+            'source_page' => 'admin-manual',
+        ]);
+    }
+
+    public function test_manual_crm_lead_creation_blocks_duplicate_phone_numbers(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Existing Manual Duplicate',
+            'phone' => '01056565656',
+            'crm_status_id' => \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id'),
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($admin)
+            ->from(route('admin.crm.leads.create'))
+            ->post(route('admin.crm.leads.store'), [
+                'full_name' => 'Blocked Duplicate',
+                'phone' => '01056565656',
+            ])
+            ->assertRedirect(route('admin.crm.leads.create'))
+            ->assertSessionHasErrors(['phone']);
+    }
+
+    public function test_admin_can_view_delayed_leads_with_red_delay_reason_labels(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $statusId = \App\Models\CrmStatus::query()->where('slug', 'new-lead')->value('id');
+
+        $overdueLead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Overdue Follow Up Lead',
+            'phone' => '01030101010',
+            'crm_status_id' => $statusId,
+            'status' => 'new',
+        ]);
+        $overdueLead->forceFill([
+            'updated_at' => now()->subDays(3),
+            'created_at' => now()->subDays(7),
+        ])->save();
+
+        CrmFollowUp::query()->create([
+            'inquiry_id' => $overdueLead->id,
+            'crm_status_id' => $statusId,
+            'assigned_user_id' => $admin->id,
+            'created_by' => $admin->id,
+            'status' => CrmFollowUp::STATUS_PENDING,
+            'scheduled_at' => now()->subDays(2),
+            'reminder_offset_minutes' => 30,
+            'remind_at' => now()->subDays(2)->subMinutes(30),
+        ]);
+
+        $inactiveLead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Inactive Lead',
+            'phone' => '01030202020',
+            'crm_status_id' => $statusId,
+            'status' => 'new',
+        ]);
+        $inactiveLead->forceFill([
+            'updated_at' => now()->subDays(6),
+            'created_at' => now()->subDays(9),
+        ])->save();
+
+        $activeLead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Recently Active Lead',
+            'phone' => '01030303030',
+            'crm_status_id' => $statusId,
+            'status' => 'new',
+        ]);
+        $activeLead->forceFill([
+            'updated_at' => now()->subDays(10),
+            'created_at' => now()->subDays(12),
+        ])->save();
+
+        $activeLead->crmNotes()->create([
+            'user_id' => $admin->id,
+            'body' => 'Recent note keeps this lead active.',
+            'created_at' => now()->subDay(),
+            'updated_at' => now()->subDay(),
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.delayed'))
+            ->assertOk()
+            ->assertSee('Overdue Follow Up Lead')
+            ->assertSee('Inactive Lead')
+            ->assertDontSee('Recently Active Lead')
+            ->assertSee('text-bg-danger', false)
+            ->assertSee('تمت الجدولة ولم يتم تغيير الحالة')
+            ->assertSee('لم يتم اتخاذ أي إجراء منذ 5 أيام');
+    }
+
+    public function test_admin_can_view_enhanced_crm_reports_with_filters_and_activity_log(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Reports Seller',
+            'email' => 'reports-seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+
+        $statusNew = \App\Models\CrmStatus::query()->where('slug', 'new-lead')->firstOrFail();
+        $statusNoAnswer = \App\Models\CrmStatus::query()->where('slug', 'no-answer')->firstOrFail();
+        $source = \App\Models\CrmLeadSource::query()->first();
+
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Report Lead',
+            'phone' => '01010101010',
+            'assigned_user_id' => $seller->id,
+            'crm_status_id' => $statusNew->id,
+            'status' => 'new',
+            'crm_source_id' => $source?->id,
+            'lead_source' => $source?->name_en ?? 'manual',
+        ]);
+
+        \App\Models\CrmLeadNote::query()->create([
+            'inquiry_id' => $lead->id,
+            'user_id' => $seller->id,
+            'body' => 'Daily follow-up note',
+            'created_at' => now()->subHour(),
+            'updated_at' => now()->subHour(),
+        ]);
+
+        \App\Models\CrmStatusUpdate::query()->create([
+            'inquiry_id' => $lead->id,
+            'status_level' => 'primary',
+            'old_status_id' => $statusNew->id,
+            'new_status_id' => $statusNoAnswer->id,
+            'changed_by' => $seller->id,
+            'changed_at' => now()->subMinutes(30),
+            'note' => 'No answer today',
+        ]);
+
+        \App\Models\CrmFollowUp::query()->create([
+            'inquiry_id' => $lead->id,
+            'crm_status_id' => $statusNoAnswer->id,
+            'assigned_user_id' => $seller->id,
+            'created_by' => $seller->id,
+            'status' => \App\Models\CrmFollowUp::STATUS_PENDING,
+            'scheduled_at' => now()->addHour(),
+            'reminder_offset_minutes' => 30,
+            'remind_at' => now()->addMinutes(30),
+            'note' => 'Call back later',
+            'created_at' => now()->subMinutes(20),
+            'updated_at' => now()->subMinutes(20),
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.reports', [
+                'employee_id' => $seller->id,
+                'day' => now()->toDateString(),
+            ]))
+            ->assertOk()
+            ->assertSee('فلاتر التقارير')
+            ->assertSee('تفاصيل النشاط')
+            ->assertSee('Report Lead')
+            ->assertSee('Daily follow-up note');
+    }
+
+    public function test_admin_can_view_crm_reports2_grouped_by_status_for_selected_seller(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Reports 2 Seller',
+            'email' => 'reports2-seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+
+        $salesRole = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $seller->roles()->sync([$salesRole->id]);
+
+        $statusNew = \App\Models\CrmStatus::query()->where('slug', 'new-lead')->firstOrFail();
+        $statusNoAnswer = \App\Models\CrmStatus::query()->where('slug', 'no-answer')->firstOrFail();
+
+        Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Reports2 Lead A',
+            'phone' => '01021021021',
+            'assigned_user_id' => $seller->id,
+            'crm_status_id' => $statusNew->id,
+            'status' => 'new',
+            'created_at' => now()->subDay(),
+            'updated_at' => now()->subDay(),
+        ]);
+
+        Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Reports2 Lead B',
+            'phone' => '01021021022',
+            'assigned_user_id' => $seller->id,
+            'crm_status_id' => $statusNoAnswer->id,
+            'status' => 'new',
+            'created_at' => now()->subDay(),
+            'updated_at' => now()->subDay(),
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.reports2', [
+                'seller_id' => $seller->id,
+                'from' => now()->subDays(2)->toDateString(),
+                'to' => today()->toDateString(),
+            ]))
+            ->assertOk()
+            ->assertSee('Reports 2', false)
+            ->assertSee($seller->name)
+            ->assertSee($statusNew->localizedName())
+            ->assertSee($statusNoAnswer->localizedName());
+    }
+
+    public function test_admin_can_create_and_review_general_crm_task_module_pages(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Task Seller',
+            'email' => 'task-seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+
+        $salesRole = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $seller->roles()->sync([$salesRole->id]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.tasks.store'), [
+                'title' => 'Internal Operations Task',
+                'description' => 'Review pricing sheet',
+                'task_type' => \App\Models\CrmTask::TYPE_GENERAL,
+                'assigned_user_id' => $seller->id,
+                'priority' => \App\Models\CrmTask::PRIORITY_HIGH,
+                'status' => \App\Models\CrmTask::STATUS_NEW,
+                'due_at' => now()->addDay()->format('Y-m-d H:i:s'),
+            ])
+            ->assertRedirect();
+
+        $task = \App\Models\CrmTask::query()->where('title', 'Internal Operations Task')->firstOrFail();
+
+        $this->assertNull($task->inquiry_id);
+        $this->assertDatabaseHas('crm_task_activities', [
+            'crm_task_id' => $task->id,
+            'action_type' => 'created',
+        ]);
+
+        $this->actingAs($admin)->get(route('admin.crm.tasks.index'))->assertOk()->assertSee('Internal Operations Task');
+        $this->actingAs($admin)->get(route('admin.crm.tasks.board'))->assertOk()->assertSee('Internal Operations Task');
+        $this->actingAs($admin)->get(route('admin.crm.tasks.reports'))->assertOk()->assertSee('Task Reports')->assertSee($seller->name);
+    }
+
+    public function test_lead_linked_task_can_be_created_from_lead_page_and_is_visible(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $status = \App\Models\CrmStatus::query()->where('slug', 'new-lead')->firstOrFail();
+
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Lead Task Customer',
+            'phone' => '01045454545',
+            'crm_status_id' => $status->id,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.leads.tasks.store', $lead), [
+                'title' => 'Call customer about documents',
+                'description' => 'Need missing embassy file',
+                'assigned_user_id' => $admin->id,
+                'task_type' => \App\Models\CrmTask::TYPE_LEAD,
+                'priority' => \App\Models\CrmTask::PRIORITY_URGENT,
+                'status' => \App\Models\CrmTask::STATUS_IN_PROGRESS,
+                'due_at' => now()->addHours(5)->format('Y-m-d H:i:s'),
+            ])
+            ->assertRedirect(route('admin.crm.leads.show', $lead));
+
+        $task = \App\Models\CrmTask::query()->where('title', 'Call customer about documents')->firstOrFail();
+
+        $this->assertSame($lead->id, $task->inquiry_id);
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.show', $lead))
+            ->assertOk()
+            ->assertSee('Call customer about documents')
+            ->assertSee('In Progress');
+    }
+
+    public function test_admin_can_sync_accounting_account_from_crm_lead_update(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $status = \App\Models\CrmStatus::query()->where('slug', 'new-lead')->firstOrFail();
+
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Finance Lead',
+            'phone' => '01077777777',
+            'crm_status_id' => $status->id,
+            'status' => 'new',
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.crm.leads.update', $lead), [
+                'full_name' => 'Finance Lead',
+                'phone' => '01077777777',
+                'crm_status_id' => $status->id,
+                'total_amount' => 1000,
+                'paid_amount' => 400,
+            ])
+            ->assertRedirect(route('admin.crm.leads.show', $lead));
+
+        $this->assertDatabaseHas('accounting_customer_accounts', [
+            'inquiry_id' => $lead->id,
+            'total_amount' => 1000,
+            'paid_amount' => 400,
+            'remaining_amount' => 600,
+            'payment_status' => 'partially_paid',
+        ]);
+
+        $this->assertDatabaseHas('accounting_customer_payments', [
+            'amount' => 400,
+            'payment_type' => 'payment',
+        ]);
+    }
+
+    public function test_admin_can_open_accounting_dashboard_and_reports(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.accounting.dashboard'))
+            ->assertOk();
+
+        $this->actingAs($admin)
+            ->get(route('admin.accounting.reports'))
+            ->assertOk();
+    }
+
+    public function test_accounting_profit_is_calculated_from_paid_amount_only(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $status = \App\Models\CrmStatus::query()->where('slug', 'new-lead')->firstOrFail();
+
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Paid Amount Profit Lead',
+            'phone' => '01088888888',
+            'crm_status_id' => $status->id,
+            'status' => 'new',
+            'total_amount' => 5000,
+            'paid_amount' => 2500,
+            'remaining_amount' => 2500,
+            'payment_status' => 'partially_paid',
+        ]);
+
+        $calculator = app(\App\Support\AccountingCalculatorService::class);
+        $account = $calculator->syncLeadAccount($lead, $admin->id);
+
+        $category = \App\Models\AccountingExpenseCategory::query()->firstOrFail();
+        $account->expenses()->create([
+            'accounting_expense_category_id' => $category->id,
+            'amount' => 2000,
+            'expense_date' => now()->toDateString(),
+            'created_by' => $admin->id,
+        ]);
+
+        $account = $calculator->syncLeadAccount($lead->fresh(), $admin->id)->fresh();
+
+        $this->assertSame(2500.0, (float) $account->paid_amount);
+        $this->assertSame(2500.0, (float) $account->remaining_amount);
+        $this->assertSame(2000.0, (float) $account->total_customer_expenses);
+        $this->assertSame(500.0, (float) $account->company_profit_before_seller);
+        $this->assertSame(50.0, (float) $account->seller_profit);
+        $this->assertSame(450.0, (float) $account->final_company_profit);
+
+        $this->actingAs($admin)
+            ->get(route('admin.accounting.customers.show', $account))
+            ->assertOk()
+            ->assertSee('500.00')
+            ->assertSee('50.00')
+            ->assertSee('450.00');
+    }
+
+    public function test_lead_page_hides_accounting_fields_but_accounting_page_keeps_them(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $status = \App\Models\CrmStatus::query()->where('slug', 'new-lead')->firstOrFail();
+
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Lead Without Finance UI',
+            'phone' => '01012121212',
+            'crm_status_id' => $status->id,
+            'status' => 'new',
+            'total_amount' => 3000,
+            'paid_amount' => 1500,
+            'remaining_amount' => 1500,
+            'payment_status' => 'partially_paid',
+        ]);
+
+        $account = app(\App\Support\AccountingCalculatorService::class)->syncLeadAccount($lead, $admin->id);
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.show', $lead))
+            ->assertOk()
+            ->assertDontSee('name="total_amount"', false)
+            ->assertDontSee('name="paid_amount"', false)
+            ->assertDontSee('name="expenses"', false)
+            ->assertDontSee('name="net_price"', false)
+            ->assertDontSee(__('admin.accounting_total_amount'))
+            ->assertDontSee(__('admin.accounting_total_customer_expenses'))
+            ->assertDontSee(__('admin.accounting_final_company_profit'));
+
+        $this->actingAs($admin)
+            ->get(route('admin.accounting.customers.show', $account))
+            ->assertOk()
+            ->assertSee(__('admin.accounting_total_amount'))
+            ->assertSee(__('admin.accounting_total_customer_expenses'))
+            ->assertSee(__('admin.accounting_final_company_profit'));
+    }
+
+    public function test_converted_customer_is_visible_from_lead_page(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $status = \App\Models\CrmStatus::query()->where('slug', 'new-lead')->firstOrFail();
+
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Converted Lead',
+            'phone' => '01043434343',
+            'crm_status_id' => $status->id,
+            'status' => 'new',
+            'assigned_user_id' => $admin->id,
+        ]);
+
+        $customer = app(\App\Support\CustomerConversionService::class)
+            ->convertFromLead($lead, $admin, ['stage' => \App\Models\CrmCustomer::STAGE_UNDER_PROCESSING]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.leads.show', $lead))
+            ->assertOk()
+            ->assertSee($customer->full_name)
+            ->assertSee($customer->customer_code)
+            ->assertSee(route('admin.crm.customers.show', $customer), false);
+    }
+
+    public function test_admin_can_create_crm_information_and_track_recipients(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Info Seller',
+            'email' => 'info-seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+
+        $salesRole = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $seller->roles()->sync([$salesRole->id]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.information.store'), [
+                'title' => 'Embassy Update',
+                'content' => 'New embassy process for this week.',
+                'category' => 'embassy_decision',
+                'priority' => 'important',
+                'audience_type' => 'selected_users',
+                'selected_users' => [$seller->id],
+                'event_date' => now()->toDateString(),
+            ])
+            ->assertRedirect();
+
+        $information = \App\Models\CrmInformation::query()->where('title', 'Embassy Update')->firstOrFail();
+
+        $this->assertDatabaseHas('crm_information_recipients', [
+            'crm_information_id' => $information->id,
+            'user_id' => $seller->id,
+        ]);
+    }
+
+    public function test_admin_can_open_crm_information_create_page(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.crm.information.create'))
+            ->assertOk()
+            ->assertSee('name="title"', false);
+    }
+
+    public function test_targeted_user_can_acknowledge_crm_information_but_other_user_cannot_open_it(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $targetSeller = User::query()->create([
+            'name' => 'Target Seller',
+            'email' => 'target-seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+        $otherViewer = User::query()->create([
+            'name' => 'Other Viewer',
+            'email' => 'other-viewer@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+
+        $salesRole = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $viewerRole = Role::query()->where('slug', 'viewer-analyst')->firstOrFail();
+        $targetSeller->roles()->sync([$salesRole->id]);
+        $otherViewer->roles()->sync([$viewerRole->id]);
+
+        $information = \App\Models\CrmInformation::query()->create([
+            'title' => 'Holiday Notice',
+            'content' => 'Office will be closed on Friday.',
+            'audience_type' => 'selected_users',
+            'priority' => 'urgent',
+            'created_by' => $admin->id,
+            'is_active' => true,
+        ]);
+
+        $information->recipients()->create([
+            'user_id' => $targetSeller->id,
+            'delivered_at' => now(),
+        ]);
+
+        $this->actingAs($targetSeller)
+            ->get(route('admin.crm.information.show', $information))
+            ->assertOk()
+            ->assertSee('Holiday Notice');
+
+        $this->actingAs($targetSeller)
+            ->post(route('admin.crm.information.acknowledge', $information))
+            ->assertRedirect(route('admin.crm.information.show', $information));
+
+        $this->assertDatabaseHas('crm_information_recipients', [
+            'crm_information_id' => $information->id,
+            'user_id' => $targetSeller->id,
+        ]);
+
+        $this->assertNotNull(
+            \App\Models\CrmInformationRecipient::query()
+                ->where('crm_information_id', $information->id)
+                ->where('user_id', $targetSeller->id)
+                ->value('acknowledged_at')
+        );
+
+        $this->actingAs($otherViewer)
+            ->get(route('admin.crm.information.show', $information))
+            ->assertNotFound();
+    }
+
     public function test_admin_can_detect_duplicate_leads_by_phone_and_download_duplicate_report(): void
     {
         $this->seed(DatabaseSeeder::class);
@@ -3516,5 +4143,288 @@ class TravelWaveFrontendTest extends TestCase
                 'fields' => ['full_name', 'phone'],
             ])
             ->assertForbidden();
+    }
+
+    public function test_admin_can_create_utm_campaign_and_view_module_pages(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.utm.dashboard'))
+            ->assertOk()
+            ->assertSee('UTM', false);
+
+        $this->actingAs($admin)
+            ->get(route('admin.utm.create'))
+            ->assertOk()
+            ->assertSee('name="display_name"', false)
+            ->assertSee('name="base_url"', false);
+
+        $this->actingAs($admin)
+            ->post(route('admin.utm.store'), [
+                'display_name' => 'Meta Visa Campaign',
+                'base_url' => 'https://travelwave.test/visas',
+                'utm_source' => 'facebook',
+                'utm_medium' => 'paid-social',
+                'utm_campaign' => 'march-visa',
+                'utm_content' => 'video-a',
+                'platform' => 'Meta Ads',
+                'status' => 'active',
+            ])
+            ->assertRedirect(route('admin.utm.index'));
+
+        $campaign = UtmCampaign::query()->where('display_name', 'Meta Visa Campaign')->firstOrFail();
+
+        $this->assertStringContainsString('utm_source=facebook', $campaign->generated_url);
+        $this->assertStringContainsString('utm_campaign=march-visa', $campaign->generated_url);
+
+        $this->actingAs($admin)
+            ->get(route('admin.utm.index'))
+            ->assertOk()
+            ->assertSee('Meta Visa Campaign')
+            ->assertSee('utm_source=facebook')
+            ->assertSee('utm_campaign=march-visa');
+    }
+
+    public function test_inquiry_captures_utm_attribution_and_links_saved_campaign(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $campaign = UtmCampaign::query()->create([
+            'display_name' => 'Search Germany',
+            'base_url' => 'https://travelwave.test/visa-country/france',
+            'generated_url' => 'https://travelwave.test/visa-country/france?utm_source=google&utm_medium=cpc&utm_campaign=spring-search',
+            'utm_source' => 'google',
+            'utm_medium' => 'cpc',
+            'utm_campaign' => 'spring-search',
+            'status' => 'active',
+        ]);
+
+        $this->get('/?utm_source=google&utm_medium=cpc&utm_campaign=spring-search')
+            ->assertOk();
+
+        $this->post(route('inquiries.store'), [
+            'type' => 'visa',
+            'full_name' => 'UTM Lead',
+            'phone' => '01090909090',
+            'destination' => 'France',
+            'service_type' => 'visa',
+        ])->assertSessionHasNoErrors();
+
+        $lead = Inquiry::query()->where('full_name', 'UTM Lead')->firstOrFail();
+
+        $this->assertSame($campaign->id, $lead->utm_campaign_id);
+        $this->assertSame('google', $lead->utm_source);
+        $this->assertSame('cpc', $lead->utm_medium);
+        $this->assertSame('spring-search', $lead->utm_campaign);
+        $this->assertSame('google', $lead->first_utm_source);
+        $this->assertNotNull($lead->first_touch_at);
+        $this->assertNotNull($lead->last_touch_at);
+
+        $this->assertDatabaseHas('utm_visits', [
+            'utm_campaign_id' => $campaign->id,
+            'utm_source' => 'google',
+            'utm_medium' => 'cpc',
+            'utm_campaign' => 'spring-search',
+        ]);
+    }
+
+    public function test_crm_task_board_status_endpoint_updates_completed_at_correctly(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Board Seller',
+            'email' => 'board-seller@example.com',
+            'password' => bcrypt('password123'),
+            'is_active' => true,
+            'preferred_language' => 'ar',
+        ]);
+
+        $salesRole = Role::query()->where('slug', 'sales-leads-manager')->firstOrFail();
+        $seller->roles()->sync([$salesRole->id]);
+
+        $task = \App\Models\CrmTask::query()->create([
+            'title' => 'Board Move Task',
+            'task_type' => \App\Models\CrmTask::TYPE_GENERAL,
+            'priority' => \App\Models\CrmTask::PRIORITY_HIGH,
+            'status' => \App\Models\CrmTask::STATUS_NEW,
+            'assigned_user_id' => $seller->id,
+            'created_by' => $admin->id,
+        ]);
+
+        $this->actingAs($seller)
+            ->get(route('admin.crm.tasks.index'))
+            ->assertOk()
+            ->assertSee('Sortable.min.js', false)
+            ->assertSee('Board Move Task');
+
+        $this->actingAs($seller)
+            ->patchJson(route('admin.crm.tasks.status', $task), [
+                'status' => \App\Models\CrmTask::STATUS_COMPLETED,
+            ])
+            ->assertOk()
+            ->assertJson([
+                'status' => 'ok',
+                'task' => [
+                    'status' => \App\Models\CrmTask::STATUS_COMPLETED,
+                ],
+            ]);
+
+        $task->refresh();
+        $this->assertNotNull($task->completed_at);
+
+        $this->actingAs($seller)
+            ->patchJson(route('admin.crm.tasks.status', $task), [
+                'status' => \App\Models\CrmTask::STATUS_IN_PROGRESS,
+            ])
+            ->assertOk()
+            ->assertJson([
+                'status' => 'ok',
+                'task' => [
+                    'status' => \App\Models\CrmTask::STATUS_IN_PROGRESS,
+                ],
+            ]);
+
+        $task->refresh();
+        $this->assertNull($task->completed_at);
+    }
+
+    public function test_notifications_center_page_renders_database_notifications(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $admin->notify(new AdminDatabaseNotification([
+            'type' => 'system_alert',
+            'module' => 'system',
+            'severity' => 'warning',
+            'title_ar' => 'تنبيه اختباري',
+            'title_en' => 'Test Alert',
+            'message_ar' => 'رسالة إشعار تجريبية',
+            'message_en' => 'Test notification message',
+            'url' => route('admin.dashboard'),
+        ]));
+
+        $this->actingAs($admin)
+            ->get(route('admin.notifications.index'))
+            ->assertOk()
+            ->assertSee('Test Alert')
+            ->assertSee('Test notification message');
+    }
+
+    public function test_creating_task_sends_assignment_notification_to_assigned_user(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Task Seller',
+            'email' => 'task-seller@travelwave.test',
+            'password' => bcrypt('password123'),
+            'is_admin' => true,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.tasks.store'), [
+                'title' => 'Call delayed lead',
+                'task_type' => \App\Models\CrmTask::TYPE_GENERAL,
+                'category' => \App\Models\CrmTask::CATEGORY_INTERNAL,
+                'assigned_user_id' => $seller->id,
+                'priority' => \App\Models\CrmTask::PRIORITY_MEDIUM,
+                'status' => \App\Models\CrmTask::STATUS_NEW,
+                'due_at' => now()->addDay()->toDateTimeString(),
+            ])
+            ->assertRedirect();
+
+        $notification = $seller->notifications()->latest()->first();
+
+        $this->assertNotNull($notification);
+        $this->assertSame('task_assigned', $notification->data['type'] ?? null);
+    }
+
+    public function test_publishing_information_creates_notifications_for_selected_users(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $target = User::query()->create([
+            'name' => 'Info Seller',
+            'email' => 'info-seller@travelwave.test',
+            'password' => bcrypt('password123'),
+            'is_admin' => true,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.crm.information.store'), [
+                'title' => 'Urgent office notice',
+                'content' => 'Please review the updated process.',
+                'priority' => 'urgent',
+                'audience_type' => CrmInformation::AUDIENCE_SELECTED_USERS,
+                'selected_users' => [$target->id],
+                'is_active' => 1,
+            ])
+            ->assertRedirect();
+
+        $notification = $target->notifications()->latest()->first();
+
+        $this->assertNotNull($notification);
+        $this->assertSame('information_new', $notification->data['type'] ?? null);
+    }
+
+    public function test_recording_accounting_payment_creates_notification_for_assigned_user(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $seller = User::query()->create([
+            'name' => 'Finance Seller',
+            'email' => 'finance-seller@travelwave.test',
+            'password' => bcrypt('password123'),
+            'is_admin' => true,
+            'is_active' => true,
+        ]);
+
+        $lead = Inquiry::query()->create([
+            'type' => 'general',
+            'full_name' => 'Accounting Lead',
+            'phone' => '+201000000000',
+            'assigned_user_id' => $seller->id,
+            'status' => 'new',
+            'total_amount' => 5000,
+            'paid_amount' => 0,
+            'remaining_amount' => 5000,
+            'payment_status' => 'unpaid',
+        ]);
+
+        $account = AccountingCustomerAccount::query()->create([
+            'inquiry_id' => $lead->id,
+            'assigned_user_id' => $seller->id,
+            'created_by' => $admin->id,
+            'customer_name' => $lead->full_name,
+            'phone' => $lead->phone,
+            'total_amount' => 5000,
+            'paid_amount' => 0,
+            'remaining_amount' => 5000,
+            'payment_status' => 'unpaid',
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.accounting.customers.payments.store', $account), [
+                'amount' => 1000,
+                'payment_date' => now()->toDateString(),
+                'note' => 'Initial payment',
+            ])
+            ->assertRedirect();
+
+        $notification = $seller->notifications()->latest()->first();
+
+        $this->assertNotNull($notification);
+        $this->assertSame('accounting_payment', $notification->data['type'] ?? null);
     }
 }

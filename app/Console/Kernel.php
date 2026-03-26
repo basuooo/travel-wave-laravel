@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('notifications:dispatch-operational')->hourly();
+        $schedule->command('workflow:run-scheduled')->hourly();
     }
 
     /**

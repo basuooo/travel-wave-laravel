@@ -192,10 +192,25 @@ class Setting extends Model
 
     public function logoPathFor(string $variant = 'header'): ?string
     {
-        return match ($variant) {
-            'footer' => $this->footer_logo_path ?: $this->header_logo_path ?: $this->logo_path,
-            default => $this->header_logo_path ?: $this->logo_path,
+        $candidates = match ($variant) {
+            'footer' => [$this->footer_logo_path, $this->header_logo_path, $this->logo_path],
+            default => [$this->header_logo_path, $this->logo_path],
         };
+
+        $normalizedCandidates = collect($candidates)
+            ->map(fn ($path) => $this->normalizedMediaPath($path))
+            ->filter()
+            ->values();
+
+        $disk = Storage::disk('public');
+
+        foreach ($normalizedCandidates as $candidate) {
+            if ($disk->exists($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return $normalizedCandidates->first();
     }
 
     public function normalizedMediaPath(?string $path): ?string
@@ -226,13 +241,13 @@ class Setting extends Model
 
     public function logoUrlFor(string $variant = 'header'): ?string
     {
-        $path = $this->normalizedMediaPath($this->logoPathFor($variant));
+        $path = $this->logoPathFor($variant);
 
         if (! $path || ! Storage::disk('public')->exists($path)) {
             return null;
         }
 
-        return '/storage/' . $path . '?v=' . ($this->updated_at?->timestamp ?: time());
+        return asset('storage/' . $path) . '?v=' . ($this->updated_at?->timestamp ?: time());
     }
 
     public function logoWidthFor(string $variant = 'header'): int
