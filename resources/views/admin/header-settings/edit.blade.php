@@ -38,6 +38,35 @@
             <div class="col-md-3"><label class="form-label">Mobile Logo Width</label><input class="form-control" type="number" name="header_mobile_logo_width" value="{{ old('header_mobile_logo_width', $setting->header_mobile_logo_width ?: $setting->mobile_logo_width ?: 168) }}"><div class="form-text">Header mobile width only.</div></div>
             <div class="col-md-3 d-flex align-items-end"><div class="form-check pb-2"><input type="hidden" name="header_logo_keep_aspect_ratio" value="0"><input class="form-check-input" type="checkbox" name="header_logo_keep_aspect_ratio" value="1" id="header_logo_keep_aspect_ratio" @checked(old('header_logo_keep_aspect_ratio', $setting->header_logo_keep_aspect_ratio ?? $setting->logo_keep_aspect_ratio ?? true))><label class="form-check-label" for="header_logo_keep_aspect_ratio">Keep aspect ratio</label></div></div>
             <div class="col-md-4"><label class="form-label">Top Spacing / Vertical Padding</label><input class="form-control" type="number" name="header_vertical_padding" value="{{ old('header_vertical_padding', $setting->header_vertical_padding ?: 8) }}"></div>
+            <div class="col-md-4">
+                <label class="form-label">English Logo Position</label>
+                <select class="form-select" name="header_logo_position_en">
+                    <option value="left" @selected(old('header_logo_position_en', $setting->header_logo_position_en ?: 'left') === 'left')>Left</option>
+                    <option value="right" @selected(old('header_logo_position_en', $setting->header_logo_position_en ?: 'left') === 'right')>Right</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Arabic Logo Position</label>
+                <select class="form-select" name="header_logo_position_ar">
+                    <option value="right" @selected(old('header_logo_position_ar', $setting->header_logo_position_ar ?: 'right') === 'right')>Right</option>
+                    <option value="left" @selected(old('header_logo_position_ar', $setting->header_logo_position_ar ?: 'right') === 'left')>Left</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">English Menu Position</label>
+                <select class="form-select" name="header_menu_position_en">
+                    <option value="left" @selected(old('header_menu_position_en', $setting->header_menu_position_en ?: 'left') === 'left')>Left</option>
+                    <option value="right" @selected(old('header_menu_position_en', $setting->header_menu_position_en ?: 'left') === 'right')>Right</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Arabic Menu Position</label>
+                <select class="form-select" name="header_menu_position_ar">
+                    <option value="right" @selected(old('header_menu_position_ar', $setting->header_menu_position_ar ?: 'right') === 'right')>Right</option>
+                    <option value="left" @selected(old('header_menu_position_ar', $setting->header_menu_position_ar ?: 'right') === 'left')>Left</option>
+                </select>
+                <div class="form-text">These controls apply the navbar alignment separately for English and Arabic on desktop and mobile.</div>
+            </div>
             <div class="col-md-4 d-flex align-items-end"><div class="form-check pb-2"><input type="hidden" name="header_logo_enabled" value="0"><input class="form-check-input" type="checkbox" name="header_logo_enabled" value="1" id="header_logo_enabled" @checked(old('header_logo_enabled', $setting->header_logo_enabled ?? true))><label class="form-check-label" for="header_logo_enabled">Show logo in header</label></div></div>
             <div class="col-md-4 d-flex align-items-end"><div class="form-check pb-2"><input type="hidden" name="header_is_sticky" value="0"><input class="form-check-input" type="checkbox" name="header_is_sticky" value="1" id="header_is_sticky" @checked(old('header_is_sticky', $setting->header_is_sticky ?? true))><label class="form-check-label" for="header_is_sticky">Enable sticky header</label></div></div>
                 </div>

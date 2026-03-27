@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ChatbotKnowledgeItem;
 use App\Models\Setting;
 use App\Support\SiteChatbotService;
 use Illuminate\Http\Request;
@@ -19,7 +18,6 @@ class ChatbotController extends Controller
         $setting = Setting::query()->firstOrCreate([]);
 
         abort_unless($setting->shouldRenderChatbot(), 404);
-        abort_unless(ChatbotKnowledgeItem::query()->exists(), 503);
 
         $data = $request->validate([
             'question' => ['required', 'string', 'min:2', 'max:1000'],

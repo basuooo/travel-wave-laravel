@@ -5,15 +5,24 @@ namespace App\Support;
 use App\Models\CrmFollowUp;
 use App\Models\User;
 use App\Notifications\CrmFollowUpReminderNotification;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class CrmFollowUpReminderService
 {
     public function dispatchDueReminders(): void
     {
-        if (! Schema::hasTable('crm_follow_ups') || ! Schema::hasTable('notifications')) {
+        try {
+            if (! Schema::hasTable('crm_follow_ups') || ! Schema::hasTable('notifications') || ! Schema::hasTable('users')) {
+                return;
+            }
+        } catch (Throwable $exception) {
+            report($exception);
             return;
         }
+
+        $adminRecipients = $this->adminRecipients();
 
         CrmFollowUp::query()
             ->with(['inquiry', 'assignedUser'])
@@ -21,7 +30,7 @@ class CrmFollowUpReminderService
             ->whereNull('reminder_sent_at')
             ->whereNotNull('remind_at')
             ->where('remind_at', '<=', now())
-            ->chunkById(50, function ($followUps) {
+            ->chunkById(50, function ($followUps) use ($adminRecipients) {
                 foreach ($followUps as $followUp) {
                     $recipients = collect();
 
@@ -29,14 +38,7 @@ class CrmFollowUpReminderService
                         $recipients->push($followUp->assignedUser);
                     }
 
-                    User::query()
-                        ->where('is_active', true)
-                        ->get()
-                        ->filter(function (User $user) {
-                            return $user->is_admin
-                                || $user->roles->contains(fn ($role) => in_array($role->slug, ['super-admin', 'admin'], true));
-                        })
-                        ->each(fn (User $user) => $recipients->push($user));
+                    $adminRecipients->each(fn (User $user) => $recipients->push($user));
 
                     $recipients
                         ->unique('id')
@@ -47,5 +49,18 @@ class CrmFollowUpReminderService
                     ])->save();
                 }
             });
+    }
+
+    protected function adminRecipients(): Collection
+    {
+        return User::query()
+            ->with('roles')
+            ->where('is_active', true)
+            ->get()
+            ->filter(function (User $user) {
+                return $user->is_admin
+                    || $user->roles->contains(fn ($role) => in_array($role->slug, ['super-admin', 'admin'], true));
+            })
+            ->values();
     }
 }

@@ -20,9 +20,9 @@
     </div>
     <div class="col-md-4">
         <div class="card admin-card p-4 h-100">
-            <div class="text-muted small mb-2">{{ __('admin.chatbot_knowledge_items') }}</div>
-            <div class="fs-3 fw-semibold mb-1">{{ number_format($knowledgeCount) }}</div>
-            <div class="text-muted">{{ __('admin.chatbot_content_sources_label') }}</div>
+            <div class="text-muted small mb-2">{{ __('admin.chatbot_manual_knowledge') }}</div>
+            <div class="fs-3 fw-semibold mb-1">{{ number_format($manualKnowledgeCount) }}</div>
+            <div class="text-muted">{{ __('admin.chatbot_knowledge_items') }}: {{ number_format($knowledgeCount) }}</div>
         </div>
     </div>
     <div class="col-md-4">
@@ -49,6 +49,7 @@
                 <p class="text-muted mb-0">{{ __('admin.chatbot_manager_desc') }}</p>
             </div>
             <div class="d-flex gap-2">
+                <a href="{{ route('admin.chatbot-knowledge.index') }}" class="btn btn-outline-primary">{{ __('admin.chatbot_manage_knowledge') }}</a>
                 <button class="btn btn-primary px-4">{{ __('admin.update') }}</button>
                 <button type="submit" form="chatbot-rebuild-form" class="btn btn-outline-secondary">{{ __('admin.chatbot_rebuild_knowledge') }}</button>
             </div>
@@ -65,8 +66,8 @@
             <div class="col-md-4">
                 <label class="form-label">{{ __('admin.chatbot_primary_language') }}</label>
                 <select name="chatbot_primary_language" class="form-select">
-                    <option value="ar" @selected(old('chatbot_primary_language', $setting->chatbot_primary_language ?: 'ar') === 'ar')>العربية</option>
-                    <option value="en" @selected(old('chatbot_primary_language', $setting->chatbot_primary_language ?: 'ar') === 'en')>English</option>
+                    <option value="ar" @selected(old('chatbot_primary_language', $setting->chatbot_primary_language ?: 'ar') === 'ar')>{{ __('ui.language_arabic') }}</option>
+                    <option value="en" @selected(old('chatbot_primary_language', $setting->chatbot_primary_language ?: 'ar') === 'en')>{{ __('ui.language_english') }}</option>
                 </select>
             </div>
             <div class="col-md-4">

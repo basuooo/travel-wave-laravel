@@ -44,6 +44,10 @@ class HeaderSettingController extends Controller
             'header_mobile_logo_width' => ['nullable', 'integer', 'min:50', 'max:320'],
             'header_logo_keep_aspect_ratio' => ['nullable', 'boolean'],
             'header_logo_display_mode' => ['nullable', 'in:original,contain,cover,custom'],
+            'header_logo_position_en' => ['nullable', 'in:left,right'],
+            'header_logo_position_ar' => ['nullable', 'in:left,right'],
+            'header_menu_position_en' => ['nullable', 'in:left,right'],
+            'header_menu_position_ar' => ['nullable', 'in:left,right'],
             'logo_width' => ['nullable', 'integer', 'min:60', 'max:520'],
             'logo_height' => ['nullable', 'integer', 'min:20', 'max:220'],
             'mobile_logo_width' => ['nullable', 'integer', 'min:50', 'max:320'],
@@ -73,6 +77,10 @@ class HeaderSettingController extends Controller
         $data['header_logo_height'] = $headerLogoHeight;
         $data['header_mobile_logo_width'] = $headerMobileLogoWidth;
         $data['header_vertical_padding'] = $data['header_vertical_padding'] ?? ($setting->header_vertical_padding ?: 8);
+        $data['header_logo_position_en'] = $this->firstStringFrom($data, ['header_logo_position_en'], $setting->header_logo_position_en ?: 'left');
+        $data['header_logo_position_ar'] = $this->firstStringFrom($data, ['header_logo_position_ar'], $setting->header_logo_position_ar ?: 'right');
+        $data['header_menu_position_en'] = $this->firstStringFrom($data, ['header_menu_position_en'], $setting->header_menu_position_en ?: 'left');
+        $data['header_menu_position_ar'] = $this->firstStringFrom($data, ['header_menu_position_ar'], $setting->header_menu_position_ar ?: 'right');
 
         // Keep legacy columns in sync for older environments and existing reads.
         $data['logo_path'] = $headerLogoPath;

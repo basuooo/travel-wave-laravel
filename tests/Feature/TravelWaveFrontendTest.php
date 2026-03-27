@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\HeroSlide;
 use App\Models\Inquiry;
 use App\Models\ChatbotInteraction;
+use App\Models\ChatbotKnowledgeEntry;
 use App\Models\ChatbotKnowledgeItem;
 use App\Models\AccountingCustomerAccount;
 use App\Models\CrmInformation;
@@ -1776,6 +1777,56 @@ class TravelWaveFrontendTest extends TestCase
         $this->assertSame(240, $setting->fresh()->header_logo_width);
     }
 
+    public function test_header_settings_can_save_locale_specific_alignment_options(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $response = $this->actingAs($admin)->put(route('admin.header-settings.update'), [
+            'header_logo_position_en' => 'left',
+            'header_logo_position_ar' => 'right',
+            'header_menu_position_en' => 'left',
+            'header_menu_position_ar' => 'right',
+            'header_logo_enabled' => '1',
+            'header_is_sticky' => '1',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $fresh = Setting::query()->firstOrFail();
+
+        $this->assertSame('left', $fresh->header_logo_position_en);
+        $this->assertSame('right', $fresh->header_logo_position_ar);
+        $this->assertSame('left', $fresh->header_menu_position_en);
+        $this->assertSame('right', $fresh->header_menu_position_ar);
+    }
+
+    public function test_header_uses_locale_specific_alignment_classes_on_frontend(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Setting::query()->firstOrFail()->update([
+            'header_logo_position_en' => 'left',
+            'header_logo_position_ar' => 'right',
+            'header_menu_position_en' => 'left',
+            'header_menu_position_ar' => 'right',
+        ]);
+
+        $this->withSession(['locale' => 'en'])
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('tw-navbar-shell--logo-left', false)
+            ->assertSee('tw-navbar-collapse-shell--menu-left', false);
+
+        $this->withSession(['locale' => 'ar'])
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('tw-navbar-shell--logo-right', false)
+            ->assertSee('tw-navbar-collapse-shell--menu-right', false);
+    }
+
     public function test_header_settings_can_update_aspect_ratio_and_sticky_flags_without_logo_upload(): void
     {
         $this->seed(DatabaseSeeder::class);
@@ -2584,6 +2635,117 @@ class TravelWaveFrontendTest extends TestCase
             'question' => 'ما رقم الواتساب؟',
             'was_answered' => 1,
         ]);
+    }
+
+    public function test_admin_can_create_chatbot_knowledge_entry_from_dashboard(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->post(route('admin.chatbot-knowledge.store'), [
+                'title_en' => 'Visa application steps',
+                'title_ar' => 'خطوات التقديم على التأشيرة',
+                'question_en' => 'How can I apply for a visa?',
+                'question_ar' => 'كيف أقدم على التأشيرة؟',
+                'answer_en' => 'Send us your passport copy and we will guide you through the required documents and appointment steps.',
+                'answer_ar' => 'أرسل لنا صورة جواز السفر وسنرشدك إلى الأوراق المطلوبة وخطوات الحجز والتقديم.',
+                'keywords_en' => 'visa, apply, documents',
+                'keywords_ar' => 'تأشيرة، تقديم، أوراق',
+                'category_en' => 'Visas',
+                'category_ar' => 'التأشيرات',
+                'priority' => 1,
+                'is_active' => 1,
+            ])
+            ->assertRedirect(route('admin.chatbot-knowledge.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('chatbot_knowledge_entries', [
+            'title_en' => 'Visa application steps',
+            'title_ar' => 'خطوات التقديم على التأشيرة',
+            'is_active' => 1,
+        ]);
+    }
+
+    public function test_chatbot_prefers_manual_knowledge_answer_in_english(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Setting::query()->firstOrFail()->update([
+            'chatbot_enabled' => true,
+            'chatbot_primary_language' => 'en',
+        ]);
+
+        ChatbotKnowledgeEntry::query()->create([
+            'title_en' => 'Visa application support',
+            'title_ar' => 'مساعدة التقديم على التأشيرة',
+            'question_en' => 'How can I apply for a visa?',
+            'question_ar' => 'كيف أقدم على التأشيرة؟',
+            'answer_en' => 'To apply for a visa, send us your passport copy and travel dates, and our team will help you with the checklist and appointment steps.',
+            'answer_ar' => 'للتقديم على التأشيرة أرسل لنا صورة جواز السفر وتاريخ السفر وسيساعدك فريقنا في قائمة الأوراق وخطوات الموعد.',
+            'keywords_en' => 'visa apply application documents',
+            'keywords_ar' => 'تأشيرة تقديم طلب أوراق',
+            'category_en' => 'Visas',
+            'category_ar' => 'التأشيرات',
+            'priority' => 0,
+            'is_active' => true,
+        ]);
+
+        ChatbotKnowledgeItem::query()->create([
+            'source_type' => 'pages',
+            'source_id' => 1,
+            'source_key' => 'visas',
+            'locale' => 'en',
+            'title' => 'Visa Services',
+            'summary' => 'Visa services page',
+            'content' => 'Visit our visas page for more details.',
+            'url' => route('visas.index'),
+            'sort_order' => 1,
+        ]);
+
+        $this->postJson(route('chatbot.ask'), [
+            'question' => 'How can I apply for a visa?',
+            'locale' => 'en',
+        ])
+            ->assertOk()
+            ->assertJsonPath('was_answered', true)
+            ->assertJsonPath('answer', 'To apply for a visa, send us your passport copy and travel dates, and our team will help you with the checklist and appointment steps.')
+            ->assertJsonCount(0, 'sources');
+    }
+
+    public function test_chatbot_prefers_manual_knowledge_answer_in_arabic(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Setting::query()->firstOrFail()->update([
+            'chatbot_enabled' => true,
+            'chatbot_primary_language' => 'ar',
+        ]);
+
+        ChatbotKnowledgeEntry::query()->create([
+            'title_en' => 'Booking steps',
+            'title_ar' => 'خطوات الحجز',
+            'question_en' => 'What are the booking steps?',
+            'question_ar' => 'ما خطوات الحجز؟',
+            'answer_en' => 'Send your travel dates and destination, then our team will confirm availability and complete the booking with you.',
+            'answer_ar' => 'أرسل تاريخ السفر والوجهة المطلوبة ثم يؤكد فريقنا التوفر ويكمل معك إجراءات الحجز خطوة بخطوة.',
+            'keywords_en' => 'booking reservation travel steps',
+            'keywords_ar' => 'حجز حجزات سفر خطوات',
+            'category_en' => 'Booking',
+            'category_ar' => 'الحجوزات',
+            'priority' => 0,
+            'is_active' => true,
+        ]);
+
+        $this->postJson(route('chatbot.ask'), [
+            'question' => 'ما خطوات الحجز؟',
+            'locale' => 'ar',
+        ])
+            ->assertOk()
+            ->assertJsonPath('was_answered', true)
+            ->assertJsonPath('answer', 'أرسل تاريخ السفر والوجهة المطلوبة ثم يؤكد فريقنا التوفر ويكمل معك إجراءات الحجز خطوة بخطوة.')
+            ->assertJsonCount(0, 'sources');
     }
 
     public function test_frontend_chatbot_widget_renders_when_enabled(): void

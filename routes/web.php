@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\ChatbotSettingController;
+use App\Http\Controllers\Admin\ChatbotKnowledgeController;
 use App\Http\Controllers\Admin\CrmController;
 use App\Http\Controllers\Admin\CrmInformationController;
 use App\Http\Controllers\Admin\CrmLeadController;
@@ -150,6 +151,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/chatbot-settings', [ChatbotSettingController::class, 'edit'])->name('chatbot-settings.edit');
             Route::put('/chatbot-settings', [ChatbotSettingController::class, 'update'])->name('chatbot-settings.update');
             Route::post('/chatbot-settings/rebuild-knowledge', [ChatbotSettingController::class, 'rebuildKnowledge'])->name('chatbot-settings.rebuild');
+            Route::get('/chatbot-knowledge', [ChatbotKnowledgeController::class, 'index'])->name('chatbot-knowledge.index');
+            Route::get('/chatbot-knowledge/create', [ChatbotKnowledgeController::class, 'create'])->name('chatbot-knowledge.create');
+            Route::post('/chatbot-knowledge', [ChatbotKnowledgeController::class, 'store'])->name('chatbot-knowledge.store');
+            Route::get('/chatbot-knowledge/{chatbotKnowledge}/edit', [ChatbotKnowledgeController::class, 'edit'])->name('chatbot-knowledge.edit');
+            Route::put('/chatbot-knowledge/{chatbotKnowledge}', [ChatbotKnowledgeController::class, 'update'])->name('chatbot-knowledge.update');
+            Route::delete('/chatbot-knowledge/{chatbotKnowledge}', [ChatbotKnowledgeController::class, 'destroy'])->name('chatbot-knowledge.destroy');
         });
 
         Route::middleware('permission:seo.manage')->group(function () {

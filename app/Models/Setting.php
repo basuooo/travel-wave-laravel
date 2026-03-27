@@ -77,6 +77,10 @@ class Setting extends Model
         'header_logo_enabled',
         'header_is_sticky',
         'header_vertical_padding',
+        'header_logo_position_en',
+        'header_logo_position_ar',
+        'header_menu_position_en',
+        'header_menu_position_ar',
         'footer_background_color',
         'footer_text_color',
         'footer_link_color',
@@ -300,6 +304,26 @@ class Setting extends Model
         }
 
         return 'original';
+    }
+
+    public function headerLogoPositionForLocale(?string $locale = null): string
+    {
+        $locale = $locale ?: app()->getLocale();
+        $position = $locale === 'ar' ? $this->header_logo_position_ar : $this->header_logo_position_en;
+
+        return in_array($position, ['left', 'right'], true)
+            ? $position
+            : ($locale === 'ar' ? 'right' : 'left');
+    }
+
+    public function headerMenuPositionForLocale(?string $locale = null): string
+    {
+        $locale = $locale ?: app()->getLocale();
+        $position = $locale === 'ar' ? $this->header_menu_position_ar : $this->header_menu_position_en;
+
+        return in_array($position, ['left', 'right'], true)
+            ? $position
+            : ($locale === 'ar' ? 'right' : 'left');
     }
 
     public function floatingWhatsappMessage(): ?string

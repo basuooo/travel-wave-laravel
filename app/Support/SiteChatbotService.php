@@ -3,8 +3,10 @@
 namespace App\Support;
 
 use App\Models\ChatbotInteraction;
+use App\Models\ChatbotKnowledgeEntry;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -19,7 +21,7 @@ class SiteChatbotService
     {
         $request ??= request();
         $settings = Setting::query()->firstOrCreate([]);
-        $locale = $this->resolveLocale($locale, $settings);
+        $locale = $this->resolveLocale($question, $locale, $settings);
 
         $directAnswer = $this->directContactAnswer($question, $locale, $settings);
         $matchedSources = collect();
@@ -29,20 +31,28 @@ class SiteChatbotService
             $answer = $directAnswer;
             $wasAnswered = true;
         } else {
-            $matchedSources = $this->knowledgeManager->search(
-                question: $question,
-                locale: $locale,
-                sources: $settings->chatbotContentSources(),
-                limit: 3,
-            );
+            $manualKnowledge = $this->searchManualKnowledge($question, $locale);
 
-            if ($matchedSources->isEmpty()) {
-                $answer = $this->fallbackAnswer($locale, $settings);
-                $wasAnswered = false;
-                $usedHandoff = true;
-            } else {
-                $answer = $this->composeKnowledgeAnswer($question, $matchedSources, $locale, $settings);
+            if ($manualKnowledge) {
+                $answer = $this->composeManualKnowledgeAnswer($manualKnowledge, $locale, $settings);
+                $matchedSources = collect([$manualKnowledge]);
                 $wasAnswered = true;
+            } else {
+                $matchedSources = $this->knowledgeManager->search(
+                    question: $question,
+                    locale: $locale,
+                    sources: $settings->chatbotContentSources(),
+                    limit: 3,
+                );
+
+                if ($matchedSources->isEmpty()) {
+                    $answer = $this->fallbackAnswer($locale, $settings);
+                    $wasAnswered = false;
+                    $usedHandoff = true;
+                } else {
+                    $answer = $this->composeKnowledgeAnswer($question, $matchedSources, $locale, $settings);
+                    $wasAnswered = true;
+                }
             }
         }
 
@@ -51,11 +61,10 @@ class SiteChatbotService
             'locale' => $locale,
             'question' => $question,
             'answer' => $answer,
-            'matched_sources' => $matchedSources->map(fn ($item) => [
-                'title' => $item->title,
-                'url' => $item->url,
-                'source_type' => $item->source_type,
-            ])->all(),
+            'matched_sources' => $matchedSources
+                ->map(fn ($item) => $this->serializeSource($item, $locale))
+                ->values()
+                ->all(),
             'was_answered' => $wasAnswered,
             'used_handoff' => $usedHandoff,
             'ip_address' => $request?->ip(),
@@ -66,10 +75,11 @@ class SiteChatbotService
             'answer' => $answer,
             'was_answered' => $wasAnswered,
             'used_handoff' => $usedHandoff,
-            'sources' => $matchedSources->map(fn ($item) => [
-                'title' => $item->title,
-                'url' => $item->url,
-            ])->filter(fn ($item) => filled($item['url']))->values()->all(),
+            'sources' => $matchedSources
+                ->map(fn ($item) => Arr::only($this->serializeSource($item, $locale), ['title', 'url']))
+                ->filter(fn ($item) => filled($item['url']))
+                ->values()
+                ->all(),
             'handoff' => [
                 'whatsapp_url' => $settings->chatbot_show_whatsapp_handoff ? $settings->floatingWhatsappUrl() : null,
                 'contact_url' => $settings->chatbot_show_contact_handoff ? route('contact') : null,
@@ -97,10 +107,6 @@ class SiteChatbotService
 
             $lines[] = $line;
 
-            if ($item->url) {
-                $lines[] = ($locale === 'ar' ? 'الرابط: ' : 'Link: ') . $item->url;
-            }
-
             if ($index < $matchedSources->count() - 1) {
                 $lines[] = '';
             }
@@ -114,6 +120,17 @@ class SiteChatbotService
         }
 
         return trim(implode("\n", $lines));
+    }
+
+    protected function composeManualKnowledgeAnswer(ChatbotKnowledgeEntry $entry, string $locale, Setting $settings): string
+    {
+        $answer = trim($entry->localizedAnswer($locale));
+
+        if ($answer !== '') {
+            return $answer;
+        }
+
+        return $this->fallbackAnswer($locale, $settings);
     }
 
     protected function fallbackAnswer(string $locale, Setting $settings): string
@@ -177,6 +194,91 @@ class SiteChatbotService
         return trim(implode("\n", $lines));
     }
 
+    protected function searchManualKnowledge(string $question, string $locale): ?ChatbotKnowledgeEntry
+    {
+        $tokens = collect(explode(' ', $this->normalize($question)))
+            ->filter(fn ($token) => mb_strlen($token) >= 2)
+            ->values();
+        $needle = $this->normalize($question);
+
+        if ($tokens->isEmpty() && $needle === '') {
+            return null;
+        }
+
+        return ChatbotKnowledgeEntry::query()
+            ->where('is_active', true)
+            ->get()
+            ->map(function (ChatbotKnowledgeEntry $entry) use ($locale, $tokens, $needle) {
+                $title = $this->normalize($entry->localizedTitle($locale));
+                $knowledgeQuestion = $this->normalize($entry->localizedQuestion($locale));
+                $answer = $this->normalize($entry->localizedAnswer($locale));
+                $keywords = $this->normalize($entry->localizedKeywords($locale));
+                $category = $this->normalize($entry->localizedCategory($locale));
+                $haystack = trim(implode(' ', array_filter([$title, $knowledgeQuestion, $answer, $keywords, $category])));
+                $score = 0;
+
+                if ($needle !== '' && $knowledgeQuestion !== '' && str_contains($knowledgeQuestion, $needle)) {
+                    $score += 20;
+                }
+
+                if ($needle !== '' && $keywords !== '' && str_contains($keywords, $needle)) {
+                    $score += 16;
+                }
+
+                if ($needle !== '' && $title !== '' && str_contains($title, $needle)) {
+                    $score += 14;
+                }
+
+                if ($needle !== '' && $haystack !== '' && str_contains($haystack, $needle)) {
+                    $score += 10;
+                }
+
+                foreach ($tokens as $token) {
+                    if ($knowledgeQuestion !== '' && str_contains($knowledgeQuestion, $token)) {
+                        $score += 7;
+                    }
+
+                    if ($title !== '' && str_contains($title, $token)) {
+                        $score += 6;
+                    }
+
+                    if ($keywords !== '' && str_contains($keywords, $token)) {
+                        $score += 5;
+                    }
+
+                    if ($answer !== '' && str_contains($answer, $token)) {
+                        $score += 3;
+                    }
+                }
+
+                return [
+                    'entry' => $entry,
+                    'score' => $score + max(0, 10 - (int) $entry->priority),
+                ];
+            })
+            ->filter(fn (array $result) => $result['score'] >= 12 && trim($result['entry']->localizedAnswer($locale)) !== '')
+            ->sortByDesc('score')
+            ->map(fn (array $result) => $result['entry'])
+            ->first();
+    }
+
+    protected function serializeSource(mixed $item, string $locale): array
+    {
+        if ($item instanceof ChatbotKnowledgeEntry) {
+            return [
+                'title' => $item->localizedTitle($locale) ?: $item->localizedQuestion($locale),
+                'url' => null,
+                'source_type' => 'manual_knowledge',
+            ];
+        }
+
+        return [
+            'title' => $item->title,
+            'url' => $item->url,
+            'source_type' => $item->source_type,
+        ];
+    }
+
     protected function bestSnippet(string $content, string $question): string
     {
         $content = trim(preg_replace('/\s+/u', ' ', strip_tags($content)) ?? '');
@@ -202,11 +304,24 @@ class SiteChatbotService
         return Str::limit($best['sentence'] ?? $content, 220);
     }
 
-    protected function resolveLocale(?string $locale, Setting $settings): string
+    protected function resolveLocale(string $question, ?string $locale, Setting $settings): string
     {
-        $locale = $locale ?: app()->getLocale() ?: $settings->chatbot_primary_language ?: 'ar';
+        $locale = $locale ?: $this->detectQuestionLocale($question) ?: app()->getLocale() ?: $settings->chatbot_primary_language ?: 'ar';
 
         return in_array($locale, ['ar', 'en'], true) ? $locale : 'ar';
+    }
+
+    protected function detectQuestionLocale(string $question): ?string
+    {
+        if (preg_match('/\p{Arabic}/u', $question) === 1) {
+            return 'ar';
+        }
+
+        if (preg_match('/[a-zA-Z]/', $question) === 1) {
+            return 'en';
+        }
+
+        return null;
     }
 
     protected function normalize(string $text): string

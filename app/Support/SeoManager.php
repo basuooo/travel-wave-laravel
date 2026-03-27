@@ -17,29 +17,30 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Throwable;
 
 class SeoManager
 {
     public function settings(): SeoSetting
     {
-        if (! Schema::hasTable('seo_settings')) {
+        if (! $this->safeHasTable('seo_settings')) {
             return new SeoSetting([
                 'robots_txt_content' => $this->defaultRobotsTxt(),
-                'schema_organization_name' => Setting::query()->first()?->localized('site_name') ?: 'Travel Wave',
+                'schema_organization_name' => $this->siteName(),
                 'default_robots_meta' => 'index,follow',
             ]);
         }
 
         return SeoSetting::query()->firstOrCreate([], [
             'robots_txt_content' => $this->defaultRobotsTxt(),
-            'schema_organization_name' => Setting::query()->first()?->localized('site_name') ?: 'Travel Wave',
+            'schema_organization_name' => $this->siteName(),
             'default_robots_meta' => 'index,follow',
         ]);
     }
 
     public function targets(): Collection
     {
-        if (! Schema::hasTable('seo_meta_entries')) {
+        if (! $this->safeHasTable('seo_meta_entries')) {
             return collect();
         }
 
@@ -61,7 +62,7 @@ class SeoManager
 
     public function entryForTarget(string $type, int $id): SeoMetaEntry
     {
-        if (! Schema::hasTable('seo_meta_entries')) {
+        if (! $this->safeHasTable('seo_meta_entries')) {
             return new SeoMetaEntry([
                 'target_type' => $type,
                 'target_id' => $id,
@@ -83,11 +84,15 @@ class SeoManager
     {
         $settings = $this->settings();
         [$type, $id, $model] = $this->targetFromRequest($request);
-        $entry = $type && $id ? SeoMetaEntry::query()
-            ->where('target_type', $type)
-            ->where('target_id', $id)
-            ->where('is_active', true)
-            ->first() : null;
+        $entry = null;
+
+        if ($type && $id && $this->safeHasTable('seo_meta_entries')) {
+            $entry = SeoMetaEntry::query()
+                ->where('target_type', $type)
+                ->where('target_id', $id)
+                ->where('is_active', true)
+                ->first();
+        }
 
         $title = $entry?->localized('meta_title') ?: $this->fallbackModelValue($model, 'meta_title') ?: $this->fallbackModelValue($model, 'title');
         $description = $entry?->localized('meta_description') ?: $this->fallbackModelValue($model, 'meta_description') ?: $this->fallbackModelValue($model, 'excerpt');
@@ -127,8 +132,8 @@ class SeoManager
             'missing_meta_description' => $audit['missing_meta_description'],
             'missing_canonical' => $audit['missing_canonical'],
             'missing_schema' => $audit['missing_schema'],
-            'redirects_count' => SeoRedirect::query()->count(),
-            'active_redirects_count' => SeoRedirect::query()->where('is_active', true)->count(),
+            'redirects_count' => $this->safeHasTable('seo_redirects') ? SeoRedirect::query()->count() : 0,
+            'active_redirects_count' => $this->safeHasTable('seo_redirects') ? SeoRedirect::query()->where('is_active', true)->count() : 0,
             'sitemap_last_generated_at' => $this->settings()->sitemap_last_generated_at,
             'latest_issues' => $audit['issues'],
         ];
@@ -137,7 +142,7 @@ class SeoManager
     public function healthAudit(): array
     {
         $targets = $this->targets();
-        $entryMap = Schema::hasTable('seo_meta_entries')
+        $entryMap = $this->safeHasTable('seo_meta_entries')
             ? SeoMetaEntry::query()->get()->keyBy(fn (SeoMetaEntry $entry) => $entry->target_type . ':' . $entry->target_id)
             : collect();
 
@@ -194,7 +199,7 @@ class SeoManager
 
     public function regenerateSitemaps(): array
     {
-        if (! Schema::hasTable('seo_settings')) {
+        if (! $this->safeHasTable('seo_settings')) {
             return [
                 'index' => 'sitemap.xml',
                 'files' => [],
@@ -242,7 +247,7 @@ class SeoManager
 
     public function readSitemap(string $file = 'sitemap.xml'): string
     {
-        if (! Schema::hasTable('seo_settings')) {
+        if (! $this->safeHasTable('seo_settings')) {
             return $this->buildSitemapIndex(collect());
         }
 
@@ -548,5 +553,31 @@ class SeoManager
         }
 
         return $schema;
+    }
+
+    protected function safeHasTable(string $table): bool
+    {
+        try {
+            return Schema::hasTable($table);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return false;
+        }
+    }
+
+    protected function siteName(): string
+    {
+        if (! $this->safeHasTable('settings')) {
+            return 'Travel Wave';
+        }
+
+        try {
+            return Setting::query()->first()?->localized('site_name') ?: 'Travel Wave';
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return 'Travel Wave';
+        }
     }
 }

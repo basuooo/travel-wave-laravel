@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChatbotInteraction;
+use App\Models\ChatbotKnowledgeEntry;
 use App\Models\ChatbotKnowledgeItem;
 use App\Models\Setting;
 use App\Support\ChatbotKnowledgeManager;
@@ -24,6 +25,7 @@ class ChatbotSettingController extends Controller
             'setting' => $setting,
             'sourceOptions' => $this->knowledgeManager->sourceOptions(),
             'knowledgeCount' => ChatbotKnowledgeItem::query()->count(),
+            'manualKnowledgeCount' => ChatbotKnowledgeEntry::query()->count(),
             'latestInteractions' => ChatbotInteraction::query()->latest()->limit(20)->get(),
             'unansweredCount' => ChatbotInteraction::query()->where('was_answered', false)->count(),
         ]);

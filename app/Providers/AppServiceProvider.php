@@ -6,8 +6,10 @@ use App\Models\MenuItem;
 use App\Models\Setting;
 use App\Support\SeoManager;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Throwable;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,39 +33,62 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFive();
 
         view()->composer('*', function ($view) {
-            $settings = Setting::query()->first();
-            $seoManager = app(SeoManager::class);
-            $headerMenu = MenuItem::query()
-                ->where('location', 'header')
-                ->whereNull('parent_id')
-                ->where('is_active', true)
-                ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('sort_order')])
-                ->orderBy('sort_order')
-                ->get();
-            $footerMenu = MenuItem::query()
-                ->where('location', 'footer')
-                ->whereNull('parent_id')
-                ->where('is_active', true)
-                ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('sort_order')])
-                ->orderBy('sort_order')
-                ->get();
-            $adminNotifications = collect();
-            $adminUnreadNotificationsCount = 0;
+            $payload = [
+                'siteSettings' => null,
+                'seoSettings' => null,
+                'seoMetaData' => [],
+                'headerMenuItems' => collect(),
+                'footerMenuItems' => collect(),
+                'adminNotifications' => collect(),
+                'adminUnreadNotificationsCount' => 0,
+            ];
 
-            if (auth()->check() && Schema::hasTable('notifications')) {
-                $adminNotifications = auth()->user()->notifications()->latest()->limit(6)->get();
-                $adminUnreadNotificationsCount = auth()->user()->unreadNotifications()->count();
+            try {
+                $seoManager = app(SeoManager::class);
+
+                if ($this->safeHasTable('settings')) {
+                    $payload['siteSettings'] = Setting::query()->first();
+                }
+
+                if ($this->safeHasTable('menu_items')) {
+                    $payload['headerMenuItems'] = $this->menuItemsForLocation('header');
+                    $payload['footerMenuItems'] = $this->menuItemsForLocation('footer');
+                }
+
+                $payload['seoSettings'] = $seoManager->settings();
+                $payload['seoMetaData'] = $seoManager->resolveForRequest(request());
+
+                if (auth()->check() && $this->safeHasTable('notifications')) {
+                    $payload['adminNotifications'] = auth()->user()->notifications()->latest()->limit(6)->get();
+                    $payload['adminUnreadNotificationsCount'] = auth()->user()->unreadNotifications()->count();
+                }
+            } catch (Throwable $exception) {
+                report($exception);
             }
 
-            $view->with([
-                'siteSettings' => $settings,
-                'seoSettings' => class_exists(\App\Models\SeoSetting::class) ? $seoManager->settings() : null,
-                'seoMetaData' => $seoManager->resolveForRequest(request()),
-                'headerMenuItems' => $headerMenu,
-                'footerMenuItems' => $footerMenu,
-                'adminNotifications' => $adminNotifications,
-                'adminUnreadNotificationsCount' => $adminUnreadNotificationsCount,
-            ]);
+            $view->with($payload);
         });
+    }
+
+    protected function safeHasTable(string $table): bool
+    {
+        try {
+            return Schema::hasTable($table);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return false;
+        }
+    }
+
+    protected function menuItemsForLocation(string $location): Collection
+    {
+        return MenuItem::query()
+            ->where('location', $location)
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->get();
     }
 }
