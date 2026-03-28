@@ -421,18 +421,6 @@
     </div>
 </section>
 
-<section class="container py-5">
-    <div class="row g-4 align-items-center">
-        <div class="col-lg-5">
-            <h2 class="tw-section-title display-6">{{ app()->getLocale() === 'ar' ? ($sections['inquiry']['title_ar'] ?? '') : ($sections['inquiry']['title_en'] ?? '') }}</h2>
-            <p class="text-muted">{{ app()->getLocale() === 'ar' ? ($sections['inquiry']['text_ar'] ?? '') : ($sections['inquiry']['text_en'] ?? '') }}</p>
-        </div>
-        <div class="col-lg-7">
-            @include('partials.frontend.inquiry-form', ['type' => 'general', 'source' => 'home'])
-        </div>
-    </div>
-</section>
-
 @if(!empty($sections['final_cta']))
 <section class="container py-5">
     <div class="tw-page-header p-4 p-lg-5 text-center">

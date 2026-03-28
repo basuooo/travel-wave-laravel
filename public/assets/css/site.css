@@ -1899,11 +1899,40 @@ html[dir="rtl"] .tw-navbar-locale-menu {
     overflow: hidden;
 }
 
+.tw-visa-guidance-card {
+    border: 1px solid rgba(18, 57, 91, 0.08);
+    box-shadow: 0 18px 38px rgba(14, 32, 48, 0.07);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.tw-visa-guidance-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 44px rgba(14, 32, 48, 0.1);
+    border-color: rgba(18, 57, 91, 0.14);
+}
+
 .tw-destination-highlight-media {
     aspect-ratio: 16 / 11;
     border-radius: 1.15rem;
     overflow: hidden;
     background: linear-gradient(135deg, rgba(18, 57, 91, 0.92), rgba(255, 140, 50, 0.75));
+}
+
+.tw-visa-guidance-card .tw-destination-highlight-media {
+    aspect-ratio: 16 / 9;
+}
+
+.tw-visa-guidance-card .tw-image-cover {
+    object-fit: cover;
+}
+
+.tw-visa-guidance-card h3 {
+    line-height: 1.35;
+}
+
+.tw-visa-guidance-card p {
+    color: rgba(16, 33, 50, 0.72);
+    line-height: 1.75;
 }
 
 .tw-destination-highlight-placeholder {
@@ -3750,4 +3779,71 @@ html[dir="rtl"] .tw-list-check li::before {
     .tw-chatbot-form .btn {
         width: 100%;
     }
+}
+.tw-icon-svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.tw-iconify-icon,
+iconify-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 1;
+    flex-shrink: 0;
+    color: currentColor;
+    overflow: visible;
+    visibility: visible;
+    opacity: 1;
+}
+
+iconify-icon svg,
+.tw-iconify-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.tw-brand-card-icon .tw-icon-svg,
+.tw-visa-reference-doc-icon .tw-icon-svg,
+.tw-visa-reference-service-icon .tw-icon-svg,
+.tw-visa-reference-summary-icon .tw-icon-svg,
+.tw-destination-highlight-placeholder .tw-icon-svg,
+.tw-brand-card-icon .tw-iconify-icon,
+.tw-visa-reference-doc-icon .tw-iconify-icon,
+.tw-visa-reference-service-icon .tw-iconify-icon,
+.tw-visa-reference-summary-icon .tw-iconify-icon,
+.tw-brand-card-icon iconify-icon,
+.tw-visa-reference-doc-icon iconify-icon,
+.tw-visa-reference-service-icon iconify-icon,
+.tw-visa-reference-summary-icon iconify-icon,
+.tw-destination-highlight-placeholder .tw-iconify-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+}
+
+.tw-visa-reference-summary-icon iconify-icon,
+.tw-visa-reference-summary-icon .tw-iconify-icon {
+    color: var(--tw-accent, #ff8c32);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+}
+
+.tw-visa-reference-summary-icon .tw-icon-svg,
+.tw-visa-reference-summary-icon svg {
+    width: 28px;
+    height: 28px;
 }

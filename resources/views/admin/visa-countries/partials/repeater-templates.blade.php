@@ -2,13 +2,48 @@
     <div class="col-12" data-repeater-item>
         <div class="border rounded-4 p-3">
             <div class="row g-3">
-                <div class="col-md-5">
-                    <label class="form-label">Point EN</label>
-                    <input class="form-control" name="highlights_en[]" value="">
+                <div class="col-md-3">
+                    <label class="form-label">Title EN</label>
+                    <input class="form-control" data-field="title_en" type="text">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Title AR</label>
+                    <input class="form-control text-end" dir="rtl" data-field="title_ar" type="text">
                 </div>
                 <div class="col-md-5">
-                    <label class="form-label">Point AR</label>
-                    <input class="form-control text-end" dir="rtl" name="highlights_ar[]" value="">
+                    <label class="form-label">Description EN</label>
+                    <textarea class="form-control" data-field="description_en" rows="3"></textarea>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Description AR</label>
+                    <textarea class="form-control text-end" dir="rtl" data-field="description_ar" rows="3"></textarea>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Order</label>
+                    <input class="form-control" data-field="sort_order" type="number">
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check mt-4 pt-2">
+                        <input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked>
+                        <label class="form-check-label">Active</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Card Image</label>
+                    <input class="form-control" data-field="image_file" data-highlight-image-input data-media-target-field="existing_image" data-media-enhanced="1" type="file" accept="image/*">
+                    <div class="admin-media-picker">
+                        <div class="admin-media-picker__actions">
+                            <button type="button" class="btn btn-outline-secondary btn-sm js-open-media-library">Select from Library</button>
+                            <span class="admin-media-picker__hint">or upload new</span>
+                        </div>
+                        <div class="admin-media-picker__selected"></div>
+                    </div>
+                    <input data-field="existing_image" type="hidden" value="">
+                    <img src="" alt="" class="img-fluid rounded border mt-3 js-highlight-preview d-none" style="max-height: 160px; object-fit: cover;">
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" data-field="remove_image" type="checkbox" value="1">
+                        <label class="form-check-label">Remove current image</label>
+                    </div>
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                     <button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>Remove</button>
@@ -42,11 +77,18 @@
     <div class="col-12" data-repeater-item>
         <div class="border rounded-4 p-3">
             <div class="row g-3">
-                <div class="col-md-3"><label class="form-label">Card Title EN</label><input class="form-control" data-field="title_en" type="text"></div>
-                <div class="col-md-3"><label class="form-label">Card Title AR</label><input class="form-control text-end" dir="rtl" data-field="title_ar" type="text"></div>
+                <div class="col-md-3"><label class="form-label">Card Label EN</label><input class="form-control" data-field="label_en" type="text"></div>
+                <div class="col-md-3"><label class="form-label">Card Label AR</label><input class="form-control text-end" dir="rtl" data-field="label_ar" type="text"></div>
                 <div class="col-md-2"><label class="form-label">Value EN</label><input class="form-control" data-field="value_en" type="text"></div>
                 <div class="col-md-2"><label class="form-label">Value AR</label><input class="form-control text-end" dir="rtl" data-field="value_ar" type="text"></div>
-                <div class="col-md-1"><label class="form-label">Icon</label><input class="form-control" data-field="icon" type="text"></div>
+                <div class="col-md-2">
+                    <label class="form-label d-flex align-items-center gap-2">
+                        <span>Icon</span>
+                        <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="small text-decoration-none" aria-label="Browse Iconify icons"><span aria-hidden="true">&#127760;</span></a>
+                    </label>
+                    <input class="form-control" data-field="icon" type="text" placeholder="material-symbols:travel">
+                    <div class="form-text">Example: material-symbols:travel</div>
+                </div>
                 <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
                 <div class="col-md-2"><div class="form-check mt-4 pt-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div></div>
                 <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>Remove</button></div>
@@ -155,7 +197,8 @@
 
 @php
     $repeaterConfigs = [
-        'quick-summary' => ['name' => 'quick_summary_items', 'fields' => ['title_en', 'title_ar', 'value_en', 'value_ar', 'icon', 'sort_order', 'is_active']],
+        'detail-highlights' => ['name' => 'highlight_items', 'fields' => ['title_en', 'title_ar', 'description_en', 'description_ar', 'image_file', 'existing_image', 'remove_image', 'sort_order', 'is_active']],
+        'quick-summary' => ['name' => 'quick_summary_items', 'fields' => ['label_en', 'label_ar', 'value_en', 'value_ar', 'icon', 'sort_order', 'is_active']],
         'why-choose' => ['name' => 'why_choose_items', 'fields' => ['title_en', 'title_ar', 'description_en', 'description_ar', 'icon', 'sort_order', 'is_active']],
         'documents' => ['name' => 'document_items', 'fields' => ['name_en', 'name_ar', 'description_en', 'description_ar', 'sort_order', 'is_active']],
         'steps' => ['name' => 'step_items', 'fields' => ['title_en', 'title_ar', 'description_en', 'description_ar', 'step_number', 'sort_order', 'is_active']],
@@ -205,10 +248,6 @@ function syncRepeaterNames(key) {
         return;
     }
 
-    if (key === 'detail-highlights') {
-        return;
-    }
-
     list.querySelectorAll('[data-repeater-item]').forEach(function (item, index) {
         const inputs = item.querySelectorAll('input, textarea, select');
         inputs.forEach(function (input) {
@@ -222,5 +261,31 @@ function syncRepeaterNames(key) {
     });
 }
 
-['quick-summary', 'why-choose', 'documents', 'steps', 'faq', 'fees'].forEach(syncRepeaterNames);
+['detail-highlights', 'quick-summary', 'why-choose', 'documents', 'steps', 'faq', 'fees'].forEach(syncRepeaterNames);
+
+document.addEventListener('change', function (event) {
+    const input = event.target.closest('[data-highlight-image-input]');
+
+    if (!input) {
+        return;
+    }
+
+    const preview = input.closest('[data-repeater-item]')?.querySelector('.js-highlight-preview');
+    const removeCheckbox = input.closest('[data-repeater-item]')?.querySelector('[data-field="remove_image"]');
+
+    if (!preview || !input.files || !input.files.length) {
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (loadEvent) {
+        preview.src = loadEvent.target?.result || '';
+        preview.classList.remove('d-none');
+    };
+    reader.readAsDataURL(input.files[0]);
+
+    if (removeCheckbox) {
+        removeCheckbox.checked = false;
+    }
+});
 </script>

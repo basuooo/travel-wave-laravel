@@ -427,6 +427,31 @@
             input.form.querySelectorAll(`[data-media-hidden-for="${input.name}"]`).forEach((field) => field.remove());
         };
 
+        const findManagedTargetField = (input) => {
+            const targetField = input.dataset.mediaTargetField;
+            if (!targetField) return null;
+
+            return input.closest('[data-repeater-item]')?.querySelector(`[data-field="${targetField}"]`)
+                || input.parentElement?.querySelector(`[data-field="${targetField}"]`)
+                || input.form?.querySelector(`[data-field="${targetField}"]`);
+        };
+
+        const updateManagedPreview = (input, selectedItem) => {
+            const preview = input.closest('[data-repeater-item]')?.querySelector('.js-highlight-preview');
+            const removeCheckbox = input.closest('[data-repeater-item]')?.querySelector('[data-field="remove_image"]');
+
+            if (removeCheckbox) {
+                removeCheckbox.checked = false;
+            }
+
+            if (!preview || !selectedItem) {
+                return;
+            }
+
+            preview.src = selectedItem.url;
+            preview.classList.remove('d-none');
+        };
+
         const appendHiddenField = (input, name, value) => {
             const hidden = document.createElement('input');
             hidden.type = 'hidden';
@@ -441,13 +466,40 @@
             const selectedBox = shell.querySelector('.admin-media-picker__selected');
             clearHiddenFields(input);
 
-            if (input.multiple) {
+            const targetField = findManagedTargetField(input);
+            if (targetField) {
+                targetField.value = selected[0] ? selected[0].path : '';
+            }
+
+            if (input.multiple && !targetField) {
                 selected.forEach((item) => appendHiddenField(input, `${input.name.replace(/\[\]$/, '')}_existing_paths[]`, item.path));
-            } else if (selected[0]) {
+            } else if (selected[0] && !targetField) {
                 appendHiddenField(input, `${input.name}_existing_path`, selected[0].path);
             }
 
             selectedBox.innerHTML = selected.map((item) => `<div class="admin-media-picker__item"><img src="${item.url}" alt="${item.title || item.file_name}"><div><strong>${item.title || item.file_name}</strong><span>${item.file_name}</span></div></div>`).join('');
+            updateManagedPreview(input, selected[0] || null);
+        };
+
+        const renderLocalFilesPreview = (input) => {
+            const shell = ensurePreviewShell(input);
+            const selectedBox = shell.querySelector('.admin-media-picker__selected');
+            clearHiddenFields(input);
+
+            const targetField = findManagedTargetField(input);
+            if (targetField) {
+                targetField.value = '';
+            }
+
+            if (!input.files || !input.files.length) {
+                selectedBox.innerHTML = '';
+                return;
+            }
+
+            selectedBox.innerHTML = Array.from(input.files).map((file) => {
+                const fileUrl = URL.createObjectURL(file);
+                return `<div class="admin-media-picker__item"><img src="${fileUrl}" alt="${escapeHtml(file.name)}"><div><strong>${escapeHtml(file.name)}</strong><span>${escapeHtml(file.type || 'image')}</span></div></div>`;
+            }).join('');
         };
 
         const renderUsageEntries = (entries) => {
@@ -571,6 +623,7 @@
         document.querySelectorAll('input[type="file"]').forEach((input) => {
             if (input.id === 'admin-media-upload') return;
             ensurePreviewShell(input);
+            input.addEventListener('change', () => renderLocalFilesPreview(input));
         });
 
         document.addEventListener('click', (event) => {

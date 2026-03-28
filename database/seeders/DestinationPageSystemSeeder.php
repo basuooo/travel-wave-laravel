@@ -18,15 +18,16 @@ class DestinationPageSystemSeeder extends Seeder
     protected function seedDomestic(): void
     {
         foreach ($this->domesticPages() as $index => $page) {
-            Destination::query()->updateOrCreate(
-                ['slug' => $page['slug']],
-                $page + [
-                    'destination_type' => 'domestic',
-                    'is_active' => true,
-                    'is_featured' => true,
-                    'sort_order' => $index + 1,
-                ]
-            );
+            $destination = Destination::query()->withTrashed()->firstOrNew(['slug' => $page['slug']]);
+            $destination->fill($page + [
+                'destination_type' => 'domestic',
+                'is_active' => true,
+                'is_featured' => true,
+                'sort_order' => $index + 1,
+                'deleted_at' => null,
+                'deleted_by' => null,
+            ]);
+            $destination->save();
         }
     }
 
@@ -47,15 +48,16 @@ class DestinationPageSystemSeeder extends Seeder
         );
 
         foreach ($this->visaPages() as $index => $page) {
-            VisaCountry::query()->updateOrCreate(
-                ['slug' => $page['slug']],
-                $page + [
-                    'visa_category_id' => $category->id,
-                    'is_active' => true,
-                    'is_featured' => true,
-                    'sort_order' => $index + 1,
-                ]
-            );
+            $country = VisaCountry::query()->withTrashed()->firstOrNew(['slug' => $page['slug']]);
+            $country->fill($page + [
+                'visa_category_id' => $category->id,
+                'is_active' => true,
+                'is_featured' => true,
+                'sort_order' => $index + 1,
+                'deleted_at' => null,
+                'deleted_by' => null,
+            ]);
+            $country->save();
         }
     }
 
@@ -164,11 +166,13 @@ class DestinationPageSystemSeeder extends Seeder
         $heroSlideOne = 'hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png';
         $heroSlideTwo = 'hero-slides/1TunK6YuKgLHdHi2aBuDZeVe9NJXS23rNCFgFqi0.png';
         $heroSlideThree = 'hero-slides/AHA77CWYemeYDheAtHSRseA0io46WT0GuRkU8Vfh.jpg';
+        $highlightImages = [$heroSlideOne, $heroSlideTwo, $heroSlideThree];
 
         return [
             'slug' => $slug,
             'title_en' => $titleEn,
             'title_ar' => $titleAr,
+            'destination_type' => 'domestic',
             'subtitle_en' => $subtitleEn,
             'subtitle_ar' => $subtitleAr,
             'excerpt_en' => $subtitleEn,
@@ -182,20 +186,23 @@ class DestinationPageSystemSeeder extends Seeder
             'hero_cta_text_en' => 'Book Now',
             'hero_cta_text_ar' => 'احجز الآن',
             'hero_cta_url' => '#destination-form',
-            'hero_secondary_cta_text_en' => 'View Highlights',
-            'hero_secondary_cta_text_ar' => 'استعرض المزايا',
-            'hero_secondary_cta_url' => '#destination-highlights',
+            'hero_secondary_cta_text_en' => 'Quick Summary',
+            'hero_secondary_cta_text_ar' => 'ملخص سريع',
+            'hero_secondary_cta_url' => '#destination-summary',
             'hero_image' => $heroSlideThree,
             'hero_mobile_image' => 'hero-slides/slide-3.svg',
             'featured_image' => $heroSlideThree,
             'about_image' => $heroSlideOne,
-            'quick_info_title_en' => 'Quick Info',
-            'quick_info_title_ar' => 'معلومات سريعة',
+            'quick_info_title_en' => 'Quick Summary',
+            'quick_info_title_ar' => 'ملخص سريع',
+            'quick_summary_destination_label_en' => 'Destination',
+            'quick_summary_destination_label_ar' => 'الوجهة',
+            'quick_summary_destination_icon' => 'material-symbols:globe-location-pin-outline',
             'quick_info_items' => [
-                ['label_en' => 'Trip Type', 'label_ar' => 'نوع البرنامج', 'value_en' => 'Domestic tourism package', 'value_ar' => 'برنامج سياحة داخلية', 'icon' => 'TP', 'sort_order' => 1, 'is_active' => true],
-                ['label_en' => 'Suggested Duration', 'label_ar' => 'المدة المقترحة', 'value_en' => '3 to 5 nights', 'value_ar' => '3 إلى 5 ليالٍ', 'icon' => 'DU', 'sort_order' => 2, 'is_active' => true],
-                ['label_en' => 'Starting Price', 'label_ar' => 'السعر يبدأ من', 'value_en' => 'Ask for latest offer', 'value_ar' => 'اطلب أحدث عرض', 'icon' => 'PR', 'sort_order' => 3, 'is_active' => true],
-                ['label_en' => 'Best Time', 'label_ar' => 'أفضل وقت', 'value_en' => 'Depends on season', 'value_ar' => 'بحسب الموسم', 'icon' => 'BT', 'sort_order' => 4, 'is_active' => true],
+                ['label_en' => 'Trip Type', 'label_ar' => 'نوع البرنامج', 'value_en' => 'Domestic tourism package', 'value_ar' => 'برنامج سياحة داخلية', 'icon' => 'material-symbols:travel', 'sort_order' => 1, 'is_active' => true],
+                ['label_en' => 'Suggested Duration', 'label_ar' => 'المدة المقترحة', 'value_en' => '3 to 5 nights', 'value_ar' => '3 إلى 5 ليالٍ', 'icon' => 'mdi:clock-outline', 'sort_order' => 2, 'is_active' => true],
+                ['label_en' => 'Starting Price', 'label_ar' => 'السعر يبدأ من', 'value_en' => 'Ask for latest offer', 'value_ar' => 'اطلب أحدث عرض', 'icon' => 'solar:tag-price-linear', 'sort_order' => 3, 'is_active' => true],
+                ['label_en' => 'Best Time', 'label_ar' => 'أفضل وقت', 'value_en' => 'Depends on season', 'value_ar' => 'بحسب الموسم', 'icon' => 'solar:calendar-linear', 'sort_order' => 4, 'is_active' => true],
             ],
             'about_title_en' => 'About the Destination',
             'about_title_ar' => 'نبذة عن الوجهة',
@@ -210,42 +217,59 @@ class DestinationPageSystemSeeder extends Seeder
             'detailed_title_ar' => 'تفاصيل الرحلة',
             'detailed_description_en' => "Travel Wave organizes the destination around the right stay length, hotel category, and guest preferences.\n\nThis makes the trip easier to compare and confirm without getting lost in scattered options.",
             'detailed_description_ar' => "تنظم Travel Wave الوجهة حسب مدة الإقامة المناسبة وفئة الفندق واحتياج المسافرين.\n\nوهذا يجعل الرحلة أسهل في المقارنة والتأكيد دون تشتت بين الخيارات.",
+            'best_time_badge_en' => 'Best Time',
+            'best_time_badge_ar' => 'أفضل وقت',
             'best_time_title_en' => 'Best Time to Visit',
             'best_time_title_ar' => 'أفضل وقت للزيارة',
             'best_time_description_en' => 'Best travel timing depends on weather preference, budget level, and the type of activities planned.',
             'best_time_description_ar' => $bestTimeAr,
+            'highlights_section_label_en' => 'Helpful Guidance Points',
+            'highlights_section_label_ar' => 'أهم الإرشادات',
             'highlights_title_en' => 'Top Highlights',
-            'highlights_title_ar' => 'أهم المعالم والأنشطة',
-            'highlight_items' => collect($highlightsAr)->map(fn ($item, $index) => [
-                'title_en' => $item[0],
-                'title_ar' => $item[0],
-                'description_en' => $item[1],
-                'description_ar' => $item[1],
-                'icon' => strtoupper(substr($item[0], 0, 2)),
-                'sort_order' => $index + 1,
-                'is_active' => true,
-            ])->all(),
+            'highlights_title_ar' => 'أبرز النقاط المهمة',
+            'highlight_items' => collect($highlightsAr)->map(function ($item, $index) use ($highlightImages, $heroSlideThree) {
+                return [
+                    'title_en' => $item[0],
+                    'title_ar' => $item[0],
+                    'description_en' => $item[1],
+                    'description_ar' => $item[1],
+                    'image' => $highlightImages[$index] ?? $heroSlideThree,
+                    'icon' => match ($index) {
+                        0 => 'material-symbols:beach-access-outline-rounded',
+                        1 => 'material-symbols:scuba-diving',
+                        default => 'material-symbols:hotel-class-outline-rounded',
+                    },
+                    'sort_order' => $index + 1,
+                    'is_active' => true,
+                ];
+            })->all(),
             'services_title_en' => 'Included Services',
             'services_title_ar' => 'الخدمات المتضمنة',
             'services_intro_en' => 'The trip can be built around your timing, comfort level, and package preference.',
             'services_intro_ar' => 'يمكن تصميم الرحلة حسب توقيتك ومستوى الراحة المناسب والبرنامج المطلوب.',
-            'service_items' => collect($servicesAr)->map(fn ($item, $index) => [
-                'title_en' => $item[0],
-                'title_ar' => $item[0],
-                'description_en' => $item[1],
-                'description_ar' => $item[1],
-                'icon' => strtoupper(substr($item[0], 0, 2)),
-                'sort_order' => $index + 1,
-                'is_active' => true,
-            ])->all(),
+            'service_items' => collect($servicesAr)->map(function ($item, $index) {
+                return [
+                    'title_en' => $item[0],
+                    'title_ar' => $item[0],
+                    'description_en' => $item[1],
+                    'description_ar' => $item[1],
+                    'icon' => match ($index) {
+                        0 => 'material-symbols:hotel-outline-rounded',
+                        1 => 'material-symbols:directions-car-outline-rounded',
+                        default => 'material-symbols:concierge',
+                    },
+                    'sort_order' => $index + 1,
+                    'is_active' => true,
+                ];
+            })->all(),
             'documents_title_en' => 'Required Before Booking',
             'documents_title_ar' => 'ما يلزم قبل الحجز',
             'documents_subtitle_en' => 'Domestic travel does not need visa paperwork, but some basic details help confirm the booking faster.',
             'documents_subtitle_ar' => 'السفر الداخلي لا يحتاج مستندات تأشيرة، لكن بعض البيانات الأساسية تساعد على تأكيد الحجز بسرعة.',
             'document_items' => [
-                ['title_en' => 'Traveler Names', 'title_ar' => 'أسماء المسافرين', 'description_en' => 'Correct names for reservation records.', 'description_ar' => 'الأسماء الصحيحة لبيانات الحجز.', 'icon' => 'NM', 'sort_order' => 1, 'is_active' => true],
-                ['title_en' => 'Travel Dates', 'title_ar' => 'تواريخ السفر', 'description_en' => 'Preferred travel period and stay length.', 'description_ar' => 'فترة السفر المفضلة وعدد الليالي.', 'icon' => 'DT', 'sort_order' => 2, 'is_active' => true],
-                ['title_en' => 'Guest Count', 'title_ar' => 'عدد الأفراد', 'description_en' => 'Used to match room type and offer level.', 'description_ar' => 'لتحديد نوع الغرفة ومستوى العرض.', 'icon' => 'GS', 'sort_order' => 3, 'is_active' => true],
+                ['title_en' => 'Traveler Names', 'title_ar' => 'أسماء المسافرين', 'description_en' => 'Correct names for reservation records.', 'description_ar' => 'الأسماء الصحيحة لبيانات الحجز.', 'icon' => 'material-symbols:badge-outline-rounded', 'sort_order' => 1, 'is_active' => true],
+                ['title_en' => 'Travel Dates', 'title_ar' => 'تواريخ السفر', 'description_en' => 'Preferred travel period and stay length.', 'description_ar' => 'فترة السفر المفضلة وعدد الليالي.', 'icon' => 'solar:calendar-linear', 'sort_order' => 2, 'is_active' => true],
+                ['title_en' => 'Guest Count', 'title_ar' => 'عدد الأفراد', 'description_en' => 'Used to match room type and offer level.', 'description_ar' => 'لتحديد نوع الغرفة ومستوى العرض.', 'icon' => 'material-symbols:group-outline-rounded', 'sort_order' => 3, 'is_active' => true],
             ],
             'steps_title_en' => 'Booking Steps',
             'steps_title_ar' => 'خطوات الحجز',

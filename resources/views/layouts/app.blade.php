@@ -33,6 +33,7 @@
     <link rel="icon" href="{{ $siteSettings?->favicon_path ? asset('storage/' . $siteSettings->favicon_path) : '' }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ asset('assets/css/site.css') }}" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     @php($trackingContext = $trackingContext ?? \App\Support\TrackingManager::contextFromRequest(request()))
     @php($pageTrackingIntegrations = collect($pageTrackingIntegrations ?? []))
     @php($headTrackingIntegrations = collect(\App\Support\TrackingManager::resolveForPlacement('head', $trackingContext))->merge($pageTrackingIntegrations->filter(fn ($integration) => in_array($integration->placement, ['standard', 'head'], true)))->unique('id')->values())

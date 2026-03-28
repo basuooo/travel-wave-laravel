@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\HandlesCmsData;
 use App\Http\Controllers\Controller;
 use App\Models\VisaCategory;
 use App\Models\VisaCountry;
+use App\Support\MediaLibraryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -129,6 +130,9 @@ class VisaCountryController extends Controller
             'visa_type_ar' => ['nullable', 'string', 'max:255'],
             'stay_duration_en' => ['nullable', 'string', 'max:255'],
             'stay_duration_ar' => ['nullable', 'string', 'max:255'],
+            'quick_summary_destination_label_en' => ['nullable', 'string', 'max:255'],
+            'quick_summary_destination_label_ar' => ['nullable', 'string', 'max:255'],
+            'quick_summary_destination_icon' => ['nullable', 'string', 'max:255'],
             'introduction_title_en' => ['nullable', 'string', 'max:255'],
             'introduction_title_ar' => ['nullable', 'string', 'max:255'],
             'introduction_badge_en' => ['nullable', 'string', 'max:255'],
@@ -137,6 +141,17 @@ class VisaCountryController extends Controller
             'detailed_title_ar' => ['nullable', 'string', 'max:255'],
             'detailed_description_en' => ['nullable', 'string'],
             'detailed_description_ar' => ['nullable', 'string'],
+            'best_time_badge_en' => ['nullable', 'string', 'max:255'],
+            'best_time_badge_ar' => ['nullable', 'string', 'max:255'],
+            'best_time_title_en' => ['nullable', 'string', 'max:255'],
+            'best_time_title_ar' => ['nullable', 'string', 'max:255'],
+            'best_time_description_en' => ['nullable', 'string'],
+            'best_time_description_ar' => ['nullable', 'string'],
+            'highlights_section_label_en' => ['nullable', 'string', 'max:255'],
+            'highlights_section_label_ar' => ['nullable', 'string', 'max:255'],
+            'highlights_section_title_en' => ['nullable', 'string', 'max:255'],
+            'highlights_section_title_ar' => ['nullable', 'string', 'max:255'],
+            'highlight_items.*.image_file' => ['nullable', 'image'],
             'why_choose_title_en' => ['nullable', 'string', 'max:255'],
             'why_choose_title_ar' => ['nullable', 'string', 'max:255'],
             'why_choose_intro_en' => ['nullable', 'string'],
@@ -209,7 +224,7 @@ class VisaCountryController extends Controller
         $data['intro_image'] = $this->uploadFile($request, 'intro_image', 'visa-countries', $country?->intro_image);
         $data['final_cta_background_image'] = $this->uploadFile($request, 'final_cta_background_image', 'visa-countries', $country?->final_cta_background_image);
         $data['og_image'] = $this->uploadFile($request, 'og_image', 'visa-countries', $country?->og_image);
-        $data['highlights'] = $this->mapLocalizedTextItems($request->input('highlights_en'), $request->input('highlights_ar'));
+        $data['highlights'] = $this->mapHighlightItems($request, $request->input('highlight_items', []));
         $data['quick_summary_items'] = $this->mapQuickSummaryItems($request->input('quick_summary_items', []));
         $data['introduction_points'] = $this->mapLocalizedTextItems($request->input('introduction_points_en'), $request->input('introduction_points_ar'));
         $data['required_documents'] = $this->mapLocalizedTextItems($request->input('documents_en'), $request->input('documents_ar'));
@@ -356,12 +371,41 @@ class VisaCountryController extends Controller
         });
     }
 
+    protected function mapHighlightItems(Request $request, array $items): array
+    {
+        return $this->mapRepeaterItems($items, function (array $item, int $index) use ($request) {
+            $currentImage = trim((string) ($item['existing_image'] ?? ''));
+            $removeImage = ! empty($item['remove_image']);
+            $image = $removeImage ? null : $currentImage;
+
+            if ($image) {
+                MediaLibraryService::syncExistingFile($image, 'visa-countries/highlights');
+            }
+
+            if ($request->hasFile("highlight_items.$index.image_file")) {
+                $file = $request->file("highlight_items.$index.image_file");
+                $image = $file->store('visa-countries/highlights', 'public');
+                MediaLibraryService::registerUploadedFile($file, $image, 'visa-countries/highlights');
+            }
+
+            return [
+                'title_en' => trim($item['title_en'] ?? ''),
+                'title_ar' => trim($item['title_ar'] ?? ''),
+                'description_en' => trim($item['description_en'] ?? ''),
+                'description_ar' => trim($item['description_ar'] ?? ''),
+                'image' => $image,
+                'sort_order' => (int) ($item['sort_order'] ?? $index + 1),
+                'is_active' => ! empty($item['is_active']),
+            ];
+        });
+    }
+
     protected function mapQuickSummaryItems(array $items): array
     {
         return $this->mapRepeaterItems($items, function (array $item, int $index) {
             return [
-                'title_en' => trim($item['title_en'] ?? ''),
-                'title_ar' => trim($item['title_ar'] ?? ''),
+                'label_en' => trim($item['label_en'] ?? $item['title_en'] ?? ''),
+                'label_ar' => trim($item['label_ar'] ?? $item['title_ar'] ?? ''),
                 'value_en' => trim($item['value_en'] ?? ''),
                 'value_ar' => trim($item['value_ar'] ?? ''),
                 'icon' => trim($item['icon'] ?? ''),

@@ -35,8 +35,12 @@
         </div>
     @endif
 
+    @php
+        $renderRows = !empty($items) ? $items : [[]];
+    @endphp
+
     <div class="row gy-3" data-repeater-list="{{ $repeaterKey }}">
-        @foreach($items as $index => $row)
+        @foreach($renderRows as $index => $row)
             <div class="col-12" data-repeater-item>
                 <div class="border rounded-4 p-3">
                     <div class="row g-3">
@@ -51,14 +55,18 @@
                                         <input class="form-check-input" type="checkbox" data-field="{{ $field['key'] }}" name="{{ $inputName }}[{{ $index }}][{{ $field['key'] }}]" value="1" @checked($value)>
                                         <label class="form-check-label">{{ $field['label'] }}</label>
                                     </div>
-                                @elseif($inputType === 'textarea')
+                                @endif
+
+                                @if($inputType === 'textarea')
                                     <label class="form-label">{{ $field['label'] }}</label>
                                     <textarea class="form-control {{ !empty($field['rtl']) ? 'text-end' : '' }}"
                                               data-field="{{ $field['key'] }}"
                                               @if(!empty($field['rtl'])) dir="rtl" @endif
                                               name="{{ $inputName }}[{{ $index }}][{{ $field['key'] }}]"
                                               rows="3">{{ $value }}</textarea>
-                                @else
+                                @endif
+
+                                @if(!in_array($inputType, ['checkbox', 'textarea'], true))
                                     <label class="form-label">{{ $field['label'] }}</label>
                                     <input class="form-control {{ !empty($field['rtl']) ? 'text-end' : '' }}"
                                            data-field="{{ $field['key'] }}"

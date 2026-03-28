@@ -94,12 +94,6 @@
     @include('partials.frontend.form-zone', ['assignments' => $managedForms['after_faq'] ?? [], 'position' => 'after_faq', 'sourcePage' => $page->key])
     @include('partials.frontend.map-zone', ['assignments' => $managedMaps['after_faq'] ?? [], 'position' => 'after_faq'])
 
-    @if(($form['enabled'] ?? true) && !empty($form['fields']))
-        @include('partials.frontend.map-zone', ['assignments' => $managedMaps['above_form'] ?? [], 'position' => 'above_form'])
-        @include('frontend.services.sections.contact', ['section' => $form, 'servicePage' => $servicePage, 'page' => $page])
-        @include('partials.frontend.map-zone', ['assignments' => $managedMaps['below_form'] ?? [], 'position' => 'below_form'])
-    @endif
-
     @include('partials.frontend.form-zone', ['assignments' => $managedForms['bottom'] ?? [], 'position' => 'bottom', 'sourcePage' => $page->key])
     @include('partials.frontend.map-zone', ['assignments' => $managedMaps['bottom'] ?? [], 'position' => 'bottom'])
 </div>

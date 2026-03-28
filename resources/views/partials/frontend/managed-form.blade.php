@@ -8,7 +8,7 @@
     $formSubtitle = $form->localized('subtitle');
     $submitText = $form->localized('submit_text') ?: __('ui.inquire_now');
     $successMessage = $form->localized('success_message');
-    $layoutVariant = $settings['layout_variant'] ?? 'standard';
+    $layoutVariant = $settings['layout_type'] ?? $settings['layout_variant'] ?? 'standard';
     $contextData = $contextData ?? null;
     $contextType = $contextData['type'] ?? null;
     $isVisaSplit = $layoutVariant === 'visa_split' && $contextType === 'visa';

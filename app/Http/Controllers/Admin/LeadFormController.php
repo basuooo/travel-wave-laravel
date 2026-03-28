@@ -135,6 +135,7 @@ class LeadFormController extends Controller
             'success_message_en' => ['nullable', 'string'],
             'success_message_ar' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
+            'settings.layout_type' => ['nullable', 'string', 'max:50'],
             'settings.layout_variant' => ['nullable', 'string', 'max:50'],
             'settings.info_label_en' => ['nullable', 'string', 'max:255'],
             'settings.info_label_ar' => ['nullable', 'string', 'max:255'],
@@ -171,6 +172,10 @@ class LeadFormController extends Controller
             'assignments.*.is_active' => ['nullable', 'boolean'],
         ]);
 
+        $layoutType = $request->input('settings.layout_type')
+            ?: $request->input('settings.layout_variant')
+            ?: 'standard';
+
         return [
             'form' => [
                 'name' => $validated['name'],
@@ -186,7 +191,8 @@ class LeadFormController extends Controller
                 'success_message_ar' => $validated['success_message_ar'] ?? null,
                 'is_active' => $request->boolean('is_active'),
                 'settings' => [
-                    'layout_variant' => $request->input('settings.layout_variant') ?: 'standard',
+                    'layout_type' => $layoutType,
+                    'layout_variant' => $layoutType,
                     'info_label_en' => $request->input('settings.info_label_en'),
                     'info_label_ar' => $request->input('settings.info_label_ar'),
                     'info_heading_en' => $request->input('settings.info_heading_en'),
@@ -351,7 +357,7 @@ class LeadFormController extends Controller
             })->all(),
             'fieldTypeOptions' => LeadFormManager::fieldTypeOptions(),
             'categoryOptions' => LeadFormManager::categoryOptions(),
-            'layoutVariantOptions' => [
+            'layoutTypeOptions' => [
                 'standard' => 'Standard Form',
                 'split_details' => 'Split Details + Form Layout',
                 'visa_split' => 'External Visa Split Layout',

@@ -49,7 +49,9 @@
         </div>
     </div>
 
-    @if(($page->key ?? null) === 'home')
+    @php($pageKey = old('key', $page->key))
+
+    @if($pageKey === 'home')
         <div class="card admin-card p-4 mb-4">
             <h2 class="h5 mb-3">Homepage Services</h2>
             @for($i = 0; $i < 6; $i++)
@@ -100,6 +102,10 @@
                 <div class="col-md-4"><label class="form-label">Final CTA URL</label><input class="form-control" name="final_cta_url" value="{{ $sections['final_cta']['url'] ?? '' }}"></div>
             </div>
         </div>
+    @elseif(in_array($pageKey, ['visas', 'domestic', 'flights', 'hotels'], true))
+        @include('admin.pages.partials.service-sections', ['sections' => $sections])
+    @elseif(in_array($pageKey, ['about', 'contact'], true))
+        @include('admin.pages.partials.content-sections', ['sections' => $sections])
     @else
         <div class="card admin-card p-4 mb-4">
             <h2 class="h5 mb-3">Feature Blocks, FAQs, and CTA</h2>
@@ -129,3 +135,70 @@
 
     <button class="btn btn-primary">{{ $submitLabel ?? 'Save Page' }}</button>
 </form>
+
+<script>
+document.addEventListener('click', function (event) {
+    const addButton = event.target.closest('[data-repeater-add]');
+    const removeButton = event.target.closest('[data-repeater-remove]');
+
+    if (addButton) {
+        const key = addButton.getAttribute('data-repeater-add');
+        const list = document.querySelector('[data-repeater-list="' + key + '"]');
+        const lastItem = list?.querySelector('[data-repeater-item]:last-child');
+
+        if (!list || !lastItem) {
+            return;
+        }
+
+        const clone = lastItem.cloneNode(true);
+        clone.querySelectorAll('input, textarea, select').forEach((input) => {
+            if (input.type === 'checkbox') {
+                input.checked = input.defaultChecked;
+            } else {
+                input.value = '';
+            }
+        });
+        list.appendChild(clone);
+        syncPageRepeaterNames(list);
+    }
+
+    if (removeButton) {
+        const list = removeButton.closest('[data-repeater-list]');
+        const item = removeButton.closest('[data-repeater-item]');
+
+        if (item && list) {
+            if (list.querySelectorAll('[data-repeater-item]').length > 1) {
+                item.remove();
+            } else {
+                item.querySelectorAll('input, textarea, select').forEach((input) => {
+                    if (input.type === 'checkbox') {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                });
+            }
+
+            syncPageRepeaterNames(list);
+        }
+    }
+});
+
+function syncPageRepeaterNames(list) {
+    if (!list) {
+        return;
+    }
+
+    list.querySelectorAll('[data-repeater-item]').forEach((item, index) => {
+        item.querySelectorAll('input, textarea, select').forEach((input) => {
+            if (!input.name) {
+                return;
+            }
+
+            input.name = input.name.replace(/\[\d+\]/, '[' + index + ']');
+        });
+    });
+}
+
+document.querySelectorAll('[data-repeater-list]').forEach(syncPageRepeaterNames);
+</script>

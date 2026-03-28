@@ -90,6 +90,28 @@ class MediaLibraryService
                     }
                 }
             });
+
+            if (Schema::hasColumn((new Destination())->getTable(), 'highlight_items')) {
+                Destination::query()->whereNotNull('highlight_items')->get()->each(function (Destination $destination) {
+                    foreach ((array) $destination->highlight_items as $item) {
+                        $path = is_array($item) ? ($item['image'] ?? null) : null;
+                        if (is_string($path) && trim($path) !== '') {
+                            self::syncExistingFile($path, 'destinations/highlights');
+                        }
+                    }
+                });
+            }
+        }
+
+        if (Schema::hasTable((new VisaCountry())->getTable()) && Schema::hasColumn((new VisaCountry())->getTable(), 'highlights')) {
+            VisaCountry::query()->whereNotNull('highlights')->get()->each(function (VisaCountry $country) {
+                foreach ((array) $country->highlights as $item) {
+                    $path = is_array($item) ? ($item['image'] ?? null) : null;
+                    if (is_string($path) && trim($path) !== '') {
+                        self::syncExistingFile($path, 'visa-countries/highlights');
+                    }
+                }
+            });
         }
 
         if (Schema::hasTable((new MarketingLandingPage())->getTable())) {
@@ -164,6 +186,18 @@ class MediaLibraryService
         if (Schema::hasTable((new Destination())->getTable()) && Schema::hasColumn((new Destination())->getTable(), 'gallery')) {
             foreach ($normalizedPaths as $path) {
                 $counts[$path] += Destination::query()->where('gallery', 'like', '%' . $path . '%')->count();
+            }
+        }
+
+        if (Schema::hasTable((new Destination())->getTable()) && Schema::hasColumn((new Destination())->getTable(), 'highlight_items')) {
+            foreach ($normalizedPaths as $path) {
+                $counts[$path] += Destination::query()->where('highlight_items', 'like', '%' . $path . '%')->count();
+            }
+        }
+
+        if (Schema::hasTable((new VisaCountry())->getTable()) && Schema::hasColumn((new VisaCountry())->getTable(), 'highlights')) {
+            foreach ($normalizedPaths as $path) {
+                $counts[$path] += VisaCountry::query()->where('highlights', 'like', '%' . $path . '%')->count();
             }
         }
 
@@ -281,6 +315,28 @@ class MediaLibraryService
                     'count' => $galleryMatches,
                 ];
             }
+
+            $highlightMatches = Schema::hasColumn((new Destination())->getTable(), 'highlight_items')
+                ? Destination::query()->where('highlight_items', 'like', '%' . $path . '%')->count()
+                : 0;
+            if ($highlightMatches > 0) {
+                $references[] = [
+                    'source' => 'Destination',
+                    'field' => 'highlight_items',
+                    'count' => $highlightMatches,
+                ];
+            }
+        }
+
+        if (Schema::hasTable((new VisaCountry())->getTable()) && Schema::hasColumn((new VisaCountry())->getTable(), 'highlights')) {
+            $highlightMatches = VisaCountry::query()->where('highlights', 'like', '%' . $path . '%')->count();
+            if ($highlightMatches > 0) {
+                $references[] = [
+                    'source' => 'Visa Country',
+                    'field' => 'highlights',
+                    'count' => $highlightMatches,
+                ];
+            }
         }
 
         if (Schema::hasTable((new MarketingLandingPage())->getTable())) {
@@ -345,6 +401,18 @@ class MediaLibraryService
         if (Schema::hasTable((new Destination())->getTable()) && Schema::hasColumn((new Destination())->getTable(), 'gallery')) {
             Destination::query()->where('gallery', 'like', '%' . $path . '%')->get()->each(function (Destination $destination) use (&$details) {
                 $details[] = self::buildUsageDetail($destination, 'gallery');
+            });
+        }
+
+        if (Schema::hasTable((new Destination())->getTable()) && Schema::hasColumn((new Destination())->getTable(), 'highlight_items')) {
+            Destination::query()->where('highlight_items', 'like', '%' . $path . '%')->get()->each(function (Destination $destination) use (&$details) {
+                $details[] = self::buildUsageDetail($destination, 'highlight_items');
+            });
+        }
+
+        if (Schema::hasTable((new VisaCountry())->getTable()) && Schema::hasColumn((new VisaCountry())->getTable(), 'highlights')) {
+            VisaCountry::query()->where('highlights', 'like', '%' . $path . '%')->get()->each(function (VisaCountry $country) use (&$details) {
+                $details[] = self::buildUsageDetail($country, 'highlights');
             });
         }
 
@@ -431,6 +499,8 @@ class MediaLibraryService
             'image' => 'Image',
             'profile_image' => 'Profile Image',
             'gallery' => 'Gallery',
+            'highlights' => 'Highlights',
+            'highlight_items' => 'Helpful Guidance Points',
             'sections' => 'Sections',
             default => Str::title(str_replace('_', ' ', $field)),
         };

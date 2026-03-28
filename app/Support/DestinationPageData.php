@@ -15,14 +15,28 @@ class DestinationPageData
             ->sortBy('sort_order')
             ->values();
 
+        $destinationSummaryItem = [
+            'label_en' => trim((string) ($country->quick_summary_destination_label_en ?: __('ui.destination'))),
+            'label_ar' => trim((string) ($country->quick_summary_destination_label_ar ?: __('ui.destination'))),
+            'value_en' => trim((string) $country->name_en),
+            'value_ar' => trim((string) $country->name_ar),
+            'icon' => trim((string) ($country->quick_summary_destination_icon ?: 'globe')),
+            'sort_order' => 0,
+            'is_active' => true,
+        ];
+
         if ($summaryItems->isEmpty()) {
             $summaryItems = collect([
-                ['title_en' => 'Visa Type', 'title_ar' => 'نوع الخدمة', 'value_en' => $country->localized('visa_type'), 'value_ar' => $country->localized('visa_type'), 'icon' => 'VS'],
-                ['title_en' => 'Processing Time', 'title_ar' => 'مدة المعالجة', 'value_en' => $country->localized('processing_time'), 'value_ar' => $country->localized('processing_time'), 'icon' => 'PT'],
-                ['title_en' => 'Approx. Fees', 'title_ar' => 'الرسوم', 'value_en' => $country->localized('fees'), 'value_ar' => $country->localized('fees'), 'icon' => 'FE'],
-                ['title_en' => 'Stay Duration', 'title_ar' => 'مدة الإقامة', 'value_en' => $country->localized('stay_duration'), 'value_ar' => $country->localized('stay_duration'), 'icon' => 'SD'],
+                ['title_en' => 'Visa Type', 'title_ar' => 'نوع الخدمة', 'value_en' => $country->localized('visa_type'), 'value_ar' => $country->localized('visa_type'), 'icon' => 'globe'],
+                ['title_en' => 'Processing Time', 'title_ar' => 'مدة المعالجة', 'value_en' => $country->localized('processing_time'), 'value_ar' => $country->localized('processing_time'), 'icon' => 'clock'],
+                ['title_en' => 'Approx. Fees', 'title_ar' => 'الرسوم', 'value_en' => $country->localized('fees'), 'value_ar' => $country->localized('fees'), 'icon' => 'money'],
+                ['title_en' => 'Stay Duration', 'title_ar' => 'مدة الإقامة', 'value_en' => $country->localized('stay_duration'), 'value_ar' => $country->localized('stay_duration'), 'icon' => 'calendar'],
             ])->filter(fn (array $item) => filled($country->repeaterValue($item, 'value')));
         }
+
+        $summaryItems = collect([$destinationSummaryItem])
+            ->merge($summaryItems)
+            ->values();
 
         $heroTitle = $country->localized('hero_title') ?: $country->localized('name');
         $heroSubtitle = $country->localized('hero_subtitle') ?: $country->localized('overview');
@@ -63,7 +77,7 @@ class DestinationPageData
                 'enabled' => true,
                 'title' => __('ui.quick_summary'),
                 'items' => self::localizedRepeater($summaryItems, $country, fn (array $item) => [
-                    'label' => $country->repeaterValue($item, 'title'),
+                    'label' => $country->repeaterValue($item, 'label', fallback: $country->repeaterValue($item, 'title')),
                     'value' => $country->repeaterValue($item, 'value'),
                     'icon' => $item['icon'] ?? '',
                 ]),
@@ -83,20 +97,22 @@ class DestinationPageData
                 'title' => $country->localized('detailed_title') ?: __('ui.visa_details'),
                 'description' => $country->localized('detailed_description'),
             ],
-            'best_time' => [
+            'best_time' => self::normalizeBestTimeSection([
                 'enabled' => true,
-                'title' => __('ui.best_time_to_apply'),
-                'description' => $country->localized('processing_time') ?: $country->localized('fees_notes'),
-            ],
+                'badge' => $country->localized('best_time_badge') ?: self::defaultVisaCountryBestTimeCopy('badge'),
+                'title' => $country->localized('best_time_title') ?: self::defaultVisaCountryBestTimeCopy('title'),
+                'description' => $country->localized('best_time_description') ?: self::defaultVisaCountryBestTimeCopy('description'),
+            ]),
             'highlights' => [
                 'enabled' => collect($country->highlights ?: [])->isNotEmpty(),
-                'title' => __('ui.key_highlights'),
+                'label' => $country->localized('highlights_section_label') ?: (app()->getLocale() === 'ar' ? 'أهم الإرشادات' : 'Helpful Guidance Points'),
+                'title' => $country->localized('highlights_section_title') ?: (app()->getLocale() === 'ar' ? 'أبرز النقاط المهمة' : 'Key Highlights'),
                 'items' => self::localizedRepeater($country->highlights ?: [], $country, fn (array $item) => [
-                    'title' => $country->repeaterValue($item, 'text'),
-                    'description' => '',
-                    'image' => null,
-                    'icon' => '•',
-                ]),
+                    'title' => $country->repeaterValue($item, 'title') ?: self::compactHighlightTitle($country->repeaterValue($item, 'text'), app()->getLocale()),
+                    'description' => $country->repeaterValue($item, 'description') ?: $country->repeaterValue($item, 'text'),
+                    'image' => self::storageUrl($item['image'] ?? null),
+                    'icon' => 'star',
+                ], active: true),
             ],
             'services' => [
                 'enabled' => collect($country->why_choose_items ?: [])->isNotEmpty(),
@@ -115,7 +131,7 @@ class DestinationPageData
                 'items' => self::localizedRepeater($country->document_items ?: [], $country, fn (array $item) => [
                     'title' => $country->repeaterValue($item, 'name'),
                     'description' => $country->repeaterValue($item, 'description'),
-                    'icon' => 'OK',
+                    'icon' => 'check',
                 ], active: true),
             ],
             'steps' => [
@@ -190,7 +206,7 @@ class DestinationPageData
                     'visible_fields' => $country->inquiry_form_visible_fields ?: ['full_name', 'phone', 'whatsapp_number', 'email', 'service_type', 'destination', 'travel_date', 'message'],
                 ],
                 'highlights' => self::localizedRepeater($summaryItems->take(3), $country, fn (array $item) => [
-                    'label' => $country->repeaterValue($item, 'title'),
+                    'label' => $country->repeaterValue($item, 'label', fallback: $country->repeaterValue($item, 'title')),
                     'value' => $country->repeaterValue($item, 'value'),
                 ]),
             ],
@@ -204,6 +220,18 @@ class DestinationPageData
         $quickInfoItems = collect($destination->quick_info_items ?: [])
             ->filter(fn (array $item) => ($item['is_active'] ?? true))
             ->sortBy('sort_order')
+            ->values();
+        $destinationSummaryItem = [
+            'label_en' => trim((string) ($destination->quick_summary_destination_label_en ?: __('ui.destination'))),
+            'label_ar' => trim((string) ($destination->quick_summary_destination_label_ar ?: __('ui.destination'))),
+            'value_en' => trim((string) $destination->title_en),
+            'value_ar' => trim((string) $destination->title_ar),
+            'icon' => trim((string) ($destination->quick_summary_destination_icon ?: 'globe')),
+            'sort_order' => 0,
+            'is_active' => true,
+        ];
+        $quickInfoSummaryItems = collect([$destinationSummaryItem])
+            ->merge($quickInfoItems)
             ->values();
 
         return [
@@ -238,10 +266,10 @@ class DestinationPageData
                 ],
             ],
             'quick_info' => [
-                'enabled' => (bool) $destination->show_quick_info && $quickInfoItems->isNotEmpty(),
+                'enabled' => (bool) $destination->show_quick_info && $quickInfoSummaryItems->isNotEmpty(),
                 'title' => $destination->localized('quick_info_title') ?: __('ui.quick_summary'),
-                'items' => self::localizedRepeater($quickInfoItems, $destination, fn (array $item) => [
-                    'label' => $destination->repeaterValue($item, 'label'),
+                'items' => self::localizedRepeater($quickInfoSummaryItems, $destination, fn (array $item) => [
+                    'label' => $destination->repeaterValue($item, 'label', fallback: $destination->repeaterValue($item, 'title')),
                     'value' => $destination->repeaterValue($item, 'value'),
                     'icon' => $item['icon'] ?? '',
                 ]),
@@ -261,13 +289,17 @@ class DestinationPageData
                 'title' => $destination->localized('detailed_title') ?: __('ui.service_details'),
                 'description' => $destination->localized('detailed_description'),
             ],
-            'best_time' => [
-                'enabled' => (bool) $destination->show_best_time && filled($destination->localized('best_time_description')),
-                'title' => $destination->localized('best_time_title') ?: __('ui.best_time_to_visit'),
-                'description' => $destination->localized('best_time_description'),
-            ],
+            'best_time' => self::normalizeBestTimeSection([
+                'enabled' => (bool) $destination->show_best_time,
+                'badge' => $destination->localized('best_time_badge') ?: self::defaultDestinationBestTimeCopy('badge'),
+                'title' => $destination->localized('best_time_title') ?: self::defaultDestinationBestTimeCopy('title'),
+                'description' => $destination->localized('best_time_description') ?: self::defaultDestinationBestTimeCopy('description'),
+            ]),
             'highlights' => [
                 'enabled' => (bool) $destination->show_highlights && collect($destination->highlight_items ?: [])->isNotEmpty(),
+                'label' => $destination->localized('highlights_section_label') ?: ($destination->destination_type === 'domestic'
+                    ? (app()->getLocale() === 'ar' ? 'أهم الإرشادات' : 'Helpful Guidance Points')
+                    : __('ui.highlights')),
                 'title' => $destination->localized('highlights_title') ?: __('ui.top_highlights'),
                 'items' => self::localizedRepeater($destination->highlight_items ?: [], $destination, fn (array $item) => [
                     'title' => $destination->repeaterValue($item, 'title'),
@@ -364,8 +396,8 @@ class DestinationPageData
                     'default_service_type' => $destination->localized('title'),
                     'visible_fields' => $destination->form_visible_fields ?: ['email', 'travel_date', 'message'],
                 ],
-                'highlights' => self::localizedRepeater($quickInfoItems->take(3), $destination, fn (array $item) => [
-                    'label' => $destination->repeaterValue($item, 'label'),
+                'highlights' => self::localizedRepeater($quickInfoSummaryItems->take(3), $destination, fn (array $item) => [
+                    'label' => $destination->repeaterValue($item, 'label', fallback: $destination->repeaterValue($item, 'title')),
                     'value' => $destination->repeaterValue($item, 'value'),
                 ]),
             ],
@@ -381,6 +413,59 @@ class DestinationPageData
             ->filter(fn (array $item) => collect($item)->filter(fn ($value) => filled($value))->isNotEmpty())
             ->values()
             ->all();
+    }
+
+    protected static function normalizeBestTimeSection(array $section): array
+    {
+        return [
+            'enabled' => (bool) ($section['enabled'] ?? false),
+            'badge' => trim((string) ($section['badge'] ?? __('ui.best_time'))),
+            'title' => trim((string) ($section['title'] ?? ($section['default_title'] ?? ''))),
+            'description' => trim((string) ($section['description'] ?? ($section['default_description'] ?? ''))),
+        ];
+    }
+
+    protected static function defaultVisaCountryBestTimeCopy(string $field): string
+    {
+        $isArabic = app()->getLocale() === 'ar';
+
+        return match ($field) {
+            'badge' => $isArabic ? 'أفضل وقت' : 'Best Time',
+            'title' => $isArabic ? 'أفضل وقت للتقديم' : 'Best Time to Apply',
+            'description' => $isArabic
+                ? 'تتراوح مدة المعالجة غالبا بين 15 و30 يوم عمل بحسب الموسم وضغط السفارة ومدى اكتمال الملف.'
+                : 'Processing usually takes between 15 and 30 business days depending on the season, embassy workload, and how complete the application file is.',
+            default => '',
+        };
+    }
+
+    protected static function defaultDestinationBestTimeCopy(string $field): string
+    {
+        $isArabic = app()->getLocale() === 'ar';
+
+        return match ($field) {
+            'badge' => $isArabic ? 'أفضل وقت' : 'Best Time',
+            'title' => $isArabic ? 'أفضل وقت للزيارة' : 'Best Time to Visit',
+            'description' => $isArabic
+                ? 'يعتمد اختيار أفضل وقت للزيارة على الطقس المفضل وميزانية الرحلة وطبيعة الأنشطة التي تريد تضمينها في البرنامج.'
+                : 'The best time to visit depends on the weather you prefer, your trip budget, and the type of activities you want to include.',
+            default => '',
+        };
+    }
+
+    protected static function compactHighlightTitle(?string $text, string $locale): string
+    {
+        $text = trim((string) $text);
+
+        if ($text === '') {
+            return $locale === 'ar' ? 'نقطة مهمة' : 'Key Point';
+        }
+
+        $firstSegment = preg_split('/[،,:;\-\.!\?\n\r]+/u', $text)[0] ?? $text;
+        $words = preg_split('/\s+/u', trim($firstSegment), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $title = implode(' ', array_slice($words, 0, 4));
+
+        return $title !== '' ? $title : ($locale === 'ar' ? 'نقطة مهمة' : 'Key Point');
     }
 
     protected static function storageUrl(?string $path): ?string

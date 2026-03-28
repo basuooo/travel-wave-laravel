@@ -1,7 +1,5 @@
 @php
     $assignments = $assignments ?? [];
-    $fallbackSection = $fallbackSection ?? null;
-    $hasFallback = !empty($fallbackSection['enabled']) && !empty($fallbackSection['embed_code']);
 @endphp
 
 @if(!empty($assignments))
@@ -12,6 +10,4 @@
             @endforeach
         </div>
     </section>
-@elseif($hasFallback)
-    @include('frontend.pages.sections.map', ['section' => $fallbackSection])
 @endif

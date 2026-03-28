@@ -38,7 +38,7 @@
                         ) }}
                     </p>
                     <div class="d-flex flex-wrap gap-3">
-                        <a href="#visa-hub-contact" class="btn btn-primary btn-lg tw-btn-primary">{{ $copy('ابدأ الآن', 'Start Now') }}</a>
+                        <a href="{{ route('contact') }}" class="btn btn-primary btn-lg tw-btn-primary">{{ $copy('ابدأ الآن', 'Start Now') }}</a>
                         <a href="#visa-hub-popular" class="btn btn-lg tw-visa-hub-outline-btn">{{ $copy('استعرض الوجهات', 'Browse Destinations') }}</a>
                     </div>
                 </div>
@@ -258,7 +258,7 @@
                 <p class="mb-0">{{ $copy('نمنحك تجربة أكثر وضوحاً واحترافية من أول استشارة وحتى مرحلة التقديم، مع متابعة حقيقية تقلل التشتت وتزيد الاطمئنان.', 'Get a clearer, more premium experience from your first consultation to final submission, with real follow-up along the way.') }}</p>
             </div>
             <div class="d-flex flex-wrap gap-3">
-                <a href="#visa-hub-contact" class="btn btn-primary btn-lg tw-btn-primary">{{ $copy('احجز استشارتك الآن', 'Book Your Consultation') }}</a>
+                <a href="{{ route('contact') }}" class="btn btn-primary btn-lg tw-btn-primary">{{ $copy('احجز استشارتك الآن', 'Book Your Consultation') }}</a>
                 <a href="https://wa.me/201000000000" class="btn btn-lg tw-visa-hub-outline-btn-light">{{ $copy('تواصل واتساب', 'WhatsApp') }}</a>
             </div>
         </div>
@@ -296,65 +296,6 @@
         </div>
     </section>
 
-    <section class="container py-5" id="visa-hub-contact">
-        <div class="row g-4 align-items-stretch">
-            <div class="col-lg-5">
-                <div class="tw-visa-hub-contact-copy h-100">
-                    <span class="tw-visa-hub-section-pill">{{ $copy('طلب استشارة', 'Lead Form') }}</span>
-                    <h2 class="tw-section-title h2 mt-3 mb-3">{{ $copy('ابدأ معنا بشكل احترافي', 'Start with a premium consultation') }}</h2>
-                    <p class="text-muted mb-4">{{ $copy('اترك بياناتك وسيتواصل معك فريق Travel Wave لترتيب الخطوات المناسبة لوجهتك ونوع التأشيرة.', 'Leave your details and the Travel Wave team will guide you on the right next steps for your destination and visa type.') }}</p>
-                    <div class="tw-visa-hub-contact-list">
-                        <div>{{ $copy('استشارة أولية واضحة ومباشرة', 'Clear first consultation') }}</div>
-                        <div>{{ $copy('توجيه للمستندات والحجوزات', 'Guidance for documents and bookings') }}</div>
-                        <div>{{ $copy('متابعة بعد الإرسال', 'Follow-up after inquiry') }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-7">
-                <div class="tw-form-card p-4 p-lg-5">
-                    <form method="POST" action="{{ route('inquiries.store') }}" class="row g-3">
-                        @csrf
-                        <input type="hidden" name="type" value="visa">
-                        <input type="hidden" name="source_page" value="External Visa Services">
-                        <div class="col-md-6">
-                            <label class="form-label">{{ $copy('الاسم', 'Name') }}</label>
-                            <input type="text" name="full_name" class="form-control" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{{ $copy('رقم الهاتف', 'Phone Number') }}</label>
-                            <input type="text" name="phone" class="form-control" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{{ $copy('الوجهة', 'Destination') }}</label>
-                            <select name="destination" class="form-select">
-                                <option value="">{{ $copy('اختر الوجهة', 'Select destination') }}</option>
-                                @foreach($filterDestinations as $destination)
-                                    <option value="{{ $destination['label'] }}">{{ $destination['label'] }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{{ $copy('نوع التأشيرة', 'Visa Type') }}</label>
-                            <select name="service_type" class="form-select">
-                                <option value="">{{ $copy('اختر النوع', 'Select type') }}</option>
-                                <option value="{{ $copy('تأشيرة سياحية', 'Tourist Visa') }}">{{ $copy('تأشيرة سياحية', 'Tourist Visa') }}</option>
-                                <option value="{{ $copy('زيارة عائلية', 'Family Visit') }}">{{ $copy('زيارة عائلية', 'Family Visit') }}</option>
-                                <option value="{{ $copy('تأشيرة أعمال', 'Business Visa') }}">{{ $copy('تأشيرة أعمال', 'Business Visa') }}</option>
-                                <option value="{{ $copy('شنغن', 'Schengen') }}">{{ $copy('شنغن', 'Schengen') }}</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">{{ $copy('ملاحظات', 'Notes') }}</label>
-                            <textarea name="message" class="form-control" rows="5" placeholder="{{ $copy('اكتب تفاصيل الرحلة أو أي ملاحظات مهمة هنا', 'Share your destination, timing, or any important notes here') }}"></textarea>
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary btn-lg tw-btn-primary">{{ $copy('أرسل الطلب', 'Submit Inquiry') }}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
 </div>
 
 <script>

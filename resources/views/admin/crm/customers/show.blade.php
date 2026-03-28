@@ -104,7 +104,11 @@
                     <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">{{ __('admin.accounting_total_amount') }}</div><div class="fw-semibold">{{ number_format((float) $customer->accountingAccount->total_amount, 2) }}</div></div></div>
                     <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">{{ __('admin.accounting_paid_amount') }}</div><div class="fw-semibold text-success">{{ number_format((float) $customer->accountingAccount->paid_amount, 2) }}</div></div></div>
                     <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">{{ __('admin.accounting_remaining_amount') }}</div><div class="fw-semibold text-danger">{{ number_format((float) $customer->accountingAccount->remaining_amount, 2) }}</div></div></div>
-                    <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">{{ __('admin.payment_status') }}</div><div class="fw-semibold">{{ $customer->accountingAccount->payment_status }}</div></div></div>
+                    <div class="col-md-3"><div class="border rounded-4 p-3 h-100"><div class="small text-muted">{{ __('admin.payment_status') }}</div><div class="fw-semibold">{{ match($customer->accountingAccount->payment_status) {
+                        'fully_paid' => __('admin.accounting_fully_paid'),
+                        'partially_paid' => __('admin.accounting_partially_paid'),
+                        default => __('admin.accounting_unpaid'),
+                    } }}</div></div></div>
                 </div>
             @else
                 <div class="text-muted">{{ __('admin.no_data_available') }}</div>

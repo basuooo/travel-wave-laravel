@@ -88,10 +88,10 @@
         </div>
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <label class="form-label">Layout Variant</label>
-                <select name="settings[layout_variant]" class="form-select">
-                    @foreach($layoutVariantOptions as $key => $label)
-                        <option value="{{ $key }}" @selected(($settings['layout_variant'] ?? 'standard') === $key)>{{ $label }}</option>
+                <label class="form-label">Layout Type</label>
+                <select name="settings[layout_type]" class="form-select">
+                    @foreach($layoutTypeOptions as $key => $label)
+                        <option value="{{ $key }}" @selected(($settings['layout_type'] ?? $settings['layout_variant'] ?? 'standard') === $key)>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>

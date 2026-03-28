@@ -15,7 +15,7 @@
         @foreach($section['items'] ?? [] as $item)
             <div class="{{ $section['columns'] ?? 'col-md-6 col-xl-4' }}">
                 <div class="tw-card tw-brand-card tw-brand-card-{{ $section['variant'] ?? 'default' }} p-4 h-100">
-                    <div class="tw-brand-card-icon">{{ $item['icon'] ?? 'TW' }}</div>
+                    <div class="tw-brand-card-icon">@include('partials.frontend.icon', ['icon' => $item['icon'] ?? null, 'fallback' => 'sparkles'])</div>
                     <h3 class="h5 mt-4 mb-2">{{ $item['title'] }}</h3>
                     @if(!empty($item['meta']))
                         <div class="small text-muted mb-2">{{ $item['meta'] }}</div>

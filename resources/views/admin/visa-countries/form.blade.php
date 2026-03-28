@@ -8,8 +8,22 @@
     $faqItems = old('faq_items', $item->faqs ?: []);
     $quickSummaryItems = old('quick_summary_items', $item->quick_summary_items ?: []);
     $visibleFields = old('inquiry_form_visible_fields', $item->inquiry_form_visible_fields ?: ['full_name', 'phone', 'whatsapp_number', 'email', 'service_type', 'destination', 'travel_date', 'message']);
-    $detailHighlightsEn = old('highlights_en', collect($item->highlights ?? [])->pluck('text_en')->all());
-    $detailHighlightsAr = old('highlights_ar', collect($item->highlights ?? [])->pluck('text_ar')->all());
+    $detailHighlights = old('highlight_items', collect($item->highlights ?? [])->map(function ($highlight, $index) {
+        $descriptionEn = $highlight['description_en'] ?? $highlight['text_en'] ?? '';
+        $descriptionAr = $highlight['description_ar'] ?? $highlight['text_ar'] ?? '';
+        $titleEn = $highlight['title_en'] ?? trim(\Illuminate\Support\Str::words($descriptionEn, 4, ''));
+        $titleAr = $highlight['title_ar'] ?? trim(\Illuminate\Support\Str::words($descriptionAr, 4, ''));
+
+        return [
+            'title_en' => $titleEn,
+            'title_ar' => $titleAr,
+            'description_en' => $descriptionEn,
+            'description_ar' => $descriptionAr,
+            'image' => $highlight['image'] ?? '',
+            'sort_order' => $highlight['sort_order'] ?? ($index + 1),
+            'is_active' => $highlight['is_active'] ?? true,
+        ];
+    })->all());
     $introPointsEn = old('introduction_points_en', collect($item->introduction_points ?? [])->pluck('text_en')->all());
     $introPointsAr = old('introduction_points_ar', collect($item->introduction_points ?? [])->pluck('text_ar')->all());
 @endphp
@@ -140,7 +154,7 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h2 class="h5 mb-1">Quick Summary Cards</h2>
-                <p class="text-muted mb-0">Editable summary cards shown directly under the hero.</p>
+                <p class="text-muted mb-0">Editable summary cards shown directly under the hero. Icon field accepts Iconify names like material-symbols:travel.</p>
             </div>
             <button type="button" class="btn btn-outline-primary btn-sm" data-repeater-add="quick-summary">Add summary card</button>
         </div>
@@ -153,17 +167,40 @@
             <div class="col-md-6"><label class="form-label">Processing Time AR</label><textarea class="form-control text-end" dir="rtl" rows="3" name="processing_time_ar">{{ old('processing_time_ar', $item->processing_time_ar) }}</textarea></div>
             <div class="col-md-6"><label class="form-label">Approximate Fees EN</label><textarea class="form-control" rows="3" name="fees_en">{{ old('fees_en', $item->fees_en) }}</textarea></div>
             <div class="col-md-6"><label class="form-label">Approximate Fees AR</label><textarea class="form-control text-end" dir="rtl" rows="3" name="fees_ar">{{ old('fees_ar', $item->fees_ar) }}</textarea></div>
+            <div class="col-md-4">
+                <label class="form-label">Destination Card Label EN</label>
+                <input class="form-control" name="quick_summary_destination_label_en" value="{{ old('quick_summary_destination_label_en', $item->quick_summary_destination_label_en) }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Destination Card Label AR</label>
+                <input class="form-control text-end" dir="rtl" name="quick_summary_destination_label_ar" value="{{ old('quick_summary_destination_label_ar', $item->quick_summary_destination_label_ar) }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label d-flex align-items-center gap-2">
+                    <span>Destination Card Icon</span>
+                    <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="small text-decoration-none" aria-label="Browse Iconify icons"><span aria-hidden="true">&#127760;</span></a>
+                </label>
+                <input class="form-control" name="quick_summary_destination_icon" value="{{ old('quick_summary_destination_icon', $item->quick_summary_destination_icon) }}" placeholder="material-symbols:travel">
+                <div class="form-text">Example: material-symbols:travel</div>
+            </div>
         </div>
         <div class="row gy-3" data-repeater-list="quick-summary">
             @foreach($quickSummaryItems as $index => $summary)
                 <div class="col-12" data-repeater-item>
                     <div class="border rounded-4 p-3">
                         <div class="row g-3">
-                            <div class="col-md-3"><label class="form-label">Card Title EN</label><input class="form-control" data-field="title_en" name="quick_summary_items[{{ $index }}][title_en]" value="{{ $summary['title_en'] ?? '' }}"></div>
-                            <div class="col-md-3"><label class="form-label">Card Title AR</label><input class="form-control text-end" dir="rtl" data-field="title_ar" name="quick_summary_items[{{ $index }}][title_ar]" value="{{ $summary['title_ar'] ?? '' }}"></div>
+                            <div class="col-md-3"><label class="form-label">Card Label EN</label><input class="form-control" data-field="label_en" name="quick_summary_items[{{ $index }}][label_en]" value="{{ $summary['label_en'] ?? $summary['title_en'] ?? '' }}"></div>
+                            <div class="col-md-3"><label class="form-label">Card Label AR</label><input class="form-control text-end" dir="rtl" data-field="label_ar" name="quick_summary_items[{{ $index }}][label_ar]" value="{{ $summary['label_ar'] ?? $summary['title_ar'] ?? '' }}"></div>
                             <div class="col-md-2"><label class="form-label">Value EN</label><input class="form-control" data-field="value_en" name="quick_summary_items[{{ $index }}][value_en]" value="{{ $summary['value_en'] ?? '' }}"></div>
                             <div class="col-md-2"><label class="form-label">Value AR</label><input class="form-control text-end" dir="rtl" data-field="value_ar" name="quick_summary_items[{{ $index }}][value_ar]" value="{{ $summary['value_ar'] ?? '' }}"></div>
-                            <div class="col-md-1"><label class="form-label">Icon</label><input class="form-control" data-field="icon" name="quick_summary_items[{{ $index }}][icon]" value="{{ $summary['icon'] ?? '' }}"></div>
+                            <div class="col-md-2">
+                                <label class="form-label d-flex align-items-center gap-2">
+                                    <span>Icon</span>
+                                    <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="small text-decoration-none" aria-label="Browse Iconify icons"><span aria-hidden="true">&#127760;</span></a>
+                                </label>
+                                <input class="form-control" data-field="icon" name="quick_summary_items[{{ $index }}][icon]" value="{{ $summary['icon'] ?? '' }}" placeholder="material-symbols:travel">
+                                <div class="form-text">Example: material-symbols:travel</div>
+                            </div>
                             <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" type="number" data-field="sort_order" name="quick_summary_items[{{ $index }}][sort_order]" value="{{ $summary['sort_order'] ?? ($index + 1) }}"></div>
                             <div class="col-md-2"><div class="form-check mt-4 pt-2"><input class="form-check-input" type="checkbox" data-field="is_active" name="quick_summary_items[{{ $index }}][is_active]" value="1" @checked($summary['is_active'] ?? true)><label class="form-check-label">Active</label></div></div>
                             <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>Remove</button></div>
@@ -228,6 +265,36 @@
                 <label class="form-label">Detailed Explanation AR</label>
                 <textarea class="form-control text-end" dir="rtl" rows="7" name="detailed_description_ar">{{ old('detailed_description_ar', $item->detailed_description_ar) }}</textarea>
             </div>
+            <div class="col-12">
+                <div class="border rounded-4 p-3 bg-light-subtle">
+                    <h3 class="h6 mb-1">Best Time Section / قسم أفضل وقت للتقديم</h3>
+                    <p class="text-muted mb-0">Controls the side note card that appears next to the detailed section on visa country pages.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Best Time Badge EN</label>
+                <input class="form-control" name="best_time_badge_en" value="{{ old('best_time_badge_en', $item->best_time_badge_en) }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Best Time Badge AR</label>
+                <input class="form-control text-end" dir="rtl" name="best_time_badge_ar" value="{{ old('best_time_badge_ar', $item->best_time_badge_ar) }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Best Time Title EN</label>
+                <input class="form-control" name="best_time_title_en" value="{{ old('best_time_title_en', $item->best_time_title_en) }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Best Time Title AR</label>
+                <input class="form-control text-end" dir="rtl" name="best_time_title_ar" value="{{ old('best_time_title_ar', $item->best_time_title_ar) }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Best Time Description EN</label>
+                <textarea class="form-control" rows="4" name="best_time_description_en">{{ old('best_time_description_en', $item->best_time_description_en) }}</textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Best Time Description AR</label>
+                <textarea class="form-control text-end" dir="rtl" rows="4" name="best_time_description_ar">{{ old('best_time_description_ar', $item->best_time_description_ar) }}</textarea>
+            </div>
         </div>
         <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
             <div>
@@ -252,22 +319,79 @@
         <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
             <div>
                 <h3 class="h6 mb-1">Helpful Guidance Points</h3>
-                <p class="text-muted mb-0">Optional short bullets under the detailed explanation.</p>
+                <p class="text-muted mb-0">Three visual cards with bilingual title, description, and image.</p>
             </div>
-            <button type="button" class="btn btn-outline-primary btn-sm" data-repeater-add="detail-highlights">Add point</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" data-repeater-add="detail-highlights">Add card</button>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Section Label EN</label>
+                <input class="form-control" name="highlights_section_label_en" value="{{ old('highlights_section_label_en', $item->highlights_section_label_en) }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Section Label AR</label>
+                <input class="form-control text-end" dir="rtl" name="highlights_section_label_ar" value="{{ old('highlights_section_label_ar', $item->highlights_section_label_ar) }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Section Title EN</label>
+                <input class="form-control" name="highlights_section_title_en" value="{{ old('highlights_section_title_en', $item->highlights_section_title_en) }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Section Title AR</label>
+                <input class="form-control text-end" dir="rtl" name="highlights_section_title_ar" value="{{ old('highlights_section_title_ar', $item->highlights_section_title_ar) }}">
+            </div>
         </div>
         <div class="row gy-3" data-repeater-list="detail-highlights">
-            @foreach($detailHighlightsEn as $index => $pointEn)
+            @foreach($detailHighlights as $index => $highlight)
                 <div class="col-12" data-repeater-item>
                     <div class="border rounded-4 p-3">
                         <div class="row g-3">
-                            <div class="col-md-5">
-                                <label class="form-label">Point EN</label>
-                                <input class="form-control" name="highlights_en[]" value="{{ $pointEn }}">
+                            <div class="col-md-3">
+                                <label class="form-label">Title EN</label>
+                                <input class="form-control" data-field="title_en" name="highlight_items[{{ $index }}][title_en]" value="{{ $highlight['title_en'] ?? '' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Title AR</label>
+                                <input class="form-control text-end" dir="rtl" data-field="title_ar" name="highlight_items[{{ $index }}][title_ar]" value="{{ $highlight['title_ar'] ?? '' }}">
                             </div>
                             <div class="col-md-5">
-                                <label class="form-label">Point AR</label>
-                                <input class="form-control text-end" dir="rtl" name="highlights_ar[]" value="{{ $detailHighlightsAr[$index] ?? '' }}">
+                                <label class="form-label">Description EN</label>
+                                <textarea class="form-control" rows="3" data-field="description_en" name="highlight_items[{{ $index }}][description_en]">{{ $highlight['description_en'] ?? '' }}</textarea>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Description AR</label>
+                                <textarea class="form-control text-end" dir="rtl" rows="3" data-field="description_ar" name="highlight_items[{{ $index }}][description_ar]">{{ $highlight['description_ar'] ?? '' }}</textarea>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Order</label>
+                                <input class="form-control" type="number" data-field="sort_order" name="highlight_items[{{ $index }}][sort_order]" value="{{ $highlight['sort_order'] ?? ($index + 1) }}">
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check mt-4 pt-2">
+                                    <input class="form-check-input" type="checkbox" data-field="is_active" name="highlight_items[{{ $index }}][is_active]" value="1" @checked($highlight['is_active'] ?? true)>
+                                    <label class="form-check-label">Active</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Card Image</label>
+                                <input class="form-control" type="file" accept="image/*" data-field="image_file" data-highlight-image-input data-media-target-field="existing_image" data-media-enhanced="1" name="highlight_items[{{ $index }}][image_file]">
+                                <div class="admin-media-picker">
+                                    <div class="admin-media-picker__actions">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm js-open-media-library">Select from Library</button>
+                                        <span class="admin-media-picker__hint">or upload new</span>
+                                    </div>
+                                    <div class="admin-media-picker__selected"></div>
+                                </div>
+                                <input type="hidden" data-field="existing_image" name="highlight_items[{{ $index }}][existing_image]" value="{{ $highlight['image'] ?? '' }}">
+                                @if(!empty($highlight['image']))
+                                    <img src="{{ asset('storage/' . ltrim($highlight['image'], '/')) }}" alt="" class="img-fluid rounded border mt-3 js-highlight-preview" style="max-height: 160px; object-fit: cover;">
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" data-field="remove_image" name="highlight_items[{{ $index }}][remove_image]" value="1">
+                                        <label class="form-check-label">Remove current image</label>
+                                    </div>
+                                @else
+                                    <img src="" alt="" class="img-fluid rounded border mt-3 js-highlight-preview d-none" style="max-height: 160px; object-fit: cover;">
+                                @endif
                             </div>
                             <div class="col-md-2 d-flex align-items-end">
                                 <button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>Remove</button>

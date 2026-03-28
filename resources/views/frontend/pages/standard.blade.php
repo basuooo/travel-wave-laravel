@@ -85,18 +85,4 @@
 </section>
 @endif
 
-<section class="container py-5">
-    <div class="row g-4 align-items-start">
-        <div class="col-lg-6">
-            @php($cta = $sections['cta'] ?? [])
-            <h2 class="tw-section-title h2">{{ app()->getLocale() === 'ar' ? ($cta['title_ar'] ?? $siteSettings?->localized('global_cta_title')) : ($cta['title_en'] ?? $siteSettings?->localized('global_cta_title')) }}</h2>
-            <p class="text-muted">{{ app()->getLocale() === 'ar' ? ($cta['text_ar'] ?? $siteSettings?->localized('global_cta_text')) : ($cta['text_en'] ?? $siteSettings?->localized('global_cta_text')) }}</p>
-        </div>
-        <div class="col-lg-6">
-            <div class="tw-section-shell">
-                @include('partials.frontend.inquiry-form', ['type' => $page->key === 'contact' ? 'contact' : $page->key, 'source' => $page->key])
-            </div>
-        </div>
-    </div>
-</section>
 @endsection

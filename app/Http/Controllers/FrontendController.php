@@ -65,6 +65,7 @@ class FrontendController extends Controller
 
     public function visaIndex()
     {
+        $page = $this->page('visas');
         $categories = VisaCategory::where('is_active', true)
             ->with(['countries' => fn ($query) => $query->where('is_active', true)->orderBy('sort_order')])
             ->orderBy('sort_order')
@@ -77,8 +78,8 @@ class FrontendController extends Controller
             ->get();
 
         return view('frontend.services.premium-landing', [
-            'page' => $this->page('visas'),
-            'servicePage' => $this->visaServicePage($categories, $featuredCountries),
+            'page' => $page,
+            'servicePage' => $this->applyManagedServicePage($page, $this->visaServicePage($categories, $featuredCountries)),
             'managedForms' => $this->formsForContext(LeadFormManager::contextForPageKey('visas.index')),
             'managedMaps' => $this->mapsForContext(MapSectionManager::contextForPageKey('visas.index')),
         ]);
@@ -106,11 +107,12 @@ class FrontendController extends Controller
 
     public function domesticIndex()
     {
+        $page = $this->page('domestic');
         $destinations = Destination::where('is_active', true)->orderBy('sort_order')->get();
 
         return view('frontend.services.premium-landing', [
-            'page' => $this->page('domestic'),
-            'servicePage' => $this->domesticServicePage($destinations),
+            'page' => $page,
+            'servicePage' => $this->applyManagedServicePage($page, $this->domesticServicePage($destinations)),
             'managedForms' => $this->formsForContext(LeadFormManager::contextForPageKey('destinations.index')),
             'managedMaps' => $this->mapsForContext(MapSectionManager::contextForPageKey('destinations.index')),
         ]);
@@ -129,9 +131,10 @@ class FrontendController extends Controller
 
     public function flights()
     {
+        $page = $this->page('flights');
         return view('frontend.services.premium-landing', [
-            'page' => $this->page('flights'),
-            'servicePage' => $this->flightServicePage(),
+            'page' => $page,
+            'servicePage' => $this->applyManagedServicePage($page, $this->flightServicePage()),
             'managedForms' => $this->formsForContext(LeadFormManager::contextForPageKey('flights')),
             'managedMaps' => $this->mapsForContext(MapSectionManager::contextForPageKey('flights')),
         ]);
@@ -139,9 +142,10 @@ class FrontendController extends Controller
 
     public function hotels()
     {
+        $page = $this->page('hotels');
         return view('frontend.services.premium-landing', [
-            'page' => $this->page('hotels'),
-            'servicePage' => $this->hotelServicePage(),
+            'page' => $page,
+            'servicePage' => $this->applyManagedServicePage($page, $this->hotelServicePage()),
             'managedForms' => $this->formsForContext(LeadFormManager::contextForPageKey('hotels')),
             'managedMaps' => $this->mapsForContext(MapSectionManager::contextForPageKey('hotels')),
         ]);
@@ -149,9 +153,10 @@ class FrontendController extends Controller
 
     public function about()
     {
+        $page = $this->page('about');
         return view('frontend.pages.premium', [
-            'page' => $this->page('about'),
-            'contentPage' => $this->aboutPageContent(),
+            'page' => $page,
+            'contentPage' => $this->applyManagedContentPage($page, $this->aboutPageContent()),
             'managedForms' => $this->formsForContext(LeadFormManager::contextForPageKey('about')),
             'managedMaps' => $this->mapsForContext(MapSectionManager::contextForPageKey('about')),
         ]);
@@ -159,9 +164,10 @@ class FrontendController extends Controller
 
     public function contact()
     {
+        $page = $this->page('contact');
         return view('frontend.pages.premium', [
-            'page' => $this->page('contact'),
-            'contentPage' => $this->contactPageContent(),
+            'page' => $page,
+            'contentPage' => $this->applyManagedContentPage($page, $this->contactPageContent()),
             'managedForms' => $this->formsForContext(LeadFormManager::contextForPageKey('contact')),
             'managedMaps' => $this->mapsForContext(MapSectionManager::contextForPageKey('contact')),
         ]);
@@ -589,6 +595,297 @@ class FrontendController extends Controller
         return Page::where('key', $key)->where('is_active', true)->firstOrFail();
     }
 
+    protected function applyManagedServicePage(Page $page, array $defaults): array
+    {
+        $managed = $page->sections ?? [];
+
+        if ($page->localized('hero_badge')) {
+            data_set($defaults, 'hero.badge', $page->localized('hero_badge'));
+        }
+        if ($page->localized('hero_title')) {
+            data_set($defaults, 'hero.title', $page->localized('hero_title'));
+        }
+        if ($page->localized('hero_subtitle')) {
+            data_set($defaults, 'hero.text', $page->localized('hero_subtitle'));
+        }
+        if ($page->hero_image) {
+            data_set($defaults, 'hero.image', asset('storage/' . $page->hero_image));
+        }
+        if ($page->localized('hero_primary_cta_text')) {
+            data_set($defaults, 'hero.primary_cta.label', $page->localized('hero_primary_cta_text'));
+        }
+        if ($page->hero_primary_cta_url) {
+            data_set($defaults, 'hero.primary_cta.url', $page->hero_primary_cta_url);
+        }
+        if ($page->localized('hero_secondary_cta_text')) {
+            data_set($defaults, 'hero.secondary_cta.label', $page->localized('hero_secondary_cta_text'));
+        }
+        if ($page->hero_secondary_cta_url) {
+            data_set($defaults, 'hero.secondary_cta.url', $page->hero_secondary_cta_url);
+        }
+
+        if (! empty($managed['featured_section'])) {
+            $defaults['featured_section'] = $this->localizedServiceSection($managed['featured_section'], function (array $item) {
+                return [
+                    'title' => $this->localizedItemValue($item, 'title'),
+                    'subtitle' => $this->localizedItemValue($item, 'subtitle'),
+                    'meta' => $this->localizedItemValue($item, 'meta'),
+                    'badge' => $this->localizedItemValue($item, 'badge'),
+                    'button' => $this->localizedItemValue($item, 'button'),
+                    'url' => $item['url'] ?? '#service-contact',
+                ];
+            });
+        }
+
+        if (! empty($managed['features_section'])) {
+            $defaults['features_section'] = $this->localizedServiceSection($managed['features_section'], function (array $item) {
+                return [
+                    'tag' => $item['tag'] ?? null,
+                    'title' => $this->localizedItemValue($item, 'title'),
+                    'text' => $this->localizedItemValue($item, 'text'),
+                ];
+            });
+        }
+
+        if (! empty($managed['cards_section'])) {
+            $defaults['cards_section'] = $this->localizedServiceSection($managed['cards_section'], function (array $item) {
+                return [
+                    'title' => $this->localizedItemValue($item, 'title'),
+                    'meta' => $this->localizedItemValue($item, 'meta'),
+                    'price' => $this->localizedItemValue($item, 'price'),
+                    'button' => $this->localizedItemValue($item, 'button'),
+                    'url' => $item['url'] ?? '#service-contact',
+                    'highlights' => collect(preg_split('/\r\n|\r|\n/', (string) $this->localizedItemValue($item, 'highlights')))
+                        ->map(fn ($value) => trim($value))
+                        ->filter()
+                        ->values()
+                        ->all(),
+                ];
+            });
+        }
+
+        if (! empty($managed['steps_section'])) {
+            $defaults['steps_section'] = $this->localizedServiceSection($managed['steps_section'], function (array $item) {
+                return [
+                    'number' => $item['number'] ?? null,
+                    'title' => $this->localizedItemValue($item, 'title'),
+                    'description' => $this->localizedItemValue($item, 'description'),
+                ];
+            });
+        }
+
+        if (! empty($managed['grid_section'])) {
+            $defaults['grid_section'] = $this->localizedServiceSection($managed['grid_section'], function (array $item) {
+                return [
+                    'title' => $this->localizedItemValue($item, 'title'),
+                    'chip' => $this->localizedItemValue($item, 'chip'),
+                    'text' => $this->localizedItemValue($item, 'text'),
+                    'url' => $item['url'] ?? '#service-contact',
+                ];
+            });
+        }
+
+        if (! empty($managed['quick_info_section'])) {
+            $defaults['quick_info_section'] = $this->localizedServiceSection($managed['quick_info_section'], function (array $item) {
+                return [
+                    'title' => $this->localizedItemValue($item, 'title'),
+                    'value' => $this->localizedItemValue($item, 'value'),
+                    'tone' => $item['tone'] ?? null,
+                ];
+            });
+        }
+
+        if (! empty($managed['faq_section'])) {
+            $defaults['faq_section'] = $this->localizedServiceSection($managed['faq_section'], function (array $item) {
+                return [
+                    'question' => $this->localizedItemValue($item, 'question'),
+                    'answer' => $this->localizedItemValue($item, 'answer'),
+                ];
+            });
+        }
+
+        if (! empty($managed['cta_section'])) {
+            $defaults['cta_section'] = [
+                'enabled' => (bool) ($managed['cta_section']['enabled'] ?? true),
+                'eyebrow' => $this->localizedItemValue($managed['cta_section'], 'eyebrow'),
+                'title' => $this->localizedItemValue($managed['cta_section'], 'title'),
+                'description' => $this->localizedItemValue($managed['cta_section'], 'description'),
+                'background_image' => !empty($managed['cta_section']['background_image'])
+                    ? asset('storage/' . ltrim((string) $managed['cta_section']['background_image'], '/'))
+                    : data_get($defaults, 'cta_section.background_image'),
+                'buttons' => collect($managed['cta_section']['buttons'] ?? [])
+                    ->filter(fn (array $item) => ($item['is_active'] ?? true) && filled($this->localizedItemValue($item, 'text')))
+                    ->sortBy('sort_order')
+                    ->map(fn (array $item) => [
+                        'label' => $this->localizedItemValue($item, 'text'),
+                        'url' => $item['url'] ?? '#service-contact',
+                        'variant' => $item['variant'] ?? 'primary',
+                    ])
+                    ->values()
+                    ->all(),
+            ];
+        }
+
+        return $defaults;
+    }
+
+    protected function applyManagedContentPage(Page $page, array $defaults): array
+    {
+        $managed = $page->sections ?? [];
+
+        if ($page->localized('hero_badge')) {
+            data_set($defaults, 'hero.eyebrow', $page->localized('hero_badge'));
+        }
+        if ($page->localized('hero_title')) {
+            data_set($defaults, 'hero.title', $page->localized('hero_title'));
+        }
+        if ($page->localized('hero_subtitle')) {
+            data_set($defaults, 'hero.subtitle', $page->localized('hero_subtitle'));
+        }
+        if ($page->hero_image) {
+            data_set($defaults, 'hero.background_image', asset('storage/' . $page->hero_image));
+        }
+
+        foreach (['story', 'professionalism'] as $sectionKey) {
+            if (empty($managed[$sectionKey])) {
+                continue;
+            }
+
+            $defaults[$sectionKey] = [
+                'enabled' => (bool) ($managed[$sectionKey]['enabled'] ?? true),
+                'eyebrow' => $this->localizedItemValue($managed[$sectionKey], 'eyebrow'),
+                'title' => $this->localizedItemValue($managed[$sectionKey], 'title'),
+                'description' => $this->localizedItemValue($managed[$sectionKey], 'description'),
+                'reverse' => (bool) ($managed[$sectionKey]['reverse'] ?? false),
+                'image' => !empty($managed[$sectionKey]['image'])
+                    ? asset('storage/' . ltrim((string) $managed[$sectionKey]['image'], '/'))
+                    : data_get($defaults, $sectionKey . '.image'),
+                'points' => collect($managed[$sectionKey]['points'] ?? [])
+                    ->filter(fn (array $item) => ($item['is_active'] ?? true) && filled($this->localizedItemValue($item, 'text')))
+                    ->sortBy('sort_order')
+                    ->map(fn (array $item) => $this->localizedItemValue($item, 'text'))
+                    ->values()
+                    ->all(),
+            ];
+        }
+
+        foreach (['mission', 'why_choose', 'services', 'contact_info', 'quick_help'] as $sectionKey) {
+            if (empty($managed[$sectionKey])) {
+                continue;
+            }
+
+            $defaults[$sectionKey] = $this->localizedContentCardSection($managed[$sectionKey]);
+        }
+
+        if (! empty($managed['stats'])) {
+            $defaults['stats'] = [
+                'enabled' => (bool) ($managed['stats']['enabled'] ?? true),
+                'eyebrow' => $this->localizedItemValue($managed['stats'], 'eyebrow'),
+                'title' => $this->localizedItemValue($managed['stats'], 'title'),
+                'items' => collect($managed['stats']['items'] ?? [])
+                    ->filter(fn (array $item) => ($item['is_active'] ?? true) && filled($item['value'] ?? null))
+                    ->sortBy('sort_order')
+                    ->map(fn (array $item) => [
+                        'value' => $item['value'] ?? '',
+                        'label' => $this->localizedItemValue($item, 'label'),
+                        'text' => $this->localizedItemValue($item, 'text'),
+                    ])
+                    ->values()
+                    ->all(),
+            ];
+        }
+
+        if (! empty($managed['faq'])) {
+            $defaults['faq'] = [
+                'enabled' => (bool) ($managed['faq']['enabled'] ?? true),
+                'eyebrow' => $this->localizedItemValue($managed['faq'], 'eyebrow'),
+                'title' => $this->localizedItemValue($managed['faq'], 'title'),
+                'items' => collect($managed['faq']['items'] ?? [])
+                    ->filter(fn (array $item) => ($item['is_active'] ?? true) && filled($this->localizedItemValue($item, 'question')))
+                    ->sortBy('sort_order')
+                    ->map(fn (array $item) => [
+                        'question' => $this->localizedItemValue($item, 'question'),
+                        'answer' => $this->localizedItemValue($item, 'answer'),
+                    ])
+                    ->values()
+                    ->all(),
+            ];
+        }
+
+        if (! empty($managed['cta'])) {
+            $defaults['cta'] = [
+                'enabled' => (bool) ($managed['cta']['enabled'] ?? true),
+                'eyebrow' => $this->localizedItemValue($managed['cta'], 'eyebrow'),
+                'title' => $this->localizedItemValue($managed['cta'], 'title'),
+                'description' => $this->localizedItemValue($managed['cta'], 'description'),
+                'background_image' => !empty($managed['cta']['background_image'])
+                    ? asset('storage/' . ltrim((string) $managed['cta']['background_image'], '/'))
+                    : data_get($defaults, 'cta.background_image'),
+                'buttons' => collect($managed['cta']['buttons'] ?? [])
+                    ->filter(fn (array $item) => ($item['is_active'] ?? true) && filled($this->localizedItemValue($item, 'text')))
+                    ->sortBy('sort_order')
+                    ->map(fn (array $item) => [
+                        'text' => $this->localizedItemValue($item, 'text'),
+                        'url' => $item['url'] ?? route('contact'),
+                        'variant' => $item['variant'] ?? 'primary',
+                    ])
+                    ->values()
+                    ->all(),
+            ];
+        }
+
+        return $defaults;
+    }
+
+    protected function localizedServiceSection(array $section, callable $itemMap): array
+    {
+        return [
+            'enabled' => (bool) ($section['enabled'] ?? true),
+            'eyebrow' => $this->localizedItemValue($section, 'eyebrow'),
+            'title' => $this->localizedItemValue($section, 'title'),
+            'subtitle' => $this->localizedItemValue($section, 'subtitle'),
+            'items' => collect($section['items'] ?? [])
+                ->filter(fn (array $item) => ($item['is_active'] ?? true))
+                ->sortBy('sort_order')
+                ->map($itemMap)
+                ->filter(fn (array $item) => collect($item)->filter(fn ($value) => filled($value))->isNotEmpty())
+                ->values()
+                ->all(),
+        ];
+    }
+
+    protected function localizedContentCardSection(array $section): array
+    {
+        return [
+            'enabled' => (bool) ($section['enabled'] ?? true),
+            'eyebrow' => $this->localizedItemValue($section, 'eyebrow'),
+            'title' => $this->localizedItemValue($section, 'title'),
+            'subtitle' => $this->localizedItemValue($section, 'subtitle'),
+            'variant' => $section['variant'] ?? 'default',
+            'columns' => $section['columns'] ?? 'col-md-6 col-xl-4',
+            'items' => collect($section['items'] ?? [])
+                ->filter(fn (array $item) => ($item['is_active'] ?? true) && filled($this->localizedItemValue($item, 'title')))
+                ->sortBy('sort_order')
+                ->map(fn (array $item) => [
+                    'icon' => $item['icon'] ?? '',
+                    'title' => $this->localizedItemValue($item, 'title'),
+                    'meta' => $this->localizedItemValue($item, 'meta'),
+                    'text' => $this->localizedItemValue($item, 'text'),
+                    'link_label' => $this->localizedItemValue($item, 'link_label'),
+                    'url' => $item['url'] ?? '',
+                ])
+                ->values()
+                ->all(),
+        ];
+    }
+
+    protected function localizedItemValue(array $item, string $key): string
+    {
+        $locale = app()->getLocale();
+
+        return trim((string) ($item[$key . '_' . $locale] ?? $item[$key . '_en'] ?? $item[$key . '_ar'] ?? $item[$key] ?? ''));
+    }
+
     protected function formsForContext(array $context): array
     {
         return LeadFormManager::resolve($context);
@@ -966,31 +1263,20 @@ class FrontendController extends Controller
                         'subtitle' => 'Fill in the main details and the Travel Wave team will contact you shortly.',
                         'submit_text' => 'Send Now',
                         'success_message' => 'Your message has been sent successfully. The Travel Wave team will contact you soon.',
-                        'visible_fields' => ['email', 'service_type', 'destination', 'message'],
+                        'visible_fields' => ['email', 'message'],
                         'labels' => [
                             'full_name' => 'Name',
                             'phone' => 'Phone Number',
                             'email' => 'Email Address',
-                            'service_type' => 'Service Type',
-                            'destination' => 'Destination',
                             'message' => 'Message / Notes',
                         ],
                         'placeholders' => [
                             'full_name' => 'Enter your full name',
                             'phone' => 'Enter your phone number',
                             'email' => 'example@email.com',
-                            'destination' => 'Example: France, Sharm El Sheikh, Dubai',
                             'message' => 'Write your request details or inquiry here',
                         ],
-                        'field_options' => [
-                            'service_type' => [
-                                ['value' => 'External Visas', 'label' => 'External Visas'],
-                                ['value' => 'Domestic Tourism', 'label' => 'Domestic Tourism'],
-                                ['value' => 'Flight Bookings', 'label' => 'Flight Bookings'],
-                                ['value' => 'Hotel Bookings', 'label' => 'Hotel Bookings'],
-                                ['value' => 'Custom Request', 'label' => 'Custom Request'],
-                            ],
-                        ],
+                        'field_options' => [],
                     ],
                 ],
                 'quick_help' => [
@@ -1038,7 +1324,7 @@ class FrontendController extends Controller
                     'background_image' => asset('storage/hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png'),
                     'buttons' => [
                         ['text' => 'Message Us Now', 'url' => $whatsAppUrl, 'variant' => 'primary'],
-                        ['text' => 'Start Your Request', 'url' => '#premium-contact-form', 'variant' => 'outline'],
+                        ['text' => 'Call Us', 'url' => $settings?->phone ? 'tel:' . $settings->phone : $whatsAppUrl, 'variant' => 'outline'],
                     ],
                 ],
             ];
@@ -1089,7 +1375,7 @@ class FrontendController extends Controller
                     'subtitle' => 'املأ البيانات الأساسية وسيتواصل معك فريق Travel Wave.',
                     'submit_text' => 'أرسل الآن',
                     'success_message' => 'تم إرسال رسالتك بنجاح، وسيتواصل معك فريق Travel Wave قريبًا.',
-                    'visible_fields' => ['email', 'service_type', 'destination', 'message'],
+                    'visible_fields' => ['email', 'message'],
                     'labels' => [
                         'full_name' => 'الاسم',
                         'phone' => 'رقم الهاتف',
@@ -1161,7 +1447,7 @@ class FrontendController extends Controller
                 'background_image' => asset('storage/hero-slides/XDOtmN6qPyfvyZMihVB7ZmNHaMRwt0JImWpqFmdj.png'),
                 'buttons' => [
                     ['text' => 'راسلنا الآن', 'url' => $whatsAppUrl, 'variant' => 'primary'],
-                    ['text' => 'ابدأ طلبك', 'url' => '#premium-contact-form', 'variant' => 'outline'],
+                    ['text' => 'اتصل بنا', 'url' => $settings?->phone ? 'tel:' . $settings->phone : $whatsAppUrl, 'variant' => 'outline'],
                 ],
             ],
         ];

@@ -405,6 +405,235 @@ class TravelWaveFrontendTest extends TestCase
             ->assertSee('Section Visibility');
     }
 
+    public function test_sharm_destination_updates_from_admin_and_renders_latest_dynamic_sections_on_frontend(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $destination = Destination::query()->where('slug', 'sharm-el-sheikh')->firstOrFail();
+        $libraryImage = $destination->hero_image ?: 'hero-slides/AHA77CWYemeYDheAtHSRseA0io46WT0GuRkU8Vfh.jpg';
+
+        $payload = [
+            'title_en' => $destination->title_en,
+            'title_ar' => $destination->title_ar,
+            'slug' => $destination->slug,
+            'destination_type' => $destination->destination_type,
+            'subtitle_en' => $destination->subtitle_en,
+            'subtitle_ar' => $destination->subtitle_ar,
+            'excerpt_en' => $destination->excerpt_en,
+            'excerpt_ar' => $destination->excerpt_ar,
+            'hero_badge_en' => $destination->hero_badge_en,
+            'hero_badge_ar' => $destination->hero_badge_ar,
+            'hero_title_en' => 'Sharm Escapes Curated by Travel Wave',
+            'hero_title_ar' => 'رحلات شرم الشيخ بتنظيم Travel Wave',
+            'hero_subtitle_en' => $destination->hero_subtitle_en,
+            'hero_subtitle_ar' => $destination->hero_subtitle_ar,
+            'hero_cta_text_en' => $destination->hero_cta_text_en,
+            'hero_cta_text_ar' => $destination->hero_cta_text_ar,
+            'hero_cta_url' => $destination->hero_cta_url,
+            'hero_secondary_cta_text_en' => $destination->hero_secondary_cta_text_en,
+            'hero_secondary_cta_text_ar' => $destination->hero_secondary_cta_text_ar,
+            'hero_secondary_cta_url' => $destination->hero_secondary_cta_url,
+            'hero_overlay_opacity' => $destination->hero_overlay_opacity ?? '0.45',
+            'quick_summary_destination_label_en' => 'Destination',
+            'quick_summary_destination_label_ar' => 'الوجهة',
+            'quick_summary_destination_icon' => 'material-symbols:globe-location-pin-outline',
+            'about_title_en' => $destination->about_title_en,
+            'about_title_ar' => $destination->about_title_ar,
+            'about_description_en' => $destination->about_description_en,
+            'about_description_ar' => $destination->about_description_ar,
+            'detailed_title_en' => $destination->detailed_title_en,
+            'detailed_title_ar' => $destination->detailed_title_ar,
+            'detailed_description_en' => $destination->detailed_description_en,
+            'detailed_description_ar' => $destination->detailed_description_ar,
+            'best_time_badge_en' => 'Best Beach Season',
+            'best_time_badge_ar' => 'أفضل موسم للشاطئ',
+            'best_time_title_en' => 'Best Time to Visit Sharm',
+            'best_time_title_ar' => 'أفضل وقت لزيارة شرم الشيخ',
+            'best_time_description_en' => 'Spring and autumn usually offer the best mix of weather, sea activities, and hotel value.',
+            'best_time_description_ar' => 'عادةً ما يمنح الربيع والخريف أفضل توازن بين الطقس والأنشطة البحرية وقيمة الإقامة.',
+            'highlights_section_label_en' => 'Helpful Guidance Points',
+            'highlights_section_label_ar' => 'أهم الإرشادات',
+            'highlights_title_en' => 'Sharm Highlights',
+            'highlights_title_ar' => 'أبرز مزايا شرم الشيخ',
+            'services_title_en' => $destination->services_title_en,
+            'services_title_ar' => $destination->services_title_ar,
+            'services_intro_en' => $destination->services_intro_en,
+            'services_intro_ar' => $destination->services_intro_ar,
+            'documents_title_en' => $destination->documents_title_en,
+            'documents_title_ar' => $destination->documents_title_ar,
+            'documents_subtitle_en' => $destination->documents_subtitle_en,
+            'documents_subtitle_ar' => $destination->documents_subtitle_ar,
+            'steps_title_en' => $destination->steps_title_en,
+            'steps_title_ar' => $destination->steps_title_ar,
+            'pricing_title_en' => $destination->pricing_title_en,
+            'pricing_title_ar' => $destination->pricing_title_ar,
+            'pricing_notes_en' => $destination->pricing_notes_en,
+            'pricing_notes_ar' => $destination->pricing_notes_ar,
+            'faq_title_en' => $destination->faq_title_en,
+            'faq_title_ar' => $destination->faq_title_ar,
+            'cta_title_en' => $destination->cta_title_en,
+            'cta_title_ar' => $destination->cta_title_ar,
+            'cta_text_en' => $destination->cta_text_en,
+            'cta_text_ar' => $destination->cta_text_ar,
+            'cta_button_en' => $destination->cta_button_en,
+            'cta_button_ar' => $destination->cta_button_ar,
+            'cta_url' => $destination->cta_url,
+            'cta_secondary_button_en' => $destination->cta_secondary_button_en,
+            'cta_secondary_button_ar' => $destination->cta_secondary_button_ar,
+            'cta_secondary_url' => $destination->cta_secondary_url,
+            'form_title_en' => $destination->form_title_en,
+            'form_title_ar' => $destination->form_title_ar,
+            'form_subtitle_en' => $destination->form_subtitle_en,
+            'form_subtitle_ar' => $destination->form_subtitle_ar,
+            'form_submit_text_en' => $destination->form_submit_text_en,
+            'form_submit_text_ar' => $destination->form_submit_text_ar,
+            'meta_title_en' => $destination->meta_title_en,
+            'meta_title_ar' => $destination->meta_title_ar,
+            'meta_description_en' => $destination->meta_description_en,
+            'meta_description_ar' => $destination->meta_description_ar,
+            'quick_info_items' => [
+                [
+                    'label_en' => 'Trip Type',
+                    'label_ar' => 'نوع البرنامج',
+                    'value_en' => 'Beach and resort package',
+                    'value_ar' => 'برنامج شاطئي وإقامة منتجعية',
+                    'icon' => 'material-symbols:travel-explore-rounded',
+                    'sort_order' => 1,
+                    'is_active' => '1',
+                ],
+                [
+                    'label_en' => 'Suggested Duration',
+                    'label_ar' => 'المدة المقترحة',
+                    'value_en' => '4 nights',
+                    'value_ar' => '4 ليالٍ',
+                    'icon' => 'mdi:clock-outline',
+                    'sort_order' => 2,
+                    'is_active' => '1',
+                ],
+            ],
+            'highlight_items' => [
+                [
+                    'title_en' => 'Naama Bay Access',
+                    'title_ar' => 'سهولة الوصول إلى خليج نعمة',
+                    'description_en' => 'Stay close to promenades, cafes, and evening activities.',
+                    'description_ar' => 'إقامة قريبة من الممشى والمقاهي والأنشطة المسائية.',
+                    'icon' => 'material-symbols:beach-access-outline-rounded',
+                    'existing_image' => $libraryImage,
+                    'sort_order' => 1,
+                    'is_active' => '1',
+                ],
+            ],
+            'service_items' => collect($destination->service_items ?: [])->map(fn (array $item) => [
+                'title_en' => $item['title_en'] ?? '',
+                'title_ar' => $item['title_ar'] ?? '',
+                'description_en' => $item['description_en'] ?? '',
+                'description_ar' => $item['description_ar'] ?? '',
+                'icon' => $item['icon'] ?? '',
+                'sort_order' => $item['sort_order'] ?? 0,
+                'is_active' => !empty($item['is_active']) ? '1' : '0',
+            ])->values()->all(),
+            'document_items' => collect($destination->document_items ?: [])->map(fn (array $item) => [
+                'title_en' => $item['title_en'] ?? '',
+                'title_ar' => $item['title_ar'] ?? '',
+                'description_en' => $item['description_en'] ?? '',
+                'description_ar' => $item['description_ar'] ?? '',
+                'icon' => $item['icon'] ?? '',
+                'sort_order' => $item['sort_order'] ?? 0,
+                'is_active' => !empty($item['is_active']) ? '1' : '0',
+            ])->values()->all(),
+            'step_items' => collect($destination->step_items ?: [])->map(fn (array $item) => [
+                'title_en' => $item['title_en'] ?? '',
+                'title_ar' => $item['title_ar'] ?? '',
+                'description_en' => $item['description_en'] ?? '',
+                'description_ar' => $item['description_ar'] ?? '',
+                'icon' => $item['icon'] ?? '',
+                'step_number' => $item['step_number'] ?? 0,
+                'sort_order' => $item['sort_order'] ?? 0,
+                'is_active' => !empty($item['is_active']) ? '1' : '0',
+            ])->values()->all(),
+            'pricing_items' => collect($destination->pricing_items ?: [])->map(fn (array $item) => [
+                'label_en' => $item['label_en'] ?? '',
+                'label_ar' => $item['label_ar'] ?? '',
+                'value_en' => $item['value_en'] ?? '',
+                'value_ar' => $item['value_ar'] ?? '',
+                'note_en' => $item['note_en'] ?? '',
+                'note_ar' => $item['note_ar'] ?? '',
+                'sort_order' => $item['sort_order'] ?? 0,
+                'is_active' => !empty($item['is_active']) ? '1' : '0',
+            ])->values()->all(),
+            'faq_items' => collect($destination->faqs ?: [])->map(fn (array $item) => [
+                'question_en' => $item['question_en'] ?? '',
+                'question_ar' => $item['question_ar'] ?? '',
+                'answer_en' => $item['answer_en'] ?? '',
+                'answer_ar' => $item['answer_ar'] ?? '',
+                'sort_order' => $item['sort_order'] ?? 0,
+                'is_active' => !empty($item['is_active']) ? '1' : '0',
+            ])->values()->all(),
+            'form_visible_fields' => $destination->form_visible_fields ?: ['email', 'travel_date', 'return_date', 'travelers_count', 'message'],
+            'sort_order' => $destination->sort_order,
+            'show_hero' => '1',
+            'show_quick_info' => '1',
+            'show_about' => '1',
+            'show_detailed' => '1',
+            'show_best_time' => '1',
+            'show_highlights' => '1',
+            'show_services' => '1',
+            'show_documents' => '1',
+            'show_steps' => '1',
+            'show_pricing' => '1',
+            'show_faq' => '1',
+            'show_cta' => '1',
+            'show_form' => '1',
+            'is_active' => '1',
+            'is_featured' => $destination->is_featured ? '1' : '0',
+        ];
+
+        $this->actingAs($admin)
+            ->put(route('admin.destinations.update', $destination), $payload)
+            ->assertRedirect(route('admin.destinations.index'))
+            ->assertSessionHasNoErrors();
+
+        $destination->refresh();
+
+        $this->assertSame('Best Beach Season', $destination->best_time_badge_en);
+        $this->assertSame('أفضل موسم للشاطئ', $destination->best_time_badge_ar);
+        $this->assertSame('Sharm Highlights', $destination->highlights_title_en);
+        $this->assertSame('أبرز مزايا شرم الشيخ', $destination->highlights_title_ar);
+        $this->assertSame('Destination', $destination->quick_summary_destination_label_en);
+        $this->assertSame('الوجهة', $destination->quick_summary_destination_label_ar);
+        $this->assertSame('material-symbols:globe-location-pin-outline', $destination->quick_summary_destination_icon);
+        $this->assertSame('material-symbols:travel-explore-rounded', $destination->quick_info_items[0]['icon']);
+        $this->assertSame('Naama Bay Access', $destination->highlight_items[0]['title_en']);
+        $this->assertSame($libraryImage, $destination->highlight_items[0]['image']);
+
+        $this->withSession(['locale' => 'en'])
+            ->get(route('destinations.show', $destination))
+            ->assertOk()
+            ->assertSee('Sharm Escapes Curated by Travel Wave')
+            ->assertSee('Best Beach Season')
+            ->assertSee('Best Time to Visit Sharm')
+            ->assertSee('Spring and autumn usually offer the best mix of weather, sea activities, and hotel value.')
+            ->assertSee('Destination')
+            ->assertSee('Sharm El Sheikh')
+            ->assertSee('material-symbols:globe-location-pin-outline', false)
+            ->assertSee('material-symbols:travel-explore-rounded', false)
+            ->assertSee('Naama Bay Access')
+            ->assertSee($libraryImage, false);
+
+        $this->withSession(['locale' => 'ar'])
+            ->get(route('destinations.show', $destination))
+            ->assertOk()
+            ->assertSee('رحلات شرم الشيخ بتنظيم Travel Wave')
+            ->assertSee('أفضل موسم للشاطئ')
+            ->assertSee('أفضل وقت لزيارة شرم الشيخ')
+            ->assertSee('الوجهة')
+            ->assertSee('شرم الشيخ')
+            ->assertSee('عادةً ما يمنح الربيع والخريف أفضل توازن بين الطقس والأنشطة البحرية وقيمة الإقامة.')
+            ->assertSee('أبرز مزايا شرم الشيخ')
+            ->assertSee('سهولة الوصول إلى خليج نعمة');
+    }
+
     public function test_pages_manager_supports_create_view_duplicate_and_trash_restore_for_custom_pages(): void
     {
         $this->seed(DatabaseSeeder::class);
@@ -1541,6 +1770,139 @@ class TravelWaveFrontendTest extends TestCase
         $this->assertStringContainsString('Visa type:', $country->excerpt_en);
         $this->assertStringContainsString('Expected processing time:', $country->excerpt_en);
         $this->assertStringNotContainsString('...', $country->excerpt_en);
+    }
+
+    public function test_best_time_section_updates_from_admin_and_renders_on_france_visa_page(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $country = VisaCountry::query()->where('slug', 'france-visa')->firstOrFail();
+
+        $payload = [
+            'visa_category_id' => $country->visa_category_id,
+            'name_en' => $country->name_en,
+            'name_ar' => $country->name_ar,
+            'slug' => $country->slug,
+            'excerpt_en' => $country->excerpt_en,
+            'excerpt_ar' => $country->excerpt_ar,
+            'overview_en' => $country->overview_en,
+            'overview_ar' => $country->overview_ar,
+            'detailed_description_en' => $country->detailed_description_en,
+            'detailed_description_ar' => $country->detailed_description_ar,
+            'visa_type_en' => $country->visa_type_en,
+            'visa_type_ar' => $country->visa_type_ar,
+            'stay_duration_en' => $country->stay_duration_en,
+            'stay_duration_ar' => $country->stay_duration_ar,
+            'processing_time_en' => $country->processing_time_en,
+            'processing_time_ar' => $country->processing_time_ar,
+            'best_time_badge_en' => 'Best Season',
+            'best_time_badge_ar' => 'أفضل موسم',
+            'best_time_title_en' => 'Apply at the Right Time',
+            'best_time_title_ar' => 'قدّم في الوقت المناسب',
+            'best_time_description_en' => 'Updated English best time guidance from the dashboard.',
+            'best_time_description_ar' => 'تم تحديث وصف أفضل وقت للتقديم من لوحة التحكم.',
+            'hero_overlay_opacity' => $country->hero_overlay_opacity ?? '0.45',
+            'sort_order' => $country->sort_order,
+            'is_active' => '1',
+            'is_featured' => $country->is_featured ? '1' : '0',
+        ];
+
+        $this->actingAs($admin)
+            ->put(route('admin.visa-countries.update', $country), $payload)
+            ->assertRedirect(route('admin.visa-countries.index'))
+            ->assertSessionHasNoErrors();
+
+        $country->refresh();
+
+        $this->assertSame('Best Season', $country->best_time_badge_en);
+        $this->assertSame('أفضل موسم', $country->best_time_badge_ar);
+        $this->assertSame('Apply at the Right Time', $country->best_time_title_en);
+        $this->assertSame('قدّم في الوقت المناسب', $country->best_time_title_ar);
+        $this->assertSame('Updated English best time guidance from the dashboard.', $country->best_time_description_en);
+        $this->assertSame('تم تحديث وصف أفضل وقت للتقديم من لوحة التحكم.', $country->best_time_description_ar);
+
+        $this->withSession(['locale' => 'en'])
+            ->get(route('visas.country', $country))
+            ->assertOk()
+            ->assertSee('Best Season')
+            ->assertSee('Apply at the Right Time')
+            ->assertSee('Updated English best time guidance from the dashboard.');
+
+        $this->withSession(['locale' => 'ar'])
+            ->get(route('visas.country', $country))
+            ->assertOk()
+            ->assertSee('أفضل موسم')
+            ->assertSee('قدّم في الوقت المناسب')
+            ->assertSee('تم تحديث وصف أفضل وقت للتقديم من لوحة التحكم.');
+    }
+
+    public function test_admin_can_add_helpful_guidance_card_and_keep_library_image_after_save(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@travelwave.test')->firstOrFail();
+        $country = VisaCountry::query()->where('slug', 'france-visa')->firstOrFail();
+        $libraryImage = $country->hero_image;
+
+        $this->assertNotEmpty($libraryImage);
+
+        $response = $this->actingAs($admin)->put(route('admin.visa-countries.update', $country), [
+            'visa_category_id' => $country->visa_category_id,
+            'name_en' => $country->name_en,
+            'name_ar' => $country->name_ar,
+            'slug' => $country->slug,
+            'excerpt_en' => $country->excerpt_en,
+            'excerpt_ar' => $country->excerpt_ar,
+            'overview_en' => $country->overview_en,
+            'overview_ar' => $country->overview_ar,
+            'detailed_description_en' => $country->detailed_description_en,
+            'detailed_description_ar' => $country->detailed_description_ar,
+            'visa_type_en' => $country->visa_type_en,
+            'visa_type_ar' => $country->visa_type_ar,
+            'stay_duration_en' => $country->stay_duration_en,
+            'stay_duration_ar' => $country->stay_duration_ar,
+            'processing_time_en' => $country->processing_time_en,
+            'processing_time_ar' => $country->processing_time_ar,
+            'hero_overlay_opacity' => $country->hero_overlay_opacity ?? '0.45',
+            'sort_order' => $country->sort_order,
+            'is_active' => '1',
+            'is_featured' => $country->is_featured ? '1' : '0',
+            'highlight_items' => [
+                [
+                    'title_en' => 'New Guidance Card',
+                    'title_ar' => 'كارت إرشادي جديد',
+                    'description_en' => 'Saved through the dashboard repeater.',
+                    'description_ar' => 'تم حفظه من خلال مكرر لوحة التحكم.',
+                    'existing_image' => $libraryImage,
+                    'sort_order' => 99,
+                    'is_active' => '1',
+                ],
+            ],
+        ]);
+
+        $response->assertRedirect(route('admin.visa-countries.index'));
+        $response->assertSessionHasNoErrors();
+
+        $country->refresh();
+
+        $this->assertCount(1, $country->highlights ?? []);
+        $this->assertSame('New Guidance Card', $country->highlights[0]['title_en'] ?? null);
+        $this->assertSame('كارت إرشادي جديد', $country->highlights[0]['title_ar'] ?? null);
+        $this->assertSame($libraryImage, $country->highlights[0]['image'] ?? null);
+        $this->assertDatabaseHas('media_assets', ['path' => $libraryImage]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.visa-countries.edit', $country))
+            ->assertOk()
+            ->assertSee('New Guidance Card')
+            ->assertSee('كارت إرشادي جديد')
+            ->assertSee($libraryImage, false);
+
+        $this->get(route('visas.country', $country))
+            ->assertOk()
+            ->assertSee('New Guidance Card')
+            ->assertSee($libraryImage, false);
     }
 
     public function test_france_visa_page_uses_curated_excerpt_content(): void

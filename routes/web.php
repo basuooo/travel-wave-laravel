@@ -240,11 +240,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('menu-items', MenuItemController::class);
         });
 
+        Route::get('/forms/submissions', [InquiryController::class, 'index'])->middleware('permission:forms.submissions.view')->name('forms.submissions');
+
         Route::middleware('permission:forms.manage')->group(function () {
             Route::post('/forms/{form}/duplicate', [LeadFormController::class, 'duplicate'])->name('forms.duplicate');
             Route::resource('forms', LeadFormController::class);
         });
-        Route::get('/forms/submissions', [InquiryController::class, 'index'])->middleware('permission:forms.submissions.view')->name('forms.submissions');
 
         Route::middleware('permission:marketing.manage')->group(function () {
             Route::post('/marketing-landing-pages/{marketing_landing_page}/duplicate', [MarketingLandingPageController::class, 'duplicate'])->name('marketing-landing-pages.duplicate');

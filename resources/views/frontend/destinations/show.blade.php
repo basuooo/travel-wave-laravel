@@ -11,7 +11,7 @@
 </section>
 <section class="container py-4">
     <div class="row g-4">
-        <div class="col-lg-8">
+        <div class="col-12">
             <div class="tw-card tw-section-shell p-4 mb-4">
                 <h2 class="tw-section-title h2">Overview</h2>
                 <div class="text-muted">{!! nl2br(e($destination->localized('overview'))) !!}</div>
@@ -67,11 +67,6 @@
                         <li>{{ app()->getLocale() === 'ar' ? $item['text_ar'] : $item['text_en'] }}</li>
                     @endforeach
                 </ul>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="tw-sticky-form">
-                @include('partials.frontend.inquiry-form', ['type' => 'destination', 'source' => 'destination', 'destination' => $destination->localized('title')])
             </div>
         </div>
     </div>

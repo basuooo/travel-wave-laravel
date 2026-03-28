@@ -7,7 +7,8 @@
     $address = $mapSection->localized('address');
     $buttonText = $mapSection->localized('button_text');
     $buttonLink = $mapSection->button_link ?: $mapSection->map_url;
-    $height = max(200, min(1200, (int) ($mapSection->height ?: 380)));
+    $baseHeight = max(200, min(1200, (int) ($mapSection->height ?: 380)));
+    $height = max(200, $baseHeight - 40);
     $embedCode = $mapSection->embed_code;
     $mapUrl = $mapSection->map_url;
 

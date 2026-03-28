@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Concerns\HandlesCmsData;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
+use App\Support\MediaLibraryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -125,6 +126,9 @@ class DestinationController extends Controller
             'overview_ar' => ['nullable', 'string'],
             'quick_info_title_en' => ['nullable', 'string', 'max:255'],
             'quick_info_title_ar' => ['nullable', 'string', 'max:255'],
+            'quick_summary_destination_label_en' => ['nullable', 'string', 'max:255'],
+            'quick_summary_destination_label_ar' => ['nullable', 'string', 'max:255'],
+            'quick_summary_destination_icon' => ['nullable', 'string', 'max:255'],
             'about_title_en' => ['nullable', 'string', 'max:255'],
             'about_title_ar' => ['nullable', 'string', 'max:255'],
             'about_description_en' => ['nullable', 'string'],
@@ -133,12 +137,17 @@ class DestinationController extends Controller
             'detailed_title_ar' => ['nullable', 'string', 'max:255'],
             'detailed_description_en' => ['nullable', 'string'],
             'detailed_description_ar' => ['nullable', 'string'],
+            'best_time_badge_en' => ['nullable', 'string', 'max:255'],
+            'best_time_badge_ar' => ['nullable', 'string', 'max:255'],
             'best_time_title_en' => ['nullable', 'string', 'max:255'],
             'best_time_title_ar' => ['nullable', 'string', 'max:255'],
             'best_time_description_en' => ['nullable', 'string'],
             'best_time_description_ar' => ['nullable', 'string'],
+            'highlights_section_label_en' => ['nullable', 'string', 'max:255'],
+            'highlights_section_label_ar' => ['nullable', 'string', 'max:255'],
             'highlights_title_en' => ['nullable', 'string', 'max:255'],
             'highlights_title_ar' => ['nullable', 'string', 'max:255'],
+            'highlight_items.*.image_file' => ['nullable', 'image'],
             'services_title_en' => ['nullable', 'string', 'max:255'],
             'services_title_ar' => ['nullable', 'string', 'max:255'],
             'services_intro_en' => ['nullable', 'string'],
@@ -196,7 +205,7 @@ class DestinationController extends Controller
         $data['cta_background_image'] = $this->uploadFile($request, 'cta_background_image', 'destinations', $destination?->cta_background_image);
         $data['quick_info_items'] = $this->mapQuickInfoItems($request->input('quick_info_items', []));
         $data['about_points'] = $this->mapLocalizedTextItems($request->input('about_points_en'), $request->input('about_points_ar'));
-        $data['highlight_items'] = $this->mapHighlightItems($request->input('highlight_items', []));
+        $data['highlight_items'] = $this->mapHighlightItems($request, $request->input('highlight_items', []));
         $data['service_items'] = $this->mapServiceItems($request->input('service_items', []));
         $data['document_items'] = $this->mapDocumentItems($request->input('document_items', []));
         $data['step_items'] = $this->mapStepItems($request->input('step_items', []));
@@ -292,15 +301,29 @@ class DestinationController extends Controller
         });
     }
 
-    protected function mapHighlightItems(array $items): array
+    protected function mapHighlightItems(Request $request, array $items): array
     {
-        return $this->mapRepeaterItems($items, function (array $item, int $index) {
+        return $this->mapRepeaterItems($items, function (array $item, int $index) use ($request) {
+            $currentImage = trim((string) ($item['existing_image'] ?? $item['image'] ?? ''));
+            $removeImage = ! empty($item['remove_image']);
+            $image = $removeImage ? null : $currentImage;
+
+            if ($image) {
+                MediaLibraryService::syncExistingFile($image, 'destinations/highlights');
+            }
+
+            if ($request->hasFile("highlight_items.$index.image_file")) {
+                $file = $request->file("highlight_items.$index.image_file");
+                $image = $file->store('destinations/highlights', 'public');
+                MediaLibraryService::registerUploadedFile($file, $image, 'destinations/highlights');
+            }
+
             return [
                 'title_en' => trim($item['title_en'] ?? ''),
                 'title_ar' => trim($item['title_ar'] ?? ''),
                 'description_en' => trim($item['description_en'] ?? ''),
                 'description_ar' => trim($item['description_ar'] ?? ''),
-                'image' => trim($item['image'] ?? ''),
+                'image' => $image,
                 'icon' => trim($item['icon'] ?? ''),
                 'sort_order' => (int) ($item['sort_order'] ?? $index + 1),
                 'is_active' => ! empty($item['is_active']),

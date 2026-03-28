@@ -123,7 +123,13 @@
                         <td>{{ $item->crmServiceType?->localizedName() ?: '-' }}</td>
                         <td>
                             @if($item->accountingAccount)
-                                <span class="badge text-bg-light">{{ $item->accountingAccount->payment_status }}</span>
+                                <span class="badge text-bg-light">
+                                    {{ match($item->accountingAccount->payment_status) {
+                                        'fully_paid' => __('admin.accounting_fully_paid'),
+                                        'partially_paid' => __('admin.accounting_partially_paid'),
+                                        default => __('admin.accounting_unpaid'),
+                                    } }}
+                                </span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif

@@ -15,7 +15,7 @@
             @foreach($steps as $step)
                 @php
                     $stepTitle = is_array($step) ? ($step['title'] ?? '') : $step;
-                    $stepText = is_array($step) ? ($step['text'] ?? '') : '';
+                    $stepText = is_array($step) ? ($step['text'] ?? ($step['description'] ?? '')) : '';
                 @endphp
                 <div class="col-md-6 col-xl">
                     <div class="tw-visa-hub-step-card h-100">

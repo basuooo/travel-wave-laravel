@@ -116,17 +116,10 @@
                 @endif
             </div>
             <div class="row g-3 flex-grow-1">
-                <div class="col-6 col-lg">
-                    <div class="tw-visa-reference-summary-card h-100">
-                        <span class="tw-visa-reference-summary-icon">{{ strtoupper(mb_substr($pageData['title'], 0, 2)) }}</span>
-                        <div class="small text-muted">{{ __('ui.destination') }}</div>
-                        <div class="fw-semibold">{{ $pageData['title'] }}</div>
-                    </div>
-                </div>
                 @foreach($quickInfo as $item)
                     <div class="col-6 col-lg">
                         <div class="tw-visa-reference-summary-card h-100">
-                            <span class="tw-visa-reference-summary-icon">{{ $item['icon'] ?: strtoupper(mb_substr($item['label'], 0, 2)) }}</span>
+                            <span class="tw-visa-reference-summary-icon">@include('partials.frontend.icon', ['icon' => $item['icon'] ?? null, 'fallback' => 'star'])</span>
                             <div class="small text-muted">{{ $item['label'] }}</div>
                             <div class="fw-semibold">{{ $item['value'] }}</div>
                         </div>
@@ -190,7 +183,7 @@
             @if(!empty($bestTime['enabled']))
                 <div class="col-lg-5">
                     <div class="tw-card p-4 p-lg-5 h-100 tw-destination-side-note">
-                        <div class="tw-visa-reference-inline-badge mb-3">{{ __('ui.best_time') }}</div>
+                        <div class="tw-visa-reference-inline-badge mb-3">{{ $bestTime['badge'] ?? __('ui.best_time') }}</div>
                         <h2 class="tw-section-title h3 mb-3">{{ $bestTime['title'] }}</h2>
                         <p class="mb-0">{!! nl2br(e($bestTime['description'] ?? '')) !!}</p>
                     </div>
@@ -207,19 +200,19 @@
     <section class="container py-4" id="destination-highlights">
         <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
             <div>
-                <div class="small text-uppercase text-muted mb-2">{{ __('ui.highlights') }}</div>
+                <div class="small text-uppercase text-muted mb-2">{{ $pageData['highlights']['label'] ?? (app()->getLocale() === 'ar' ? 'أهم الإرشادات' : 'Helpful Guidance Points') }}</div>
                 <h2 class="tw-section-title h2 mb-0">{{ $pageData['highlights']['title'] }}</h2>
             </div>
         </div>
         <div class="row g-4">
             @foreach($highlights as $item)
                 <div class="col-md-6 col-xl-4">
-                    <div class="tw-card p-3 h-100 tw-destination-highlight-card">
+                    <div class="tw-card p-3 h-100 tw-destination-highlight-card {{ ($pageData['type'] ?? '') === 'visa' ? 'tw-visa-guidance-card' : '' }}">
                         <div class="tw-destination-highlight-media">
                             @if(!empty($item['image']))
                                 <img src="{{ $item['image'] }}" alt="{{ $item['title'] }}" class="tw-image-cover">
                             @else
-                                <div class="tw-destination-highlight-placeholder">{{ $item['icon'] ?: strtoupper(mb_substr($item['title'], 0, 2)) }}</div>
+                                <div class="tw-destination-highlight-placeholder">@include('partials.frontend.icon', ['icon' => $item['icon'] ?? null, 'fallback' => 'star'])</div>
                             @endif
                         </div>
                         <div class="pt-3">
@@ -250,7 +243,7 @@
             @foreach($services as $item)
                 <div class="col-md-6 col-xl-3">
                     <div class="tw-card p-4 h-100 tw-visa-reference-service-card">
-                        <span class="tw-visa-reference-service-icon">{{ $item['icon'] ?: strtoupper(mb_substr($item['title'], 0, 2)) }}</span>
+                        <span class="tw-visa-reference-service-icon">@include('partials.frontend.icon', ['icon' => $item['icon'] ?? null, 'fallback' => 'support'])</span>
                         <h3 class="h5 mt-3 mb-2">{{ $item['title'] }}</h3>
                         <p class="text-muted mb-0">{{ $item['description'] }}</p>
                     </div>
@@ -273,7 +266,7 @@
                 @foreach($documents as $item)
                     <div class="col-md-6 col-xl-4">
                         <div class="tw-visa-reference-doc-card h-100">
-                            <div class="tw-visa-reference-doc-icon">{{ $item['icon'] ?: 'OK' }}</div>
+                            <div class="tw-visa-reference-doc-icon">@include('partials.frontend.icon', ['icon' => $item['icon'] ?? null, 'fallback' => 'check'])</div>
                             <div>
                                 <h3 class="h6 mb-2">{{ $item['title'] }}</h3>
                                 @if(!empty($item['description']))
@@ -363,7 +356,7 @@
 @endif
 
 @include('partials.frontend.form-zone', ['assignments' => $managedForms['after_faq'] ?? [], 'position' => 'after_faq', 'sourcePage' => $pageData['title'], 'contextData' => $pageData])
-@include('partials.frontend.map-zone', ['assignments' => $managedMaps['after_faq'] ?? [], 'position' => 'after_faq', 'fallbackSection' => $map])
+@include('partials.frontend.map-zone', ['assignments' => $managedMaps['after_faq'] ?? [], 'position' => 'after_faq'])
 
 @if(!empty($cta['enabled']))
     <section class="container py-4">
