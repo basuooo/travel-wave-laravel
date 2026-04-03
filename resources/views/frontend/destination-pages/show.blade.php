@@ -74,29 +74,32 @@
                         @endif
                     </div>
                 </div>
-                <div class="col-xl-5 col-lg-4">
-                    <div class="tw-visa-reference-note">
-                        <div class="small text-uppercase text-muted mb-2">{{ $pageData['quick_info']['title'] ?? __('ui.quick_summary') }}</div>
-                        @if($excerptLines->isNotEmpty())
-                            <ul class="tw-visa-reference-summary-list mb-0">
-                                @foreach($excerptLines->take(5) as $line)
-                                    <li><span>{{ $line }}</span></li>
-                                @endforeach
-                            </ul>
-                        @elseif($quickInfo->isNotEmpty())
-                            <ul class="tw-visa-reference-summary-list mb-0">
-                                @foreach($quickInfo->take(5) as $item)
-                                    <li>
-                                        <strong>{{ $item['label'] }}:</strong>
-                                        <span>{{ $item['value'] }}</span>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @elseif(!empty($pageData['subtitle']))
-                            <p class="mb-0">{{ $pageData['subtitle'] }}</p>
-                        @endif
+
+                @if(false)
+                    <div class="col-xl-5 col-lg-4">
+                        <div class="tw-visa-reference-note">
+                            <div class="small text-uppercase text-muted mb-2">{{ $pageData['quick_info']['title'] ?? __('ui.quick_summary') }}</div>
+                            @if($excerptLines->isNotEmpty())
+                                <ul class="tw-visa-reference-summary-list mb-0">
+                                    @foreach($excerptLines->take(5) as $line)
+                                        <li><span>{{ $line }}</span></li>
+                                    @endforeach
+                                </ul>
+                            @elseif($quickInfo->isNotEmpty())
+                                <ul class="tw-visa-reference-summary-list mb-0">
+                                    @foreach($quickInfo->take(5) as $item)
+                                        <li>
+                                            <strong>{{ $item['label'] }}:</strong>
+                                            <span>{{ $item['value'] }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @elseif(!empty($pageData['subtitle']))
+                                <p class="mb-0">{{ $pageData['subtitle'] }}</p>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
     @endif
