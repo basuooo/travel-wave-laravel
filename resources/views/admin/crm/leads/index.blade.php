@@ -106,12 +106,11 @@
                     <span class="badge text-bg-danger ms-1">{{ $delayedLeadsCount }}</span>
                 @endif
             </a>
-            @if(auth()->user()?->hasPermission('leads.edit') && $canViewAllLeads)
+            @if(auth()->user()?->hasPermission('leads.create'))
                 <a href="{{ route('admin.crm.leads.create') }}" class="btn btn-primary btn-sm">{{ __('admin.crm_add_lead') }}</a>
-                <a href="{{ route('admin.crm.leads.transfer', request()->query()) }}" class="btn btn-outline-secondary btn-sm">{{ __('admin.crm_import_export') }}</a>
             @endif
-            @if(auth()->user()?->hasPermission('leads.export') && $canViewAllLeads)
-                <a href="{{ route('admin.crm.leads.transfer', request()->query()) }}" class="btn btn-outline-secondary btn-sm">{{ __('admin.crm_export') }}</a>
+            @if(auth()->user()?->hasPermission('leads.create') || auth()->user()?->hasPermission('leads.export'))
+                <a href="{{ route('admin.crm.leads.transfer', request()->query()) }}" class="btn btn-outline-secondary btn-sm">{{ __('admin.crm_import_export') }}</a>
             @endif
             @if(auth()->user()?->hasPermission('leads.edit'))
                 <select class="form-select form-select-sm" name="bulk_status_id" form="crm-bulk-action-form" style="min-width: 180px;">

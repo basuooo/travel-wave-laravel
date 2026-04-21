@@ -81,6 +81,8 @@ class AccessControl
             ],
             'leads' => [
                 ['slug' => 'leads.view', 'name' => 'View Leads', 'description' => 'View inquiries and leads.'],
+                ['slug' => 'leads.view_all', 'name' => 'View All Leads', 'description' => 'View leads assigned to all users, not just own assigned leads.'],
+                ['slug' => 'leads.create', 'name' => 'Create Leads', 'description' => 'Manually create new leads in the CRM.'],
                 ['slug' => 'leads.edit', 'name' => 'Manage Leads', 'description' => 'Update lead status and internal notes.'],
                 ['slug' => 'leads.delete', 'name' => 'Delete Leads', 'description' => 'Move leads to trash, restore them, or delete them permanently when allowed.'],
                 ['slug' => 'leads.export', 'name' => 'Export Leads', 'description' => 'Export leads for sales and reporting.'],
@@ -136,7 +138,7 @@ class AccessControl
                     'workflow_automations.view', 'workflow_automations.manage',
                     'goals_commissions.view', 'goals_commissions.manage',
                     'knowledge_base.view', 'knowledge_base.manage', 'knowledge_base.categories.manage',
-                    'leads.view', 'leads.edit', 'leads.delete', 'leads.export', 'information.manage', 'customers.view', 'customers.manage',
+                    'leads.view', 'leads.view_all', 'leads.create', 'leads.edit', 'leads.delete', 'leads.export', 'information.manage', 'customers.view', 'customers.manage',
                     'documents.view', 'documents.manage', 'documents.categories.manage',
                     'accounting.view', 'accounting.manage', 'accounting.reports.view',
                 ],
@@ -172,7 +174,17 @@ class AccessControl
                 'slug' => 'sales-leads-manager',
                 'description' => 'Monitor and update leads, submissions, and sales-related follow-up records.',
                 'permissions' => [
-                    'dashboard.access', 'reports.view', 'leads.view', 'leads.edit', 'leads.export', 'forms.submissions.view', 'forms.submissions.edit', 'information.manage',
+                    'dashboard.access', 'reports.view', 'leads.view', 'leads.view_all', 'leads.create', 'leads.edit', 'leads.export', 'forms.submissions.view', 'forms.submissions.edit', 'information.manage',
+                    'customers.view', 'customers.manage', 'documents.view', 'documents.manage', 'knowledge_base.view', 'knowledge_base.manage',
+                    'workflow_automations.view', 'goals_commissions.view', 'leads.change_assigned_to',
+                ],
+            ],
+            [
+                'name' => 'Sales Team Leader',
+                'slug' => 'sales-team-leader',
+                'description' => 'Team leader for sales with capabilities to manage and create leads.',
+                'permissions' => [
+                    'dashboard.access', 'reports.view', 'leads.view', 'leads.view_all', 'leads.create', 'leads.edit', 'leads.export', 'forms.submissions.view', 'forms.submissions.edit', 'information.manage',
                     'customers.view', 'customers.manage', 'documents.view', 'documents.manage', 'knowledge_base.view', 'knowledge_base.manage',
                     'workflow_automations.view', 'goals_commissions.view', 'leads.change_assigned_to',
                 ],

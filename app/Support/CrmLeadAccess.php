@@ -10,17 +10,7 @@ class CrmLeadAccess
 {
     public static function canViewAll(?User $user): bool
     {
-        if (! $user) {
-            return false;
-        }
-
-        if ($user->is_admin && ! $user->roles()->exists()) {
-            return true;
-        }
-
-        $user->loadMissing('roles');
-
-        return $user->roles->contains(fn ($role) => in_array($role->slug, ['super-admin', 'admin'], true));
+        return $user && $user->hasPermission('leads.view_all');
     }
 
     public static function applyVisibilityScope(Builder $query, ?User $user): Builder

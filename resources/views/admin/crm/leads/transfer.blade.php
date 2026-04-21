@@ -5,6 +5,7 @@
 
 @section('content')
 <div class="row g-4">
+    @if(auth()->user()?->hasPermission('leads.create'))
     <div class="col-lg-7">
         <div class="card admin-card p-4 mb-4">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
@@ -165,6 +166,7 @@
             </div>
         @endif
     </div>
+    @endif
 
     <div class="col-lg-5">
         @if($canExportLeads)

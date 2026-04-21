@@ -1407,12 +1407,12 @@ class CrmLeadController extends Controller
             return;
         }
 
-        abort_unless($user && CrmLeadAccess::canViewAll($user) && $user->hasPermission('leads.edit'), 403);
+        abort_unless($user && $user->hasPermission('leads.create'), 403);
     }
 
     protected function canExportLeads(?User $user): bool
     {
-        return (bool) ($user && CrmLeadAccess::canViewAll($user) && $user->hasPermission('leads.export'));
+        return (bool) ($user && $user->hasPermission('leads.export'));
     }
 
     protected function guardManualLeadDuplicates(array $data): void
