@@ -7,22 +7,22 @@
 <div class="card admin-card p-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
-            <h2 class="h5 mb-1">Pages Trash</h2>
-            <p class="text-muted mb-0">Deleted pages stay here safely until you restore them or permanently delete them.</p>
+            <h2 class="h5 mb-1">{{ __('admin.pages_trash') }}</h2>
+            <p class="text-muted mb-0">{{ __('admin.trash_desc') }}</p>
         </div>
-        <a href="{{ route('admin.pages.index') }}" class="btn btn-outline-secondary">Back to Pages</a>
+        <a href="{{ route('admin.pages.index') }}" class="btn btn-outline-secondary">{{ __('admin.back_to_pages') }}</a>
     </div>
 
     <div class="table-responsive">
         <table class="table align-middle">
             <thead>
                 <tr>
-                    <th>Title AR</th>
-                    <th>Title EN</th>
-                    <th>Key</th>
-                    <th>Deleted At</th>
-                    <th>Deleted By</th>
-                    <th class="text-end">Actions</th>
+                    <th>{{ __('admin.title_ar') }}</th>
+                    <th>{{ __('admin.title_en') }}</th>
+                    <th>{{ __('admin.key') }}</th>
+                    <th>{{ __('admin.deleted_at') }}</th>
+                    <th>{{ __('admin.deleted_by') }}</th>
+                    <th class="text-end">{{ __('admin.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,21 +35,21 @@
                         <td>{{ $page->deletedBy?->name ?? 'System' }}</td>
                         <td class="text-end">
                             <div class="d-inline-flex flex-wrap justify-content-end gap-2">
-                                <form method="post" action="{{ route('admin.pages.restore', $page->id) }}" onsubmit="return confirm('Restore this page to the active Pages list?')">
+                                <form method="post" action="{{ route('admin.pages.restore', $page->id) }}" onsubmit="return confirm('{{ __('admin.confirm_restore') }}')">
                                     @csrf
-                                    <button type="submit" class="btn btn-sm btn-outline-primary">Restore</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">{{ __('admin.restore') }}</button>
                                 </form>
-                                <form method="post" action="{{ route('admin.pages.force-destroy', $page->id) }}" onsubmit="return confirm('Permanently delete this page? This cannot be undone.')">
+                                <form method="post" action="{{ route('admin.pages.force-destroy', $page->id) }}" onsubmit="return confirm('{{ __('admin.confirm_delete_permanently') }}')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete Permanently</button>
+                                    <button type="submit" class="btn btn-sm btn-danger">{{ __('admin.delete_permanently') }}</button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">Trash is empty.</td>
+                        <td colspan="6" class="text-center text-muted py-4">{{ __('admin.trash_is_empty') }}</td>
                     </tr>
                 @endforelse
             </tbody>

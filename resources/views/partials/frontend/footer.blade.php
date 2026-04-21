@@ -75,7 +75,7 @@
                 @if($siteSettings?->whatsapp_number && $footerWhatsappUrl)
                     <p class="mb-1">
                         <a href="{{ $footerWhatsappUrl }}" class="tw-footer-contact-link tw-footer-whatsapp-link" target="_blank" rel="noopener noreferrer">
-                            <span>WhatsApp:</span>
+                            <span>{{ __('ui.whatsapp') }}:</span>
                             <span>{{ $siteSettings?->whatsapp_number }}</span>
                         </a>
                     </p>

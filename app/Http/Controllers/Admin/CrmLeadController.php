@@ -1407,7 +1407,7 @@ class CrmLeadController extends Controller
             return;
         }
 
-        abort_unless($user && $user->hasPermission('leads.create'), 403);
+        abort_unless($user && ($user->hasPermission('leads.create') || $user->hasPermission('leads.export')), 403);
     }
 
     protected function canExportLeads(?User $user): bool

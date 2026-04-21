@@ -104,4 +104,5 @@ return [
     'visa_summary_stay_duration' => 'تسمح عادة بإقامة تصل إلى :duration.',
     'visa_summary_processing_time' => 'مدة المعالجة غالبًا :duration.',
     'visa_summary_support' => 'تساعدك Travel Wave في :items.',
+    'whatsapp' => 'واتساب',
 ];

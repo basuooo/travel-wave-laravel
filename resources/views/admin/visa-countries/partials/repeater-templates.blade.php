@@ -3,38 +3,38 @@
         <div class="border rounded-4 p-3">
             <div class="row g-3">
                 <div class="col-md-3">
-                    <label class="form-label">Title EN</label>
+                    <label class="form-label">{{ __('admin.title_en') }}</label>
                     <input class="form-control" data-field="title_en" type="text">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Title AR</label>
+                    <label class="form-label">{{ __('admin.title_ar') }}</label>
                     <input class="form-control text-end" dir="rtl" data-field="title_ar" type="text">
                 </div>
                 <div class="col-md-5">
-                    <label class="form-label">Description EN</label>
+                    <label class="form-label">{{ __('admin.description_en') }}</label>
                     <textarea class="form-control" data-field="description_en" rows="3"></textarea>
                 </div>
                 <div class="col-md-5">
-                    <label class="form-label">Description AR</label>
+                    <label class="form-label">{{ __('admin.description_ar') }}</label>
                     <textarea class="form-control text-end" dir="rtl" data-field="description_ar" rows="3"></textarea>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Order</label>
+                    <label class="form-label">{{ __('admin.order') }}</label>
                     <input class="form-control" data-field="sort_order" type="number">
                 </div>
                 <div class="col-md-2">
                     <div class="form-check mt-4 pt-2">
                         <input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked>
-                        <label class="form-check-label">Active</label>
+                        <label class="form-check-label">{{ __('admin.active') }}</label>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Card Image</label>
+                    <label class="form-label">{{ __('admin.card_image') }}</label>
                     <input class="form-control" data-field="image_file" data-highlight-image-input data-media-target-field="existing_image" data-media-enhanced="1" type="file" accept="image/*">
                     <div class="admin-media-picker">
                         <div class="admin-media-picker__actions">
-                            <button type="button" class="btn btn-outline-secondary btn-sm js-open-media-library">Select from Library</button>
-                            <span class="admin-media-picker__hint">or upload new</span>
+                            <button type="button" class="btn btn-outline-secondary btn-sm js-open-media-library">{{ __('admin.select_from_library') }}</button>
+                            <span class="admin-media-picker__hint">{{ __('admin.or_upload_new') }}</span>
                         </div>
                         <div class="admin-media-picker__selected"></div>
                     </div>
@@ -42,11 +42,11 @@
                     <img src="" alt="" class="img-fluid rounded border mt-3 js-highlight-preview d-none" style="max-height: 160px; object-fit: cover;">
                     <div class="form-check mt-2">
                         <input class="form-check-input" data-field="remove_image" type="checkbox" value="1">
-                        <label class="form-check-label">Remove current image</label>
+                        <label class="form-check-label">{{ __('admin.remove_current_image') }}</label>
                     </div>
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
-                    <button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>Remove</button>
+                    <button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>{{ __('admin.remove') }}</button>
                 </div>
             </div>
         </div>
@@ -58,15 +58,15 @@
         <div class="border rounded-4 p-3">
             <div class="row g-3">
                 <div class="col-md-5">
-                    <label class="form-label">Bullet EN</label>
+                    <label class="form-label">{{ __('admin.bullet_en') }}</label>
                     <input class="form-control" name="introduction_points_en[]" value="">
                 </div>
                 <div class="col-md-5">
-                    <label class="form-label">Bullet AR</label>
+                    <label class="form-label">{{ __('admin.bullet_ar') }}</label>
                     <input class="form-control text-end" dir="rtl" name="introduction_points_ar[]" value="">
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
-                    <button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>Remove</button>
+                    <button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>{{ __('admin.remove') }}</button>
                 </div>
             </div>
         </div>
@@ -77,21 +77,21 @@
     <div class="col-12" data-repeater-item>
         <div class="border rounded-4 p-3">
             <div class="row g-3">
-                <div class="col-md-3"><label class="form-label">Card Label EN</label><input class="form-control" data-field="label_en" type="text"></div>
-                <div class="col-md-3"><label class="form-label">Card Label AR</label><input class="form-control text-end" dir="rtl" data-field="label_ar" type="text"></div>
-                <div class="col-md-2"><label class="form-label">Value EN</label><input class="form-control" data-field="value_en" type="text"></div>
-                <div class="col-md-2"><label class="form-label">Value AR</label><input class="form-control text-end" dir="rtl" data-field="value_ar" type="text"></div>
+                <div class="col-md-3"><label class="form-label">{{ __('admin.card_label_en') }}</label><input class="form-control" data-field="label_en" type="text"></div>
+                <div class="col-md-3"><label class="form-label">{{ __('admin.card_label_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="label_ar" type="text"></div>
+                <div class="col-md-2"><label class="form-label">{{ __('admin.value_en') }}</label><input class="form-control" data-field="value_en" type="text"></div>
+                <div class="col-md-2"><label class="form-label">{{ __('admin.value_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="value_ar" type="text"></div>
                 <div class="col-md-2">
                     <label class="form-label d-flex align-items-center gap-2">
-                        <span>Icon</span>
+                        <span>{{ __('admin.icon') }}</span>
                         <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="small text-decoration-none" aria-label="Browse Iconify icons"><span aria-hidden="true">&#127760;</span></a>
                     </label>
                     <input class="form-control" data-field="icon" type="text" placeholder="material-symbols:travel">
-                    <div class="form-text">Example: material-symbols:travel</div>
+                    <div class="form-text">{{ __('admin.example') }}: material-symbols:travel</div>
                 </div>
-                <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
-                <div class="col-md-2"><div class="form-check mt-4 pt-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div></div>
-                <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>Remove</button></div>
+                <div class="col-md-1"><label class="form-label">{{ __('admin.order') }}</label><input class="form-control" data-field="sort_order" type="number"></div>
+                <div class="col-md-2"><div class="form-check mt-4 pt-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">{{ __('admin.active') }}</label></div></div>
+                <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>{{ __('admin.remove') }}</button></div>
             </div>
         </div>
     </div>
@@ -101,13 +101,13 @@
     <div class="col-12" data-repeater-item>
         <div class="border rounded-4 p-3">
             <div class="row g-3">
-                <div class="col-md-4"><label class="form-label">Title EN</label><input class="form-control" data-field="title_en" type="text"></div>
-                <div class="col-md-4"><label class="form-label">Title AR</label><input class="form-control text-end" dir="rtl" data-field="title_ar" type="text"></div>
-                <div class="col-md-4"><label class="form-label">Icon Keyword</label><input class="form-control" data-field="icon" type="text" placeholder="shield, file, calendar, support"></div>
-                <div class="col-md-5"><label class="form-label">Description EN</label><textarea class="form-control" data-field="description_en" rows="3"></textarea></div>
-                <div class="col-md-5"><label class="form-label">Description AR</label><textarea class="form-control text-end" dir="rtl" data-field="description_ar" rows="3"></textarea></div>
-                <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
-                <div class="col-md-1 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>Remove</button></div>
+                <div class="col-md-4"><label class="form-label">{{ __('admin.title_en') }}</label><input class="form-control" data-field="title_en" type="text"></div>
+                <div class="col-md-4"><label class="form-label">{{ __('admin.title_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="title_ar" type="text"></div>
+                <div class="col-md-4"><label class="form-label">{{ __('admin.icon_keyword') }}</label><input class="form-control" data-field="icon" type="text" placeholder="shield, file, calendar, support"></div>
+                <div class="col-md-5"><label class="form-label">{{ __('admin.description_en') }}</label><textarea class="form-control" data-field="description_en" rows="3"></textarea></div>
+                <div class="col-md-5"><label class="form-label">{{ __('admin.description_ar') }}</label><textarea class="form-control text-end" dir="rtl" data-field="description_ar" rows="3"></textarea></div>
+                <div class="col-md-1"><label class="form-label">{{ __('admin.order') }}</label><input class="form-control" data-field="sort_order" type="number"></div>
+                <div class="col-md-1 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">{{ __('admin.active') }}</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>{{ __('admin.remove') }}</button></div>
             </div>
         </div>
     </div>
@@ -117,12 +117,12 @@
     <div class="col-12" data-repeater-item>
         <div class="border rounded-4 p-3">
             <div class="row g-3">
-                <div class="col-md-4"><label class="form-label">Document Name EN</label><input class="form-control" data-field="name_en" type="text"></div>
-                <div class="col-md-4"><label class="form-label">Document Name AR</label><input class="form-control text-end" dir="rtl" data-field="name_ar" type="text"></div>
-                <div class="col-md-2"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
-                <div class="col-md-2 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>Remove</button></div>
-                <div class="col-md-6"><label class="form-label">Description EN</label><textarea class="form-control" data-field="description_en" rows="3"></textarea></div>
-                <div class="col-md-6"><label class="form-label">Description AR</label><textarea class="form-control text-end" dir="rtl" data-field="description_ar" rows="3"></textarea></div>
+                <div class="col-md-4"><label class="form-label">{{ __('admin.document_name_en') }}</label><input class="form-control" data-field="name_en" type="text"></div>
+                <div class="col-md-4"><label class="form-label">{{ __('admin.document_name_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="name_ar" type="text"></div>
+                <div class="col-md-2"><label class="form-label">{{ __('admin.order') }}</label><input class="form-control" data-field="sort_order" type="number"></div>
+                <div class="col-md-2 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">{{ __('admin.active') }}</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>{{ __('admin.remove') }}</button></div>
+                <div class="col-md-6"><label class="form-label">{{ __('admin.description_en') }}</label><textarea class="form-control" data-field="description_en" rows="3"></textarea></div>
+                <div class="col-md-6"><label class="form-label">{{ __('admin.description_ar') }}</label><textarea class="form-control text-end" dir="rtl" data-field="description_ar" rows="3"></textarea></div>
             </div>
         </div>
     </div>
@@ -132,13 +132,13 @@
     <div class="col-12" data-repeater-item>
         <div class="border rounded-4 p-3">
             <div class="row g-3">
-                <div class="col-md-4"><label class="form-label">Step Title EN</label><input class="form-control" data-field="title_en" type="text"></div>
-                <div class="col-md-4"><label class="form-label">Step Title AR</label><input class="form-control text-end" dir="rtl" data-field="title_ar" type="text"></div>
-                <div class="col-md-1"><label class="form-label">Step</label><input class="form-control" data-field="step_number" type="number"></div>
-                <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
-                <div class="col-md-2 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>Remove</button></div>
-                <div class="col-md-6"><label class="form-label">Description EN</label><textarea class="form-control" data-field="description_en" rows="3"></textarea></div>
-                <div class="col-md-6"><label class="form-label">Description AR</label><textarea class="form-control text-end" dir="rtl" data-field="description_ar" rows="3"></textarea></div>
+                <div class="col-md-4"><label class="form-label">{{ __('admin.step_title_en') }}</label><input class="form-control" data-field="title_en" type="text"></div>
+                <div class="col-md-4"><label class="form-label">{{ __('admin.step_title_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="title_ar" type="text"></div>
+                <div class="col-md-1"><label class="form-label">{{ __('admin.step') }}</label><input class="form-control" data-field="step_number" type="number"></div>
+                <div class="col-md-1"><label class="form-label">{{ __('admin.order') }}</label><input class="form-control" data-field="sort_order" type="number"></div>
+                <div class="col-md-2 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">{{ __('admin.active') }}</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>{{ __('admin.remove') }}</button></div>
+                <div class="col-md-6"><label class="form-label">{{ __('admin.description_en') }}</label><textarea class="form-control" data-field="description_en" rows="3"></textarea></div>
+                <div class="col-md-6"><label class="form-label">{{ __('admin.description_ar') }}</label><textarea class="form-control text-end" dir="rtl" data-field="description_ar" rows="3"></textarea></div>
             </div>
         </div>
     </div>
@@ -148,12 +148,12 @@
     <div class="col-12" data-repeater-item>
         <div class="border rounded-4 p-3">
             <div class="row g-3">
-                <div class="col-md-5"><label class="form-label">Question EN</label><input class="form-control" data-field="question_en" type="text"></div>
-                <div class="col-md-5"><label class="form-label">Question AR</label><input class="form-control text-end" dir="rtl" data-field="question_ar" type="text"></div>
-                <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
-                <div class="col-md-1 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>Remove</button></div>
-                <div class="col-md-6"><label class="form-label">Answer EN</label><textarea class="form-control" data-field="answer_en" rows="3"></textarea></div>
-                <div class="col-md-6"><label class="form-label">Answer AR</label><textarea class="form-control text-end" dir="rtl" data-field="answer_ar" rows="3"></textarea></div>
+                <div class="col-md-5"><label class="form-label">{{ __('admin.question_en') }}</label><input class="form-control" data-field="question_en" type="text"></div>
+                <div class="col-md-5"><label class="form-label">{{ __('admin.question_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="question_ar" type="text"></div>
+                <div class="col-md-1"><label class="form-label">{{ __('admin.order') }}</label><input class="form-control" data-field="sort_order" type="number"></div>
+                <div class="col-md-1 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">{{ __('admin.active') }}</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>{{ __('admin.remove') }}</button></div>
+                <div class="col-md-6"><label class="form-label">{{ __('admin.answer_en') }}</label><textarea class="form-control" data-field="answer_en" rows="3"></textarea></div>
+                <div class="col-md-6"><label class="form-label">{{ __('admin.answer_ar') }}</label><textarea class="form-control text-end" dir="rtl" data-field="answer_ar" rows="3"></textarea></div>
             </div>
         </div>
     </div>
@@ -164,31 +164,31 @@
         <div class="border rounded-4 p-3">
             <div class="row g-3">
                 <div class="col-md-3">
-                    <label class="form-label">Label EN</label>
+                    <label class="form-label">{{ __('admin.label_en') }}</label>
                     <input class="form-control" data-field="label_en" type="text">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Label AR</label>
+                    <label class="form-label">{{ __('admin.label_ar') }}</label>
                     <input class="form-control text-end" dir="rtl" data-field="label_ar" type="text">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Value EN</label>
+                    <label class="form-label">{{ __('admin.value_en') }}</label>
                     <input class="form-control" data-field="value_en" type="text">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Value AR</label>
+                    <label class="form-label">{{ __('admin.value_ar') }}</label>
                     <input class="form-control text-end" dir="rtl" data-field="value_ar" type="text">
                 </div>
                 <div class="col-md-1">
-                    <label class="form-label">Order</label>
+                    <label class="form-label">{{ __('admin.order') }}</label>
                     <input class="form-control" data-field="sort_order" type="number">
                 </div>
                 <div class="col-md-1 d-flex flex-column justify-content-end">
                     <div class="form-check mb-2">
                         <input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked>
-                        <label class="form-check-label">Active</label>
+                        <label class="form-check-label">{{ __('admin.active') }}</label>
                     </div>
-                    <button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>Remove</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>{{ __('admin.remove') }}</button>
                 </div>
             </div>
         </div>

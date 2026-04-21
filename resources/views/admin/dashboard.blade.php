@@ -126,7 +126,7 @@
                                     <a href="{{ route('admin.inquiries.show', $item) }}" class="admin-table-link">{{ $item->full_name }}</a>
                                 </td>
                                 <td>{{ $item->type }}</td>
-                                <td><span class="admin-status-pill">{{ ucfirst($item->status) }}</span></td>
+                                <td><span class="admin-status-pill">{{ $item->crmStatus ? $item->crmStatus->localizedName() : ucfirst($item->status) }}</span></td>
                             </tr>
                         @empty
                             <tr>
@@ -153,7 +153,7 @@
                     @forelse($latestPosts as $item)
                         <article class="admin-stack-item">
                             <div>
-                                <strong>{{ $item->title_en }}</strong>
+                                <strong>{{ $item->localized('title') }}</strong>
                                 <div class="text-muted small">{{ $item->slug }}</div>
                             </div>
                             <span>{{ optional($item->published_at)->format('d M Y') ?: '—' }}</span>
