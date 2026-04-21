@@ -78,6 +78,14 @@
             <input class="form-control" name="additional_notes" value="{{ request('additional_notes') }}" placeholder="{{ __('admin.crm_additional_notes') }}">
         </div>
         <div class="col-md-2">
+            <label class="form-label">{{ __('admin.from') }} ({{ __('admin.last_modified') }})</label>
+            <input type="date" class="form-control" name="updated_from" value="{{ request('updated_from') }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">{{ __('admin.to') }} ({{ __('admin.last_modified') }})</label>
+            <input type="date" class="form-control" name="updated_to" value="{{ request('updated_to') }}">
+        </div>
+        <div class="col-md-2">
             <label class="form-label">Per page</label>
             <select class="form-select" name="per_page" onchange="this.form.submit()">
                 @foreach(['20' => '20', '50' => '50', '100' => '100', '500' => '500', '1000' => '1000', 'all' => 'All'] as $value => $label)
@@ -154,6 +162,7 @@
                     <th>{{ __('admin.crm_additional_notes') }}</th>
                     <th>{{ __('admin.created_date') }}</th>
                     <th>{{ __('admin.crm_last_status_change') }}</th>
+                    <th>{{ __('admin.last_modified') }}</th>
                     <th class="text-end">{{ __('admin.actions') }}</th>
                 </tr>
             </thead>
@@ -189,6 +198,7 @@
                         <td><div class="text-truncate" style="max-width: 150px;" title="{{ $item->additional_notes }}">{{ $item->additional_notes ?: '-' }}</div></td>
                         <td>{{ optional($item->created_at)->format('Y-m-d') }}</td>
                         <td>{{ optional($item->statusChangedAt())->format('Y-m-d H:i') ?: '-' }}</td>
+                        <td>{{ optional($item->updated_at)->format('Y-m-d H:i') ?: '-' }}</td>
                         <td class="text-end">
                             <div class="d-inline-flex gap-2">
                                 <a href="{{ route('admin.crm.leads.show', $item) }}" class="btn btn-sm btn-outline-secondary">{{ __('admin.edit') }}</a>
@@ -204,7 +214,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="14" class="text-muted">{{ __('admin.no_search_results') }}</td></tr>
+                    <tr><td colspan="15" class="text-muted">{{ __('admin.no_search_results') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

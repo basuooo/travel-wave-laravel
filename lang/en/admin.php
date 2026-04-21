@@ -173,6 +173,7 @@ return [
     'select_platform' => 'Select platform',
     'none_option' => 'None',
     'created_date' => 'Created Date',
+    'last_modified' => 'Last Modified',
     'whatsapp_clicks' => 'WhatsApp Clicks',
     'cta_clicks' => 'CTA Clicks',
     'marketing_landing_saved' => 'Landing page created successfully.',

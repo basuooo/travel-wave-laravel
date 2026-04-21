@@ -233,6 +233,7 @@ return [
     'select_platform' => 'اختر المنصة',
     'none_option' => 'بدون',
     'created_date' => 'تاريخ الإنشاء',
+    'last_modified' => 'تاريخ التعديل',
     'whatsapp_clicks' => 'نقرات واتساب',
     'cta_clicks' => 'نقرات أزرار الدعوة',
     'marketing_landing_saved' => 'تم إنشاء صفحة الهبوط بنجاح.',

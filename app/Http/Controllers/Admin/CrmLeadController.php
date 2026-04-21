@@ -155,6 +155,7 @@ class CrmLeadController extends Controller
             'country' => ['nullable', 'string', 'max:255'],
             'destination' => ['nullable', 'string', 'max:255'],
             'admin_notes' => ['nullable', 'string'],
+            'additional_notes' => ['nullable', 'string'],
             'crm_status_id' => ['nullable', 'exists:crm_statuses,id'],
         ]);
 
@@ -176,6 +177,7 @@ class CrmLeadController extends Controller
             'country' => $data['country'] ?? null,
             'destination' => $data['destination'] ?? ($data['country'] ?? null),
             'admin_notes' => $data['admin_notes'] ?? null,
+            'additional_notes' => $data['additional_notes'] ?? null,
             'crm_status_id' => $status?->id,
             'status' => $status?->slug ?? 'new',
             'crm_source_id' => $manualSource?->id,
@@ -1098,6 +1100,14 @@ class CrmLeadController extends Controller
 
         if ($request->filled('changed_to')) {
             $query->whereDate('crm_status_updated_at', '<=', $request->date('changed_to'));
+        }
+
+        if ($request->filled('updated_from')) {
+            $query->whereDate('updated_at', '>=', $request->date('updated_from'));
+        }
+
+        if ($request->filled('updated_to')) {
+            $query->whereDate('updated_at', '<=', $request->date('updated_to'));
         }
 
         return $query;

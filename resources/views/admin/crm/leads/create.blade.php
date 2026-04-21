@@ -66,10 +66,15 @@
             @error('destination')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
 
-        <div class="col-12">
-            <label class="form-label">{{ __('admin.notes') }}</label>
-            <textarea name="admin_notes" rows="5" class="form-control @error('admin_notes') is-invalid @enderror">{{ old('admin_notes') }}</textarea>
+        <div class="col-md-6">
+            <label class="form-label">{{ __('admin.comment') }}</label>
+            <textarea name="admin_notes" rows="3" class="form-control @error('admin_notes') is-invalid @enderror">{{ old('admin_notes') }}</textarea>
             @error('admin_notes')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">{{ __('admin.crm_additional_notes') }}</label>
+            <textarea name="additional_notes" rows="3" class="form-control @error('additional_notes') is-invalid @enderror">{{ old('additional_notes') }}</textarea>
+            @error('additional_notes')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
 
         <div class="col-12">
