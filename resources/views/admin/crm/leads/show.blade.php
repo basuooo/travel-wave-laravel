@@ -338,7 +338,7 @@
                 <div class="col-md-6"><label class="form-label">{{ __('admin.email') }}</label><input class="form-control" name="email" value="{{ old('email', $lead->email) }}"></div>
                 <div class="col-md-6"><label class="form-label">{{ __('admin.status') }}</label><select class="form-select" name="crm_status_id" data-crm-status-select>@foreach($statuses as $status)<option value="{{ $status->id }}" data-status-slug="{{ $status->slug }}" @selected($selectedStatusId === (int) $status->id)>{{ $status->localizedName() }}</option>@endforeach</select></div>
                 <div class="col-md-6"><label class="form-label">{{ __('admin.source') }}</label><select class="form-select" name="crm_source_id"><option value="">-</option>@foreach($sources as $source)<option value="{{ $source->id }}" @selected((int) old('crm_source_id', $lead->crm_source_id) === (int) $source->id)>{{ $source->localizedName() }}</option>@endforeach</select></div>
-                @if($canViewAllLeads)
+                @if(auth()->user()?->hasPermission('leads.change_assigned_to'))
                     <div class="col-md-6"><label class="form-label">{{ __('admin.assigned_to') }}</label><select class="form-select" name="assigned_user_id"><option value="">{{ __('admin.crm_unassigned') }}</option>@foreach($users as $user)<option value="{{ $user->id }}" @selected((int) old('assigned_user_id', $lead->assigned_user_id) === (int) $user->id)>{{ $user->name }}</option>@endforeach</select></div>
                 @else
                     <input type="hidden" name="assigned_user_id" value="{{ old('assigned_user_id', $lead->assigned_user_id) }}">

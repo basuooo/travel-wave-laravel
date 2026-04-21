@@ -54,6 +54,7 @@ class AccessControl
                 ['slug' => 'media.manage', 'name' => 'Manage Media', 'description' => 'Upload or manage media assets used in content.'],
                 ['slug' => 'menu.manage', 'name' => 'Manage Navigation', 'description' => 'Manage site menus and navigation items.'],
                 ['slug' => 'testimonials.manage', 'name' => 'Manage Testimonials', 'description' => 'Manage testimonials and social proof sections.'],
+
             ],
             'forms' => [
                 ['slug' => 'forms.manage', 'name' => 'Manage Forms', 'description' => 'Manage reusable lead and inquiry forms.'],
@@ -84,6 +85,7 @@ class AccessControl
                 ['slug' => 'leads.delete', 'name' => 'Delete Leads', 'description' => 'Move leads to trash, restore them, or delete them permanently when allowed.'],
                 ['slug' => 'leads.export', 'name' => 'Export Leads', 'description' => 'Export leads for sales and reporting.'],
                 ['slug' => 'information.manage', 'name' => 'Manage CRM Information', 'description' => 'Create and review targeted CRM information notices and acknowledgements.'],
+                ['slug' => 'leads.change_assigned_to', 'label' => 'Change Assigned To']
             ],
             'customers' => [
                 ['slug' => 'customers.view', 'name' => 'View Customers', 'description' => 'View converted customers and active customer cases.'],

@@ -70,6 +70,14 @@
             <input type="date" class="form-control" name="changed_to" value="{{ request('changed_to') }}">
         </div>
         <div class="col-md-2">
+            <label class="form-label">{{ __('admin.comment') }}</label>
+            <input class="form-control" name="admin_notes" value="{{ request('admin_notes') }}" placeholder="{{ __('admin.comment') }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">{{ __('admin.crm_additional_notes') }}</label>
+            <input class="form-control" name="additional_notes" value="{{ request('additional_notes') }}" placeholder="{{ __('admin.crm_additional_notes') }}">
+        </div>
+        <div class="col-md-2">
             <label class="form-label">Per page</label>
             <select class="form-select" name="per_page" onchange="this.form.submit()">
                 @foreach(['20' => '20', '50' => '50', '100' => '100', '500' => '500', '1000' => '1000', 'all' => 'All'] as $value => $label)
@@ -104,7 +112,7 @@
                         <option value="{{ $status->id }}">{{ $status->localizedName() }}</option>
                     @endforeach
                 </select>
-                @if($canViewAllLeads)
+                @if(auth()->user()?->hasPermission('leads.change_assigned_to'))
                     <select class="form-select form-select-sm" name="bulk_assigned_user_id" form="crm-bulk-action-form" style="min-width: 180px;">
                         <option value="">{{ __('admin.crm_bulk_assign_to_seller') }}</option>
                         <option value="unassigned">{{ __('admin.crm_unassigned') }}</option>
@@ -142,6 +150,8 @@
                     <th>{{ __('admin.destination') }}</th>
                     <th>{{ __('admin.source') }}</th>
                     <th>{{ __('admin.assigned_to') }}</th>
+                    <th>{{ __('admin.comment') }}</th>
+                    <th>{{ __('admin.crm_additional_notes') }}</th>
                     <th>{{ __('admin.created_date') }}</th>
                     <th>{{ __('admin.crm_last_status_change') }}</th>
                     <th class="text-end">{{ __('admin.actions') }}</th>
@@ -175,6 +185,8 @@
                                 <span class="text-muted">{{ __('admin.crm_unassigned') }}</span>
                             @endif
                         </td>
+                        <td><div class="text-truncate" style="max-width: 150px;" title="{{ $item->admin_notes }}">{{ $item->admin_notes ?: '-' }}</div></td>
+                        <td><div class="text-truncate" style="max-width: 150px;" title="{{ $item->additional_notes }}">{{ $item->additional_notes ?: '-' }}</div></td>
                         <td>{{ optional($item->created_at)->format('Y-m-d') }}</td>
                         <td>{{ optional($item->statusChangedAt())->format('Y-m-d H:i') ?: '-' }}</td>
                         <td class="text-end">
@@ -192,7 +204,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="12" class="text-muted">{{ __('admin.no_search_results') }}</td></tr>
+                    <tr><td colspan="14" class="text-muted">{{ __('admin.no_search_results') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

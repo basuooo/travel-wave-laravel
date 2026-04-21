@@ -529,9 +529,12 @@ class CrmLeadController extends Controller
         $userId = auth()->id();
         $statusChanged = (int) ($lead->crm_status_id ?? 0) !== (int) ($data['crm_status_id'] ?? 0);
         $assignmentChanged = (int) ($lead->assigned_user_id ?? 0) !== (int) ($data['assigned_user_id'] ?? 0);
-        if ($assignmentChanged && ! CrmLeadAccess::canViewAll(auth()->user())) {
-            abort(403);
-        }
+        if (
+    $assignmentChanged
+    && ! auth()->user()?->hasPermission('leads.change_assigned_to')
+) {
+    abort(403);
+}
         $callLaterStatus = ! empty($data['crm_status_id'])
             ? CrmStatus::query()->find($data['crm_status_id'])
             : null;
@@ -1049,8 +1052,18 @@ class CrmLeadController extends Controller
                     ->orWhere('tourism_destination', 'like', $needle)
                     ->orWhere('travel_destination', 'like', $needle)
                     ->orWhere('hotel_destination', 'like', $needle)
-                    ->orWhere('lead_source', 'like', $needle);
+                    ->orWhere('lead_source', 'like', $needle)
+                    ->orWhere('admin_notes', 'like', $needle)
+                    ->orWhere('additional_notes', 'like', $needle);
             });
+        }
+
+        if ($request->filled('admin_notes')) {
+            $query->where('admin_notes', 'like', '%' . trim((string) $request->query('admin_notes')) . '%');
+        }
+
+        if ($request->filled('additional_notes')) {
+            $query->where('additional_notes', 'like', '%' . trim((string) $request->query('additional_notes')) . '%');
         }
 
         foreach (['crm_status_id', 'crm_source_id'] as $field) {
