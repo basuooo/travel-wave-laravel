@@ -37,7 +37,7 @@ class CrmLeadController extends Controller
         $viewer = auth()->user();
 
         return view('admin.crm.leads.index', [
-            'items' => $this->filteredLeadsQuery($request)->paginate(20)->withQueryString(),
+            'items' => $this->paginateFilteredLeads($this->filteredLeadsQuery($request), $request)->withQueryString(),
             'statuses' => $this->activeStatuses(),
             'sources' => $this->activeSources(),
             'serviceTypes' => $this->activeServiceTypes(),
@@ -84,7 +84,7 @@ class CrmLeadController extends Controller
             $query->where('crm_status_id', $request->integer('crm_status_id'));
         }
 
-        $items = $query->paginate(20)->withQueryString();
+        $items = $this->paginateFilteredLeads($query, $request)->withQueryString();
         $items->setCollection($delayedLeadService->annotate($items->getCollection()));
 
         return view('admin.crm.leads.delayed', [
@@ -94,6 +94,22 @@ class CrmLeadController extends Controller
             'canViewAllLeads' => CrmLeadAccess::canViewAll($viewer),
             'delayedLeadsCount' => $this->delayedLeadsCount(),
         ]);
+    }
+
+    protected function paginateFilteredLeads($query, Request $request)
+    {
+        $perPage = (string) $request->query('per_page', '20');
+        $allowedPerPage = ['20', '50', '100', '500', '1000', 'all'];
+
+        if (! in_array($perPage, $allowedPerPage, true)) {
+            $perPage = '20';
+        }
+
+        if ($perPage === 'all') {
+            return $query->paginate(max(1, (clone $query)->count()));
+        }
+
+        return $query->paginate((int) $perPage);
     }
 
     public function transfer(Request $request, CrmLeadTransferService $transferService)
@@ -346,7 +362,7 @@ class CrmLeadController extends Controller
         $viewer = auth()->user();
 
         return view('admin.crm.leads.trash', [
-            'items' => $this->filteredLeadsQuery($request, true)->paginate(20)->withQueryString(),
+            'items' => $this->paginateFilteredLeads($this->filteredLeadsQuery($request, true), $request)->withQueryString(),
             'statuses' => $this->activeStatuses(),
             'sources' => $this->activeSources(),
             'serviceTypes' => $this->activeServiceTypes(),
@@ -1007,10 +1023,10 @@ class CrmLeadController extends Controller
                 'crmServiceType',
                 'crmServiceSubtype',
                 'assignedUser',
-            'crmStatusUpdatedBy',
-            'deletedBy',
-            'utmCampaign',
-        ])
+                'crmStatusUpdatedBy',
+                'deletedBy',
+                'utmCampaign',
+            ])
             ->latest();
 
         $query = CrmLeadAccess::applyVisibilityScope($query, auth()->user());

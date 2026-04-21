@@ -52,6 +52,7 @@
         <div class="col-md-1">
             <button class="btn btn-primary w-100">{{ __('admin.search') }}</button>
         </div>
+
         <div class="col-md-2">
             <label class="form-label">{{ __('admin.created_date') }}</label>
             <input type="date" class="form-control" name="created_from" value="{{ request('created_from') }}">
@@ -68,8 +69,16 @@
             <label class="form-label">{{ __('admin.to_date') }}</label>
             <input type="date" class="form-control" name="changed_to" value="{{ request('changed_to') }}">
         </div>
+        <div class="col-md-2">
+            <label class="form-label">Per page</label>
+            <select class="form-select" name="per_page" onchange="this.form.submit()">
+                @foreach(['20' => '20', '50' => '50', '100' => '100', '500' => '500', '1000' => '1000', 'all' => 'All'] as $value => $label)
+                    <option value="{{ $value }}" @selected((string) request('per_page', '20') === (string) $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
     </div>
- </form>
+</form>
 
 <div class="card admin-card p-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
