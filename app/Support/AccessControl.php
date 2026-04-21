@@ -85,7 +85,7 @@ class AccessControl
                 ['slug' => 'leads.delete', 'name' => 'Delete Leads', 'description' => 'Move leads to trash, restore them, or delete them permanently when allowed.'],
                 ['slug' => 'leads.export', 'name' => 'Export Leads', 'description' => 'Export leads for sales and reporting.'],
                 ['slug' => 'information.manage', 'name' => 'Manage CRM Information', 'description' => 'Create and review targeted CRM information notices and acknowledgements.'],
-                ['slug' => 'leads.change_assigned_to', 'label' => 'Change Assigned To']
+                ['slug' => 'leads.change_assigned_to', 'name' => 'Change Assigned To', 'description' => 'Allow reassigning leads to other salespeople.'],
             ],
             'customers' => [
                 ['slug' => 'customers.view', 'name' => 'View Customers', 'description' => 'View converted customers and active customer cases.'],
@@ -174,7 +174,7 @@ class AccessControl
                 'permissions' => [
                     'dashboard.access', 'reports.view', 'leads.view', 'leads.edit', 'leads.export', 'forms.submissions.view', 'forms.submissions.edit', 'information.manage',
                     'customers.view', 'customers.manage', 'documents.view', 'documents.manage', 'knowledge_base.view', 'knowledge_base.manage',
-                    'workflow_automations.view', 'goals_commissions.view',
+                    'workflow_automations.view', 'goals_commissions.view', 'leads.change_assigned_to',
                 ],
             ],
             [

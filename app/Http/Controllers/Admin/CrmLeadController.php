@@ -941,7 +941,7 @@ class CrmLeadController extends Controller
 
         $newAssignedUserId = null;
         if ($hasAssignmentChange) {
-            abort_unless(CrmLeadAccess::canViewAll(auth()->user()), 403);
+            abort_unless(auth()->user()?->hasPermission('leads.change_assigned_to'), 403);
 
             $newAssignedUserId = $data['bulk_assigned_user_id'] === 'unassigned' || blank($data['bulk_assigned_user_id'])
                 ? null
