@@ -279,6 +279,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/campaigns/{campaign}', [UtmController::class, 'update'])->name('update');
         });
 
+        Route::middleware('permission:settings.manage')->prefix('integrations')->name('integrations.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\IntegrationController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\IntegrationController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\IntegrationController::class, 'store'])->name('store');
+            Route::get('/{integration}/edit', [\App\Http\Controllers\Admin\IntegrationController::class, 'edit'])->name('edit');
+            Route::put('/{integration}', [\App\Http\Controllers\Admin\IntegrationController::class, 'update'])->name('update');
+            Route::post('/{integration}/test', [\App\Http\Controllers\Admin\IntegrationController::class, 'testConnection'])->name('test');
+            Route::get('/logs', [\App\Http\Controllers\Admin\IntegrationController::class, 'logs'])->name('logs');
+        });
+
         Route::middleware('permission:pages.edit')->group(function () {
             Route::put('/hero-slides/settings', [HeroSlideController::class, 'updateSettings'])->name('hero-slides.settings');
             Route::resource('hero-slides', HeroSlideController::class);

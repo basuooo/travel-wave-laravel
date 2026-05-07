@@ -88,6 +88,8 @@ return [
     'forms_manager' => 'Forms Manager',
     'maps_manager' => 'Maps Manager',
     'tracking_manager' => 'Tracking Manager',
+    'integrations_management' => 'Integrations & API Management',
+    'integrations_management_desc' => 'Connect external platforms (Meta, TikTok), manage API keys, monitor webhooks, and test connections.',
     'tracking_manager_desc' => 'Manage Google, Meta, social ad pixels, heatmaps, and future tracking scripts from one centralized dashboard module.',
     'marketing_manager' => 'Marketing Manager',
     'marketing_manager_desc' => 'Build, duplicate, publish, and track campaign landing pages with connected forms, pixels, and performance metrics.',

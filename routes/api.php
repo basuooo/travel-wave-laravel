@@ -17,3 +17,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::prefix('webhooks')->group(function () {
+    Route::post('/{platform}', [\App\Http\Controllers\API\WebhookController::class, 'handle'])
+        ->where('platform', 'meta|tiktok');
+    
+    // Support for Meta's GET verification
+    Route::get('/meta', [\App\Http\Controllers\API\WebhookController::class, 'handle'])
+        ->defaults('platform', 'meta');
+});
