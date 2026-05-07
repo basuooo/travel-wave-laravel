@@ -310,6 +310,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/leads/trash', [CrmLeadController::class, 'trash'])->middleware('permission:leads.delete')->name('leads.trash');
                 Route::get('/leads/transfer', [CrmLeadController::class, 'transfer'])->name('leads.transfer');
                 Route::get('/leads/create', [CrmLeadController::class, 'create'])->middleware('permission:leads.create')->name('leads.create');
+                Route::post('/leads', [CrmLeadController::class, 'store'])->middleware('permission:leads.create')->name('leads.store');
                 Route::get('/leads/{lead}', [CrmLeadController::class, 'show'])->name('leads.show');
                 Route::get('/pipeline', [CrmController::class, 'pipeline'])->name('pipeline');
                 Route::get('/follow-ups', [CrmController::class, 'followUps'])->name('follow-ups');
@@ -340,7 +341,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{document}/download', [CrmDocumentController::class, 'download'])->name('download');
         });
         Route::put('/inquiries/{inquiry}', [InquiryController::class, 'update'])->middleware('permission:leads.edit')->name('inquiries.update');
-        Route::post('/crm/leads', [CrmLeadController::class, 'store'])->middleware(['auth', 'admin', 'permission:leads.create'])->name('admin.crm.leads.store');
         Route::middleware('permission:leads.edit')->prefix('crm')->name('crm.')->group(function () {
             Route::post('/customers', [CrmCustomerController::class, 'store'])->middleware('permission:customers.manage')->name('customers.store');
             Route::put('/customers/{customer}', [CrmCustomerController::class, 'update'])->middleware('permission:customers.manage')->name('customers.update');

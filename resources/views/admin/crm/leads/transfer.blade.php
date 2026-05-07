@@ -127,6 +127,7 @@
                                 <th>{{ __('admin.full_name') }}</th>
                                 <th>{{ __('admin.phone') }}</th>
                                 <th>{{ __('admin.status') }}</th>
+                                <th>{{ __('admin.assigned_user') }}</th>
                                 <th>{{ __('admin.crm_import_result') }}</th>
                             </tr>
                         </thead>
@@ -137,6 +138,7 @@
                                     <td>{{ $row['mapped']['full_name'] ?? '-' }}</td>
                                     <td>{{ $row['mapped']['phone'] ?? '-' }}</td>
                                     <td>{{ $row['mapped']['crm_status'] ?? '-' }}</td>
+                                    <td>{{ $row['mapped']['assigned_user'] ?? '-' }}</td>
                                     <td>
                                         @if(!empty($row['errors']))
                                             <span class="badge text-bg-danger">{{ implode(' | ', $row['errors']) }}</span>

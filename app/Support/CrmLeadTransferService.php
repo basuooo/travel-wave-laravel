@@ -449,25 +449,25 @@ class CrmLeadTransferService
                 ->value();
 
             return match ($normalized) {
-                'اسم العميل', 'الاسم', 'customer name', 'full name', 'name' => 'full_name',
-                'رقم الموبايل', 'الموبايل', 'phone', 'mobile', 'mobile number' => 'phone',
+                'اسم العميل', 'الاسم', 'الاسم بالكامل', 'customer name', 'full name', 'name' => 'full_name',
+                'رقم الموبايل', 'الموبايل', 'الجوال', 'الهاتف', 'phone', 'mobile', 'mobile number' => 'phone',
                 'رقم الواتساب', 'واتساب', 'whatsapp', 'whatsapp number' => 'whatsapp_number',
-                'الايميل', 'الإيميل', 'email' => 'email',
-                'الحالة', 'status' => 'crm_status',
+                'الايميل', 'الإيميل', 'البريد الالكتروني', 'email' => 'email',
+                'الحالة', 'حالة الليد', 'status', 'lead status' => 'crm_status',
                 'النوع', 'type', 'service type' => 'crm_service_type',
-                'تصنيف النوع', 'subtype', 'service subtype', 'visa region', 'visa category' => 'crm_service_subtype',
+                'تصنيف النوع', 'القسم', 'subtype', 'service subtype', 'visa region', 'visa category' => 'crm_service_subtype',
                 'الدولة', 'country', 'country name' => 'service_country_name',
                 'الوجهة السياحية', 'tourism destination' => 'tourism_destination',
                 'جهة السفر', 'travel destination', 'destination' => 'travel_destination',
-                'وجهة الفندق', 'hotel destination', 'hotel city', 'city / country' => 'hotel_destination',
-                'العدد', 'number of persons', 'travellers', 'travelers count' => 'travelers_count',
-                'ملاحظات', 'notes', 'comment' => 'admin_notes',
+                'وجهة الفندق', 'hotel destination', 'hotel city', 'city country' => 'hotel_destination',
+                'العدد', 'عدد الافراد', 'number of persons', 'travellers', 'travelers count' => 'travelers_count',
+                'ملاحظات', 'ملاحظات الادارة', 'notes', 'comment' => 'admin_notes',
                 'ملاحظات أخرى', 'additional notes' => 'additional_notes',
                 'السعر الإجمالي', 'total price' => 'total_price',
                 'المصروفات', 'expenses' => 'expenses',
                 'السعر الصافي', 'net price' => 'net_price',
-                'مصدر الليد', 'lead source', 'source' => 'crm_source',
-                'البائع / المسؤول', 'assigned user', 'seller', 'assigned seller' => 'assigned_user',
+                'مصدر الليد', 'المصدر', 'lead source', 'source' => 'crm_source',
+                'البائع المسؤول', 'اسم البائع', 'البائع', 'المسؤول', 'assigned user', 'seller', 'assigned seller', 'seller name', 'seller assigned user' => 'assigned_user',
                 'تاريخ الإنشاء', 'created at', 'created date' => 'created_at',
                 default => $normalized,
             };
@@ -746,12 +746,45 @@ class CrmLeadTransferService
             return null;
         }
 
-        return User::query()
+        $value = trim($value);
+
+        // Try exact name or email first
+        $user = User::query()
             ->where(function ($query) use ($value) {
                 $query->where('name', $value)
-                    ->orWhere('email', $value);
+                    ->orWhere('email', $value)
+                    ->orWhere('phone', $value);
             })
             ->first();
+
+        if ($user) {
+            return $user;
+        }
+
+        // Try normalized Arabic name search
+        $normalizedValue = $this->normalizeArabic($value);
+        if ($normalizedValue !== '') {
+            $users = User::query()->where('is_active', true)->get();
+            foreach ($users as $u) {
+                if ($this->normalizeArabic($u->name) === $normalizedValue) {
+                    return $u;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected function normalizeArabic(string $value): string
+    {
+        return Str::of($value)
+            ->trim()
+            ->replace(['أ', 'إ', 'آ'], 'ا')
+            ->replace(['ة'], 'ه')
+            ->replace(['ى'], 'ي')
+            ->replace(['ؤ', 'ئ'], 'ء')
+            ->replace([' ', '_', '-'], '')
+            ->value();
     }
 
     protected function normalizeGoogleSheetUrl(string $url): string
