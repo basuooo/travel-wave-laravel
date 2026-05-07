@@ -11,15 +11,15 @@
                     @csrf
                     
                     <div class="mb-4">
-                        <label class="form-label fw-bold">{{ __('admin.integration_name') ?? 'Integration Name' }}</label>
+                        <label class="form-label fw-bold">{{ Lang::has('admin.integration_name') ? __('admin.integration_name') : (app()->getLocale() == 'ar' ? 'اسم التكامل' : 'Integration Name') }}</label>
                         <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="e.g. Meta Main Account" required>
                         @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">{{ __('admin.platform') }}</label>
-                        <select name="platform" class="form-select @error('platform') is-invalid @enderror" required>
-                            <option value="">-- Select Platform --</option>
+                        <label class="form-label fw-bold">{{ Lang::has('admin.platform') ? __('admin.platform') : (app()->getLocale() == 'ar' ? 'المنصة' : 'Platform') }}</label>
+                        <select name="platform" id="platformSelect" class="form-select @error('platform') is-invalid @enderror" required onchange="renderPlatformFields()">
+                            <option value="">-- {{ app()->getLocale() == 'ar' ? 'اختر المنصة' : 'Select Platform' }} --</option>
                             <option value="meta" @selected(old('platform') === 'meta')>Meta (Facebook/Instagram)</option>
                             <option value="tiktok" @selected(old('platform') === 'tiktok')>TikTok</option>
                         </select>
@@ -27,10 +27,10 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">{{ __('admin.status') }}</label>
+                        <label class="form-label fw-bold">{{ Lang::has('admin.status') ? __('admin.status') : (app()->getLocale() == 'ar' ? 'الحالة' : 'Status') }}</label>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" name="is_active" value="1" id="isActive" checked>
-                            <label class="form-check-label" for="isActive">{{ __('admin.active') }}</label>
+                            <label class="form-check-label" for="isActive">{{ Lang::has('admin.active') ? __('admin.active') : (app()->getLocale() == 'ar' ? 'نشط' : 'Active') }}</label>
                         </div>
                     </div>
 
@@ -38,16 +38,17 @@
 
                     <h5 class="mb-4"><i class="bi bi-shield-lock me-2 text-primary"></i> API Credentials</h5>
                     
-                    <div id="credentialsFields">
-                        <p class="text-muted small">Select a platform first to see required credential fields.</p>
+                    <div id="credentialsFields" class="p-3 border rounded bg-light" style="min-height: 100px;">
+                        <!-- Fields will be injected here -->
+                        <p class="text-muted small m-0">{{ app()->getLocale() == 'ar' ? 'اختر المنصة أولاً لعرض حقول الربط المطلوبة.' : 'Select a platform first to see required credential fields.' }}</p>
                     </div>
 
                     <div class="mt-5 d-flex gap-2">
                         <button type="submit" class="btn btn-primary px-4">
-                            {{ __('admin.create') }}
+                            {{ Lang::has('admin.create') ? __('admin.create') : (app()->getLocale() == 'ar' ? 'إنشاء' : 'Create') }}
                         </button>
                         <a href="{{ route('admin.integrations.index') }}" class="btn btn-outline-secondary px-4">
-                            {{ __('admin.cancel') }}
+                            {{ Lang::has('admin.cancel') ? __('admin.cancel') : (app()->getLocale() == 'ar' ? 'إلغاء' : 'Cancel') }}
                         </a>
                     </div>
                 </form>
@@ -58,65 +59,55 @@
 
 @push('scripts')
 <script>
-    const platformSelect = document.querySelector('select[name="platform"]');
-    const credentialsDiv = document.getElementById('credentialsFields');
+    function renderPlatformFields() {
+        const platform = document.getElementById('platformSelect').value;
+        const container = document.getElementById('credentialsFields');
+        
+        if (!platform) {
+            container.innerHTML = '<p class="text-muted small m-0">{{ app()->getLocale() == "ar" ? "اختر المنصة أولاً لعرض حقول الربط المطلوبة." : "Select a platform first to see required credential fields." }}</p>';
+            return;
+        }
 
-    const fields = {
-        meta: [
-            { name: 'app_id', label: 'App ID', type: 'text' },
-            { name: 'app_secret', label: 'App Secret', type: 'password' },
-            { name: 'access_token', label: 'Page Access Token', type: 'textarea' }
-        ],
-        tiktok: [
-            { name: 'app_id', label: 'App ID', type: 'text' },
-            { name: 'client_secret', label: 'Client Secret', type: 'password' },
-            { name: 'access_token', label: 'Access Token', type: 'textarea' }
-        ]
-    };
+        const fieldsMap = {
+            meta: [
+                { name: 'app_id', label: 'App ID', type: 'text' },
+                { name: 'app_secret', label: 'App Secret', type: 'password' },
+                { name: 'access_token', label: 'Page Access Token', type: 'textarea' }
+            ],
+            tiktok: [
+                { name: 'app_id', label: 'App ID', type: 'text' },
+                { name: 'client_secret', label: 'Client Secret', type: 'password' },
+                { name: 'access_token', label: 'Access Token', type: 'textarea' }
+            ]
+        };
 
-    platformSelect.addEventListener('change', function() {
-        const platform = this.value;
-        credentialsDiv.innerHTML = '';
-
-        if (fields[platform]) {
-            fields[platform].forEach(field => {
-                const div = document.createElement('div');
-                div.className = 'mb-3';
-                
-                let input;
-                if (field.type === 'textarea') {
-                    input = `<textarea name="credentials[${field.name}]" class="form-control" rows="3" required></textarea>`;
-                } else {
-                    input = `<input type="${field.type}" name="credentials[${field.name}]" class="form-control" required>`;
-                }
-
-                div.innerHTML = `
-                    <label class="form-label">${field.label}</label>
-                    ${input}
-                `;
-                credentialsDiv.appendChild(div);
+        let html = '';
+        if (fieldsMap[platform]) {
+            fieldsMap[platform].forEach(field => {
+                html += `<div class="mb-3">
+                    <label class="form-label fw-bold small">${field.label}</label>
+                    ${field.type === 'textarea' 
+                        ? `<textarea name="credentials[${field.name}]" class="form-control" rows="3" required></textarea>`
+                        : `<input type="${field.type}" name="credentials[${field.name}]" class="form-control" required>`
+                    }
+                </div>`;
             });
 
-            // Add Verify Token for Webhooks if platform supports it
             if (platform === 'meta') {
-                const verifyTokenDiv = document.createElement('div');
-                verifyTokenDiv.className = 'mb-3 mt-4 p-3 bg-light rounded';
-                verifyTokenDiv.innerHTML = `
-                    <label class="form-label fw-bold text-primary">Webhook Verify Token</label>
+                html += `<div class="mb-3 mt-4 p-3 bg-white border rounded shadow-sm">
+                    <label class="form-label fw-bold text-primary small">Webhook Verify Token</label>
                     <input type="text" name="webhook_verify_token" class="form-control" placeholder="Create a unique token for Meta Webhook setup">
-                    <div class="form-text">You will use this token when configuring the Webhook in Meta Developers portal.</div>
-                `;
-                credentialsDiv.appendChild(verifyTokenDiv);
+                    <div class="form-text x-small">You will use this token when configuring the Webhook in Meta Developers portal.</div>
+                </div>`;
             }
-        } else {
-            credentialsDiv.innerHTML = '<p class="text-muted small">Select a platform first to see required credential fields.</p>';
+            container.innerHTML = html;
         }
-    });
-
-    // Trigger on page load if there's a pre-selected value
-    if (platformSelect.value) {
-        platformSelect.dispatchEvent(new Event('change'));
     }
+
+    // Initialize on load
+    window.addEventListener('load', renderPlatformFields);
+    // Safety call
+    setTimeout(renderPlatformFields, 500);
 </script>
 @endpush
 @endsection

@@ -1020,6 +1020,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPopup();
 });
 </script>
+@stack('scripts')
 </body>
 </html>
 

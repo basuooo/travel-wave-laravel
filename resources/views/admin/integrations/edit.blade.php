@@ -26,16 +26,16 @@
                     @method('PUT')
                     
                     <div class="mb-4">
-                        <label class="form-label fw-bold">{{ __('admin.integration_name') ?? 'Integration Name' }}</label>
+                        <label class="form-label fw-bold">{{ Lang::has('admin.integration_name') ? __('admin.integration_name') : (app()->getLocale() == 'ar' ? 'اسم التكامل' : 'Integration Name') }}</label>
                         <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $integration->name) }}" required>
                         @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">{{ __('admin.status') }}</label>
+                        <label class="form-label fw-bold">{{ Lang::has('admin.status') ? __('admin.status') : (app()->getLocale() == 'ar' ? 'الحالة' : 'Status') }}</label>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" name="is_active" value="1" id="isActive" @checked(old('is_active', $integration->is_active))>
-                            <label class="form-check-label" for="isActive">{{ __('admin.active') }}</label>
+                            <label class="form-check-label" for="isActive">{{ Lang::has('admin.active') ? __('admin.active') : (app()->getLocale() == 'ar' ? 'نشط' : 'Active') }}</label>
                         </div>
                     </div>
 
@@ -74,10 +74,10 @@
 
                     <div class="mt-5 d-flex gap-2">
                         <button type="submit" class="btn btn-primary px-4">
-                            {{ __('admin.update') }}
+                            {{ Lang::has('admin.update') ? __('admin.update') : (app()->getLocale() == 'ar' ? 'حفظ التحديثات' : 'Update') }}
                         </button>
                         <a href="{{ route('admin.integrations.index') }}" class="btn btn-outline-secondary px-4">
-                            {{ __('admin.cancel') }}
+                            {{ Lang::has('admin.cancel') ? __('admin.cancel') : (app()->getLocale() == 'ar' ? 'إلغاء' : 'Cancel') }}
                         </a>
                     </div>
                 </form>

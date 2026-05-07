@@ -441,3 +441,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 });
+// Cache Clearing Route for Production Debugging
+Route::get('/clear-all-cache', function() {
+    try {
+        Artisan::call('view:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
+        Artisan::call('route:clear');
+        return "<h1>Success!</h1><p>All caches have been cleared. Please refresh the Integrations page now.</p>";
+    } catch (\Exception $e) {
+        return "<h1>Error</h1><p>" . $e->getMessage() . "</p>";
+    }
+});
