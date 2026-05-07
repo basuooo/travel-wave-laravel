@@ -112,6 +112,11 @@
             credentialsDiv.innerHTML = '<p class="text-muted small">Select a platform first to see required credential fields.</p>';
         }
     });
+
+    // Trigger on page load if there's a pre-selected value
+    if (platformSelect.value) {
+        platformSelect.dispatchEvent(new Event('change'));
+    }
 </script>
 @endpush
 @endsection
