@@ -157,6 +157,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/chatbot-knowledge/{chatbotKnowledge}/edit', [ChatbotKnowledgeController::class, 'edit'])->name('chatbot-knowledge.edit');
             Route::put('/chatbot-knowledge/{chatbotKnowledge}', [ChatbotKnowledgeController::class, 'update'])->name('chatbot-knowledge.update');
             Route::delete('/chatbot-knowledge/{chatbotKnowledge}', [ChatbotKnowledgeController::class, 'destroy'])->name('chatbot-knowledge.destroy');
+            // WhatsApp Conversations
+            Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+                Route::get('/conversations', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'index'])->name('conversations.index');
+                Route::get('/conversations/{conversation}', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'show'])->name('conversations.show');
+                Route::post('/conversations/{conversation}/toggle-ai', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'toggleAi'])->name('conversations.toggle-ai');
+                Route::post('/conversations/{conversation}/send', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'sendMessage'])->name('conversations.send');
+                Route::post('/conversations/{conversation}/assign', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'assign'])->name('conversations.assign');
+            });
         });
 
         Route::middleware('permission:seo.manage')->group(function () {

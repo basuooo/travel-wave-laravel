@@ -148,6 +148,30 @@ class Setting extends Model
         'chatbot_show_whatsapp_handoff',
         'chatbot_show_contact_handoff',
         'chatbot_content_sources',
+        // AI Gateway
+        'ai_gateway_enabled',
+        'ai_default_provider',
+        'ai_fallback_to_keyword',
+        'ai_system_prompt_en',
+        'ai_system_prompt_ar',
+        'ai_openai_api_key',
+        'ai_openai_model',
+        'ai_gemini_api_key',
+        'ai_gemini_model',
+        'ai_deepseek_api_key',
+        'ai_deepseek_model',
+        'ai_claude_api_key',
+        'ai_claude_model',
+        'ai_max_tokens',
+        'ai_temperature',
+        // WhatsApp Cloud API
+        'whatsapp_bot_enabled',
+        'whatsapp_cloud_api_token',
+        'whatsapp_phone_number_id',
+        'whatsapp_business_account_id',
+        'whatsapp_webhook_verify_token',
+        'whatsapp_human_handover_enabled',
+        'whatsapp_handover_keyword',
     ];
 
     protected $casts = [
@@ -192,6 +216,14 @@ class Setting extends Model
         'chatbot_show_whatsapp_handoff' => 'boolean',
         'chatbot_show_contact_handoff' => 'boolean',
         'chatbot_content_sources' => 'array',
+        // AI Gateway
+        'ai_gateway_enabled'      => 'boolean',
+        'ai_fallback_to_keyword'  => 'boolean',
+        'ai_max_tokens'           => 'integer',
+        'ai_temperature'          => 'float',
+        // WhatsApp
+        'whatsapp_bot_enabled'              => 'boolean',
+        'whatsapp_human_handover_enabled'   => 'boolean',
     ];
 
     public function logoPathFor(string $variant = 'header'): ?string

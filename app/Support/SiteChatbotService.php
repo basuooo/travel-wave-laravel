@@ -5,9 +5,11 @@ namespace App\Support;
 use App\Models\ChatbotInteraction;
 use App\Models\ChatbotKnowledgeEntry;
 use App\Models\Setting;
+use App\Services\Ai\AiGateway;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SiteChatbotService
@@ -17,7 +19,12 @@ class SiteChatbotService
     ) {
     }
 
-    public function answer(string $question, ?string $locale = null, ?Request $request = null): array
+    protected function aiGateway(): AiGateway
+    {
+        return new AiGateway(\App\Models\AiBotConfig::getDefault());
+    }
+
+    public function answer(string $question, ?string $locale = null, ?Request $request = null, array $history = []): array
     {
         $request ??= request();
         $settings = Setting::query()->firstOrCreate([]);
@@ -42,15 +49,45 @@ class SiteChatbotService
                     question: $question,
                     locale: $locale,
                     sources: $settings->chatbotContentSources(),
-                    limit: 3,
+                    limit: 4,
                 );
 
-                if ($matchedSources->isEmpty()) {
-                    $answer = $this->fallbackAnswer($locale, $settings);
+                // --- AI Gateway ---
+                $gateway = $this->aiGateway();
+                if ($gateway->isEnabled()) {
+                    // Merge manual knowledge into context for AI
+                    $manualForAi = $this->searchManualKnowledge($question, $locale);
+                    $aiContext   = $manualForAi
+                        ? collect([$manualForAi])->merge($matchedSources)
+                        : $matchedSources;
+
+                    try {
+                        $aiResult = $gateway->reply($question, $aiContext, $locale, $history);
+                        if ($aiResult['used_ai'] && filled($aiResult['reply'])) {
+                            $answer       = $aiResult['reply'];
+                            $wasAnswered  = true;
+                        } else {
+                            // AI returned empty — use keyword fallback
+                            $answer      = $matchedSources->isEmpty()
+                                ? $this->fallbackAnswer($locale, $settings)
+                                : $this->composeKnowledgeAnswer($question, $matchedSources, $locale, $settings);
+                            $wasAnswered = ! $matchedSources->isEmpty();
+                            $usedHandoff = $matchedSources->isEmpty();
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning('AI Gateway failed, using keyword fallback.', ['error' => $e->getMessage()]);
+                        $answer      = $matchedSources->isEmpty()
+                            ? $this->fallbackAnswer($locale, $settings)
+                            : $this->composeKnowledgeAnswer($question, $matchedSources, $locale, $settings);
+                        $wasAnswered = ! $matchedSources->isEmpty();
+                        $usedHandoff = $matchedSources->isEmpty();
+                    }
+                } elseif ($matchedSources->isEmpty()) {
+                    $answer      = $this->fallbackAnswer($locale, $settings);
                     $wasAnswered = false;
                     $usedHandoff = true;
                 } else {
-                    $answer = $this->composeKnowledgeAnswer($question, $matchedSources, $locale, $settings);
+                    $answer      = $this->composeKnowledgeAnswer($question, $matchedSources, $locale, $settings);
                     $wasAnswered = true;
                 }
             }
@@ -75,6 +112,7 @@ class SiteChatbotService
             'answer' => $answer,
             'was_answered' => $wasAnswered,
             'used_handoff' => $usedHandoff,
+            'provider' => $aiResult['provider'] ?? null,
             'sources' => $matchedSources
                 ->map(fn ($item) => Arr::only($this->serializeSource($item, $locale), ['title', 'url']))
                 ->filter(fn ($item) => filled($item['url']))

@@ -42,6 +42,7 @@ class ChatbotKnowledgeManager
             ->merge($this->destinationItems())
             ->merge($this->blogItems())
             ->merge($this->contactItems($settings))
+            ->merge($this->manualEntryItems())
             ->values();
 
         if ($items->isEmpty()) {
@@ -361,6 +362,33 @@ class ChatbotKnowledgeManager
                 ],
             ];
         });
+    }
+
+    protected function manualEntryItems(): Collection
+    {
+        return \App\Models\ChatbotKnowledgeEntry::query()
+            ->where('is_active', true)
+            ->get()
+            ->flatMap(fn (\App\Models\ChatbotKnowledgeEntry $entry) => $this->localizedItemsFromModel(
+                sourceType: 'manual',
+                sourceId: $entry->id,
+                sourceKey: 'manual-' . $entry->id,
+                url: null,
+                locales: ['en', 'ar'],
+                callback: function (string $locale) use ($entry) {
+                    $title = $entry->localizedTitle($locale);
+                    $summary = $entry->localizedQuestion($locale);
+                    $content = $this->flattenToText([
+                        $entry->localizedTitle($locale),
+                        $entry->localizedQuestion($locale),
+                        $entry->localizedAnswer($locale),
+                        $entry->localizedKeywords($locale),
+                        $entry->localizedCategory($locale),
+                    ]);
+
+                    return compact('title', 'summary', 'content');
+                }
+            ));
     }
 
     protected function localizedItemsFromModel(string $sourceType, ?int $sourceId, ?string $sourceKey, ?string $url, array $locales, callable $callback): Collection

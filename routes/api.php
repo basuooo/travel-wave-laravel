@@ -25,4 +25,10 @@ Route::prefix('webhooks')->group(function () {
     // Support for Meta's GET verification
     Route::get('/meta', [\App\Http\Controllers\API\WebhookController::class, 'handle'])
         ->defaults('platform', 'meta');
+
+    // WhatsApp Cloud API Webhook
+    Route::get('/whatsapp', [\App\Http\Controllers\Api\WhatsAppWebhookController::class, 'verify'])
+        ->name('whatsapp.webhook.verify');
+    Route::post('/whatsapp', [\App\Http\Controllers\Api\WhatsAppWebhookController::class, 'handle'])
+        ->name('whatsapp.webhook.handle');
 });
