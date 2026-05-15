@@ -128,6 +128,13 @@ class ChatbotSettingController extends Controller
         return back()->with('success', trans_choice('admin.chatbot_knowledge_rebuilt', $count, ['count' => $count]));
     }
 
+    public function clearKnowledge()
+    {
+        ChatbotKnowledgeItem::query()->delete();
+
+        return back()->with('success', 'Chatbot knowledge cleared successfully.');
+    }
+
     protected function normalizeLines(?string $value): ?array
     {
         if (! filled($value)) {

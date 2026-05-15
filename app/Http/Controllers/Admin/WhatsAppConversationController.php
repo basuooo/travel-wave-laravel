@@ -99,4 +99,12 @@ class WhatsAppConversationController extends Controller
 
         return back()->with('success', 'تم تعيين المحادثة');
     }
+
+    public function clearHistory(WhatsAppConversation $conversation)
+    {
+        $conversation->messages()->delete();
+        $conversation->update(['metadata' => null]); // Clear lead info too
+
+        return back()->with('success', 'تم مسح ذاكرة المحادثة بنجاح');
+    }
 }

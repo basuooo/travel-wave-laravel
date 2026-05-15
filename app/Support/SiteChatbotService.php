@@ -246,7 +246,7 @@ class SiteChatbotService
         return ChatbotKnowledgeEntry::query()
             ->where('is_active', true)
             ->get()
-            ->map(function (ChatbotKnowledgeEntry $entry) use ($locale, $tokens, $needle) {
+            ->map(function (ChatbotKnowledgeEntry $entry) use ($locale, $tokens, $needle, $question) {
                 $title = $this->normalize($entry->localizedTitle($locale));
                 $knowledgeQuestion = $this->normalize($entry->localizedQuestion($locale));
                 $answer = $this->normalize($entry->localizedAnswer($locale));
@@ -254,6 +254,15 @@ class SiteChatbotService
                 $category = $this->normalize($entry->localizedCategory($locale));
                 $haystack = trim(implode(' ', array_filter([$title, $knowledgeQuestion, $answer, $keywords, $category])));
                 $score = 0;
+
+                // Exact Match Rule
+                if ($entry->match_type === 'exact') {
+                    $rawQuestion = trim(mb_strtolower($question));
+                    $rawEntryQuestion = trim(mb_strtolower($entry->localizedQuestion($locale)));
+                    if ($rawQuestion === $rawEntryQuestion) {
+                        $score += 1000; // Force top result
+                    }
+                }
 
                 if ($needle !== '' && $knowledgeQuestion !== '' && str_contains($knowledgeQuestion, $needle)) {
                     $score += 20;

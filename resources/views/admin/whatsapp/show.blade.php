@@ -19,12 +19,18 @@
                     @else
                         <span class="badge bg-warning-subtle text-warning-emphasis">👤 Human Mode</span>
                     @endif
-                    <form method="POST" action="{{ route('admin.whatsapp.conversations.toggle-ai', $conversation) }}">
-                        @csrf
-                        <button class="btn btn-sm {{ $conversation->ai_active ? 'btn-outline-warning' : 'btn-outline-success' }}">
-                            {{ $conversation->ai_active ? '⏸️ إيقاف AI' : '▶️ تفعيل AI' }}
-                        </button>
-                    </form>
+                    <div class="d-flex gap-2">
+                        <form method="post" action="{{ route('admin.whatsapp.conversations.toggle-ai', $conversation) }}">
+                            @csrf
+                            <button class="btn btn-{{ $conversation->ai_active ? 'warning' : 'success' }} btn-sm px-3">
+                                {{ $conversation->ai_active ? 'إيقاف الـ AI' : 'تفعيل الـ AI' }}
+                            </button>
+                        </form>
+                        <form method="post" action="{{ route('admin.whatsapp.conversations.clear', $conversation) }}" onsubmit="return confirm('هل أنت متأكد من مسح ذاكرة هذه المحادثة؟ سيتم حذف جميع الرسائل.')">
+                            @csrf
+                            <button class="btn btn-outline-danger btn-sm px-3">مسح الذاكرة</button>
+                        </form>
+                    </div>
                 </div>
             </div>
 

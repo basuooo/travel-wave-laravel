@@ -53,11 +53,17 @@
                 <p class="text-muted mb-0">{{ __('admin.chatbot_manager_desc') }}</p>
             </div>
             <div class="d-flex gap-2">
+                <a href="{{ route('admin.ai-bots.index') }}" class="btn btn-outline-info">🤖 إدارة البوتات (Multi-Bot)</a>
                 <a href="{{ route('admin.chatbot-knowledge.index') }}" class="btn btn-outline-primary">{{ __('admin.chatbot_manage_knowledge') }}</a>
                 <button class="btn btn-primary px-4">{{ __('admin.update') }}</button>
                 <button type="submit" form="chatbot-rebuild-form" class="btn btn-outline-secondary">{{ __('admin.chatbot_rebuild_knowledge') }}</button>
+                <button type="button" class="btn btn-outline-danger" onclick="if(confirm('هل أنت متأكد من مسح كل المعرفة؟')) document.getElementById('chatbot-clear-form').submit();">مسح كل المعرفة</button>
             </div>
         </div>
+
+        <form method="post" action="{{ route('admin.chatbot-settings.clear') }}" id="chatbot-clear-form" class="d-none">
+            @csrf
+        </form>
 
         <div class="row g-3">
             <div class="col-md-4">

@@ -10,6 +10,7 @@ class AiBotConfig extends Model
 
     protected $fillable = [
         'key',
+        'name',
         'enabled',
         'provider',
         'system_prompt_ar',

@@ -43,7 +43,15 @@
         <label class="form-label">{{ __('admin.priority') }}</label>
         <input type="number" min="0" class="form-control" name="priority" value="{{ old('priority', $entry->priority ?? 0) }}">
     </div>
-    <div class="col-md-2 d-flex align-items-end">
+    <div class="col-md-3">
+        <label class="form-label">نوع المطابقة (Match Type)</label>
+        <select class="form-select" name="match_type">
+            <option value="fuzzy" @selected(old('match_type', $entry->match_type) === 'fuzzy')>بحث ذكي (Fuzzy)</option>
+            <option value="exact" @selected(old('match_type', $entry->match_type) === 'exact')>مطابقة تامة (Exact - للردود المحددة)</option>
+        </select>
+        <div class="form-text small text-muted">استخدم "مطابقة تامة" للرد على كلمات محددة مثل "صباح الخير".</div>
+    </div>
+    <div class="col-md-1 d-flex align-items-end">
         <div class="form-check pb-2">
             <input type="hidden" name="is_active" value="0">
             <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" @checked(old('is_active', $entry->is_active ?? true))>

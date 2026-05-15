@@ -151,12 +151,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/chatbot-settings', [ChatbotSettingController::class, 'edit'])->name('chatbot-settings.edit');
             Route::put('/chatbot-settings', [ChatbotSettingController::class, 'update'])->name('chatbot-settings.update');
             Route::post('/chatbot-settings/rebuild-knowledge', [ChatbotSettingController::class, 'rebuildKnowledge'])->name('chatbot-settings.rebuild');
+            Route::post('/chatbot-settings/clear-knowledge', [ChatbotSettingController::class, 'clearKnowledge'])->name('chatbot-settings.clear');
             Route::get('/chatbot-knowledge', [ChatbotKnowledgeController::class, 'index'])->name('chatbot-knowledge.index');
             Route::get('/chatbot-knowledge/create', [ChatbotKnowledgeController::class, 'create'])->name('chatbot-knowledge.create');
             Route::post('/chatbot-knowledge', [ChatbotKnowledgeController::class, 'store'])->name('chatbot-knowledge.store');
             Route::get('/chatbot-knowledge/{chatbotKnowledge}/edit', [ChatbotKnowledgeController::class, 'edit'])->name('chatbot-knowledge.edit');
             Route::put('/chatbot-knowledge/{chatbotKnowledge}', [ChatbotKnowledgeController::class, 'update'])->name('chatbot-knowledge.update');
             Route::delete('/chatbot-knowledge/{chatbotKnowledge}', [ChatbotKnowledgeController::class, 'destroy'])->name('chatbot-knowledge.destroy');
+            // AI Bots Management
+            Route::resource('ai-bots', AiBotController::class);
+            Route::patch('ai-bots/{ai_bot}/toggle', [AiBotController::class, 'toggle'])->name('ai-bots.toggle');
+
             // WhatsApp Conversations
             Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
                 Route::get('/conversations', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'index'])->name('conversations.index');
@@ -164,6 +169,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/conversations/{conversation}/toggle-ai', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'toggleAi'])->name('conversations.toggle-ai');
                 Route::post('/conversations/{conversation}/send', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'sendMessage'])->name('conversations.send');
                 Route::post('/conversations/{conversation}/assign', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'assign'])->name('conversations.assign');
+                Route::post('/conversations/{conversation}/clear', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'clearHistory'])->name('conversations.clear');
             });
         });
 
@@ -457,6 +463,15 @@ Route::get('/clear-all-cache', function() {
         Artisan::call('config:clear');
         Artisan::call('route:clear');
         return "<h1>Success!</h1><p>All caches have been cleared. Please refresh the Integrations page now.</p>";
+    } catch (\Exception $e) {
+        return "<h1>Error</h1><p>" . $e->getMessage() . "</p>";
+    }
+});
+
+Route::get('/migrate-db', function() {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return "<h1>Success!</h1><pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
     } catch (\Exception $e) {
         return "<h1>Error</h1><p>" . $e->getMessage() . "</p>";
     }

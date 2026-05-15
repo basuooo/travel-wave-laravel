@@ -188,6 +188,7 @@ class ChatbotKnowledgeController extends Controller
             'category_ar' => ['nullable', 'string', 'max:255'],
             'priority' => ['nullable', 'integer', 'min:0', 'max:9999'],
             'is_active' => ['nullable', 'boolean'],
+            'match_type' => ['required', 'in:fuzzy,exact'],
         ]) + [
             'is_active' => $request->boolean('is_active'),
             'priority' => (int) ($request->input('priority') ?: 0),

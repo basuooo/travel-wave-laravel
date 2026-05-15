@@ -23,6 +23,7 @@ class ChatbotKnowledgeEntry extends Model
         'category_en',
         'category_ar',
         'is_active',
+        'match_type',
         'priority',
         'created_by',
         'updated_by',
