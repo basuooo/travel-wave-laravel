@@ -99,7 +99,7 @@ class HeroSlideController extends Controller
             'cta_text_en' => ['nullable', 'string', 'max:255'],
             'cta_text_ar' => ['nullable', 'string', 'max:255'],
             'cta_link' => ['nullable', 'string', 'max:255'],
-            'sort_order' => ['nullable', 'integer'],
+            'sort_order' => ['required', 'integer'],
             'image' => $imageRules,
             'mobile_image' => ['nullable', 'image'],
             'image_framing' => ['nullable', 'array'],

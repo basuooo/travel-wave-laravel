@@ -65,14 +65,9 @@
                                             @if($subtitle !== '')
                                                 <p class="lead text-white-50 mb-4">{{ $subtitle }}</p>
                                             @endif
-                                            @if(($ctaText !== '' && filled($slide->cta_link)) || $page->hero_secondary_cta_url)
+                                            @if($ctaText !== '' && filled($slide->cta_link))
                                                 <div class="d-flex flex-wrap gap-3 justify-content-{{ $sliderSettings?->hero_slider_content_alignment ?? 'start' }}">
-                                                    @if($ctaText !== '' && filled($slide->cta_link))
-                                                        <a href="{{ $slide->cta_link }}" class="btn btn-primary btn-lg tw-btn-primary">{{ $ctaText }}</a>
-                                                    @endif
-                                                    @if($page->hero_secondary_cta_url && $page->localized('hero_secondary_cta_text'))
-                                                        <a href="{{ $page->hero_secondary_cta_url }}" class="btn btn-lg tw-btn-outline">{{ $page->localized('hero_secondary_cta_text') }}</a>
-                                                    @endif
+                                                    <a href="{{ $slide->cta_link }}" class="btn btn-primary btn-lg tw-btn-primary">{{ $ctaText }}</a>
                                                 </div>
                                             @endif
                                         </div>

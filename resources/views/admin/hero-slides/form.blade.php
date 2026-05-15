@@ -107,7 +107,7 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">Sort Order</label>
-                <input class="form-control" type="number" name="sort_order" value="{{ old('sort_order', $item->sort_order) }}">
+                <input class="form-control" type="number" name="sort_order" value="{{ old('sort_order', $item->sort_order) }}" required>
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <div class="form-check pb-2">
