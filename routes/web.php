@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AccountingTreasuryController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogPostController;
+use App\Http\Controllers\Admin\AiBotController;
 use App\Http\Controllers\Admin\ChatbotSettingController;
 use App\Http\Controllers\Admin\ChatbotKnowledgeController;
 use App\Http\Controllers\Admin\CrmController;

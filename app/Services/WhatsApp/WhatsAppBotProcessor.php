@@ -145,6 +145,11 @@ class WhatsAppBotProcessor
                 return;
             }
 
+            // Human-like delay (simulating typing)
+            // Approx 50ms per character, min 1s, max 5s
+            $delaySeconds = min(5, max(1, mb_strlen($reply) * 0.05));
+            usleep($delaySeconds * 1000000);
+
             $this->whatsApp->sendText($conversation->wa_id, $reply);
 
             // Store outbound message
