@@ -301,6 +301,7 @@ class DatabaseSeeder extends Seeder
 
         foreach ([
             ['slug' => 'france-visa', 'name_en' => 'France', 'name_ar' => 'فرنسا'],
+            ['slug' => 'poland-visa', 'name_en' => 'Poland', 'name_ar' => 'بولندا'],
             ['slug' => 'germany-visa', 'name_en' => 'Germany', 'name_ar' => 'ألمانيا'],
             ['slug' => 'italy-visa', 'name_en' => 'Italy', 'name_ar' => 'إيطاليا'],
             ['slug' => 'spain-visa', 'name_en' => 'Spain', 'name_ar' => 'إسبانيا'],
@@ -601,6 +602,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call(FranceVisaTemplateSeeder::class);
+        $this->call(PolandVisaTemplateSeeder::class);
         $this->call(DestinationPageSystemSeeder::class);
 
         $visaLeadForm = LeadForm::query()->updateOrCreate(
