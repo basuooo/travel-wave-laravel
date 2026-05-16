@@ -162,6 +162,7 @@
         <a href="{{ route('admin.forms.index') }}" class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>
+<datalist id="field-keys-list"></datalist>
 
 @include('admin.forms.partials.templates')
 @endsection

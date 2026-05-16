@@ -19,9 +19,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const assignmentTemplate = document.getElementById('assignment-row-template')?.innerHTML ?? '';
     const infoTemplate = document.getElementById('info-item-row-template')?.innerHTML ?? '';
 
+    const fieldKeysList = document.getElementById('field-keys-list');
+    
+    const updateFieldKeysList = () => {
+        if (!fieldKeysList) return;
+        const keys = Array.from(document.querySelectorAll('.field-key-input'))
+            .map(input => input.value.trim())
+            .filter(val => val !== '');
+        
+        fieldKeysList.innerHTML = [...new Set(keys)].map(key => `<option value="${key}">`).join('');
+    };
+
     const appendRow = (container, template, selector) => {
         const index = container.querySelectorAll(selector).length;
         container.insertAdjacentHTML('beforeend', template.replaceAll('__INDEX__', index));
+        updateFieldKeysList();
     };
 
     document.getElementById('add-form-field')?.addEventListener('click', () => appendRow(fieldList, fieldTemplate, '.form-field-row'));
@@ -31,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (event) => {
         if (event.target.matches('.remove-field-row')) {
             event.target.closest('.form-field-row')?.remove();
+            updateFieldKeysList();
         }
 
         if (event.target.matches('.remove-assignment-row')) {
@@ -39,6 +52,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (event.target.matches('.remove-info-item-row')) {
             event.target.closest('.form-info-item-row')?.remove();
+        }
+
+        if (event.target.closest('.copy-field-key')) {
+            const input = event.target.closest('.input-group')?.querySelector('.field-key-input');
+            if (input && input.value) {
+                navigator.clipboard.writeText(input.value).then(() => {
+                    const btn = event.target.closest('.copy-field-key');
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+                    setTimeout(() => btn.innerHTML = originalHtml, 1500);
+                });
+            }
         }
     });
 
@@ -50,6 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 optionsWrapper.style.display = event.target.value === 'select' ? '' : 'none';
             }
         }
+
+        if (event.target.matches('.field-key-input')) {
+            updateFieldKeysList();
+        }
     });
+
+    updateFieldKeysList(); // Initial population
 });
 </script>

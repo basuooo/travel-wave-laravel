@@ -2,7 +2,12 @@
     <div class="row g-3">
         <div class="col-md-3">
             <label class="form-label">Field Key</label>
-            <input type="text" name="fields[{{ $index }}][field_key]" class="form-control" value="{{ $field['field_key'] ?? '' }}" placeholder="full_name">
+            <div class="input-group">
+                <input type="text" name="fields[{{ $index }}][field_key]" class="form-control field-key-input" value="{{ $field['field_key'] ?? '' }}" placeholder="full_name">
+                <button type="button" class="btn btn-outline-secondary copy-field-key" title="Copy Key">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
         </div>
         <div class="col-md-3">
             <label class="form-label">Field Type</label>
@@ -50,13 +55,13 @@
         </div>
         <div class="col-md-3">
             <label class="form-label text-primary">Depends on Field (Key)</label>
-            <input type="text" name="fields[{{ $index }}][depends_on_field]" class="form-control border-primary" value="{{ $field['depends_on_field'] ?? '' }}" placeholder="e.g. service_type">
-            <div class="form-text text-primary">Key of the parent field.</div>
+            <input type="text" name="fields[{{ $index }}][depends_on_field]" class="form-control border-primary" value="{{ $field['depends_on_field'] ?? '' }}" placeholder="e.g. service_type" list="field-keys-list">
+            <div class="form-text text-primary small">Key of the parent field.</div>
         </div>
         <div class="col-md-3">
-            <label class="form-label text-primary">Depends on Value</label>
-            <input type="text" name="fields[{{ $index }}][depends_on_value]" class="form-control border-primary" value="{{ $field['depends_on_value'] ?? '' }}" placeholder="e.g. visa">
-            <div class="form-text text-primary">Value that triggers this field.</div>
+            <label class="form-label text-primary">Depends on Value(s)</label>
+            <input type="text" name="fields[{{ $index }}][depends_on_value]" class="form-control border-primary" value="{{ $field['depends_on_value'] ?? '' }}" placeholder="e.g. visa,work_permit">
+            <div class="form-text text-primary small">Triggers. Use comma (,) for multiple.</div>
         </div>
         <div class="col-md-6 field-options-wrapper" style="{{ ($field['type'] ?? 'text') === 'select' ? '' : 'display: none;' }}">
             <label class="form-label">Select Options (comma or pipe separated)</label>

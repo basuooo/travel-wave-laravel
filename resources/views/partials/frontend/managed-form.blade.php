@@ -233,22 +233,34 @@ document.addEventListener('DOMContentLoaded', function() {
         const updateVisibility = () => {
             wrappers.forEach(wrapper => {
                 const parentKey = wrapper.getAttribute('data-depends-on');
-                const targetValue = wrapper.getAttribute('data-depends-value');
+                const targetValue = wrapper.getAttribute('data-depends-value') || '';
                 const parentFields = form.querySelectorAll(`[name="${parentKey}"]`);
                 
                 if (parentFields.length === 0) return;
 
+                const targetValues = targetValue.split(',').map(v => v.trim().toLowerCase());
                 let isMatch = false;
+
                 parentFields.forEach(field => {
+                    const currentVal = (field.value || '').toLowerCase();
                     if (field.type === 'checkbox' || field.type === 'radio') {
-                        if (field.checked && field.value === targetValue) isMatch = true;
+                        if (field.checked && targetValues.includes(currentVal)) isMatch = true;
                     } else {
-                        if (field.value === targetValue) isMatch = true;
+                        if (targetValues.includes(currentVal)) isMatch = true;
+                        // Special case: if target is empty string and field has value, or vice versa?
+                        // For now, exact match within the list.
                     }
                 });
 
                 if (isMatch) {
-                    wrapper.style.display = '';
+                    if (wrapper.style.display === 'none') {
+                        wrapper.style.display = '';
+                        wrapper.style.opacity = '0';
+                        setTimeout(() => {
+                            wrapper.style.transition = 'opacity 0.3s ease';
+                            wrapper.style.opacity = '1';
+                        }, 10);
+                    }
                     wrapper.querySelectorAll('[name]').forEach(el => {
                         if (el.hasAttribute('data-was-required')) {
                             el.required = true;
@@ -267,6 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         form.addEventListener('change', updateVisibility);
+        form.addEventListener('input', updateVisibility);
         updateVisibility(); // Initial check
     });
 });
