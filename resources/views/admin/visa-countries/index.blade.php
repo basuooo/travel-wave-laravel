@@ -4,7 +4,14 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
     <a href="{{ route('admin.visa-countries.trash') }}" class="btn btn-outline-secondary">{{ __('admin.trash') }}</a>
-    <a href="{{ route('admin.visa-countries.create') }}" class="btn btn-primary">{{ __('admin.add_country') }}</a>
+    <div class="d-flex gap-2">
+        <form action="{{ route('admin.visa-countries.import') }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
+            @csrf
+            <input type="file" name="file" class="form-control form-control-sm" accept=".json" required>
+            <button type="submit" class="btn btn-sm btn-outline-success">{{ __('admin.import') }}</button>
+        </form>
+        <a href="{{ route('admin.visa-countries.create') }}" class="btn btn-primary">{{ __('admin.add_country') }}</a>
+    </div>
 </div>
 <div class="card admin-card p-4">
     <table class="table align-middle">
@@ -22,6 +29,7 @@
                         @if($item->frontendUrl())
                             <a href="{{ $item->frontendUrl() }}" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener noreferrer">{{ __('admin.view') }}</a>
                         @endif
+                        <a href="{{ route('admin.visa-countries.export', $item) }}" class="btn btn-sm btn-outline-info">{{ __('admin.export') }}</a>
                         <form method="post" action="{{ route('admin.visa-countries.duplicate', $item) }}">@csrf<button class="btn btn-sm btn-outline-primary">{{ __('admin.duplicate') }}</button></form>
                         <form method="post" action="{{ route('admin.visa-countries.destroy', $item) }}">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger" onclick="return confirm('{{ __('admin.confirm_move_to_trash') }}')">{{ __('admin.delete') }}</button></form>
                     </div>

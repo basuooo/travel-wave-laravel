@@ -80,6 +80,47 @@ class VisaCountryController extends Controller
         return redirect()->route('admin.visa-countries.edit', $copy)->with('success', 'Visa country duplicated.');
     }
 
+    public function export(VisaCountry $visa_country)
+    {
+        $data = $visa_country->makeHidden(['id', 'created_at', 'updated_at', 'deleted_at', 'deleted_by'])->toArray();
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        return response($json)
+            ->header('Content-Type', 'application/json')
+            ->header('Content-Disposition', 'attachment; filename="visa-country-' . $visa_country->slug . '.json"');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:json'],
+        ]);
+
+        $data = json_decode(file_get_contents($request->file('file')->path()), true);
+
+        if (!$data || !isset($data['name_en'])) {
+            return back()->with('error', 'Invalid JSON file.');
+        }
+
+        $data['slug'] = VisaCountry::makeUniqueSlug($data['slug'] . '-imported');
+        $data['name_en'] .= ' (Imported)';
+        $data['name_ar'] .= ' (مستورد)';
+        $data['is_active'] = false;
+
+        // Ensure visa_category_id is present and exists
+        if (!isset($data['visa_category_id']) || !VisaCategory::where('id', $data['visa_category_id'])->exists()) {
+            $data['visa_category_id'] = VisaCategory::first()?->id;
+        }
+
+        if (!$data['visa_category_id']) {
+            return back()->with('error', 'No visa categories found. Please create a category first.');
+        }
+
+        $newCountry = VisaCountry::create($data);
+
+        return redirect()->route('admin.visa-countries.edit', $newCountry)->with('success', 'Visa country imported as draft.');
+    }
+
     public function destroy(VisaCountry $visa_country)
     {
         $visa_country->forceFill(['deleted_by' => auth()->id()])->save();
@@ -213,6 +254,9 @@ class VisaCountryController extends Controller
             'intro_image' => ['nullable', 'image'],
             'final_cta_background_image' => ['nullable', 'image'],
             'og_image' => ['nullable', 'image'],
+            'content_mode' => ['nullable', 'string', 'in:normal,html'],
+            'html_content_en' => ['nullable', 'string'],
+            'html_content_ar' => ['nullable', 'string'],
         ]);
     }
 
@@ -248,6 +292,10 @@ class VisaCountryController extends Controller
         $data['map_is_active'] = $request->boolean('map_is_active');
         $data['inquiry_form_is_active'] = $request->boolean('inquiry_form_is_active');
         $data['final_cta_is_active'] = $request->boolean('final_cta_is_active');
+
+        $data['content_mode'] = $request->input('content_mode', 'normal');
+        $data['html_content_en'] = $request->input('html_content_en');
+        $data['html_content_ar'] = $request->input('html_content_ar');
 
         $data['excerpt_en'] = $data['excerpt_en'] ?? null;
         $data['excerpt_ar'] = $data['excerpt_ar'] ?? null;

@@ -32,6 +32,11 @@
 @endif
 
 @section('content')
+@if(($pageData['content_mode'] ?? 'normal') === 'html')
+    <div class="custom-html-content">
+        {!! $pageData['html_content'] !!}
+    </div>
+@else
 @include('partials.frontend.form-zone', ['assignments' => $managedForms['top'] ?? [], 'position' => 'top', 'sourcePage' => $pageData['title'], 'contextData' => $pageData])
 @include('partials.frontend.map-zone', ['assignments' => $managedMaps['top'] ?? [], 'position' => 'top'])
 <section class="container pt-4 pt-lg-5">
@@ -389,4 +394,5 @@
 
 @include('partials.frontend.form-zone', ['assignments' => $managedForms['bottom'] ?? [], 'position' => 'bottom', 'sourcePage' => $pageData['title'], 'contextData' => $pageData])
 @include('partials.frontend.map-zone', ['assignments' => $managedMaps['bottom'] ?? [], 'position' => 'bottom'])
+@endif
 @endsection

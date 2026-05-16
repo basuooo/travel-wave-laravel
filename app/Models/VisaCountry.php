@@ -138,6 +138,9 @@ class VisaCountry extends Model
         'is_featured',
         'is_active',
         'sort_order',
+        'content_mode',
+        'html_content_en',
+        'html_content_ar',
     ];
 
     protected $casts = [

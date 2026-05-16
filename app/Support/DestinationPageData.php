@@ -46,6 +46,8 @@ class DestinationPageData
             'type' => 'visa',
             'title' => $country->localized('name'),
             'subtitle' => $country->localized('excerpt'),
+            'content_mode' => $country->content_mode ?? 'normal',
+            'html_content' => $country->localized('html_content'),
             'meta_title' => $country->localized('meta_title') ?: $heroTitle,
             'meta_description' => $country->localized('meta_description') ?: $country->localized('excerpt'),
             'og_image' => self::storageUrl($country->og_image ?: $country->hero_image),

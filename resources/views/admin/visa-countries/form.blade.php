@@ -80,8 +80,31 @@
                 <label class="form-label">{{ __('admin.order') }}</label>
                 <input class="form-control" type="number" name="sort_order" value="{{ old('sort_order', $item->sort_order ?? 0) }}">
             </div>
+            <div class="col-md-4">
+                <label class="form-label">Content Mode</label>
+                <select class="form-select" name="content_mode" id="content_mode_selector">
+                    <option value="normal" @selected(old('content_mode', $item->content_mode) == 'normal')>Normal (Structured)</option>
+                    <option value="html" @selected(old('content_mode', $item->content_mode) == 'html')>Custom HTML</option>
+                </select>
+            </div>
         </div>
     </div>
+
+    <div id="html_mode_section" class="card admin-card p-4 mb-4" style="display: {{ old('content_mode', $item->content_mode) == 'html' ? 'block' : 'none' }};">
+        <h2 class="h5 mb-3">Custom HTML Content</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">HTML Content (English)</label>
+                <textarea class="form-control" name="html_content_en" rows="20" placeholder="Paste your English HTML here...">{{ old('html_content_en', $item->html_content_en) }}</textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">HTML Content (Arabic)</label>
+                <textarea class="form-control text-end" dir="rtl" name="html_content_ar" rows="20" placeholder="...ضع كود الـ HTML العربي هنا">{{ old('html_content_ar', $item->html_content_ar) }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="normal_mode_sections" style="display: {{ old('content_mode', $item->content_mode) == 'html' ? 'none' : 'block' }};">
 
     <div class="card admin-card p-4 mb-4">
         <h2 class="h5 mb-3">{{ __('admin.hero_section') }}</h2>
@@ -531,6 +554,24 @@
         <button class="btn btn-primary px-4">{{ __('admin.save_visa_page') }}</button>
     </div>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selector = document.getElementById('content_mode_selector');
+    const htmlSection = document.getElementById('html_mode_section');
+    const normalSections = document.getElementById('normal_mode_sections');
+
+    selector.addEventListener('change', function() {
+        if (this.value === 'html') {
+            htmlSection.style.display = 'block';
+            normalSections.style.display = 'none';
+        } else {
+            htmlSection.style.display = 'none';
+            normalSections.style.display = 'block';
+        }
+    });
+});
+</script>
 
 @include('admin.visa-countries.partials.repeater-templates')
 @endsection

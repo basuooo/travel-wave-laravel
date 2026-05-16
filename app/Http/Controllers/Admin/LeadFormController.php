@@ -241,9 +241,17 @@ class LeadFormController extends Controller
                 return null;
             }
 
+            $type = trim((string) ($field['type'] ?? 'text')) ?: 'text';
+            $options = $this->parseOptions($field['options_text'] ?? '');
+
+            // Auto-detect select type if options are provided
+            if ($type === 'text' && !empty($options)) {
+                $type = 'select';
+            }
+
             return [
                 'field_key' => $fieldKey ?: 'field_' . ($index + 1),
-                'type' => trim((string) ($field['type'] ?? 'text')) ?: 'text',
+                'type' => $type,
                 'label_en' => $labelEn,
                 'label_ar' => $labelAr,
                 'placeholder_en' => trim((string) ($field['placeholder_en'] ?? '')),
@@ -252,7 +260,7 @@ class LeadFormController extends Controller
                 'help_text_ar' => trim((string) ($field['help_text_ar'] ?? '')),
                 'validation_rule' => trim((string) ($field['validation_rule'] ?? '')),
                 'default_value' => trim((string) ($field['default_value'] ?? '')),
-                'options' => $this->parseOptions($field['options_text'] ?? ''),
+                'options' => $options,
                 'is_required' => !empty($field['is_required']),
                 'is_enabled' => !empty($field['is_enabled']),
                 'sort_order' => (int) ($field['sort_order'] ?? $index + 1),
@@ -288,20 +296,47 @@ class LeadFormController extends Controller
 
     protected function parseOptions(?string $optionsText): array
     {
-        return collect(preg_split('/\r\n|\r|\n/', (string) $optionsText))
-            ->map(fn ($line) => trim((string) $line))
-            ->filter()
-            ->map(function (string $line) {
-                $parts = array_map('trim', explode('|', $line));
+        $options = [];
+        $lines = preg_split('/\r\n|\r|\n/', (string) $optionsText);
 
-                return [
+        foreach ($lines as $line) {
+            $line = trim((string) $line);
+            if ($line === '') {
+                continue;
+            }
+
+            if (str_contains($line, '|')) {
+                // Legacy Pipe Format: value|label_en|label_ar
+                $parts = array_map('trim', explode('|', $line));
+                $options[] = [
                     'value' => $parts[0] ?? '',
                     'label_en' => $parts[1] ?? ($parts[0] ?? ''),
                     'label_ar' => $parts[2] ?? ($parts[1] ?? ($parts[0] ?? '')),
                 ];
-            })
-            ->values()
-            ->all();
+            } elseif (str_contains($line, ',')) {
+                // Comma Separated Format: option1, option2, option3
+                $commaParts = array_map('trim', explode(',', $line));
+                foreach ($commaParts as $part) {
+                    if ($part === '') {
+                        continue;
+                    }
+                    $options[] = [
+                        'value' => $part,
+                        'label_en' => $part,
+                        'label_ar' => $part,
+                    ];
+                }
+            } else {
+                // Single line / Simple format
+                $options[] = [
+                    'value' => $line,
+                    'label_en' => $line,
+                    'label_ar' => $line,
+                ];
+            }
+        }
+
+        return $options;
     }
 
     protected function uniqueSlug(string $base): string

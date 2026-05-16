@@ -215,6 +215,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/visa-categories/{visa_category}/force-delete', [VisaCategoryController::class, 'forceDestroy'])->name('visa-categories.force-destroy');
             Route::resource('visa-categories', VisaCategoryController::class);
             Route::get('/visa-countries/trash', [VisaCountryController::class, 'trash'])->name('visa-countries.trash');
+            Route::post('/visa-countries/import', [VisaCountryController::class, 'import'])->name('visa-countries.import');
+            Route::get('/visa-countries/{visa_country}/export', [VisaCountryController::class, 'export'])->name('visa-countries.export');
             Route::post('/visa-countries/{visa_country}/duplicate', [VisaCountryController::class, 'duplicate'])->name('visa-countries.duplicate');
             Route::post('/visa-countries/{visa_country}/restore', [VisaCountryController::class, 'restore'])->name('visa-countries.restore');
             Route::delete('/visa-countries/{visa_country}/force-delete', [VisaCountryController::class, 'forceDestroy'])->name('visa-countries.force-destroy');

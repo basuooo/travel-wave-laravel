@@ -48,9 +48,10 @@
             <label class="form-label">Validation Rule</label>
             <input type="text" name="fields[{{ $index }}][validation_rule]" class="form-control" value="{{ $field['validation_rule'] ?? '' }}" placeholder="nullable|string|max:255">
         </div>
-        <div class="col-md-6">
-            <label class="form-label">Select Options</label>
-            <textarea name="fields[{{ $index }}][options_text]" class="form-control" rows="2" placeholder="value|Label EN|Label AR">{{ $field['options_text'] ?? '' }}</textarea>
+        <div class="col-md-6 field-options-wrapper" style="{{ ($field['type'] ?? 'text') === 'select' ? '' : 'display: none;' }}">
+            <label class="form-label">Select Options (comma or pipe separated)</label>
+            <textarea name="fields[{{ $index }}][options_text]" class="form-control" rows="3" placeholder="Option 1, Option 2, Option 3 OR&#10;value|Label EN|Label AR">{{ $field['options_text'] ?? '' }}</textarea>
+            <div class="form-text">You can enter options separated by commas (Option 1, Option 2) or use the pipe format for custom values and translations (visas|Visas|تأشيرات). Each format can be on a new line.</div>
         </div>
         <div class="col-md-3">
             <div class="form-check mt-4 pt-2">

@@ -41,5 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
             event.target.closest('.form-info-item-row')?.remove();
         }
     });
+
+    document.addEventListener('change', (event) => {
+        if (event.target.matches('select[name*="[type]"]')) {
+            const row = event.target.closest('.form-field-row');
+            const optionsWrapper = row?.querySelector('.field-options-wrapper');
+            if (optionsWrapper) {
+                optionsWrapper.style.display = event.target.value === 'select' ? '' : 'none';
+            }
+        }
+    });
 });
 </script>
