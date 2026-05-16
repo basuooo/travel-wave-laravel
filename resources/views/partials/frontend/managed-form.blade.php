@@ -78,7 +78,14 @@
                 continue;
             }
 
-            echo '<div class="' . e($colClass) . '">';
+            $dependsOn = $field->depends_on_field;
+            $dependsValue = $field->depends_on_value;
+            $wrapperAttrs = '';
+            if ($dependsOn) {
+                $wrapperAttrs = ' data-depends-on="' . e($dependsOn) . '" data-depends-value="' . e($dependsValue) . '" style="display: none;"';
+            }
+
+            echo '<div class="' . e($colClass) . ' tw-field-wrapper" ' . $wrapperAttrs . '>';
             echo '<label class="form-label">' . e($label);
             if ($field->is_required) {
                 echo ' <span class="text-danger">*</span>';
@@ -214,3 +221,53 @@
         </form>
     </div>
 @endif
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form[action*="inquiries.store"]');
+    
+    forms.forEach(form => {
+        const wrappers = form.querySelectorAll('.tw-field-wrapper[data-depends-on]');
+        if (wrappers.length === 0) return;
+
+        const updateVisibility = () => {
+            wrappers.forEach(wrapper => {
+                const parentKey = wrapper.getAttribute('data-depends-on');
+                const targetValue = wrapper.getAttribute('data-depends-value');
+                const parentFields = form.querySelectorAll(`[name="${parentKey}"]`);
+                
+                if (parentFields.length === 0) return;
+
+                let isMatch = false;
+                parentFields.forEach(field => {
+                    if (field.type === 'checkbox' || field.type === 'radio') {
+                        if (field.checked && field.value === targetValue) isMatch = true;
+                    } else {
+                        if (field.value === targetValue) isMatch = true;
+                    }
+                });
+
+                if (isMatch) {
+                    wrapper.style.display = '';
+                    wrapper.querySelectorAll('[name]').forEach(el => {
+                        if (el.hasAttribute('data-was-required')) {
+                            el.required = true;
+                        }
+                    });
+                } else {
+                    wrapper.style.display = 'none';
+                    wrapper.querySelectorAll('[name]').forEach(el => {
+                        if (el.required) {
+                            el.setAttribute('data-was-required', 'true');
+                            el.required = false;
+                        }
+                    });
+                }
+            });
+        };
+
+        form.addEventListener('change', updateVisibility);
+        updateVisibility(); // Initial check
+    });
+});
+</script>

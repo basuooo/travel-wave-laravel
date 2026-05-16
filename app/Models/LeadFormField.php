@@ -24,6 +24,8 @@ class LeadFormField extends Model
         'validation_rule',
         'default_value',
         'options',
+        'depends_on_field',
+        'depends_on_value',
         'is_required',
         'is_enabled',
         'sort_order',

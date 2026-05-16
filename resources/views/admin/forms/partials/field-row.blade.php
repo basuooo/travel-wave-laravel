@@ -48,6 +48,16 @@
             <label class="form-label">Validation Rule</label>
             <input type="text" name="fields[{{ $index }}][validation_rule]" class="form-control" value="{{ $field['validation_rule'] ?? '' }}" placeholder="nullable|string|max:255">
         </div>
+        <div class="col-md-3">
+            <label class="form-label text-primary">Depends on Field (Key)</label>
+            <input type="text" name="fields[{{ $index }}][depends_on_field]" class="form-control border-primary" value="{{ $field['depends_on_field'] ?? '' }}" placeholder="e.g. service_type">
+            <div class="form-text text-primary">Key of the parent field.</div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label text-primary">Depends on Value</label>
+            <input type="text" name="fields[{{ $index }}][depends_on_value]" class="form-control border-primary" value="{{ $field['depends_on_value'] ?? '' }}" placeholder="e.g. visa">
+            <div class="form-text text-primary">Value that triggers this field.</div>
+        </div>
         <div class="col-md-6 field-options-wrapper" style="{{ ($field['type'] ?? 'text') === 'select' ? '' : 'display: none;' }}">
             <label class="form-label">Select Options (comma or pipe separated)</label>
             <textarea name="fields[{{ $index }}][options_text]" class="form-control" rows="3" placeholder="Option 1, Option 2, Option 3 OR&#10;value|Label EN|Label AR">{{ $field['options_text'] ?? '' }}</textarea>
