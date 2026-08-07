@@ -260,8 +260,6 @@
     </div>
 </section>
 
-@include('partials.frontend.map-zone', ['assignments' => $managedMaps['bottom'] ?? [], 'position' => 'bottom'])
-
 <section class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="tw-section-title h1 mb-0">{{ __('ui.popular_destinations') }}</h2>
