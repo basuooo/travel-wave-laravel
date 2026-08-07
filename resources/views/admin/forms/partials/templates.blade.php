@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const index = container.querySelectorAll(selector).length;
         container.insertAdjacentHTML('beforeend', template.replaceAll('__INDEX__', index));
         updateFieldKeysList();
+        initializeAllTags();
     };
 
     document.getElementById('add-form-field')?.addEventListener('click', () => appendRow(fieldList, fieldTemplate, '.form-field-row'));
@@ -81,6 +82,130 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Custom Dual Tags Input Logic
+    const initDualTagsInput = (wrapper) => {
+        if (wrapper.dataset.tagsInitialized) return;
+        wrapper.dataset.tagsInitialized = '1';
+
+        const hiddenTextarea = wrapper.querySelector('.js-dual-hidden-textarea');
+        const containerEn = wrapper.querySelector('.js-tags-container-en');
+        const containerAr = wrapper.querySelector('.js-tags-container-ar');
+        const inputEn = containerEn.querySelector('.js-tags-input');
+        const inputAr = containerAr.querySelector('.js-tags-input');
+        
+        let tagsEn = [];
+        let tagsAr = [];
+
+        if (hiddenTextarea.value.trim() !== '') {
+            const lines = hiddenTextarea.value.split(/[\r\n]+/);
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed !== '') {
+                    if (trimmed.includes('|')) {
+                        const parts = trimmed.split('|');
+                        const enValue = (parts[1] ?? '').trim();
+                        const arValue = (parts[2] ?? '').trim();
+                        tagsEn.push(enValue);
+                        tagsAr.push(arValue);
+                    } else if (trimmed.includes(',')) {
+                        trimmed.split(',').forEach(part => {
+                            if (part.trim() !== '') {
+                                tagsEn.push(part.trim());
+                                tagsAr.push(part.trim());
+                            }
+                        });
+                    } else {
+                        tagsEn.push(trimmed);
+                        tagsAr.push(trimmed);
+                    }
+                }
+            });
+        }
+
+        const syncHiddenTextarea = () => {
+            const maxLen = Math.max(tagsEn.length, tagsAr.length);
+            let lines = [];
+            for (let i = 0; i < maxLen; i++) {
+                let en = tagsEn[i] || '';
+                let ar = tagsAr[i] || '';
+                let val = en || ar;
+                if (!en) en = '';
+                if (!ar) ar = '';
+                lines.push(`${val}|${en}|${ar}`);
+            }
+            hiddenTextarea.value = lines.join('\n');
+        };
+
+        const renderTags = (tags, container, input) => {
+            container.querySelectorAll('.js-tag-badge').forEach(el => el.remove());
+            tags.forEach((tag, idx) => {
+                const badge = document.createElement('span');
+                badge.className = 'badge text-bg-primary d-flex align-items-center gap-1 js-tag-badge px-2 py-1';
+                badge.innerHTML = `<span>${tag}</span> <i class="fas fa-times ms-1 js-tag-remove" style="cursor:pointer;" data-index="${idx}"></i>`;
+                container.insertBefore(badge, input);
+            });
+            syncHiddenTextarea();
+        };
+
+        const setupContainer = (container, input, tags) => {
+            const addTag = (value) => {
+                let added = false;
+                const parts = value.split(',');
+                parts.forEach(part => {
+                    const cleanVal = part.trim();
+                    if (cleanVal !== '') {
+                        tags.push(cleanVal);
+                        added = true;
+                    }
+                });
+                
+                input.value = '';
+                if (added) renderTags(tags, container, input);
+            };
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                if (paste) addTag(paste);
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag(input.value);
+                } else if (e.key === 'Tab' || e.key === ',') {
+                    if (input.value.trim() !== '') {
+                        e.preventDefault();
+                        addTag(input.value);
+                    }
+                } else if (e.key === 'Backspace' && input.value === '' && tags.length > 0) {
+                    tags.pop();
+                    renderTags(tags, container, input);
+                }
+            });
+
+            container.addEventListener('click', (e) => {
+                if (e.target.closest('.js-tag-remove')) {
+                    const idx = parseInt(e.target.closest('.js-tag-remove').dataset.index);
+                    tags.splice(idx, 1);
+                    renderTags(tags, container, input);
+                } else {
+                    input.focus();
+                }
+            });
+            
+            renderTags(tags, container, input);
+        };
+
+        setupContainer(containerEn, inputEn, tagsEn);
+        setupContainer(containerAr, inputAr, tagsAr);
+    };
+
+    const initializeAllTags = () => {
+        document.querySelectorAll('.js-dual-tags-wrapper').forEach(initDualTagsInput);
+    };
+
     updateFieldKeysList(); // Initial population
+    initializeAllTags(); // Initial population
 });
 </script>

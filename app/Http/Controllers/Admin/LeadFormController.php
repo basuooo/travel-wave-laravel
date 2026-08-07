@@ -312,10 +312,14 @@ class LeadFormController extends Controller
             if (str_contains($line, '|')) {
                 // Legacy Pipe Format: value|label_en|label_ar
                 $parts = array_map('trim', explode('|', $line));
+                $value = $parts[0] ?? '';
+                $labelEn = $parts[1] ?? '';
+                $labelAr = $parts[2] ?? '';
+
                 $options[] = [
-                    'value' => $parts[0] ?? '',
-                    'label_en' => $parts[1] ?? ($parts[0] ?? ''),
-                    'label_ar' => $parts[2] ?? ($parts[1] ?? ($parts[0] ?? '')),
+                    'value' => $value,
+                    'label_en' => $labelEn,
+                    'label_ar' => $labelAr,
                 ];
             } elseif (str_contains($line, ',')) {
                 // Comma Separated Format: option1, option2, option3

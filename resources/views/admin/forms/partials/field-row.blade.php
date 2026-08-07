@@ -63,10 +63,24 @@
             <input type="text" name="fields[{{ $index }}][depends_on_value]" class="form-control border-primary" value="{{ $field['depends_on_value'] ?? '' }}" placeholder="e.g. visa,work_permit">
             <div class="form-text text-primary small">Triggers. Use comma (,) for multiple.</div>
         </div>
-        <div class="col-md-6 field-options-wrapper" style="{{ ($field['type'] ?? 'text') === 'select' ? '' : 'display: none;' }}">
-            <label class="form-label">Select Options (comma or pipe separated)</label>
-            <textarea name="fields[{{ $index }}][options_text]" class="form-control" rows="3" placeholder="Option 1, Option 2, Option 3 OR&#10;value|Label EN|Label AR">{{ $field['options_text'] ?? '' }}</textarea>
-            <div class="form-text">You can enter options separated by commas (Option 1, Option 2) or use the pipe format for custom values and translations (visas|Visas|تأشيرات). Each format can be on a new line.</div>
+        <div class="col-md-12 field-options-wrapper" style="{{ ($field['type'] ?? 'text') === 'select' ? '' : 'display: none;' }}">
+            <label class="form-label mb-2">Dropdown Options</label>
+            <div class="row g-2 js-dual-tags-wrapper">
+                <div class="col-md-6">
+                    <label class="form-label small text-muted mb-1">Options EN (Press Tab/Enter to add)</label>
+                    <div class="form-control d-flex flex-wrap gap-1 align-items-center js-tags-container-en" style="min-height: 38px; cursor: text;">
+                        <input type="text" class="border-0 shadow-none js-tags-input flex-grow-1" style="min-width: 120px; outline: none; background: transparent;" placeholder="e.g. Egypt, Saudi Arabia">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small text-muted mb-1">Options AR (Press Tab/Enter to add)</label>
+                    <div class="form-control d-flex flex-wrap gap-1 align-items-center js-tags-container-ar" style="min-height: 38px; cursor: text;">
+                        <input type="text" class="border-0 shadow-none js-tags-input flex-grow-1" style="min-width: 120px; outline: none; background: transparent;" placeholder="مثال: مصر, السعودية" dir="rtl">
+                    </div>
+                </div>
+                <textarea name="fields[{{ $index }}][options_text]" class="d-none js-dual-hidden-textarea">{{ $field['options_text'] ?? '' }}</textarea>
+                <div class="col-12 form-text">Add the English and Arabic translations for each option. The system will link them together automatically. You can paste a comma-separated list.</div>
+            </div>
         </div>
         <div class="col-md-3">
             <div class="form-check mt-4 pt-2">

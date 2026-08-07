@@ -240,8 +240,6 @@
 </section>
 @endif
 
-@include('partials.frontend.map-zone', ['assignments' => $managedMaps['middle'] ?? [], 'position' => 'middle'])
-
 <section class="container py-5">
     <div class="text-center mb-5">
         <div class="d-inline-flex align-items-center justify-content-center tw-home-brand-lockup mb-4">
@@ -427,6 +425,7 @@
 @endif
 
 @include('partials.frontend.form-zone', ['assignments' => $managedForms['bottom'] ?? [], 'position' => 'bottom', 'sourcePage' => 'home'])
+@include('partials.frontend.map-zone', ['assignments' => $managedMaps['bottom'] ?? [], 'position' => 'bottom'])
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
