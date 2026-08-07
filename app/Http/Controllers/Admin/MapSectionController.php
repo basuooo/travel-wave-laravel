@@ -102,32 +102,7 @@ class MapSectionController extends Controller
 
     protected function validatedData(Request $request, ?int $id = null): array
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'unique:map_sections,slug,' . $id],
-            'title_en' => ['nullable', 'string', 'max:255'],
-            'title_ar' => ['nullable', 'string', 'max:255'],
-            'subtitle_en' => ['nullable', 'string'],
-            'subtitle_ar' => ['nullable', 'string'],
-            'address_en' => ['nullable', 'string'],
-            'address_ar' => ['nullable', 'string'],
-            'button_text_en' => ['nullable', 'string', 'max:255'],
-            'button_text_ar' => ['nullable', 'string', 'max:255'],
-            'button_link' => ['nullable', 'string', 'max:1000'],
-            'embed_code' => ['nullable', 'string'],
-            'map_url' => ['nullable', 'string', 'max:2000'],
-            'layout_type' => ['required', 'string', 'max:50'],
-            'height' => ['nullable', 'integer', 'min:200', 'max:1200'],
-            'background_style' => ['nullable', 'string', 'max:50'],
-            'spacing_preset' => ['nullable', 'string', 'max:50'],
-            'rounded_corners' => ['nullable', 'boolean'],
-            'is_active' => ['nullable', 'boolean'],
-            'assignments' => ['array'],
-            'assignments.*.assignment_target' => ['nullable', 'string'],
-            'assignments.*.display_position' => ['nullable', 'string', 'max:50'],
-            'assignments.*.sort_order' => ['nullable', 'integer'],
-            'assignments.*.is_active' => ['nullable', 'boolean'],
-        ]);
+        $validated = $request->validate($this->validationRules($id));
 
         return [
             'map' => [
@@ -152,6 +127,36 @@ class MapSectionController extends Controller
                 'is_active' => $request->boolean('is_active', true),
             ],
             'assignments' => $this->mapAssignments($request->input('assignments', [])),
+        ];
+    }
+
+    protected function validationRules(?int $id = null): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['required', 'string', 'max:255', 'unique:map_sections,slug,' . $id],
+            'title_en' => ['nullable', 'string', 'max:255'],
+            'title_ar' => ['nullable', 'string', 'max:255'],
+            'subtitle_en' => ['nullable', 'string'],
+            'subtitle_ar' => ['nullable', 'string'],
+            'address_en' => ['nullable', 'string'],
+            'address_ar' => ['nullable', 'string'],
+            'button_text_en' => ['nullable', 'string', 'max:255'],
+            'button_text_ar' => ['nullable', 'string', 'max:255'],
+            'button_link' => ['nullable', 'string', 'max:10000'],
+            'embed_code' => ['nullable', 'string'],
+            'map_url' => ['nullable', 'string', 'max:2000'],
+            'layout_type' => ['required', 'string', 'max:50'],
+            'height' => ['nullable', 'integer', 'min:200', 'max:1200'],
+            'background_style' => ['nullable', 'string', 'max:50'],
+            'spacing_preset' => ['nullable', 'string', 'max:50'],
+            'rounded_corners' => ['nullable', 'boolean'],
+            'is_active' => ['nullable', 'boolean'],
+            'assignments' => ['array'],
+            'assignments.*.assignment_target' => ['nullable', 'string'],
+            'assignments.*.display_position' => ['nullable', 'string', 'max:50'],
+            'assignments.*.sort_order' => ['nullable', 'integer'],
+            'assignments.*.is_active' => ['nullable', 'boolean'],
         ];
     }
 

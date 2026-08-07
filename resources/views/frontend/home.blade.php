@@ -19,9 +19,9 @@
     'placeholder' => __('ui.home_search_placeholder'),
     'invalid' => __('ui.home_search_invalid'),
 ])
+@php($homeMapAssignments = $managedMaps['before_footer'] ?? $managedMaps['bottom'] ?? [])
 
 @include('partials.frontend.form-zone', ['assignments' => $managedForms['top'] ?? [], 'position' => 'top', 'sourcePage' => 'home'])
-@include('partials.frontend.map-zone', ['assignments' => $managedMaps['top'] ?? [], 'position' => 'top'])
 
 <section class="tw-home-slider-wrap tw-home-slider-mode-{{ $bannerMode }}">
     <div class="{{ $safeZoneClass }} tw-home-slider-shell">
@@ -107,7 +107,6 @@
 </section>
 
 @include('partials.frontend.form-zone', ['assignments' => $managedForms['below_hero'] ?? [], 'position' => 'below_hero', 'sourcePage' => 'home'])
-@include('partials.frontend.map-zone', ['assignments' => $managedMaps['below_hero'] ?? [], 'position' => 'below_hero'])
 
 <section class="container pt-4 pb-2">
     <div class="tw-home-search-shell">
@@ -425,7 +424,7 @@
 @endif
 
 @include('partials.frontend.form-zone', ['assignments' => $managedForms['bottom'] ?? [], 'position' => 'bottom', 'sourcePage' => 'home'])
-@include('partials.frontend.map-zone', ['assignments' => $managedMaps['bottom'] ?? [], 'position' => 'bottom'])
+@include('partials.frontend.map-zone', ['assignments' => $homeMapAssignments, 'position' => !empty($managedMaps['before_footer']) ? 'before_footer' : 'bottom'])
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {

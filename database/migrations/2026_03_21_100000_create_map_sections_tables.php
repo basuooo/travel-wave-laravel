@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('address_ar')->nullable();
             $table->string('button_text_en')->nullable();
             $table->string('button_text_ar')->nullable();
-            $table->string('button_link')->nullable();
+            $table->text('button_link')->nullable();
             $table->longText('embed_code')->nullable();
             $table->text('map_url')->nullable();
             $table->string('layout_type')->default('split');

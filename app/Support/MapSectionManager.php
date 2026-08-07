@@ -21,6 +21,7 @@ class MapSectionManager
             'before_faq' => 'Before FAQ',
             'after_faq' => 'After FAQ',
             'bottom' => 'Bottom of page',
+            'before_footer' => 'Before footer',
             'sidebar' => 'Sidebar',
         ];
     }

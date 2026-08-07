@@ -16,6 +16,7 @@ use App\Models\LeadFormField;
 use App\Models\MarketingLandingPage;
 use App\Models\MarketingLandingPageEvent;
 use App\Models\MapSection;
+use App\Models\MapSectionAssignment;
 use App\Models\MediaAsset;
 use App\Models\Page;
 use App\Models\SeoMetaEntry;
@@ -118,6 +119,46 @@ class TravelWaveFrontendTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('tw-home-slider-mode-fullscreen-hero', false);
+    }
+
+    public function test_homepage_only_renders_home_maps_once_in_the_end_zone(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $mapSection = MapSection::query()->create([
+            'name' => 'Home map',
+            'slug' => 'home-map',
+            'title_en' => 'Home map',
+            'title_ar' => 'خريطة الصفحة الرئيسية',
+            'is_active' => true,
+        ]);
+
+        $mapSection->assignments()->createMany([
+            [
+                'assignment_type' => MapSectionAssignment::PAGE_KEY,
+                'target_key' => 'home',
+                'display_position' => 'top',
+                'sort_order' => 1,
+                'is_active' => true,
+            ],
+            [
+                'assignment_type' => MapSectionAssignment::PAGE_KEY,
+                'target_key' => 'home',
+                'display_position' => 'bottom',
+                'sort_order' => 2,
+                'is_active' => true,
+            ],
+        ]);
+
+        $response = $this->get(route('home'))->assertOk();
+        $content = $response->getContent();
+
+        $this->assertSame(1, substr_count($content, 'Home map'));
+        $this->assertStringNotContainsString('tw-managed-map-zone tw-managed-map-zone-top', $content);
+
+        $this->get(route('about'))
+            ->assertOk()
+            ->assertDontSee('Home map', false);
     }
 
     public function test_homepage_renders_smart_service_search_bar(): void
