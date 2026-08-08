@@ -31,8 +31,69 @@ class IconLibrary
     {
         $value = strtolower(trim((string) $icon));
 
+        if ($value === '' || in_array($value, ['tw', 'ok', 'vs', 'pt', 'fe', 'sd', '•', '-', '--'], true)) {
+            return null;
+        }
+
+        if (str_contains($value, 'material-symbols:')) {
+            $name = str_replace('material-symbols:', '', $value);
+
+            if (str_contains($name, 'travel') || str_contains($name, 'explore') || str_contains($name, 'trip') || str_contains($name, 'flight')) {
+                return 'globe';
+            }
+
+            if (str_contains($name, 'verified') || str_contains($name, 'check') || str_contains($name, 'approve')) {
+                return 'check';
+            }
+
+            if (str_contains($name, 'money') || str_contains($name, 'attach') || str_contains($name, 'currency')) {
+                return 'money';
+            }
+
+            if (str_contains($name, 'group') || str_contains($name, 'people') || str_contains($name, 'team')) {
+                return 'users';
+            }
+
+            if (str_contains($name, 'flash') || str_contains($name, 'bolt')) {
+                return 'sparkles';
+            }
+
+            if (str_contains($name, 'star')) {
+                return 'star';
+            }
+
+            if (str_contains($name, 'map') || str_contains($name, 'location') || str_contains($name, 'pin')) {
+                return 'location';
+            }
+
+            if (str_contains($name, 'card') || str_contains($name, 'plane') || str_contains($name, 'air')) {
+                return 'plane';
+            }
+
+            if (str_contains($name, 'shield')) {
+                return 'shield';
+            }
+
+            if (str_contains($name, 'phone')) {
+                return 'phone';
+            }
+
+            if (str_contains($name, 'mail') || str_contains($name, 'email')) {
+                return 'mail';
+            }
+
+            if (str_contains($name, 'support') || str_contains($name, 'chat')) {
+                return 'support';
+            }
+
+            if (str_contains($name, 'calendar') || str_contains($name, 'date') || str_contains($name, 'schedule')) {
+                return 'calendar';
+            }
+
+            return 'sparkles';
+        }
+
         return match ($value) {
-            '', 'tw', 'ok', 'vs', 'pt', 'fe', 'sd', '•', '-', '--' => null,
             'shield', 'security', 'trust' => 'shield',
             'file', 'document', 'documents', 'paper' => 'file',
             'calendar', 'appointment', 'schedule', 'date' => 'calendar',

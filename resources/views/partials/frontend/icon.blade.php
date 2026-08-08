@@ -1,5 +1,9 @@
 @php
     $iconValue = $icon ?? null;
     $iconFallback = $fallback ?? 'sparkles';
+    $iconHtml = \App\Support\IconLibrary::render($iconValue, $iconFallback);
 @endphp
-{!! \App\Support\IconLibrary::render($iconValue, $iconFallback) !!}
+<span class="tw-global-icon-shell" aria-hidden="true">
+    {!! $iconHtml !!}
+    <span class="tw-global-icon-mark">TW</span>
+</span>

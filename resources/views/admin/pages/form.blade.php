@@ -73,9 +73,38 @@
                 <div class="col-md-6"><label class="form-label">Section Subtitle EN</label><textarea class="form-control" name="why_choose_travel_wave_subtitle_en" rows="2">{{ old('why_choose_travel_wave_subtitle_en', data_get($homeWhyChooseSection, 'subtitle_en', '')) }}</textarea></div>
                 <div class="col-md-6"><label class="form-label">Section Subtitle AR</label><textarea class="form-control text-end" dir="rtl" name="why_choose_travel_wave_subtitle_ar" rows="2">{{ old('why_choose_travel_wave_subtitle_ar', data_get($homeWhyChooseSection, 'subtitle_ar', '')) }}</textarea></div>
             </div>
+            @php($whyChooseIconSuggestions = [
+                ['value' => 'material-symbols:travel-explore-rounded', 'label' => 'Travel Explore'],
+                ['value' => 'material-symbols:verified-outline', 'label' => 'Verified'],
+                ['value' => 'material-symbols:attach-money', 'label' => 'Money'],
+                ['value' => 'material-symbols:groups-2', 'label' => 'Group'],
+                ['value' => 'material-symbols:flash-on', 'label' => 'Flash'],
+                ['value' => 'material-symbols:star-rate', 'label' => 'Star'],
+            ])
+            <div class="alert alert-light border small mb-4">
+                <strong>Icon selection:</strong> choose from the recommended icons below or type a custom Iconify name.
+            </div>
             @for($i = 0; $i < 6; $i++)
                 <div class="row g-3 mb-4 border-bottom pb-3">
-                    <div class="col-md-2"><label class="form-label">Icon</label><input class="form-control" name="why_choose_travel_wave_items[{{ $i }}][icon]" value="{{ old('why_choose_travel_wave_items.' . $i . '.icon', data_get($homeWhyChooseSection, 'items.' . $i . '.icon', '')) }}"></div>
+                    <div class="col-md-3">
+                        <label class="form-label">Icon</label>
+                        <div class="border rounded-3 p-2 bg-light tw-why-choose-icon-group">
+                            @php($currentIconValue = old('why_choose_travel_wave_items.' . $i . '.icon', data_get($homeWhyChooseSection, 'items.' . $i . '.icon', 'material-symbols:travel-explore-rounded')))
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="tw-admin-icon-preview">
+                                    <iconify-icon icon="{{ $currentIconValue }}" width="18" height="18"></iconify-icon>
+                                </span>
+                                <select class="form-select form-select-sm" data-icon-select onchange="var group=this.closest('.tw-why-choose-icon-group'); var input=group.querySelector('input[data-icon-input]'); var preview=group.querySelector('.tw-admin-icon-preview'); input.value=this.value; preview.innerHTML='<iconify-icon icon=\'' + this.value + '\' width=\'18\' height=\'18\'></iconify-icon>';">
+                                    <option value="">Choose icon</option>
+                                    @foreach($whyChooseIconSuggestions as $suggestion)
+                                        <option value="{{ $suggestion['value'] }}" @selected($currentIconValue === $suggestion['value'])>{{ $suggestion['label'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <input class="form-control form-control-sm" name="why_choose_travel_wave_items[{{ $i }}][icon]" value="{{ $currentIconValue }}" placeholder="material-symbols:travel-explore-rounded" autocomplete="off" data-icon-input oninput="var group=this.closest('.tw-why-choose-icon-group'); var preview=group.querySelector('.tw-admin-icon-preview'); var value=this.value.trim(); preview.innerHTML=value ? '<iconify-icon icon=\'' + value + '\' width=\'18\' height=\'18\'></iconify-icon>' : '<span class=\'text-muted\'>★</span>';">
+                            <div class="form-text mt-2">Choose a preset or type a custom Iconify name.</div>
+                        </div>
+                    </div>
                     <div class="col-md-3"><label class="form-label">Title EN</label><input class="form-control" name="why_choose_travel_wave_items[{{ $i }}][title_en]" value="{{ old('why_choose_travel_wave_items.' . $i . '.title_en', data_get($homeWhyChooseSection, 'items.' . $i . '.title_en', '')) }}"></div>
                     <div class="col-md-3"><label class="form-label">Title AR</label><input class="form-control text-end" dir="rtl" name="why_choose_travel_wave_items[{{ $i }}][title_ar]" value="{{ old('why_choose_travel_wave_items.' . $i . '.title_ar', data_get($homeWhyChooseSection, 'items.' . $i . '.title_ar', '')) }}"></div>
                     <div class="col-md-2"><label class="form-label">Sort Order</label><input type="number" class="form-control" name="why_choose_travel_wave_items[{{ $i }}][sort_order]" value="{{ old('why_choose_travel_wave_items.' . $i . '.sort_order', data_get($homeWhyChooseSection, 'items.' . $i . '.sort_order', $i + 1)) }}"></div>
@@ -84,6 +113,22 @@
                     <div class="col-md-12"><label class="form-label">Description AR</label><textarea class="form-control text-end" dir="rtl" name="why_choose_travel_wave_items[{{ $i }}][text_ar]" rows="2">{{ old('why_choose_travel_wave_items.' . $i . '.text_ar', data_get($homeWhyChooseSection, 'items.' . $i . '.text_ar', '')) }}</textarea></div>
                 </div>
             @endfor
+            <style>
+                .tw-why-choose-icon-group {
+                    min-height: 100%;
+                }
+                .tw-admin-icon-preview {
+                    width: 2.35rem;
+                    height: 2.35rem;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 0.75rem;
+                    color: #ff8c32;
+                    background: linear-gradient(135deg, rgba(255, 140, 50, 0.18), rgba(255, 140, 50, 0.32));
+                    flex-shrink: 0;
+                }
+            </style>
         </div>
         <div class="card admin-card p-4 mb-4">
             <h2 class="h5 mb-3">Why Choose Us / How It Works</h2>

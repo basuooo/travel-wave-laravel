@@ -702,9 +702,10 @@ html[dir="rtl"] .tw-navbar-locale-menu {
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    background: rgba(255, 140, 50, 0.14);
-    color: var(--tw-accent);
+    background: linear-gradient(135deg, rgba(255, 140, 50, 0.18), rgba(255, 140, 50, 0.32));
+    color: #ff8c32;
     font-weight: 700;
+    box-shadow: inset 0 0 0 1px rgba(255, 140, 50, 0.18);
 }
 
 .tw-section-title {
@@ -3789,6 +3790,34 @@ html[dir="rtl"] .tw-list-check li::before {
         width: 100%;
     }
 }
+.tw-global-icon-shell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+.tw-global-icon-mark {
+    position: absolute;
+    top: -0.2rem;
+    right: -0.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.95rem;
+    height: 0.95rem;
+    border-radius: 999px;
+    background: var(--tw-accent, #ff8c32);
+    color: #fff;
+    font-size: 0.48rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+    box-shadow: 0 2px 6px rgba(17, 24, 39, 0.16);
+    pointer-events: none;
+}
+
 .tw-icon-svg {
     width: 1.15rem;
     height: 1.15rem;

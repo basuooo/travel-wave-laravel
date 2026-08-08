@@ -123,11 +123,7 @@
                     <div class="tw-card h-100 p-4 tw-home-why-choose-card">
                         <div class="tw-icon-badge mb-3">
                             @if(!empty($item['icon']))
-                                @if(str_contains($item['icon'], 'iconify:') || str_contains($item['icon'], 'material-symbols:') || str_contains($item['icon'], 'bi ') || str_contains($item['icon'], 'fa ') || str_contains($item['icon'], 'fas ') || str_contains($item['icon'], 'far ') || str_contains($item['icon'], 'fab '))
-                                    <iconify-icon icon="{{ $item['icon'] }}" width="24" height="24"></iconify-icon>
-                                @else
-                                    <span aria-hidden="true">{{ $item['icon'] }}</span>
-                                @endif
+                                @include('partials.frontend.icon', ['icon' => $item['icon'], 'fallback' => 'sparkles'])
                             @else
                                 <span aria-hidden="true">TW</span>
                             @endif
