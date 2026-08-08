@@ -11,11 +11,19 @@
         <div class="row g-3 mb-4">
             @foreach($sectionFields as $field)
                 <div class="col-md-6">
-                    <label class="form-label">{{ $field['label'] }}</label>
-                    <input class="form-control {{ !empty($field['rtl']) ? 'text-end' : '' }}"
-                           @if(!empty($field['rtl'])) dir="rtl" @endif
-                           name="{{ $field['name'] }}"
-                           value="{{ $field['value'] }}">
+                    @if(str_contains($field['name'], 'icon'))
+                        @include('admin.partials.icon-picker', [
+                            'name' => $field['name'],
+                            'value' => $field['value'],
+                            'label' => $field['label']
+                        ])
+                    @else
+                        <label class="form-label">{{ $field['label'] }}</label>
+                        <input class="form-control {{ !empty($field['rtl']) ? 'text-end' : '' }}"
+                               @if(!empty($field['rtl'])) dir="rtl" @endif
+                               name="{{ $field['name'] }}"
+                               value="{{ $field['value'] }}">
+                    @endif
                 </div>
             @endforeach
         </div>

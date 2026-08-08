@@ -56,9 +56,15 @@
             <h2 class="h5 mb-3">Homepage Services</h2>
             @for($i = 0; $i < 6; $i++)
                 <div class="row g-3 mb-4 border-bottom pb-3">
-                    <div class="col-md-2"><label class="form-label">Icon</label><input class="form-control" name="services_icon[]" value="{{ $sections['services'][$i]['icon'] ?? '' }}"></div>
-                    <div class="col-md-5"><label class="form-label">Title EN</label><input class="form-control" name="services_title_en[]" value="{{ $sections['services'][$i]['title_en'] ?? '' }}"></div>
-                    <div class="col-md-5"><label class="form-label">Title AR</label><input class="form-control text-end" dir="rtl" name="services_title_ar[]" value="{{ $sections['services'][$i]['title_ar'] ?? '' }}"></div>
+                    <div class="col-md-6">
+                        @include('admin.partials.icon-picker', [
+                            'name' => 'services_icon[]',
+                            'value' => $sections['services'][$i]['icon'] ?? '',
+                            'label' => 'Icon / الإيقونة'
+                        ])
+                    </div>
+                    <div class="col-md-3"><label class="form-label">Title EN</label><input class="form-control" name="services_title_en[]" value="{{ $sections['services'][$i]['title_en'] ?? '' }}"></div>
+                    <div class="col-md-3"><label class="form-label">Title AR</label><input class="form-control text-end" dir="rtl" name="services_title_ar[]" value="{{ $sections['services'][$i]['title_ar'] ?? '' }}"></div>
                     <div class="col-md-6"><label class="form-label">Description EN</label><textarea class="form-control" name="services_text_en[]" rows="2">{{ $sections['services'][$i]['text_en'] ?? '' }}</textarea></div>
                     <div class="col-md-6"><label class="form-label">Description AR</label><textarea class="form-control text-end" dir="rtl" name="services_text_ar[]" rows="2">{{ $sections['services'][$i]['text_ar'] ?? '' }}</textarea></div>
                 </div>
