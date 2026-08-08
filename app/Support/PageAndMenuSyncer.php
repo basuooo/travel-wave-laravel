@@ -278,6 +278,9 @@ class PageAndMenuSyncer
                     ]
                 );
 
+                require_once database_path('seeders/AboutPageSeeder.php');
+                (new \Database\Seeders\AboutPageSeeder())->run();
+
                 // 4. Populate Main Header Menu Items with Dropdown for Religious Tourism
                 if (Schema::hasTable('menu_items')) {
                     $headerItems = [

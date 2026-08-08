@@ -816,7 +816,7 @@ class FrontendController extends Controller
             ];
         }
 
-        foreach (['mission', 'why_choose', 'services', 'contact_info', 'quick_help'] as $sectionKey) {
+        foreach (['mission', 'why_choose', 'services', 'how_it_works', 'contact_info', 'quick_help'] as $sectionKey) {
             if (empty($managed[$sectionKey])) {
                 continue;
             }

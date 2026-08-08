@@ -760,5 +760,6 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionSeeder::class);
         $this->call(MainMenuSeeder::class);
         $this->call(UmrahHajjPagesSeeder::class);
+        $this->call(AboutPageSeeder::class);
     }
 }

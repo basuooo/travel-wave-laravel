@@ -9,6 +9,7 @@
     $mission = $contentPage['mission'] ?? [];
     $whyChoose = $contentPage['why_choose'] ?? [];
     $services = $contentPage['services'] ?? [];
+    $howItWorks = $contentPage['how_it_works'] ?? [];
     $stats = $contentPage['stats'] ?? [];
     $professionalism = $contentPage['professionalism'] ?? [];
     $contactInfo = $contentPage['contact_info'] ?? [];
@@ -63,6 +64,12 @@
             @case('services')
                 @if($services['enabled'] ?? false)
                     @include('frontend.pages.sections.cards', ['section' => $services])
+                @endif
+                @break
+
+            @case('how_it_works')
+                @if($howItWorks['enabled'] ?? false)
+                    @include('frontend.pages.sections.cards', ['section' => $howItWorks])
                 @endif
                 @break
 
