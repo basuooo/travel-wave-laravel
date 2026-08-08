@@ -86,24 +86,13 @@
             </div>
             @for($i = 0; $i < 6; $i++)
                 <div class="row g-3 mb-4 border-bottom pb-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Icon</label>
-                        <div class="border rounded-3 p-2 bg-light tw-why-choose-icon-group">
-                            @php($currentIconValue = old('why_choose_travel_wave_items.' . $i . '.icon', data_get($homeWhyChooseSection, 'items.' . $i . '.icon', 'material-symbols:travel-explore-rounded')))
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="tw-admin-icon-preview">
-                                    <iconify-icon icon="{{ $currentIconValue }}" width="18" height="18"></iconify-icon>
-                                </span>
-                                <select class="form-select form-select-sm" data-icon-select onchange="var group=this.closest('.tw-why-choose-icon-group'); var input=group.querySelector('input[data-icon-input]'); var preview=group.querySelector('.tw-admin-icon-preview'); input.value=this.value; preview.innerHTML='<iconify-icon icon=\'' + this.value + '\' width=\'18\' height=\'18\'></iconify-icon>';">
-                                    <option value="">Choose icon</option>
-                                    @foreach($whyChooseIconSuggestions as $suggestion)
-                                        <option value="{{ $suggestion['value'] }}" @selected($currentIconValue === $suggestion['value'])>{{ $suggestion['label'] }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <input class="form-control form-control-sm" name="why_choose_travel_wave_items[{{ $i }}][icon]" value="{{ $currentIconValue }}" placeholder="material-symbols:travel-explore-rounded" autocomplete="off" data-icon-input oninput="var group=this.closest('.tw-why-choose-icon-group'); var preview=group.querySelector('.tw-admin-icon-preview'); var value=this.value.trim(); preview.innerHTML=value ? '<iconify-icon icon=\'' + value + '\' width=\'18\' height=\'18\'></iconify-icon>' : '<span class=\'text-muted\'>★</span>';">
-                            <div class="form-text mt-2">Choose a preset or type a custom Iconify name.</div>
-                        </div>
+                    <div class="col-md-5">
+                        @php($currentIconValue = old('why_choose_travel_wave_items.' . $i . '.icon', data_get($homeWhyChooseSection, 'items.' . $i . '.icon', 'globe')))
+                        @include('admin.partials.icon-picker', [
+                            'name' => 'why_choose_travel_wave_items[' . $i . '][icon]',
+                            'value' => $currentIconValue,
+                            'label' => 'Icon / الإيقونة'
+                        ])
                     </div>
                     <div class="col-md-3"><label class="form-label">Title EN</label><input class="form-control" name="why_choose_travel_wave_items[{{ $i }}][title_en]" value="{{ old('why_choose_travel_wave_items.' . $i . '.title_en', data_get($homeWhyChooseSection, 'items.' . $i . '.title_en', '')) }}"></div>
                     <div class="col-md-3"><label class="form-label">Title AR</label><input class="form-control text-end" dir="rtl" name="why_choose_travel_wave_items[{{ $i }}][title_ar]" value="{{ old('why_choose_travel_wave_items.' . $i . '.title_ar', data_get($homeWhyChooseSection, 'items.' . $i . '.title_ar', '')) }}"></div>

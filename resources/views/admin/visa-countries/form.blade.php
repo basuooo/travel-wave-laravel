@@ -198,13 +198,12 @@
                 <label class="form-label">{{ __('admin.destination_card_label_ar') }}</label>
                 <input class="form-control text-end" dir="rtl" name="quick_summary_destination_label_ar" value="{{ old('quick_summary_destination_label_ar', $item->quick_summary_destination_label_ar) }}">
             </div>
-            <div class="col-md-4">
-                <label class="form-label d-flex align-items-center gap-2">
-                    <span>{{ __('admin.destination_card_icon') }}</span>
-                    <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="small text-decoration-none" aria-label="Browse Iconify icons"><span aria-hidden="true">&#127760;</span></a>
-                </label>
-                <input class="form-control" name="quick_summary_destination_icon" value="{{ old('quick_summary_destination_icon', $item->quick_summary_destination_icon) }}" placeholder="material-symbols:travel">
-                <div class="form-text">{{ __('admin.example') }}: material-symbols:travel</div>
+            <div class="col-md-6">
+                @include('admin.partials.icon-picker', [
+                    'name' => 'quick_summary_destination_icon',
+                    'value' => old('quick_summary_destination_icon', $item->quick_summary_destination_icon),
+                    'label' => __('admin.destination_card_icon')
+                ])
             </div>
         </div>
         <div class="row gy-3" data-repeater-list="quick-summary">
@@ -216,13 +215,13 @@
                             <div class="col-md-3"><label class="form-label">{{ __('admin.card_label_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="label_ar" name="quick_summary_items[{{ $index }}][label_ar]" value="{{ $summary['label_ar'] ?? $summary['title_ar'] ?? '' }}"></div>
                             <div class="col-md-2"><label class="form-label">{{ __('admin.value_en') }}</label><input class="form-control" data-field="value_en" name="quick_summary_items[{{ $index }}][value_en]" value="{{ $summary['value_en'] ?? '' }}"></div>
                             <div class="col-md-2"><label class="form-label">{{ __('admin.value_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="value_ar" name="quick_summary_items[{{ $index }}][value_ar]" value="{{ $summary['value_ar'] ?? '' }}"></div>
-                            <div class="col-md-2">
-                                <label class="form-label d-flex align-items-center gap-2">
-                                    <span>{{ __('admin.icon') }}</span>
-                                    <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="small text-decoration-none" aria-label="Browse Iconify icons"><span aria-hidden="true">&#127760;</span></a>
-                                </label>
-                                <input class="form-control" data-field="icon" name="quick_summary_items[{{ $index }}][icon]" value="{{ $summary['icon'] ?? '' }}" placeholder="material-symbols:travel">
-                                <div class="form-text">{{ __('admin.example') }}: material-symbols:travel</div>
+                            <div class="col-md-6">
+                                @include('admin.partials.icon-picker', [
+                                    'name' => 'quick_summary_items[' . $index . '][icon]',
+                                    'value' => $summary['icon'] ?? '',
+                                    'label' => __('admin.icon'),
+                                    'fieldDataAttr' => 'icon'
+                                ])
                             </div>
                             <div class="col-md-1"><label class="form-label">{{ __('admin.order') }}</label><input class="form-control" type="number" data-field="sort_order" name="quick_summary_items[{{ $index }}][sort_order]" value="{{ $summary['sort_order'] ?? ($index + 1) }}"></div>
                             <div class="col-md-2"><div class="form-check mt-4 pt-2"><input class="form-check-input" type="checkbox" data-field="is_active" name="quick_summary_items[{{ $index }}][is_active]" value="1" @checked($summary['is_active'] ?? true)><label class="form-check-label">{{ __('admin.active') }}</label></div></div>

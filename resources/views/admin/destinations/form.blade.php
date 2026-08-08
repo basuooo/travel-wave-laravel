@@ -311,13 +311,13 @@
                                 <label class="form-label">Title AR</label>
                                 <input class="form-control text-end" dir="rtl" data-field="title_ar" name="highlight_items[{{ $index }}][title_ar]" value="{{ $row['title_ar'] ?? '' }}">
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label d-flex align-items-center gap-2">
-                                    <span>Icon</span>
-                                    <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="small text-decoration-none" aria-label="Browse Iconify icons"><span aria-hidden="true">&#127760;</span></a>
-                                </label>
-                                <input class="form-control" data-field="icon" name="highlight_items[{{ $index }}][icon]" value="{{ $row['icon'] ?? '' }}" placeholder="material-symbols:travel-explore-rounded">
-                                <div class="form-text">Example: material-symbols:travel-explore-rounded</div>
+                            <div class="col-md-6">
+                                @include('admin.partials.icon-picker', [
+                                    'name' => 'highlight_items[' . $index . '][icon]',
+                                    'value' => $row['icon'] ?? '',
+                                    'label' => 'Icon / الإيقونة',
+                                    'fieldDataAttr' => 'icon'
+                                ])
                             </div>
                             <div class="col-md-1">
                                 <label class="form-label">Order</label>

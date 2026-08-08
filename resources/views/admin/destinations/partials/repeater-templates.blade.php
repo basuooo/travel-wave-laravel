@@ -26,7 +26,9 @@
                 <div class="col-md-3"><label class="form-label">Label AR</label><input class="form-control text-end" dir="rtl" data-field="label_ar" type="text"></div>
                 <div class="col-md-2"><label class="form-label">Value EN</label><input class="form-control" data-field="value_en" type="text"></div>
                 <div class="col-md-2"><label class="form-label">Value AR</label><input class="form-control text-end" dir="rtl" data-field="value_ar" type="text"></div>
-                <div class="col-md-1"><label class="form-label">Icon</label><input class="form-control" data-field="icon" type="text"></div>
+                <div class="col-md-6">
+                    @include('admin.partials.icon-picker', ['fieldDataAttr' => 'icon', 'label' => 'Icon / الإيقونة'])
+                </div>
                 <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
                 <div class="col-md-2"><div class="form-check mt-4 pt-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div></div>
                 <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>Remove</button></div>
@@ -41,13 +43,8 @@
             <div class="row g-3">
                 <div class="col-md-3"><label class="form-label">Title EN</label><input class="form-control" data-field="title_en" type="text"></div>
                 <div class="col-md-3"><label class="form-label">Title AR</label><input class="form-control text-end" dir="rtl" data-field="title_ar" type="text"></div>
-                <div class="col-md-3">
-                    <label class="form-label d-flex align-items-center gap-2">
-                        <span>Icon</span>
-                        <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="small text-decoration-none" aria-label="Browse Iconify icons"><span aria-hidden="true">&#127760;</span></a>
-                    </label>
-                    <input class="form-control" data-field="icon" type="text" placeholder="material-symbols:travel-explore-rounded">
-                    <div class="form-text">Example: material-symbols:travel-explore-rounded</div>
+                <div class="col-md-6">
+                    @include('admin.partials.icon-picker', ['fieldDataAttr' => 'icon', 'label' => 'Icon / الإيقونة'])
                 </div>
                 <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
                 <div class="col-md-2"><div class="form-check mt-4 pt-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div></div>
@@ -82,7 +79,9 @@
             <div class="row g-3">
                 <div class="col-md-4"><label class="form-label">Title EN</label><input class="form-control" data-field="title_en" type="text"></div>
                 <div class="col-md-4"><label class="form-label">Title AR</label><input class="form-control text-end" dir="rtl" data-field="title_ar" type="text"></div>
-                <div class="col-md-2"><label class="form-label">Icon</label><input class="form-control" data-field="icon" type="text"></div>
+                <div class="col-md-6">
+                    @include('admin.partials.icon-picker', ['fieldDataAttr' => 'icon', 'label' => 'Icon / الإيقونة'])
+                </div>
                 <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
                 <div class="col-md-1 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>Remove</button></div>
                 <div class="col-md-6"><label class="form-label">Description EN</label><textarea class="form-control" data-field="description_en" rows="3"></textarea></div>
@@ -98,7 +97,9 @@
             <div class="row g-3">
                 <div class="col-md-4"><label class="form-label">Title EN</label><input class="form-control" data-field="title_en" type="text"></div>
                 <div class="col-md-4"><label class="form-label">Title AR</label><input class="form-control text-end" dir="rtl" data-field="title_ar" type="text"></div>
-                <div class="col-md-2"><label class="form-label">Icon</label><input class="form-control" data-field="icon" type="text"></div>
+                <div class="col-md-6">
+                    @include('admin.partials.icon-picker', ['fieldDataAttr' => 'icon', 'label' => 'Icon / الإيقونة'])
+                </div>
                 <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
                 <div class="col-md-1 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>Remove</button></div>
                 <div class="col-md-6"><label class="form-label">Description EN</label><textarea class="form-control" data-field="description_en" rows="3"></textarea></div>
@@ -116,7 +117,9 @@
                 <div class="col-md-4"><label class="form-label">Title AR</label><input class="form-control text-end" dir="rtl" data-field="title_ar" type="text"></div>
                 <div class="col-md-1"><label class="form-label">Step</label><input class="form-control" data-field="step_number" type="number"></div>
                 <div class="col-md-1"><label class="form-label">Order</label><input class="form-control" data-field="sort_order" type="number"></div>
-                <div class="col-md-2"><label class="form-label">Icon</label><input class="form-control" data-field="icon" type="text"></div>
+                <div class="col-md-6">
+                    @include('admin.partials.icon-picker', ['fieldDataAttr' => 'icon', 'label' => 'Icon / الإيقونة'])
+                </div>
                 <div class="col-md-6"><label class="form-label">Description EN</label><textarea class="form-control" data-field="description_en" rows="3"></textarea></div>
                 <div class="col-md-6"><label class="form-label">Description AR</label><textarea class="form-control text-end" dir="rtl" data-field="description_ar" rows="3"></textarea></div>
                 <div class="col-md-2 d-flex flex-column justify-content-end"><div class="form-check mb-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">Active</label></div><button type="button" class="btn btn-outline-danger btn-sm" data-repeater-remove>Remove</button></div>

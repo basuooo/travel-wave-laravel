@@ -6,7 +6,7 @@
 <div class="col-md-6"><label class="form-label">Name EN</label><input class="form-control" name="name_en" value="{{ old('name_en', $item->name_en) }}"></div>
 <div class="col-md-6"><label class="form-label">Name AR</label><input class="form-control" name="name_ar" value="{{ old('name_ar', $item->name_ar) }}"></div>
 <div class="col-md-4"><label class="form-label">Slug</label><input class="form-control" name="slug" value="{{ old('slug', $item->slug) }}"></div>
-<div class="col-md-4"><label class="form-label">Icon</label><input class="form-control" name="icon" value="{{ old('icon', $item->icon) }}"></div>
+<div class="col-md-6">@include('admin.partials.icon-picker', ['name' => 'icon', 'value' => $item->icon, 'label' => 'Icon / الإيقونة'])</div>
 <div class="col-md-4"><label class="form-label">Order</label><input class="form-control" name="sort_order" value="{{ old('sort_order', $item->sort_order) }}"></div>
 <div class="col-md-6"><label class="form-label">Description EN</label><textarea class="form-control" name="short_description_en" rows="3">{{ old('short_description_en', $item->short_description_en) }}</textarea></div>
 <div class="col-md-6"><label class="form-label">Description AR</label><textarea class="form-control" name="short_description_ar" rows="3">{{ old('short_description_ar', $item->short_description_ar) }}</textarea></div>

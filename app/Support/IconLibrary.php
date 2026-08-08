@@ -6,23 +6,42 @@ class IconLibrary
 {
     public static function render(?string $icon, string $fallback = 'sparkles'): string
     {
-        if (static::isIconifyIcon($icon)) {
+        $value = trim((string) $icon);
+
+        if ($value === '') {
+            return static::svg(null, $fallback);
+        }
+
+        // 1. Raw HTML or SVG code (starts with '<' or contains '<svg' / '<i')
+        if (str_starts_with($value, '<') || str_contains($value, '<svg') || str_contains($value, '<i')) {
+            return sprintf('<span class="tw-custom-icon-code d-inline-flex align-items-center justify-content-center" aria-hidden="true">%s</span>', $value);
+        }
+
+        // 2. Iconify string (e.g. material-symbols:travel-explore-rounded)
+        if (static::isIconifyIcon($value)) {
             return sprintf(
                 '<iconify-icon icon="%s" aria-hidden="true" class="tw-iconify-icon"></iconify-icon>',
-                e(trim((string) $icon))
+                e($value)
             );
         }
 
-        return static::svg($icon, $fallback);
+        // 3. CSS Class string (e.g. "fa-solid fa-plane" or "bi bi-star")
+        if (str_contains($value, 'fa-') || str_contains($value, 'bi-') || str_contains($value, 'ri-')) {
+            return sprintf('<i class="%s" aria-hidden="true"></i>', e($value));
+        }
+
+        // 4. Predefined SVG key or keyword
+        return static::svg($value, $fallback);
     }
 
     public static function svg(?string $icon, string $fallback = 'sparkles'): string
     {
         $key = static::normalize($icon) ?: $fallback;
-        $path = static::paths()[$key] ?? static::paths()[$fallback];
+        $paths = static::paths();
+        $path = $paths[$key] ?? $paths[$fallback] ?? $paths['sparkles'];
 
         return sprintf(
-            '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="tw-icon-svg"><path d="%s" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+            '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="tw-icon-svg" style="width:1em; height:1em; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;"><path d="%s"></path></svg>',
             $path
         );
     }
@@ -37,6 +56,10 @@ class IconLibrary
 
         if (str_contains($value, 'material-symbols:')) {
             $name = str_replace('material-symbols:', '', $value);
+
+            if (str_contains($name, 'passport')) {
+                return 'passport';
+            }
 
             if (str_contains($name, 'travel') || str_contains($name, 'explore') || str_contains($name, 'trip') || str_contains($name, 'flight')) {
                 return 'globe';
@@ -94,6 +117,7 @@ class IconLibrary
         }
 
         return match ($value) {
+            'passport' => 'passport',
             'shield', 'security', 'trust' => 'shield',
             'file', 'document', 'documents', 'paper' => 'file',
             'calendar', 'appointment', 'schedule', 'date' => 'calendar',
@@ -109,6 +133,9 @@ class IconLibrary
             'hotel', 'stay', 'bed' => 'hotel',
             'check', 'check-circle', 'approved' => 'check',
             'money', 'fees', 'price' => 'money',
+            'sun', 'summer' => 'sun',
+            'compass', 'guide' => 'compass',
+            'ticket' => 'ticket',
             default => $value,
         };
     }
@@ -118,6 +145,32 @@ class IconLibrary
         $value = trim((string) $icon);
 
         return (bool) preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*:[a-z0-9]+(?:-[a-z0-9]+)*$/i', $value);
+    }
+
+    public static function presets(): array
+    {
+        return [
+            ['value' => 'globe', 'label' => '🌍 طيران وسفريات (Globe/Travel)'],
+            ['value' => 'plane', 'label' => '✈️ طائرة ورحلات (Plane)'],
+            ['value' => 'passport', 'label' => '🛂 جواز سفر وتأشيرة (Passport)'],
+            ['value' => 'shield', 'label' => '🛡️ أمان وثقة (Shield)'],
+            ['value' => 'file', 'label' => '📄 مستندات وأوراق (Documents)'],
+            ['value' => 'calendar', 'label' => '📅 مواعيد وتقويم (Calendar)'],
+            ['value' => 'support', 'label' => '🎧 دعم واستشارات (Support)'],
+            ['value' => 'phone', 'label' => '📞 هاتف وتواصل (Phone)'],
+            ['value' => 'mail', 'label' => '✉️ بريد إلكتروني (Email)'],
+            ['value' => 'location', 'label' => '📍 موقع وخريطة (Location)'],
+            ['value' => 'star', 'label' => '⭐ نجمة ومميز (Star)'],
+            ['value' => 'clock', 'label' => '🕒 وقت وسرعة (Clock)'],
+            ['value' => 'users', 'label' => '👥 فريق وعملاء (Users)'],
+            ['value' => 'hotel', 'label' => '🏨 فنادق وإقامة (Hotel)'],
+            ['value' => 'check', 'label' => '✅ توثيق وتأكيد (Check)'],
+            ['value' => 'money', 'label' => '💵 أسعار ورسوم (Money)'],
+            ['value' => 'sun', 'label' => '☀️ وجهات صيفية (Sun)'],
+            ['value' => 'compass', 'label' => '🧭 استكشاف ودليل (Compass)'],
+            ['value' => 'ticket', 'label' => '🎫 تذاكر وحجوزات (Ticket)'],
+            ['value' => 'sparkles', 'label' => '✨ ميزات عامة (Sparkles)'],
+        ];
     }
 
     protected static function paths(): array
@@ -139,6 +192,10 @@ class IconLibrary
             'hotel' => 'M4 20V6h10v14M14 10h6v10M7 9h2m-2 4h2m-2 4h2',
             'check' => 'M5 12l4 4L19 6',
             'money' => 'M4 7h16v10H4zM8 12h8M12 9v6M6 9.5A2.5 2.5 0 0 0 8.5 12 2.5 2.5 0 0 0 6 14.5m12-5A2.5 2.5 0 0 1 15.5 12 2.5 2.5 0 0 1 18 14.5',
+            'passport' => 'M4 4h16v16H4zM9 8h6M9 12h6M12 16a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+            'sun' => 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0-5v2m0 14v2m-7.07-14.07l1.41 1.41m11.32 11.32l1.41 1.41M3 12h2m14 0h2m-14.07 7.07l1.41-1.41m11.32-11.32l1.41-1.41',
+            'compass' => 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.24 5.76l-2.83 6.36-6.36 2.83 2.83-6.36 6.36-2.83z',
+            'ticket' => 'M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V9z',
         ];
     }
 }

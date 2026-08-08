@@ -81,13 +81,8 @@
                 <div class="col-md-3"><label class="form-label">{{ __('admin.card_label_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="label_ar" type="text"></div>
                 <div class="col-md-2"><label class="form-label">{{ __('admin.value_en') }}</label><input class="form-control" data-field="value_en" type="text"></div>
                 <div class="col-md-2"><label class="form-label">{{ __('admin.value_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="value_ar" type="text"></div>
-                <div class="col-md-2">
-                    <label class="form-label d-flex align-items-center gap-2">
-                        <span>{{ __('admin.icon') }}</span>
-                        <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="small text-decoration-none" aria-label="Browse Iconify icons"><span aria-hidden="true">&#127760;</span></a>
-                    </label>
-                    <input class="form-control" data-field="icon" type="text" placeholder="material-symbols:travel">
-                    <div class="form-text">{{ __('admin.example') }}: material-symbols:travel</div>
+                <div class="col-md-6">
+                    @include('admin.partials.icon-picker', ['fieldDataAttr' => 'icon', 'label' => __('admin.icon')])
                 </div>
                 <div class="col-md-1"><label class="form-label">{{ __('admin.order') }}</label><input class="form-control" data-field="sort_order" type="number"></div>
                 <div class="col-md-2"><div class="form-check mt-4 pt-2"><input class="form-check-input" data-field="is_active" type="checkbox" value="1" checked><label class="form-check-label">{{ __('admin.active') }}</label></div></div>
@@ -103,7 +98,9 @@
             <div class="row g-3">
                 <div class="col-md-4"><label class="form-label">{{ __('admin.title_en') }}</label><input class="form-control" data-field="title_en" type="text"></div>
                 <div class="col-md-4"><label class="form-label">{{ __('admin.title_ar') }}</label><input class="form-control text-end" dir="rtl" data-field="title_ar" type="text"></div>
-                <div class="col-md-4"><label class="form-label">{{ __('admin.icon_keyword') }}</label><input class="form-control" data-field="icon" type="text" placeholder="shield, file, calendar, support"></div>
+                <div class="col-md-6">
+                    @include('admin.partials.icon-picker', ['fieldDataAttr' => 'icon', 'label' => __('admin.icon_keyword')])
+                </div>
                 <div class="col-md-5"><label class="form-label">{{ __('admin.description_en') }}</label><textarea class="form-control" data-field="description_en" rows="3"></textarea></div>
                 <div class="col-md-5"><label class="form-label">{{ __('admin.description_ar') }}</label><textarea class="form-control text-end" dir="rtl" data-field="description_ar" rows="3"></textarea></div>
                 <div class="col-md-1"><label class="form-label">{{ __('admin.order') }}</label><input class="form-control" data-field="sort_order" type="number"></div>

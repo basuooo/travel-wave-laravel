@@ -49,24 +49,33 @@
                                 $inputType = $field['type'] ?? 'text';
                                 $value = $row[$field['key']] ?? '';
                             @endphp
-                            <div class="col-md-{{ $inputType === 'textarea' ? 6 : ($inputType === 'checkbox' ? 2 : 4) }}">
-                                @if($inputType === 'checkbox')
+                            @if($field['key'] === 'icon')
+                                <div class="col-md-6">
+                                    @include('admin.partials.icon-picker', [
+                                        'name' => $inputName . '[' . $index . '][' . $field['key'] . ']',
+                                        'value' => $value,
+                                        'label' => $field['label'],
+                                        'fieldDataAttr' => $field['key']
+                                    ])
+                                </div>
+                            @elseif($inputType === 'checkbox')
+                                <div class="col-md-2">
                                     <div class="form-check mt-4 pt-2">
                                         <input class="form-check-input" type="checkbox" data-field="{{ $field['key'] }}" name="{{ $inputName }}[{{ $index }}][{{ $field['key'] }}]" value="1" @checked($value)>
                                         <label class="form-check-label">{{ $field['label'] }}</label>
                                     </div>
-                                @endif
-
-                                @if($inputType === 'textarea')
+                                </div>
+                            @elseif($inputType === 'textarea')
+                                <div class="col-md-6">
                                     <label class="form-label">{{ $field['label'] }}</label>
                                     <textarea class="form-control {{ !empty($field['rtl']) ? 'text-end' : '' }}"
                                               data-field="{{ $field['key'] }}"
                                               @if(!empty($field['rtl'])) dir="rtl" @endif
                                               name="{{ $inputName }}[{{ $index }}][{{ $field['key'] }}]"
                                               rows="3">{{ $value }}</textarea>
-                                @endif
-
-                                @if(!in_array($inputType, ['checkbox', 'textarea'], true))
+                                </div>
+                            @else
+                                <div class="col-md-4">
                                     <label class="form-label">{{ $field['label'] }}</label>
                                     <input class="form-control {{ !empty($field['rtl']) ? 'text-end' : '' }}"
                                            data-field="{{ $field['key'] }}"
@@ -75,8 +84,8 @@
                                            name="{{ $inputName }}[{{ $index }}][{{ $field['key'] }}]"
                                            value="{{ $value }}"
                                            placeholder="{{ $field['placeholder'] ?? '' }}">
-                                @endif
-                            </div>
+                                </div>
+                            @endif
                         @endforeach
                         <div class="col-md-2 d-flex align-items-end">
                             <button type="button" class="btn btn-outline-danger w-100" data-repeater-remove>Remove</button>
