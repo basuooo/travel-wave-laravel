@@ -568,9 +568,32 @@ class VisaCountryController extends Controller
         return ['full_name', 'phone', 'whatsapp_number', 'email', 'service_type', 'destination', 'travel_date', 'message'];
     }
 
+    protected function mapPageSectionOrder(Request $request, array $existing): array
+    {
+        $rawOrders = (array) $request->input('page_section_order', []);
+        $rawEnabled = (array) $request->input('page_section_enabled', []);
+
+        if (empty($rawOrders)) {
+            return $existing;
+        }
+
+        $result = [];
+        foreach ($rawOrders as $sKey => $orderVal) {
+            $result[$sKey] = [
+                'sort_order' => (int) $orderVal,
+                'enabled' => isset($rawEnabled[$sKey]) ? (bool) $rawEnabled[$sKey] : false,
+            ];
+        }
+
+        uasort($result, fn ($a, $b) => $a['sort_order'] <=> $b['sort_order']);
+
+        return $result;
+    }
+
     protected function france3SectionsFromRequest(Request $request, array $existing): array
     {
         return [
+            'section_order' => $this->mapPageSectionOrder($request, data_get($existing, 'section_order', [])),
             'hero' => [
                 'eyebrow_en' => trim((string) $request->input('france3_hero_eyebrow_en', data_get($existing, 'hero.eyebrow_en', ''))),
                 'eyebrow_ar' => trim((string) $request->input('france3_hero_eyebrow_ar', data_get($existing, 'hero.eyebrow_ar', ''))),
