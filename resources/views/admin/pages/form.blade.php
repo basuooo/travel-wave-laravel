@@ -24,6 +24,23 @@
         </div>
     </div>
 
+    <style>
+        .custom-admin-tabs .nav-link {
+            color: #495057;
+            padding: 0.65rem 1.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 0;
+            background: transparent;
+        }
+        .custom-admin-tabs .nav-link.active {
+            background-color: #0d6efd !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        }
+    </style>
+
     <!-- TAB NAVIGATION HEADER -->
     <ul class="nav nav-pills custom-admin-tabs mb-4 bg-light p-2 rounded-3 border" id="pageFormTabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -47,7 +64,7 @@
     <div class="tab-content" id="pageFormTabsContent">
 
         <!-- TAB 1: SECTION ORDERING -->
-        <div class="tab-pane fade show active" id="tab-ordering" role="tabpanel">
+        <div class="tab-pane fade show active" id="tab-ordering" role="tabpanel" style="display: block;">
             @php($orderedSections = $page->getOrderedSections())
             <div class="card admin-card p-4 mb-4 border-primary shadow-sm">
                 <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
@@ -106,7 +123,7 @@
         </div>
 
         <!-- TAB 2: CORE INFO & SEO -->
-        <div class="tab-pane fade" id="tab-core" role="tabpanel">
+        <div class="tab-pane fade" id="tab-core" role="tabpanel" style="display: none;">
             <div class="card admin-card p-4 mb-4">
                 <h2 class="h5 mb-3">Core Page Info & Hero Settings</h2>
                 <div class="row g-3">
@@ -145,7 +162,7 @@
         </div>
 
         <!-- TAB 3: SECTIONS CONTENT -->
-        <div class="tab-pane fade" id="tab-sections" role="tabpanel">
+        <div class="tab-pane fade" id="tab-sections" role="tabpanel" style="display: none;">
             @php($pageKey = old('key', $page->key))
 
             @if($pageKey === 'home')
@@ -323,6 +340,36 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // TAB SWITCHER
+    const pageTabButtons = document.querySelectorAll('#pageFormTabs button');
+    const pageTabPanes = document.querySelectorAll('#pageFormTabsContent > .tab-pane');
+
+    pageTabButtons.forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            pageTabButtons.forEach((b) => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+
+            const targetSelector = btn.getAttribute('data-bs-target') || btn.getAttribute('data-target');
+            pageTabPanes.forEach((pane) => {
+                if ('#' + pane.id === targetSelector) {
+                    pane.classList.add('show', 'active');
+                    pane.style.display = 'block';
+                } else {
+                    pane.classList.remove('show', 'active');
+                    pane.style.display = 'none';
+                }
+            });
+        });
+    });
+
     // Dynamic Repeater Add / Remove logic
     document.addEventListener('click', function (event) {
         const addButton = event.target.closest('[data-repeater-add]');
