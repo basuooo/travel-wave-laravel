@@ -190,19 +190,23 @@ class PageController extends Controller
 
         $sections = match ($key) {
             'home' => [
-                'services' => $this->mapLocalizedBlocks(
-                    $request->input('services_title_en'),
-                    $request->input('services_title_ar'),
-                    $request->input('services_text_en'),
-                    $request->input('services_text_ar'),
-                    $request->input('services_icon')
-                ),
-                'why_choose_us' => $this->mapLocalizedBlocks(
-                    $request->input('why_title_en'),
-                    $request->input('why_title_ar'),
-                    $request->input('why_text_en'),
-                    $request->input('why_text_ar')
-                ),
+                'services' => $request->has('services_items')
+                    ? $this->mapLocalizedRows((array) $request->input('services_items', []), ['title', 'text'], ['icon'], ['is_active'], ['sort_order'])
+                    : $this->mapLocalizedBlocks(
+                        $request->input('services_title_en'),
+                        $request->input('services_title_ar'),
+                        $request->input('services_text_en'),
+                        $request->input('services_text_ar'),
+                        $request->input('services_icon')
+                    ),
+                'why_choose_us' => $request->has('why_choose_us_items')
+                    ? $this->mapLocalizedRows((array) $request->input('why_choose_us_items', []), ['title', 'text'], [], ['is_active'], ['sort_order'])
+                    : $this->mapLocalizedBlocks(
+                        $request->input('why_title_en'),
+                        $request->input('why_title_ar'),
+                        $request->input('why_text_en'),
+                        $request->input('why_text_ar')
+                    ),
                 'why_choose_travel_wave' => [
                     'title_en' => trim((string) $request->input('why_choose_travel_wave_title_en', data_get($existing, 'why_choose_travel_wave.title_en', ''))),
                     'title_ar' => trim((string) $request->input('why_choose_travel_wave_title_ar', data_get($existing, 'why_choose_travel_wave.title_ar', ''))),
@@ -210,12 +214,14 @@ class PageController extends Controller
                     'subtitle_ar' => trim((string) $request->input('why_choose_travel_wave_subtitle_ar', data_get($existing, 'why_choose_travel_wave.subtitle_ar', ''))),
                     'items' => $this->mapLocalizedRows((array) $request->input('why_choose_travel_wave_items', []), ['title', 'text'], ['icon'], ['is_active'], ['sort_order']),
                 ],
-                'how_it_works' => $this->mapLocalizedBlocks(
-                    $request->input('steps_title_en'),
-                    $request->input('steps_title_ar'),
-                    $request->input('steps_text_en'),
-                    $request->input('steps_text_ar')
-                ),
+                'how_it_works' => $request->has('how_it_works_items')
+                    ? $this->mapLocalizedRows((array) $request->input('how_it_works_items', []), ['title', 'text'], [], ['is_active'], ['sort_order'])
+                    : $this->mapLocalizedBlocks(
+                        $request->input('steps_title_en'),
+                        $request->input('steps_title_ar'),
+                        $request->input('steps_text_en'),
+                        $request->input('steps_text_ar')
+                    ),
                 'promo' => [
                     'title_en' => $request->input('promo_title_en'),
                     'title_ar' => $request->input('promo_title_ar'),
@@ -244,18 +250,22 @@ class PageController extends Controller
             'visas', 'domestic', 'flights', 'hotels' => $this->serviceSectionsFromRequest($request, $existing),
             'about', 'contact' => $this->contentSectionsFromRequest($request, $existing),
             default => [
-                'feature_blocks' => $this->mapLocalizedBlocks(
-                    $request->input('feature_title_en'),
-                    $request->input('feature_title_ar'),
-                    $request->input('feature_text_en'),
-                    $request->input('feature_text_ar')
-                ),
-                'faqs' => $this->mapFaqs(
-                    $request->input('faq_question_en'),
-                    $request->input('faq_answer_en'),
-                    $request->input('faq_question_ar'),
-                    $request->input('faq_answer_ar')
-                ),
+                'feature_blocks' => $request->has('feature_blocks_items')
+                    ? $this->mapLocalizedRows((array) $request->input('feature_blocks_items', []), ['title', 'text'], ['icon'], ['is_active'], ['sort_order'])
+                    : $this->mapLocalizedBlocks(
+                        $request->input('feature_title_en'),
+                        $request->input('feature_title_ar'),
+                        $request->input('feature_text_en'),
+                        $request->input('feature_text_ar')
+                    ),
+                'faqs' => $request->has('faq_items')
+                    ? $this->mapLocalizedRows((array) $request->input('faq_items', []), ['question', 'answer'], [], ['is_active'], ['sort_order'])
+                    : $this->mapFaqs(
+                        $request->input('faq_question_en'),
+                        $request->input('faq_answer_en'),
+                        $request->input('faq_question_ar'),
+                        $request->input('faq_answer_ar')
+                    ),
                 'cta' => [
                     'title_en' => $request->input('cta_title_en'),
                     'title_ar' => $request->input('cta_title_ar'),
