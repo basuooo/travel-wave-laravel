@@ -92,10 +92,17 @@ class AppServiceProvider extends ServiceProvider
 
         $items = $query->get();
 
-        if ($location === 'header' && $items->isEmpty() && $this->safeHasTable('pages')) {
+        if ($location === 'header' && $this->safeHasTable('pages')) {
             try {
-                app(\Database\Seeders\MainMenuSeeder::class)->run();
-                return $query->get();
+                if (! Page::where('key', 'umrah')->exists() || ! Page::where('key', 'hajj')->exists()) {
+                    app(\Database\Seeders\UmrahHajjPagesSeeder::class)->run();
+                    return $query->get();
+                }
+
+                if ($items->isEmpty()) {
+                    app(\Database\Seeders\MainMenuSeeder::class)->run();
+                    return $query->get();
+                }
             } catch (Throwable $e) {
                 report($e);
             }

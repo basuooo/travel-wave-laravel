@@ -221,6 +221,8 @@ class Page extends Model
             'about' => route('about'),
             'contact' => route('contact'),
             'blog' => route('blog.index'),
+            'umrah' => route('umrah'),
+            'hajj' => route('hajj'),
             default => $this->slug ? route('pages.show', $this) : null,
         };
     }

@@ -71,6 +71,20 @@ Route::get('/blog', [FrontendController::class, 'blogIndex'])->name('blog.index'
 Route::get('/blog/{post:slug}', [FrontendController::class, 'blogShow'])->name('blog.show');
 Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
 Route::get('/pages/{page:slug}', [FrontendController::class, 'pageShow'])->name('pages.show');
+Route::get('/umrah', function () {
+    $page = \App\Models\Page::where('key', 'umrah')->first();
+    if (! $page) {
+        $page = \App\Models\Page::where('slug', 'umrah')->firstOrFail();
+    }
+    return app(\App\Http\Controllers\FrontendController::class)->pageShow($page);
+})->name('umrah');
+Route::get('/hajj', function () {
+    $page = \App\Models\Page::where('key', 'hajj')->first();
+    if (! $page) {
+        $page = \App\Models\Page::where('slug', 'hajj')->firstOrFail();
+    }
+    return app(\App\Http\Controllers\FrontendController::class)->pageShow($page);
+})->name('hajj');
 Route::get('/campaigns/{landingPage:slug}', [FrontendController::class, 'marketingLandingPage'])->name('marketing.landing-pages.show');
 Route::post('/campaigns/{landingPage:slug}/events', [FrontendController::class, 'trackMarketingLandingPageEvent'])->name('marketing.landing-pages.events.store');
 Route::post('/inquiries', [FrontendController::class, 'storeInquiry'])->name('inquiries.store');
