@@ -112,10 +112,21 @@ class TrackingManager
             default => null,
         };
 
-        /** @var VisaCountry|null $visaCountry */
-        $visaCountry = $route?->parameter('country');
-        /** @var Destination|null $destination */
-        $destination = $route?->parameter('destination');
+        $rawVisaCountry = $route?->parameter('country');
+        $visaCountry = null;
+        if ($rawVisaCountry instanceof VisaCountry) {
+            $visaCountry = $rawVisaCountry;
+        } elseif (is_string($rawVisaCountry) && filled($rawVisaCountry)) {
+            $visaCountry = VisaCountry::where('slug', $rawVisaCountry)->first();
+        }
+
+        $rawDestination = $route?->parameter('destination');
+        $destination = null;
+        if ($rawDestination instanceof Destination) {
+            $destination = $rawDestination;
+        } elseif (is_string($rawDestination) && filled($rawDestination)) {
+            $destination = Destination::where('slug', $rawDestination)->first();
+        }
 
         return array_filter([
             'route_name' => $routeName,

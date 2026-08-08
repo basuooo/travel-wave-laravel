@@ -450,19 +450,35 @@ class SeoManager
         $route = $request->route();
         $routeName = $route?->getName();
 
-        if ($country = $route?->parameter('country')) {
+        $country = $route?->parameter('country');
+        if (is_string($country) && filled($country)) {
+            $country = \App\Models\VisaCountry::where('slug', $country)->first();
+        }
+        if ($country instanceof \App\Models\VisaCountry) {
             return ['visa_country', $country->id, $country];
         }
 
-        if ($destination = $route?->parameter('destination')) {
+        $destination = $route?->parameter('destination');
+        if (is_string($destination) && filled($destination)) {
+            $destination = \App\Models\Destination::where('slug', $destination)->first();
+        }
+        if ($destination instanceof \App\Models\Destination) {
             return ['destination', $destination->id, $destination];
         }
 
-        if ($post = $route?->parameter('post')) {
+        $post = $route?->parameter('post');
+        if (is_string($post) && filled($post)) {
+            $post = \App\Models\BlogPost::where('slug', $post)->first();
+        }
+        if ($post instanceof \App\Models\BlogPost) {
             return ['blog_post', $post->id, $post];
         }
 
-        if ($landingPage = $route?->parameter('landingPage')) {
+        $landingPage = $route?->parameter('landingPage');
+        if (is_string($landingPage) && filled($landingPage)) {
+            $landingPage = \App\Models\MarketingLandingPage::where('slug', $landingPage)->first();
+        }
+        if ($landingPage instanceof \App\Models\MarketingLandingPage) {
             return ['marketing_landing_page', $landingPage->id, $landingPage];
         }
 

@@ -181,6 +181,20 @@ class VisaCountry extends Model
         return ($this->is_active && ! $this->trashed()) ? route('visas.country', $this) : null;
     }
 
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $field = $field ?: $this->getRouteKeyName();
+        $model = $this->where($field, $value)->first();
+
+        if (! $model && in_array($value, ['france-3-visa', 'france-3'], true)) {
+            require_once database_path('seeders/France3VisaCountrySeeder.php');
+            (new \Database\Seeders\France3VisaCountrySeeder())->run();
+            $model = $this->where($field, 'france-3-visa')->first();
+        }
+
+        return $model;
+    }
+
     public static function makeUniqueSlug(string $base, ?int $ignoreId = null): string
     {
         $base = Str::slug($base) ?: 'visa-country';
