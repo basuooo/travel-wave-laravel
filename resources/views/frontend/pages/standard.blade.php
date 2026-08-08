@@ -6,6 +6,8 @@
 @php($sections = $page->sections ?? [])
 @php($orderedSections = $page->getOrderedSections())
 
+@include('partials.frontend.form-zone', ['assignments' => $managedForms['top'] ?? [], 'position' => 'top', 'sourcePage' => $page->key])
+
 @foreach($orderedSections as $sKey => $sMeta)
     @continue(empty($sMeta['enabled']))
 
@@ -106,5 +108,8 @@
             @break
     @endswitch
 @endforeach
+
+@include('partials.frontend.form-zone', ['assignments' => $managedForms['middle'] ?? [], 'position' => 'middle', 'sourcePage' => $page->key])
+@include('partials.frontend.form-zone', ['assignments' => $managedForms['bottom'] ?? [], 'position' => 'bottom', 'sourcePage' => $page->key])
 
 @endsection

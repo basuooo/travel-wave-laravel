@@ -18,7 +18,7 @@
     $map = $contentPage['map'] ?? [];
     $faq = $contentPage['faq'] ?? [];
     $cta = $contentPage['cta'] ?? [];
-    $allowManagedUtilityZones = !in_array($page->key ?? null, ['about', 'contact'], true);
+    $allowManagedUtilityZones = true;
     $orderedSections = $page->getOrderedSections();
 @endphp
 
