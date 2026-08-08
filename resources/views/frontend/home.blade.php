@@ -108,6 +108,40 @@
 
 @include('partials.frontend.form-zone', ['assignments' => $managedForms['below_hero'] ?? [], 'position' => 'below_hero', 'sourcePage' => 'home'])
 
+@if(!empty($homeWhyChooseSection['title']) || !empty($homeWhyChooseSection['subtitle']) || !empty($homeWhyChooseSection['items']))
+<section class="container py-4 py-lg-5">
+    <div class="tw-card tw-section-shell p-4 p-lg-5">
+        <div class="text-center mb-4 mb-lg-5">
+            <h2 class="tw-section-title h2 mb-2">{{ $homeWhyChooseSection['title'] }}</h2>
+            @if(!empty($homeWhyChooseSection['subtitle']))
+                <p class="text-muted mx-auto mb-0" style="max-width:780px">{{ $homeWhyChooseSection['subtitle'] }}</p>
+            @endif
+        </div>
+        <div class="row g-4">
+            @foreach(($homeWhyChooseSection['items'] ?? []) as $item)
+                <div class="col-md-6 col-lg-4">
+                    <div class="tw-card h-100 p-4 tw-home-why-choose-card">
+                        <div class="tw-icon-badge mb-3">
+                            @if(!empty($item['icon']))
+                                @if(str_contains($item['icon'], 'iconify:') || str_contains($item['icon'], 'material-symbols:') || str_contains($item['icon'], 'bi ') || str_contains($item['icon'], 'fa ') || str_contains($item['icon'], 'fas ') || str_contains($item['icon'], 'far ') || str_contains($item['icon'], 'fab '))
+                                    <iconify-icon icon="{{ $item['icon'] }}" width="24" height="24"></iconify-icon>
+                                @else
+                                    <span aria-hidden="true">{{ $item['icon'] }}</span>
+                                @endif
+                            @else
+                                <span aria-hidden="true">TW</span>
+                            @endif
+                        </div>
+                        <h3 class="h5">{{ $item['title'] }}</h3>
+                        <p class="text-muted mb-0">{{ $item['description'] }}</p>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
 <section class="container pt-4 pb-2">
     <div class="tw-home-search-shell">
         <div class="tw-home-search-copy">

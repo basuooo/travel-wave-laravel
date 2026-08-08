@@ -517,6 +517,20 @@ class DatabaseSeeder extends Seeder
                         ['title_en' => 'Organization', 'title_ar' => 'التنظيم', 'text_en' => 'We make the travel process easy to follow.', 'text_ar' => 'نجعل خطوات السفر سهلة وواضحة.'],
                         ['title_en' => 'Responsiveness', 'title_ar' => 'سرعة الاستجابة', 'text_en' => 'Practical answers and follow-up when you need them.', 'text_ar' => 'ردود عملية ومتابعة وقت الحاجة.'],
                     ],
+                    'why_choose_travel_wave' => [
+                        'title_en' => 'Why Choose Travel Wave',
+                        'title_ar' => 'لماذا Travel Wave',
+                        'subtitle_en' => 'We make your travel experience easier with professional support from planning until your journey begins.',
+                        'subtitle_ar' => 'نجعل تجربة السفر أسهل مع دعم احترافي من التخطيط وحتى بداية رحلتك.',
+                        'items' => [
+                            ['icon' => '★', 'title_en' => 'Trusted Travel Experts', 'title_ar' => 'خبراء سفر موثوقون', 'text_en' => 'Years of experience helping travelers with visas, flights and travel services.', 'text_ar' => 'سنوات من الخبرة في مساعدة المسافرين على التأشيرات والحجوزات والخدمات السفرية.', 'is_active' => true, 'sort_order' => 1],
+                            ['icon' => '✓', 'title_en' => 'Complete Application Support', 'title_ar' => 'دعم شامل للتقديم', 'text_en' => 'We assist you from document preparation until your application is submitted.', 'text_ar' => 'نساعدك من تجهيز المستندات حتى تقديم الطلب بالكامل.', 'is_active' => true, 'sort_order' => 2],
+                            ['icon' => '€', 'title_en' => 'Competitive Prices', 'title_ar' => 'أسعار تنافسية', 'text_en' => 'Transparent pricing with high-quality service and no hidden costs.', 'text_ar' => 'أسعار شفافة مع خدمة عالية الجودة وبدون تكاليف خفية.', 'is_active' => true, 'sort_order' => 3],
+                            ['icon' => '👥', 'title_en' => 'Professional Team', 'title_ar' => 'فريق محترف', 'text_en' => 'Our experienced consultants guide you through every step.', 'text_ar' => 'يُرافقك مستشارونا ذوو الخبرة في كل خطوة.', 'is_active' => true, 'sort_order' => 4],
+                            ['icon' => '⚡', 'title_en' => 'Fast Customer Support', 'title_ar' => 'دعم سريع للعملاء', 'text_en' => 'Quick responses through WhatsApp, phone and email.', 'text_ar' => 'ردود سريعة عبر واتساب والهاتف والبريد الإلكتروني.', 'is_active' => true, 'sort_order' => 5],
+                            ['icon' => '✦', 'title_en' => 'Tailored Travel Solutions', 'title_ar' => 'حلول سفر مخصصة', 'text_en' => 'Personalized travel recommendations based on your needs.', 'text_ar' => 'توصيات سفر مخصصة حسب احتياجك.', 'is_active' => true, 'sort_order' => 6],
+                        ],
+                    ],
                     'how_it_works' => [
                         ['title_en' => 'Share your need', 'title_ar' => 'أخبرنا بطلبك', 'text_en' => 'Tell us the destination, purpose, and timing.', 'text_ar' => 'أخبرنا بالوجهة والهدف والموعد.'],
                         ['title_en' => 'Receive a clear plan', 'title_ar' => 'استلم خطة واضحة', 'text_en' => 'We outline the suitable service and next steps.', 'text_ar' => 'نوضح لك الخدمة المناسبة والخطوات التالية.'],

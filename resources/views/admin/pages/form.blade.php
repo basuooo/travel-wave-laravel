@@ -65,6 +65,27 @@
             @endfor
         </div>
         <div class="card admin-card p-4 mb-4">
+            <h2 class="h5 mb-3">Why Choose Travel Wave</h2>
+            @php($homeWhyChooseSection = data_get($sections, 'why_choose_travel_wave', []))
+            <div class="row g-3 mb-4">
+                <div class="col-md-6"><label class="form-label">Section Title EN</label><input class="form-control" name="why_choose_travel_wave_title_en" value="{{ old('why_choose_travel_wave_title_en', data_get($homeWhyChooseSection, 'title_en', '')) }}"></div>
+                <div class="col-md-6"><label class="form-label">Section Title AR</label><input class="form-control text-end" dir="rtl" name="why_choose_travel_wave_title_ar" value="{{ old('why_choose_travel_wave_title_ar', data_get($homeWhyChooseSection, 'title_ar', '')) }}"></div>
+                <div class="col-md-6"><label class="form-label">Section Subtitle EN</label><textarea class="form-control" name="why_choose_travel_wave_subtitle_en" rows="2">{{ old('why_choose_travel_wave_subtitle_en', data_get($homeWhyChooseSection, 'subtitle_en', '')) }}</textarea></div>
+                <div class="col-md-6"><label class="form-label">Section Subtitle AR</label><textarea class="form-control text-end" dir="rtl" name="why_choose_travel_wave_subtitle_ar" rows="2">{{ old('why_choose_travel_wave_subtitle_ar', data_get($homeWhyChooseSection, 'subtitle_ar', '')) }}</textarea></div>
+            </div>
+            @for($i = 0; $i < 6; $i++)
+                <div class="row g-3 mb-4 border-bottom pb-3">
+                    <div class="col-md-2"><label class="form-label">Icon</label><input class="form-control" name="why_choose_travel_wave_items[{{ $i }}][icon]" value="{{ old('why_choose_travel_wave_items.' . $i . '.icon', data_get($homeWhyChooseSection, 'items.' . $i . '.icon', '')) }}"></div>
+                    <div class="col-md-3"><label class="form-label">Title EN</label><input class="form-control" name="why_choose_travel_wave_items[{{ $i }}][title_en]" value="{{ old('why_choose_travel_wave_items.' . $i . '.title_en', data_get($homeWhyChooseSection, 'items.' . $i . '.title_en', '')) }}"></div>
+                    <div class="col-md-3"><label class="form-label">Title AR</label><input class="form-control text-end" dir="rtl" name="why_choose_travel_wave_items[{{ $i }}][title_ar]" value="{{ old('why_choose_travel_wave_items.' . $i . '.title_ar', data_get($homeWhyChooseSection, 'items.' . $i . '.title_ar', '')) }}"></div>
+                    <div class="col-md-2"><label class="form-label">Sort Order</label><input type="number" class="form-control" name="why_choose_travel_wave_items[{{ $i }}][sort_order]" value="{{ old('why_choose_travel_wave_items.' . $i . '.sort_order', data_get($homeWhyChooseSection, 'items.' . $i . '.sort_order', $i + 1)) }}"></div>
+                    <div class="col-md-2 d-flex align-items-end"><div class="form-check pb-2"><input type="hidden" name="why_choose_travel_wave_items[{{ $i }}][is_active]" value="0"><input class="form-check-input" type="checkbox" name="why_choose_travel_wave_items[{{ $i }}][is_active]" value="1" @checked(old('why_choose_travel_wave_items.' . $i . '.is_active', data_get($homeWhyChooseSection, 'items.' . $i . '.is_active', true)))><label class="form-check-label">Enabled</label></div></div>
+                    <div class="col-md-12"><label class="form-label">Description EN</label><textarea class="form-control" name="why_choose_travel_wave_items[{{ $i }}][text_en]" rows="2">{{ old('why_choose_travel_wave_items.' . $i . '.text_en', data_get($homeWhyChooseSection, 'items.' . $i . '.text_en', '')) }}</textarea></div>
+                    <div class="col-md-12"><label class="form-label">Description AR</label><textarea class="form-control text-end" dir="rtl" name="why_choose_travel_wave_items[{{ $i }}][text_ar]" rows="2">{{ old('why_choose_travel_wave_items.' . $i . '.text_ar', data_get($homeWhyChooseSection, 'items.' . $i . '.text_ar', '')) }}</textarea></div>
+                </div>
+            @endfor
+        </div>
+        <div class="card admin-card p-4 mb-4">
             <h2 class="h5 mb-3">Why Choose Us / How It Works</h2>
             @for($i = 0; $i < 5; $i++)
                 <div class="row g-3 mb-4 border-bottom pb-3">

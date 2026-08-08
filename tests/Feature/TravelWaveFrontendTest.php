@@ -121,6 +121,31 @@ class TravelWaveFrontendTest extends TestCase
             ->assertSee('tw-home-slider-mode-fullscreen-hero', false);
     }
 
+    public function test_homepage_renders_cms_managed_why_choose_section(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $page = Page::query()->where('key', 'home')->firstOrFail();
+        $page->forceFill([
+            'sections' => array_merge($page->sections ?? [], [
+                'why_choose_travel_wave' => [
+                    'title_en' => 'Why Choose Travel Wave',
+                    'title_ar' => 'لماذا Travel Wave',
+                    'subtitle_en' => 'We make your travel experience easier.',
+                    'subtitle_ar' => 'نجعل تجربة السفر أسهل.',
+                    'items' => [
+                        ['icon' => '★', 'title_en' => 'Trusted Experts', 'title_ar' => 'خبراء موثوقون', 'text_en' => 'Guidance you can trust.', 'text_ar' => 'إرشاد يمكنك الوثوق به.', 'sort_order' => 1, 'is_active' => true],
+                    ],
+                ],
+            ]),
+        ])->save();
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Why Choose Travel Wave')
+            ->assertSee('Trusted Experts');
+    }
+
     public function test_homepage_only_renders_home_maps_once_in_the_end_zone(): void
     {
         $this->seed(DatabaseSeeder::class);

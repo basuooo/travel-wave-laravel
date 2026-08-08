@@ -42,9 +42,10 @@ class FrontendController extends Controller
     {
         $settings = Setting::query()->first();
         $homeSearchConfig = $this->homeSearchConfig();
+        $page = $this->page('home');
 
         return view('frontend.home', [
-            'page' => $this->page('home'),
+            'page' => $page,
             'managedForms' => $this->formsForContext(LeadFormManager::contextForPageKey('home')),
             'managedMaps' => $this->mapsForContext(MapSectionManager::contextForPageKey('home')),
             'heroSlides' => HeroSlide::where('is_active', true)->orderBy('sort_order')->limit(3)->get(),
@@ -60,6 +61,7 @@ class FrontendController extends Controller
             'categories' => VisaCategory::where('is_active', true)->orderBy('sort_order')->get(),
             'testimonials' => Testimonial::where('is_active', true)->orderBy('sort_order')->get(),
             'posts' => BlogPost::where('is_published', true)->latest('published_at')->limit(3)->get(),
+            'homeWhyChooseSection' => $this->homeWhyChooseSection($page),
         ]);
     }
 
@@ -593,6 +595,51 @@ class FrontendController extends Controller
     protected function page(string $key): Page
     {
         return Page::where('key', $key)->where('is_active', true)->firstOrFail();
+    }
+
+    protected function homeWhyChooseSection(Page $page): array
+    {
+        $managed = data_get($page->sections ?? [], 'why_choose_travel_wave', []);
+        $hasManagedContent = !empty($managed['title_en']) || !empty($managed['title_ar']) || !empty($managed['subtitle_en']) || !empty($managed['subtitle_ar']) || !empty($managed['items']);
+
+        if ($hasManagedContent) {
+            return [
+                'title' => $this->localizedItemValue($managed, 'title') ?: 'Why Choose Travel Wave',
+                'subtitle' => $this->localizedItemValue($managed, 'subtitle') ?: 'We make your travel experience easier with professional support from planning until your journey begins.',
+                'items' => collect($managed['items'] ?? [])
+                    ->filter(fn (array $item) => ($item['is_active'] ?? true) && filled($this->localizedItemValue($item, 'title')))
+                    ->sortBy('sort_order')
+                    ->map(fn (array $item) => [
+                        'icon' => $item['icon'] ?? '',
+                        'title' => $this->localizedItemValue($item, 'title'),
+                        'description' => $this->localizedItemValue($item, 'text'),
+                    ])
+                    ->values()
+                    ->all(),
+            ];
+        }
+
+        $locale = app()->getLocale();
+        $fallbackItems = [
+            ['icon' => '★', 'title_en' => 'Trusted Travel Experts', 'title_ar' => 'خبراء سفر موثوقون', 'text_en' => 'Years of experience helping travelers with visas, flights and travel services.', 'text_ar' => 'سنوات من الخبرة في مساعدة المسافرين على التأشيرات والحجوزات والخدمات السفرية.'],
+            ['icon' => '✓', 'title_en' => 'Complete Application Support', 'title_ar' => 'دعم شامل للتقديم', 'text_en' => 'We assist you from document preparation until your application is submitted.', 'text_ar' => 'نساعدك من تجهيز المستندات حتى تقديم الطلب بالكامل.'],
+            ['icon' => '€', 'title_en' => 'Competitive Prices', 'title_ar' => 'أسعار تنافسية', 'text_en' => 'Transparent pricing with high-quality service and no hidden costs.', 'text_ar' => 'أسعار شفافة مع خدمة عالية الجودة وبدون تكاليف خفية.'],
+            ['icon' => '👥', 'title_en' => 'Professional Team', 'title_ar' => 'فريق محترف', 'text_en' => 'Our experienced consultants guide you through every step.', 'text_ar' => 'يُرافقك مستشارونا ذوو الخبرة في كل خطوة.'],
+            ['icon' => '⚡', 'title_en' => 'Fast Customer Support', 'title_ar' => 'دعم سريع للعملاء', 'text_en' => 'Quick responses through WhatsApp, phone and email.', 'text_ar' => 'ردود سريعة عبر واتساب والهاتف والبريد الإلكتروني.'],
+            ['icon' => '✦', 'title_en' => 'Tailored Travel Solutions', 'title_ar' => 'حلول سفر مخصصة', 'text_en' => 'Personalized travel recommendations based on your needs.', 'text_ar' => 'توصيات سفر مخصصة حسب احتياجك.'],
+        ];
+
+        return [
+            'title' => 'Why Choose Travel Wave',
+            'subtitle' => 'We make your travel experience easier with professional support from planning until your journey begins.',
+            'items' => collect($fallbackItems)->map(function (array $item) use ($locale): array {
+                return [
+                    'icon' => $item['icon'] ?? '',
+                    'title' => $locale === 'ar' ? ($item['title_ar'] ?? $item['title_en'] ?? '') : ($item['title_en'] ?? $item['title_ar'] ?? ''),
+                    'description' => $locale === 'ar' ? ($item['text_ar'] ?? $item['text_en'] ?? '') : ($item['text_en'] ?? $item['text_ar'] ?? ''),
+                ];
+            })->values()->all(),
+        ];
     }
 
     protected function applyManagedServicePage(Page $page, array $defaults): array

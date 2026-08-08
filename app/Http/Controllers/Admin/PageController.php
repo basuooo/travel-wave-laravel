@@ -201,6 +201,13 @@ class PageController extends Controller
                     $request->input('why_text_en'),
                     $request->input('why_text_ar')
                 ),
+                'why_choose_travel_wave' => [
+                    'title_en' => trim((string) $request->input('why_choose_travel_wave_title_en', data_get($existing, 'why_choose_travel_wave.title_en', ''))),
+                    'title_ar' => trim((string) $request->input('why_choose_travel_wave_title_ar', data_get($existing, 'why_choose_travel_wave.title_ar', ''))),
+                    'subtitle_en' => trim((string) $request->input('why_choose_travel_wave_subtitle_en', data_get($existing, 'why_choose_travel_wave.subtitle_en', ''))),
+                    'subtitle_ar' => trim((string) $request->input('why_choose_travel_wave_subtitle_ar', data_get($existing, 'why_choose_travel_wave.subtitle_ar', ''))),
+                    'items' => $this->mapLocalizedRows((array) $request->input('why_choose_travel_wave_items', []), ['title', 'text'], ['icon'], ['is_active'], ['sort_order']),
+                ],
                 'how_it_works' => $this->mapLocalizedBlocks(
                     $request->input('steps_title_en'),
                     $request->input('steps_title_ar'),
