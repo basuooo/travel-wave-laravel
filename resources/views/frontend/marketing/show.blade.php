@@ -83,7 +83,7 @@
                     @continue(empty($item['is_active']))
                     <div class="col-md-6 col-xl-4">
                         <div class="tw-card tw-brand-card p-4 h-100">
-                            <div class="tw-brand-card-icon">{{ mb_substr($item['title_' . $locale] ?? $item['title_en'] ?? 'TW', 0, 2) }}</div>
+                            <div class="tw-brand-card-icon">@include('partials.frontend.icon', ['icon' => $item['icon'] ?? null, 'fallback' => 'sparkles'])</div>
                             <h3 class="h5 mt-4 mb-2">{{ $item['title_' . $locale] ?? $item['title_en'] }}</h3>
                             @if(!empty($item['meta_' . $locale]) || !empty($item['meta_en']))
                                 <div class="small text-muted mb-2">{{ $item['meta_' . $locale] ?? $item['meta_en'] }}</div>

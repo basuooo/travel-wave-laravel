@@ -122,11 +122,7 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="tw-card h-100 p-4 tw-home-why-choose-card">
                         <div class="tw-icon-badge mb-3">
-                            @if(!empty($item['icon']))
-                                @include('partials.frontend.icon', ['icon' => $item['icon'], 'fallback' => 'sparkles'])
-                            @else
-                                <span aria-hidden="true">TW</span>
-                            @endif
+                            @include('partials.frontend.icon', ['icon' => $item['icon'] ?? null, 'fallback' => 'sparkles'])
                         </div>
                         <h3 class="h5">{{ $item['title'] }}</h3>
                         <p class="text-muted mb-0">{{ $item['description'] }}</p>
@@ -281,7 +277,7 @@
         @foreach(($sections['services'] ?? []) as $service)
             <div class="col-md-6 col-xl-4">
                 <div class="tw-card p-4 h-100">
-                    <div class="tw-icon-badge mb-3">{{ $service['icon'] ?: 'TW' }}</div>
+                    <div class="tw-icon-badge mb-3">@include('partials.frontend.icon', ['icon' => $service['icon'] ?? null, 'fallback' => 'sparkles'])</div>
                     <h3 class="h5">{{ app()->getLocale() === 'ar' ? $service['title_ar'] : $service['title_en'] }}</h3>
                     <p class="text-muted mb-0">{{ app()->getLocale() === 'ar' ? $service['text_ar'] : $service['text_en'] }}</p>
                 </div>

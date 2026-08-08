@@ -5,5 +5,4 @@
 @endphp
 <span class="tw-global-icon-shell" aria-hidden="true">
     {!! $iconHtml !!}
-    <span class="tw-global-icon-mark">TW</span>
 </span>

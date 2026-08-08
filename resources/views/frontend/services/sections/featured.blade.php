@@ -27,7 +27,7 @@
                             @if(!empty($item['image']))
                                 <img src="{{ $item['image'] }}" alt="{{ $item['title'] ?? '' }}" class="tw-visa-hub-destination-image">
                             @else
-                                <div class="tw-visa-hub-destination-placeholder">{{ strtoupper(substr($item['title'] ?? 'TW', 0, 2)) }}</div>
+                                <div class="tw-visa-hub-destination-placeholder">@include('partials.frontend.icon', ['icon' => $item['icon'] ?? null, 'fallback' => 'globe'])</div>
                             @endif
                             <div class="tw-visa-hub-destination-overlay"></div>
                             @if(!empty($item['badge']))
