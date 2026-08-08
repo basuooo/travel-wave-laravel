@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 class MenuItem extends Model
 {
@@ -18,11 +19,14 @@ class MenuItem extends Model
     protected $fillable = [
         'location',
         'parent_id',
+        'type',
+        'page_id',
         'title_en',
         'title_ar',
         'url',
         'route_name',
         'target',
+        'icon',
         'sort_order',
         'is_active',
     ];
@@ -42,6 +46,11 @@ class MenuItem extends Model
         return $this->hasMany(self::class, 'parent_id')->orderBy('sort_order');
     }
 
+    public function page(): BelongsTo
+    {
+        return $this->belongsTo(Page::class, 'page_id');
+    }
+
     public function deletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');
@@ -50,9 +59,40 @@ class MenuItem extends Model
     public function frontendUrl(): ?string
     {
         if (! $this->is_active || $this->trashed()) {
-            return null;
+            return '#';
         }
 
+        // Type A: Linked to an existing Page model
+        if ($this->type === 'page' || filled($this->page_id)) {
+            $linkedPage = $this->page ?? Page::find($this->page_id);
+            if ($linkedPage) {
+                return match ($linkedPage->key) {
+                    'home' => route('home'),
+                    'visas' => route('visas.index'),
+                    'domestic' => route('pages.show', $linkedPage->slug ?: 'domestic'),
+                    'flights' => route('pages.show', $linkedPage->slug ?: 'flights'),
+                    'hotels' => route('pages.show', $linkedPage->slug ?: 'hotels'),
+                    'about' => route('pages.show', $linkedPage->slug ?: 'about'),
+                    'contact' => route('pages.show', $linkedPage->slug ?: 'contact'),
+                    default => $linkedPage->frontendUrl() ?: route('pages.show', $linkedPage->slug),
+                };
+            }
+        }
+
+        // Type C: Anchor / Section link
+        if ($this->type === 'section' && filled($this->url)) {
+            $anchor = Str::startsWith($this->url, '#') ? $this->url : '#' . ltrim($this->url, '#');
+            if ($this->page_id && ($linkedPage = $this->page ?? Page::find($this->page_id))) {
+                $baseUrl = match ($linkedPage->key) {
+                    'home' => route('home'),
+                    default => route('pages.show', $linkedPage->slug),
+                };
+                return $baseUrl . $anchor;
+            }
+            return route('home') . $anchor;
+        }
+
+        // Type B: Custom URL
         if (filled($this->url)) {
             return $this->url;
         }
@@ -61,6 +101,6 @@ class MenuItem extends Model
             return route($this->route_name);
         }
 
-        return null;
+        return '#';
     }
 }

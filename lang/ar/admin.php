@@ -100,7 +100,7 @@ return [
     'blog_categories' => 'فئات المدونة',
     'blog_posts' => 'مقالات المدونة',
     'testimonials' => 'آراء العملاء',
-    'navigation' => 'التنقل',
+    'navigation' => 'إدارة القوائم والتنقل',
     'inquiries' => 'الاستفسارات',
     'view_website' => 'عرض الموقع',
     'logout' => 'تسجيل الخروج',

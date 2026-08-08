@@ -251,6 +251,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::middleware('permission:menu.manage')->group(function () {
             Route::get('/menu-items/trash', [MenuItemController::class, 'trash'])->name('menu-items.trash');
+            Route::post('/menu-items/reorder', [MenuItemController::class, 'reorder'])->name('menu-items.reorder');
             Route::post('/menu-items/{menu_item}/duplicate', [MenuItemController::class, 'duplicate'])->name('menu-items.duplicate');
             Route::post('/menu-items/{menu_item}/restore', [MenuItemController::class, 'restore'])->name('menu-items.restore');
             Route::delete('/menu-items/{menu_item}/force-delete', [MenuItemController::class, 'forceDestroy'])->name('menu-items.force-destroy');

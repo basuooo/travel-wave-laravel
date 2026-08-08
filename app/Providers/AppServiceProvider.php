@@ -83,12 +83,24 @@ class AppServiceProvider extends ServiceProvider
 
     protected function menuItemsForLocation(string $location): Collection
     {
-        return MenuItem::query()
+        $query = MenuItem::query()
             ->where('location', $location)
             ->whereNull('parent_id')
             ->where('is_active', true)
-            ->with(['children' => fn ($query) => $query->where('is_active', true)->orderBy('sort_order')])
-            ->orderBy('sort_order')
-            ->get();
+            ->with(['page', 'children' => fn ($q) => $q->where('is_active', true)->with('page')->orderBy('sort_order')])
+            ->orderBy('sort_order');
+
+        $items = $query->get();
+
+        if ($location === 'header' && $items->isEmpty() && $this->safeHasTable('pages')) {
+            try {
+                app(\Database\Seeders\MainMenuSeeder::class)->run();
+                return $query->get();
+            } catch (Throwable $e) {
+                report($e);
+            }
+        }
+
+        return $items;
     }
 }

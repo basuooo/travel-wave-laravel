@@ -19,16 +19,33 @@
         <div class="collapse navbar-collapse tw-navbar-collapse-shell tw-navbar-collapse-shell--menu-{{ $localeHeaderAlignment['menu'] }}" id="navbarContent">
             <ul class="navbar-nav tw-navbar-nav tw-navbar-nav-primary tw-navbar-nav-primary--menu-{{ $localeHeaderAlignment['menu'] }} align-items-lg-center gap-lg-2">
                 @foreach ($headerMenuItems ?? [] as $item)
-                    <li class="nav-item dropdown">
+                    <li class="nav-item {{ $item->children->isNotEmpty() ? 'dropdown' : '' }}">
                         @if ($item->children->isNotEmpty())
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">{{ $item->localized('title') }}</a>
+                            <a class="nav-link dropdown-toggle" href="{{ $item->frontendUrl() }}" role="button" data-bs-toggle="dropdown" target="{{ $item->target ?: '_self' }}">
+                                @if($item->icon)
+                                    @include('partials.frontend.icon', ['icon' => $item->icon])
+                                @endif
+                                <span>{{ $item->localized('title') }}</span>
+                            </a>
                             <ul class="dropdown-menu tw-navbar-dropdown">
                                 @foreach ($item->children as $child)
-                                    <li><a class="dropdown-item" href="{{ $child->url ?: ($child->route_name ? route($child->route_name) : '#') }}">{{ $child->localized('title') }}</a></li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ $child->frontendUrl() }}" target="{{ $child->target ?: '_self' }}">
+                                            @if($child->icon)
+                                                @include('partials.frontend.icon', ['icon' => $child->icon])
+                                            @endif
+                                            <span>{{ $child->localized('title') }}</span>
+                                        </a>
+                                    </li>
                                 @endforeach
                             </ul>
                         @else
-                            <a class="nav-link" href="{{ $item->url ?: ($item->route_name ? route($item->route_name) : '#') }}">{{ $item->localized('title') }}</a>
+                            <a class="nav-link d-inline-flex align-items-center gap-1" href="{{ $item->frontendUrl() }}" target="{{ $item->target ?: '_self' }}">
+                                @if($item->icon)
+                                    @include('partials.frontend.icon', ['icon' => $item->icon])
+                                @endif
+                                <span>{{ $item->localized('title') }}</span>
+                            </a>
                         @endif
                     </li>
                 @endforeach
