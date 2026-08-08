@@ -186,9 +186,10 @@ class PageController extends Controller
 
     protected function pageSectionsFromRequest(Request $request, string $key, array $existing): array
     {
+        $order = $this->mapPageSectionOrder($request, $key, data_get($existing, 'section_order', []));
+
         $sections = match ($key) {
             'home' => [
-                'section_order' => $this->mapHomeSectionOrder($request, data_get($existing, 'section_order', [])),
                 'services' => $this->mapLocalizedBlocks(
                     $request->input('services_title_en'),
                     $request->input('services_title_ar'),
@@ -268,40 +269,29 @@ class PageController extends Controller
         };
 
         $filtered = array_filter($sections, fn ($value) => ! empty($value));
+        $merged = array_merge($existing, $filtered);
 
-        return array_merge($existing, $filtered);
+        if (! empty($order)) {
+            $merged['section_order'] = $order;
+        }
+
+        return $merged;
     }
 
-    protected function mapHomeSectionOrder(Request $request, array $existing): array
+    protected function mapPageSectionOrder(Request $request, string $pageKey, array $existing): array
     {
-        $rawOrders = (array) $request->input('home_section_order', []);
-        $rawEnabled = (array) $request->input('home_section_enabled', []);
+        $rawOrders = (array) $request->input('page_section_order', $request->input('home_section_order', []));
+        $rawEnabled = (array) $request->input('page_section_enabled', $request->input('home_section_enabled', []));
 
         if (empty($rawOrders)) {
             return $existing;
         }
 
-        $sectionKeys = [
-            'hero_slider',
-            'why_choose_travel_wave',
-            'search_box',
-            'country_strip',
-            'services',
-            'popular_destinations',
-            'featured_categories',
-            'why_choose_us',
-            'featured_destinations',
-            'promo',
-            'testimonials',
-            'blog',
-            'final_cta',
-        ];
-
         $result = [];
-        foreach ($sectionKeys as $idx => $key) {
-            $result[$key] = [
-                'sort_order' => (int) ($rawOrders[$key] ?? ($idx + 1)),
-                'enabled' => isset($rawEnabled[$key]) ? (bool) $rawEnabled[$key] : false,
+        foreach ($rawOrders as $sKey => $orderVal) {
+            $result[$sKey] = [
+                'sort_order' => (int) $orderVal,
+                'enabled' => isset($rawEnabled[$sKey]) ? (bool) $rawEnabled[$sKey] : false,
             ];
         }
 

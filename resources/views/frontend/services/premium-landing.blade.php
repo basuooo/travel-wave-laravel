@@ -38,61 +38,87 @@
 @endphp
 
 @section('content')
+@php($orderedSections = $page->getOrderedSections())
 <div class="tw-visa-hub-page" dir="{{ $servicePage['direction'] ?? 'rtl' }}">
     @include('partials.frontend.form-zone', ['assignments' => $managedForms['top'] ?? [], 'position' => 'top', 'sourcePage' => $page->key])
     @include('partials.frontend.map-zone', ['assignments' => $managedMaps['top'] ?? [], 'position' => 'top'])
 
-    @if(($hero['enabled'] ?? true) && !empty($hero))
-        @include('frontend.services.sections.hero', ['hero' => $hero])
-    @endif
+    @foreach($orderedSections as $sKey => $sMeta)
+        @continue(empty($sMeta['enabled']))
 
-    @include('partials.frontend.form-zone', ['assignments' => $managedForms['below_hero'] ?? [], 'position' => 'below_hero', 'sourcePage' => $page->key])
-    @include('partials.frontend.map-zone', ['assignments' => $managedMaps['below_hero'] ?? [], 'position' => 'below_hero'])
+        @switch($sKey)
+            @case('hero')
+                @if(!empty($hero))
+                    @include('frontend.services.sections.hero', ['hero' => $hero])
+                    @include('partials.frontend.form-zone', ['assignments' => $managedForms['below_hero'] ?? [], 'position' => 'below_hero', 'sourcePage' => $page->key])
+                    @include('partials.frontend.map-zone', ['assignments' => $managedMaps['below_hero'] ?? [], 'position' => 'below_hero'])
+                @endif
+                @break
 
-    @if(($search['enabled'] ?? true) && !empty($search['fields']))
-        @include('frontend.services.sections.search', ['search' => $search])
-    @endif
+            @case('search')
+                @if(!empty($search['fields']))
+                    @include('frontend.services.sections.search', ['search' => $search])
+                @endif
+                @break
 
-    @if(($featured['enabled'] ?? true) && !empty($featured['items']))
-        @include('frontend.services.sections.featured', ['popular' => $featured])
-    @endif
+            @case('featured')
+                @if(!empty($featured['items']))
+                    @include('frontend.services.sections.featured', ['popular' => $featured])
+                @endif
+                @break
 
-    @if(($features['enabled'] ?? true) && !empty($features['items']))
-        @include('frontend.services.sections.features', ['section' => $features, 'servicePage' => $servicePage])
-    @endif
+            @case('features')
+                @if(!empty($features['items']))
+                    @include('frontend.services.sections.features', ['section' => $features, 'servicePage' => $servicePage])
+                @endif
+                @break
 
-    @if(($cards['enabled'] ?? true) && !empty($cards['items']))
-        @include('frontend.services.sections.cards', ['section' => $cards])
-    @endif
+            @case('cards')
+                @if(!empty($cards['items']))
+                    @include('frontend.services.sections.cards', ['section' => $cards])
+                @endif
+                @break
+
+            @case('steps')
+                @if(!empty($steps['items']))
+                    @include('frontend.services.sections.steps', ['section' => $steps, 'servicePage' => $servicePage])
+                @endif
+                @break
+
+            @case('grid')
+                @if(!empty($grid['items']))
+                    @include('frontend.services.sections.grid', ['section' => $grid, 'servicePage' => $servicePage])
+                @endif
+                @break
+
+            @case('quick_info')
+                @if(!empty($quickInfo['items']))
+                    @include('frontend.services.sections.info', ['section' => $quickInfo, 'servicePage' => $servicePage])
+                @endif
+                @break
+
+            @case('cta')
+                @if(!empty($cta))
+                    @include('frontend.services.sections.cta', ['section' => $cta])
+                @endif
+                @break
+
+            @case('faq')
+                @if(!empty($faq['items']))
+                    @include('partials.frontend.form-zone', ['assignments' => $managedForms['before_faq'] ?? [], 'position' => 'before_faq', 'sourcePage' => $page->key])
+                    @include('partials.frontend.map-zone', ['assignments' => $managedMaps['before_faq'] ?? [], 'position' => 'before_faq'])
+
+                    @include('frontend.services.sections.faq', ['section' => $faq, 'servicePage' => $servicePage])
+
+                    @include('partials.frontend.form-zone', ['assignments' => $managedForms['after_faq'] ?? [], 'position' => 'after_faq', 'sourcePage' => $page->key])
+                    @include('partials.frontend.map-zone', ['assignments' => $managedMaps['after_faq'] ?? [], 'position' => 'after_faq'])
+                @endif
+                @break
+        @endswitch
+    @endforeach
 
     @include('partials.frontend.form-zone', ['assignments' => $managedForms['middle'] ?? [], 'position' => 'middle', 'sourcePage' => $page->key])
     @include('partials.frontend.map-zone', ['assignments' => $managedMaps['middle'] ?? [], 'position' => 'middle'])
-
-    @if(($steps['enabled'] ?? true) && !empty($steps['items']))
-        @include('frontend.services.sections.steps', ['section' => $steps, 'servicePage' => $servicePage])
-    @endif
-
-    @if(($grid['enabled'] ?? true) && !empty($grid['items']))
-        @include('frontend.services.sections.grid', ['section' => $grid, 'servicePage' => $servicePage])
-    @endif
-
-    @if(($quickInfo['enabled'] ?? true) && !empty($quickInfo['items']))
-        @include('frontend.services.sections.info', ['section' => $quickInfo, 'servicePage' => $servicePage])
-    @endif
-
-    @if(($cta['enabled'] ?? true) && !empty($cta))
-        @include('frontend.services.sections.cta', ['section' => $cta])
-    @endif
-
-    @include('partials.frontend.form-zone', ['assignments' => $managedForms['before_faq'] ?? [], 'position' => 'before_faq', 'sourcePage' => $page->key])
-    @include('partials.frontend.map-zone', ['assignments' => $managedMaps['before_faq'] ?? [], 'position' => 'before_faq'])
-
-    @if(($faq['enabled'] ?? true) && !empty($faq['items']))
-        @include('frontend.services.sections.faq', ['section' => $faq, 'servicePage' => $servicePage])
-    @endif
-
-    @include('partials.frontend.form-zone', ['assignments' => $managedForms['after_faq'] ?? [], 'position' => 'after_faq', 'sourcePage' => $page->key])
-    @include('partials.frontend.map-zone', ['assignments' => $managedMaps['after_faq'] ?? [], 'position' => 'after_faq'])
 
     @include('partials.frontend.form-zone', ['assignments' => $managedForms['bottom'] ?? [], 'position' => 'bottom', 'sourcePage' => $page->key])
     @include('partials.frontend.map-zone', ['assignments' => $managedMaps['bottom'] ?? [], 'position' => 'bottom'])
@@ -205,4 +231,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 @endsection
-

@@ -51,98 +51,99 @@
 
     @php($pageKey = old('key', $page->key))
 
-    @if($pageKey === 'home')
-        @php($orderedHomeSections = $page->getOrderedHomeSections())
-        <div class="card admin-card p-4 mb-4 border-primary shadow-sm">
-            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
-                <div>
-                    <h2 class="h5 mb-1 text-primary fw-bold">🔀 ترتيب وإظهار/إخفاء أقسام الصفحة الرئيسية (Homepage Sections Arrangement)</h2>
-                    <p class="text-muted small mb-0">يمكنك تعديل ترتيب الأقسام بالنقر على الأسهم ⬆️ ⬇️ أو كتابة رقم الترتيب، وكذلك تفعيل أو تعطيل أي قسم بسهولة.</p>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="tw-home-sections-table">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 80px;">إظهار</th>
-                            <th style="width: 110px;">الترتيب</th>
-                            <th>اسم القسم / Section Name</th>
-                            <th style="width: 120px;" class="text-center">تحريك</th>
-                        </tr>
-                    </thead>
-                    <tbody class="js-section-order-body">
-                        @foreach($orderedHomeSections as $secKey => $secMeta)
-                            <tr class="js-section-order-row" data-key="{{ $secKey }}">
-                                <td>
-                                    <div class="form-check form-switch mb-0">
-                                        <input type="checkbox"
-                                               class="form-check-input"
-                                               name="home_section_enabled[{{ $secKey }}]"
-                                               value="1"
-                                               @checked($secMeta['enabled'])>
-                                    </div>
-                                </td>
-                                <td>
-                                    <input type="number"
-                                           class="form-control form-control-sm js-section-order-input text-center fw-bold"
-                                           name="home_section_order[{{ $secKey }}]"
-                                           value="{{ $secMeta['sort_order'] }}"
-                                           min="1"
-                                           max="99">
-                                </td>
-                                <td>
-                                    <span class="fw-bold text-dark d-block mb-0">{{ $secMeta['name_ar'] }}</span>
-                                    <span class="text-muted small">{{ $secMeta['name_en'] }}</span>
-                                </td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-outline-secondary js-move-up" title="للأعلى">▲</button>
-                                        <button type="button" class="btn btn-outline-secondary js-move-down" title="للأسفل">▼</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+    @php($orderedSections = $page->getOrderedSections())
+    <div class="card admin-card p-4 mb-4 border-primary shadow-sm">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+            <div>
+                <h2 class="h5 mb-1 text-primary fw-bold">🔀 ترتيب وإظهار/إخفاء أقسام الصفحة (Page Sections Arrangement)</h2>
+                <p class="text-muted small mb-0">يمكنك تعديل ترتيب الأقسام بالنقر على الأسهم ⬆️ ⬇️ أو كتابة رقم الترتيب، وكذلك تفعيل أو تعطيل أي قسم بسهولة.</p>
             </div>
         </div>
 
-        <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const tableBody = document.querySelector('.js-section-order-body');
-            if (!tableBody) return;
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tw-page-sections-table">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;">إظهار</th>
+                        <th style="width: 110px;">الترتيب</th>
+                        <th>اسم القسم / Section Name</th>
+                        <th style="width: 120px;" class="text-center">تحريك</th>
+                    </tr>
+                </thead>
+                <tbody class="js-section-order-body">
+                    @foreach($orderedSections as $secKey => $secMeta)
+                        <tr class="js-section-order-row" data-key="{{ $secKey }}">
+                            <td>
+                                <div class="form-check form-switch mb-0">
+                                    <input type="checkbox"
+                                           class="form-check-input"
+                                           name="page_section_enabled[{{ $secKey }}]"
+                                           value="1"
+                                           @checked($secMeta['enabled'])>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="number"
+                                       class="form-control form-control-sm js-section-order-input text-center fw-bold"
+                                       name="page_section_order[{{ $secKey }}]"
+                                       value="{{ $secMeta['sort_order'] }}"
+                                       min="1"
+                                       max="99">
+                            </td>
+                            <td>
+                                <span class="fw-bold text-dark d-block mb-0">{{ $secMeta['name_ar'] }}</span>
+                                <span class="text-muted small">{{ $secMeta['name_en'] }}</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary js-move-up" title="للأعلى">▲</button>
+                                    <button type="button" class="btn btn-outline-secondary js-move-down" title="للأسفل">▼</button>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-            const updateInputs = () => {
-                const rows = Array.from(tableBody.querySelectorAll('.js-section-order-row'));
-                rows.forEach((row, index) => {
-                    const input = row.querySelector('.js-section-order-input');
-                    if (input) {
-                        input.value = index + 1;
-                    }
-                });
-            };
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tableBody = document.querySelector('.js-section-order-body');
+        if (!tableBody) return;
 
-            tableBody.addEventListener('click', (e) => {
-                const row = e.target.closest('.js-section-order-row');
-                if (!row) return;
-
-                if (e.target.classList.contains('js-move-up')) {
-                    const prev = row.previousElementSibling;
-                    if (prev) {
-                        tableBody.insertBefore(row, prev);
-                        updateInputs();
-                    }
-                } else if (e.target.classList.contains('js-move-down')) {
-                    const next = row.nextElementSibling;
-                    if (next) {
-                        tableBody.insertBefore(next, row);
-                        updateInputs();
-                    }
+        const updateInputs = () => {
+            const rows = Array.from(tableBody.querySelectorAll('.js-section-order-row'));
+            rows.forEach((row, index) => {
+                const input = row.querySelector('.js-section-order-input');
+                if (input) {
+                    input.value = index + 1;
                 }
             });
+        };
+
+        tableBody.addEventListener('click', (e) => {
+            const row = e.target.closest('.js-section-order-row');
+            if (!row) return;
+
+            if (e.target.classList.contains('js-move-up')) {
+                const prev = row.previousElementSibling;
+                if (prev) {
+                    tableBody.insertBefore(row, prev);
+                    updateInputs();
+                }
+            } else if (e.target.classList.contains('js-move-down')) {
+                const next = row.nextElementSibling;
+                if (next) {
+                    tableBody.insertBefore(next, row);
+                    updateInputs();
+                }
+            }
         });
-        </script>
+    });
+    </script>
+
+    @if($pageKey === 'home')
 
         <div class="card admin-card p-4 mb-4">
             <h2 class="h5 mb-3">Homepage Services</h2>
