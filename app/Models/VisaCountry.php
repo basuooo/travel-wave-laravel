@@ -141,9 +141,11 @@ class VisaCountry extends Model
         'content_mode',
         'html_content_en',
         'html_content_ar',
+        'sections',
     ];
 
     protected $casts = [
+        'sections' => 'array',
         'highlights' => 'array',
         'required_documents' => 'array',
         'application_steps' => 'array',
@@ -179,6 +181,43 @@ class VisaCountry extends Model
     public function frontendUrl(): ?string
     {
         return ($this->is_active && ! $this->trashed()) ? route('visas.country', $this) : null;
+    }
+
+    public function getOrderedSections(): array
+    {
+        $allDefaultSections = [
+            'hero'             => ['enabled' => true, 'sort_order' => 1,  'name_ar' => 'البانر الهيرو الرئيسي', 'name_en' => 'Hero Banner'],
+            'quick_summary'    => ['enabled' => true, 'sort_order' => 2,  'name_ar' => 'ملخص سريع عن فيزا فرنسا', 'name_en' => 'Quick Summary'],
+            'intro'            => ['enabled' => true, 'sort_order' => 3,  'name_ar' => 'نبذة عن فيزا فرنسا', 'name_en' => 'About France Visa'],
+            'best_time'        => ['enabled' => true, 'sort_order' => 4,  'name_ar' => 'متى تبدأ إجراءات فيزا فرنسا؟', 'name_en' => 'Best Time to Apply'],
+            'requirements'     => ['enabled' => true, 'sort_order' => 5,  'name_ar' => 'المتطلبات الأساسية', 'name_en' => 'Key Requirements'],
+            'services'         => ['enabled' => true, 'sort_order' => 6,  'name_ar' => 'خدمات ترافل ويف', 'name_en' => 'Travel Wave Services'],
+            'steps'            => ['enabled' => true, 'sort_order' => 7,  'name_ar' => 'خطوات التقديم الـ 5', 'name_en' => 'Application Steps'],
+            'why_choose'      => ['enabled' => true, 'sort_order' => 8,  'name_ar' => 'ليه تختار ترافل ويف؟', 'name_en' => 'Why Travel Wave'],
+            'suitability'      => ['enabled' => true, 'sort_order' => 9,  'name_ar' => 'تقييم مناسبة الحالة للتقديم', 'name_en' => 'Suitability Assessment'],
+            'pricing_duration' => ['enabled' => true, 'sort_order' => 10, 'name_ar' => 'الرسوم ومدة الإجراءات', 'name_en' => 'Duration & Fees'],
+            'faq'              => ['enabled' => true, 'sort_order' => 11, 'name_ar' => 'الأسئلة الشائعة والإجابات', 'name_en' => 'FAQs'],
+            'notice'           => ['enabled' => true, 'sort_order' => 12, 'name_ar' => 'تنبيه مهم للعميل', 'name_en' => 'Important Notice'],
+            'cta'              => ['enabled' => true, 'sort_order' => 13, 'name_ar' => 'شريط الدعوة للتواصل النهائي', 'name_en' => 'Final CTA Banner'],
+        ];
+
+        $savedOrder = data_get($this->sections, 'section_order', []);
+        $ordered = [];
+
+        foreach ($allDefaultSections as $key => $default) {
+            $userMeta = $savedOrder[$key] ?? [];
+            $enabled = array_key_exists('enabled', $userMeta) ? (bool) $userMeta['enabled'] : (bool) $default['enabled'];
+            $sortOrder = array_key_exists('sort_order', $userMeta) ? (int) $userMeta['sort_order'] : (int) $default['sort_order'];
+
+            $ordered[$key] = array_merge($default, [
+                'enabled' => $enabled,
+                'sort_order' => $sortOrder,
+            ]);
+        }
+
+        uasort($ordered, fn ($a, $b) => $a['sort_order'] <=> $b['sort_order']);
+
+        return $ordered;
     }
 
     public function resolveRouteBinding($value, $field = null)

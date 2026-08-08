@@ -100,6 +100,14 @@ class FrontendController extends Controller
 
         $country->load('category');
 
+        if ($country->slug === 'france-3-visa' || filled(data_get($country->sections, 'hero'))) {
+            return view('frontend.pages.france3', [
+                'page' => $country,
+                'managedForms' => $this->formsForContext(LeadFormManager::contextForVisaCountry($country)),
+                'managedMaps' => $this->mapsForContext(MapSectionManager::contextForVisaCountry($country)),
+            ]);
+        }
+
         return view('frontend.destination-pages.show', [
             'pageData' => DestinationPageData::fromVisaCountry($country),
             'managedForms' => $this->formsForContext(LeadFormManager::contextForVisaCountry($country)),

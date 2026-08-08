@@ -45,6 +45,11 @@ class VisaCountryController extends Controller
     {
         $data = $this->validatedData($request);
         $data = $this->transformData($request, $data);
+
+        if ($request->input('slug') === 'france-3-visa' || $request->has('france3_hero_title_ar')) {
+            $data['sections'] = $this->france3SectionsFromRequest($request, []);
+        }
+
         VisaCountry::create($data);
 
         return redirect()->route('admin.visa-countries.index')->with('success', 'Visa country created.');
@@ -60,6 +65,7 @@ class VisaCountryController extends Controller
         return view('admin.visa-countries.form', [
             'item' => $visa_country,
             'categories' => VisaCategory::orderBy('sort_order')->get(),
+            'sections' => $visa_country->sections ?? [],
         ]);
     }
 
@@ -67,6 +73,11 @@ class VisaCountryController extends Controller
     {
         $data = $this->validatedData($request, $visa_country->id);
         $data = $this->transformData($request, $data, $visa_country);
+
+        if ($visa_country->slug === 'france-3-visa' || $request->has('france3_hero_title_ar') || filled($visa_country->sections)) {
+            $data['sections'] = $this->france3SectionsFromRequest($request, $visa_country->sections ?? []);
+        }
+
         $visa_country->update($data);
 
         return redirect()->route('admin.visa-countries.index')->with('success', 'Visa country updated.');
@@ -555,5 +566,128 @@ class VisaCountryController extends Controller
     protected function availableInquiryFields(): array
     {
         return ['full_name', 'phone', 'whatsapp_number', 'email', 'service_type', 'destination', 'travel_date', 'message'];
+    }
+
+    protected function france3SectionsFromRequest(Request $request, array $existing): array
+    {
+        return [
+            'hero' => [
+                'eyebrow_en' => trim((string) $request->input('france3_hero_eyebrow_en', data_get($existing, 'hero.eyebrow_en', ''))),
+                'eyebrow_ar' => trim((string) $request->input('france3_hero_eyebrow_ar', data_get($existing, 'hero.eyebrow_ar', ''))),
+                'title_en' => trim((string) $request->input('france3_hero_title_en', data_get($existing, 'hero.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_hero_title_ar', data_get($existing, 'hero.title_ar', ''))),
+                'subtitle_en' => trim((string) $request->input('france3_hero_subtitle_en', data_get($existing, 'hero.subtitle_en', ''))),
+                'subtitle_ar' => trim((string) $request->input('france3_hero_subtitle_ar', data_get($existing, 'hero.subtitle_ar', ''))),
+                'primary_cta_text_en' => trim((string) $request->input('france3_hero_cta_text_en', data_get($existing, 'hero.primary_cta_text_en', ''))),
+                'primary_cta_text_ar' => trim((string) $request->input('france3_hero_cta_text_ar', data_get($existing, 'hero.primary_cta_text_ar', ''))),
+                'primary_cta_url' => trim((string) $request->input('france3_hero_cta_url', data_get($existing, 'hero.primary_cta_url', ''))),
+            ],
+            'quick_summary' => [
+                'title_en' => trim((string) $request->input('france3_qs_title_en', data_get($existing, 'quick_summary.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_qs_title_ar', data_get($existing, 'quick_summary.title_ar', ''))),
+                'items' => $this->mapRepeaterItems((array) $request->input('france3_qs_items', []), fn ($i, $idx) => [
+                    'label_en' => trim($i['label_en'] ?? ''), 'label_ar' => trim($i['label_ar'] ?? ''),
+                    'value_en' => trim($i['value_en'] ?? ''), 'value_ar' => trim($i['value_ar'] ?? ''),
+                    'icon' => trim($i['icon'] ?? ''), 'sort_order' => (int) ($i['sort_order'] ?? $idx + 1), 'is_active' => ! empty($i['is_active']),
+                ]),
+            ],
+            'intro' => [
+                'title_en' => trim((string) $request->input('france3_intro_title_en', data_get($existing, 'intro.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_intro_title_ar', data_get($existing, 'intro.title_ar', ''))),
+                'description_en' => trim((string) $request->input('france3_intro_desc_en', data_get($existing, 'intro.description_en', ''))),
+                'description_ar' => trim((string) $request->input('france3_intro_desc_ar', data_get($existing, 'intro.description_ar', ''))),
+            ],
+            'best_time' => [
+                'title_en' => trim((string) $request->input('france3_bt_title_en', data_get($existing, 'best_time.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_bt_title_ar', data_get($existing, 'best_time.title_ar', ''))),
+                'text_en' => trim((string) $request->input('france3_bt_text_en', data_get($existing, 'best_time.text_en', ''))),
+                'text_ar' => trim((string) $request->input('france3_bt_text_ar', data_get($existing, 'best_time.text_ar', ''))),
+                'note_en' => trim((string) $request->input('france3_bt_note_en', data_get($existing, 'best_time.note_en', ''))),
+                'note_ar' => trim((string) $request->input('france3_bt_note_ar', data_get($existing, 'best_time.note_ar', ''))),
+            ],
+            'requirements' => [
+                'title_en' => trim((string) $request->input('france3_req_title_en', data_get($existing, 'requirements.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_req_title_ar', data_get($existing, 'requirements.title_ar', ''))),
+                'note_en' => trim((string) $request->input('france3_req_note_en', data_get($existing, 'requirements.note_en', ''))),
+                'note_ar' => trim((string) $request->input('france3_req_note_ar', data_get($existing, 'requirements.note_ar', ''))),
+                'items' => $this->mapRepeaterItems((array) $request->input('france3_req_items', []), fn ($i, $idx) => [
+                    'title_en' => trim($i['title_en'] ?? ''), 'title_ar' => trim($i['title_ar'] ?? ''),
+                    'text_en' => trim($i['text_en'] ?? ''), 'text_ar' => trim($i['text_ar'] ?? ''),
+                    'icon' => trim($i['icon'] ?? ''), 'sort_order' => (int) ($i['sort_order'] ?? $idx + 1), 'is_active' => ! empty($i['is_active']),
+                ]),
+            ],
+            'services' => [
+                'title_en' => trim((string) $request->input('france3_serv_title_en', data_get($existing, 'services.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_serv_title_ar', data_get($existing, 'services.title_ar', ''))),
+                'items' => $this->mapRepeaterItems((array) $request->input('france3_service_items', []), fn ($i, $idx) => [
+                    'title_en' => trim($i['title_en'] ?? ''), 'title_ar' => trim($i['title_ar'] ?? ''),
+                    'text_en' => trim($i['text_en'] ?? ''), 'text_ar' => trim($i['text_ar'] ?? ''),
+                    'icon' => trim($i['icon'] ?? ''), 'sort_order' => (int) ($i['sort_order'] ?? $idx + 1), 'is_active' => ! empty($i['is_active']),
+                ]),
+            ],
+            'steps' => [
+                'title_en' => trim((string) $request->input('france3_steps_title_en', data_get($existing, 'steps.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_steps_title_ar', data_get($existing, 'steps.title_ar', ''))),
+                'items' => $this->mapRepeaterItems((array) $request->input('france3_step_items', []), fn ($i, $idx) => [
+                    'title_en' => trim($i['title_en'] ?? ''), 'title_ar' => trim($i['title_ar'] ?? ''),
+                    'text_en' => trim($i['text_en'] ?? ''), 'text_ar' => trim($i['text_ar'] ?? ''),
+                    'step_number' => trim($i['step_number'] ?? ''), 'sort_order' => (int) ($i['sort_order'] ?? $idx + 1), 'is_active' => ! empty($i['is_active']),
+                ]),
+            ],
+            'why_choose' => [
+                'title_en' => trim((string) $request->input('france3_why_title_en', data_get($existing, 'why_choose.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_why_title_ar', data_get($existing, 'why_choose.title_ar', ''))),
+                'items' => $this->mapRepeaterItems((array) $request->input('france3_why_items', []), fn ($i, $idx) => [
+                    'title_en' => trim($i['title_en'] ?? ''), 'title_ar' => trim($i['title_ar'] ?? ''),
+                    'text_en' => trim($i['text_en'] ?? ''), 'text_ar' => trim($i['text_ar'] ?? ''),
+                    'icon' => trim($i['icon'] ?? ''), 'sort_order' => (int) ($i['sort_order'] ?? $idx + 1), 'is_active' => ! empty($i['is_active']),
+                ]),
+            ],
+            'suitability' => [
+                'title_en' => trim((string) $request->input('france3_suit_title_en', data_get($existing, 'suitability.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_suit_title_ar', data_get($existing, 'suitability.title_ar', ''))),
+                'description_en' => trim((string) $request->input('france3_suit_desc_en', data_get($existing, 'suitability.description_en', ''))),
+                'description_ar' => trim((string) $request->input('france3_suit_desc_ar', data_get($existing, 'suitability.description_ar', ''))),
+                'note_en' => trim((string) $request->input('france3_suit_note_en', data_get($existing, 'suitability.note_en', ''))),
+                'note_ar' => trim((string) $request->input('france3_suit_note_ar', data_get($existing, 'suitability.note_ar', ''))),
+                'button_text_en' => trim((string) $request->input('france3_suit_btn_en', data_get($existing, 'suitability.button_text_en', ''))),
+                'button_text_ar' => trim((string) $request->input('france3_suit_btn_ar', data_get($existing, 'suitability.button_text_ar', ''))),
+                'button_url' => trim((string) $request->input('france3_suit_btn_url', data_get($existing, 'suitability.button_url', ''))),
+            ],
+            'pricing_duration' => [
+                'duration_title_en' => trim((string) $request->input('france3_dur_title_en', data_get($existing, 'pricing_duration.duration_title_en', ''))),
+                'duration_title_ar' => trim((string) $request->input('france3_dur_title_ar', data_get($existing, 'pricing_duration.duration_title_ar', ''))),
+                'duration_text_en' => trim((string) $request->input('france3_dur_text_en', data_get($existing, 'pricing_duration.duration_text_en', ''))),
+                'duration_text_ar' => trim((string) $request->input('france3_dur_text_ar', data_get($existing, 'pricing_duration.duration_text_ar', ''))),
+                'fees_title_en' => trim((string) $request->input('france3_fees_title_en', data_get($existing, 'pricing_duration.fees_title_en', ''))),
+                'fees_title_ar' => trim((string) $request->input('france3_fees_title_ar', data_get($existing, 'pricing_duration.fees_title_ar', ''))),
+                'fees_text_en' => trim((string) $request->input('france3_fees_text_en', data_get($existing, 'pricing_duration.fees_text_en', ''))),
+                'fees_text_ar' => trim((string) $request->input('france3_fees_text_ar', data_get($existing, 'pricing_duration.fees_text_ar', ''))),
+            ],
+            'faq' => [
+                'title_en' => trim((string) $request->input('france3_faq_title_en', data_get($existing, 'faq.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_faq_title_ar', data_get($existing, 'faq.title_ar', ''))),
+                'items' => $this->mapRepeaterItems((array) $request->input('france3_faq_items', []), fn ($i, $idx) => [
+                    'question_en' => trim($i['question_en'] ?? ''), 'question_ar' => trim($i['question_ar'] ?? ''),
+                    'answer_en' => trim($i['answer_en'] ?? ''), 'answer_ar' => trim($i['answer_ar'] ?? ''),
+                    'sort_order' => (int) ($i['sort_order'] ?? $idx + 1), 'is_active' => ! empty($i['is_active']),
+                ]),
+            ],
+            'notice' => [
+                'title_en' => trim((string) $request->input('france3_notice_title_en', data_get($existing, 'notice.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_notice_title_ar', data_get($existing, 'notice.title_ar', ''))),
+                'text_en' => trim((string) $request->input('france3_notice_text_en', data_get($existing, 'notice.text_en', ''))),
+                'text_ar' => trim((string) $request->input('france3_notice_text_ar', data_get($existing, 'notice.text_ar', ''))),
+            ],
+            'cta' => [
+                'title_en' => trim((string) $request->input('france3_cta_title_en', data_get($existing, 'cta.title_en', ''))),
+                'title_ar' => trim((string) $request->input('france3_cta_title_ar', data_get($existing, 'cta.title_ar', ''))),
+                'description_en' => trim((string) $request->input('france3_cta_desc_en', data_get($existing, 'cta.description_en', ''))),
+                'description_ar' => trim((string) $request->input('france3_cta_desc_ar', data_get($existing, 'cta.description_ar', ''))),
+                'button_text_en' => trim((string) $request->input('france3_cta_btn_en', data_get($existing, 'cta.button_text_en', ''))),
+                'button_text_ar' => trim((string) $request->input('france3_cta_btn_ar', data_get($existing, 'cta.button_text_ar', ''))),
+                'button_url' => trim((string) $request->input('france3_cta_btn_url', data_get($existing, 'cta.button_url', ''))),
+            ],
+        ];
     }
 }

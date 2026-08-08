@@ -106,7 +106,11 @@
 
     <div id="normal_mode_sections" style="display: {{ old('content_mode', $item->content_mode) == 'html' ? 'none' : 'block' }};">
 
-    <div class="card admin-card p-4 mb-4">
+    @if($item->slug === 'france-3-visa' || filled($item->sections))
+        <div class="mb-4">
+            @include('admin.pages.partials.france3-sections', ['sections' => $item->sections ?? []])
+        </div>
+    @else
         <h2 class="h5 mb-3">{{ __('admin.hero_section') }}</h2>
         <div class="row g-3">
             <div class="col-lg-4">
@@ -547,6 +551,8 @@
                 <label class="form-label">{{ __('admin.meta_description_ar') }}</label><textarea class="form-control text-end" dir="rtl" rows="4" name="meta_description_ar">{{ old('meta_description_ar', $item->meta_description_ar) }}</textarea>
             </div>
         </div>
+    </div>
+    @endif
     </div>
 
     <div class="d-flex justify-content-end">
