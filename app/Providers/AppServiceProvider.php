@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\MenuItem;
-use App\Models\Page;
 use App\Models\Setting;
 use App\Support\SeoManager;
 use Illuminate\Pagination\Paginator;
@@ -33,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFive();
 
-        $this->ensureSchemaAndDataAutoSync();
+        $this->ensureSchemaOnly();
 
         view()->composer('*', function ($view) {
             $payload = [
@@ -73,7 +72,7 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
-    protected function ensureSchemaAndDataAutoSync(): void
+    protected function ensureSchemaOnly(): void
     {
         try {
             if ($this->safeHasTable('menu_items')) {
@@ -88,18 +87,6 @@ class AppServiceProvider extends ServiceProvider
                         $table->string('icon')->nullable();
                     }
                 });
-            }
-
-            if ($this->safeHasTable('pages')) {
-                if (! Page::where('key', 'umrah')->exists() || ! Page::where('key', 'hajj')->exists()) {
-                    (new \Database\Seeders\UmrahHajjPagesSeeder())->run();
-                }
-            }
-
-            if ($this->safeHasTable('menu_items')) {
-                if (MenuItem::where('location', 'header')->count() === 0) {
-                    (new \Database\Seeders\MainMenuSeeder())->run();
-                }
             }
         } catch (Throwable $e) {
             report($e);

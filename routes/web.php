@@ -105,24 +105,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->middleware('permission:dashboard.access')->name('dashboard');
         Route::get('/sync-pages-and-menus', function () {
             try {
-                require_once database_path('seeders/MainMenuSeeder.php');
-                require_once database_path('seeders/UmrahHajjPagesSeeder.php');
-
-                if (\Illuminate\Support\Facades\Schema::hasTable('menu_items')) {
-                    \Illuminate\Support\Facades\Schema::table('menu_items', function ($table) {
-                        if (! \Illuminate\Support\Facades\Schema::hasColumn('menu_items', 'type')) {
-                            $table->string('type')->default('custom')->nullable();
-                        }
-                        if (! \Illuminate\Support\Facades\Schema::hasColumn('menu_items', 'page_id')) {
-                            $table->unsignedBigInteger('page_id')->nullable();
-                        }
-                        if (! \Illuminate\Support\Facades\Schema::hasColumn('menu_items', 'icon')) {
-                            $table->string('icon')->nullable();
-                        }
-                    });
-                }
-                (new \Database\Seeders\UmrahHajjPagesSeeder())->run();
-                (new \Database\Seeders\MainMenuSeeder())->run();
+                \App\Support\PageAndMenuSyncer::sync();
 
                 return redirect()->route('admin.pages.index')->with('success', 'تم تحديث وإنشاء صفحة العمرة والحج والقوائم بنجاح!');
             } catch (\Throwable $e) {

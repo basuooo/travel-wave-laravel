@@ -167,7 +167,7 @@ class MenuItemController extends Controller
     {
         $data = $request->validate([
             'location' => ['required', 'in:header,footer'],
-            'parent_id' => ['nullable', 'exists:menu_items,id'],
+            'parent_id' => ['nullable'],
             'type' => ['required', 'in:page,custom,section,submenu'],
             'page_id' => ['nullable', 'exists:pages,id'],
             'title_en' => ['required_without:title_ar', 'nullable', 'string', 'max:255'],
@@ -179,6 +179,8 @@ class MenuItemController extends Controller
             'sort_order' => ['nullable', 'integer'],
         ]);
 
+        $data['parent_id'] = $request->filled('parent_id') ? (int) $request->input('parent_id') : null;
+        $data['page_id'] = $request->filled('page_id') ? (int) $request->input('page_id') : null;
         $data['title_en'] = $data['title_en'] ?? $data['title_ar'] ?? '';
         $data['title_ar'] = $data['title_ar'] ?? $data['title_en'] ?? '';
         $data['is_active'] = $request->boolean('is_active');
