@@ -763,5 +763,6 @@ class DatabaseSeeder extends Seeder
         $this->call(AboutPageSeeder::class);
         $this->call(France2PageSeeder::class);
         $this->call(France3PageSeeder::class);
+        $this->call(France3VisaCountrySeeder::class);
     }
 }

@@ -16,6 +16,11 @@ class VisaCountryController extends Controller
 
     public function index()
     {
+        if (VisaCountry::where('slug', 'france-3-visa')->doesntExist()) {
+            require_once database_path('seeders/France3VisaCountrySeeder.php');
+            (new \Database\Seeders\France3VisaCountrySeeder())->run();
+        }
+
         return view('admin.visa-countries.index', [
             'items' => VisaCountry::with('category')->orderBy('sort_order')->paginate(15),
         ]);

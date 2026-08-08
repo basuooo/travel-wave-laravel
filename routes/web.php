@@ -61,7 +61,17 @@ Route::get('locale/{locale}', [FrontendController::class, 'switchLocale'])->name
 Route::get('/', [FrontendController::class, 'home'])->name('home');
 Route::get('/visas', [FrontendController::class, 'visaIndex'])->name('visas.index');
 Route::get('/visas/{category:slug}', [FrontendController::class, 'visaCategory'])->name('visas.category');
-Route::get('/visa-country/{country:slug}', [FrontendController::class, 'visaCountry'])->name('visas.country');
+Route::get('/visa-country/{country:slug}', function ($slug) {
+    $country = \App\Models\VisaCountry::where('slug', $slug)->first();
+    if (! $country && in_array($slug, ['france-3-visa', 'france-3'])) {
+        require_once database_path('seeders/France3VisaCountrySeeder.php');
+        (new \Database\Seeders\France3VisaCountrySeeder())->run();
+        $country = \App\Models\VisaCountry::where('slug', 'france-3-visa')->first();
+    }
+    abort_unless($country && $country->is_active, 404);
+
+    return app(\App\Http\Controllers\FrontendController::class)->visaCountry($country);
+})->name('visas.country');
 Route::get('/domestic-tourism', [FrontendController::class, 'domesticIndex'])->name('destinations.index');
 Route::get('/domestic-tourism/{destination:slug}', [FrontendController::class, 'destinationShow'])->name('destinations.show');
 Route::get('/flights', [FrontendController::class, 'flights'])->name('flights');
