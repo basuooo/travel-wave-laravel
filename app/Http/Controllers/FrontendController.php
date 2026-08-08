@@ -185,6 +185,16 @@ class FrontendController extends Controller
         ]);
     }
 
+    public function france3()
+    {
+        $page = $this->page('france-3');
+        return view('frontend.pages.france3', [
+            'page' => $page,
+            'managedForms' => $this->formsForContext(LeadFormManager::contextForPageKey('france-3')),
+            'managedMaps' => $this->mapsForContext(MapSectionManager::contextForPageKey('france-3')),
+        ]);
+    }
+
     public function pageShow(Page $page)
     {
         abort_unless($page->is_active, 404);

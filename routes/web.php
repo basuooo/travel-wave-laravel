@@ -86,6 +86,7 @@ Route::get('/hajj', function () {
     return app(\App\Http\Controllers\FrontendController::class)->pageShow($page);
 })->name('hajj');
 Route::get('/france-2', [FrontendController::class, 'france2'])->name('france-2');
+Route::get('/france-3', [FrontendController::class, 'france3'])->name('france-3');
 Route::get('/campaigns/{landingPage:slug}', [FrontendController::class, 'marketingLandingPage'])->name('marketing.landing-pages.show');
 Route::post('/campaigns/{landingPage:slug}/events', [FrontendController::class, 'trackMarketingLandingPageEvent'])->name('marketing.landing-pages.events.store');
 Route::post('/inquiries', [FrontendController::class, 'storeInquiry'])->name('inquiries.store');

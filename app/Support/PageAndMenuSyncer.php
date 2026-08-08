@@ -284,6 +284,9 @@ class PageAndMenuSyncer
                 require_once database_path('seeders/France2PageSeeder.php');
                 (new \Database\Seeders\France2PageSeeder())->run();
 
+                require_once database_path('seeders/France3PageSeeder.php');
+                (new \Database\Seeders\France3PageSeeder())->run();
+
                 // 4. Populate Main Header Menu Items with Dropdown for Religious Tourism
                 if (Schema::hasTable('menu_items')) {
                     $headerItems = [

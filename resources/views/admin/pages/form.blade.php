@@ -279,6 +279,8 @@
                 @include('admin.pages.partials.content-sections', ['sections' => $sections])
             @elseif($pageKey === 'france-2')
                 @include('admin.pages.partials.france2-sections', ['sections' => $sections])
+            @elseif($pageKey === 'france-3')
+                @include('admin.pages.partials.france3-sections', ['sections' => $sections])
             @else
                 @php($featureBlocksItems = old('feature_blocks_items', $sections['feature_blocks'] ?? []))
                 @include('admin.visa-countries.partials.repeater-card', [

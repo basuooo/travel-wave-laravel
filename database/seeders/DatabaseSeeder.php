@@ -762,5 +762,6 @@ class DatabaseSeeder extends Seeder
         $this->call(UmrahHajjPagesSeeder::class);
         $this->call(AboutPageSeeder::class);
         $this->call(France2PageSeeder::class);
+        $this->call(France3PageSeeder::class);
     }
 }
