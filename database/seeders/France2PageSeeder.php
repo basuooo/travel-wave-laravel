@@ -1,0 +1,255 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Page;
+use Illuminate\Database\Seeder;
+
+class France2PageSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $france2Sections = [
+            'section_order' => [
+                'hero' => ['sort_order' => 1, 'enabled' => true],
+                'intro' => ['sort_order' => 2, 'enabled' => true],
+                'requirements' => ['sort_order' => 3, 'enabled' => true],
+                'steps' => ['sort_order' => 4, 'enabled' => true],
+                'services' => ['sort_order' => 5, 'enabled' => true],
+                'suitability' => ['sort_order' => 6, 'enabled' => true],
+                'pricing_duration' => ['sort_order' => 7, 'enabled' => true],
+                'faq' => ['sort_order' => 8, 'enabled' => true],
+                'notice' => ['sort_order' => 9, 'enabled' => true],
+                'cta' => ['sort_order' => 10, 'enabled' => true],
+            ],
+            'hero' => [
+                'enabled' => true,
+                'eyebrow_ar' => 'فيزا فرنسا 🇫🇷 | شنغن',
+                'eyebrow_en' => 'France Visa 🇫🇷 | Schengen',
+                'title_ar' => 'فيزا فرنسا',
+                'title_en' => 'France Schengen Visa',
+                'subtitle_ar' => 'تأشيرة شنغن للسفر إلى فرنسا. بنساعدك في تجهيز ملف التأشيرة ومراجعة المستندات وإجراءات التقديم خطوة بخطوة بثقة واحترافية.',
+                'subtitle_en' => 'Schengen visa for traveling to France. Travel Wave assists you in preparing your visa file, reviewing documents, and submission procedures with confidence.',
+                'primary_cta_text_ar' => 'قيّم حالتك الآن',
+                'primary_cta_text_en' => 'Assess Your Case Now',
+                'primary_cta_url' => '/contact#lead-form',
+            ],
+            'intro' => [
+                'enabled' => true,
+                'title_ar' => 'فيزا فرنسا',
+                'title_en' => 'About France Visa',
+                'description_ar' => 'فيزا فرنسا قصيرة الإقامة هي تأشيرة شنغن تتيح السفر إلى فرنسا ودول منطقة الشنغن وفق مدة وشروط التأشيرة، ونساعدك في Travel Wave على تجهيز كافة المتطلبات لتقديم طلبك بأفضل صورة.',
+                'description_en' => 'The France short-stay visa is a Schengen visa allowing travel to France and Schengen states according to visa terms. Travel Wave helps you prepare all requirements effectively.',
+            ],
+            'requirements' => [
+                'enabled' => true,
+                'title_ar' => 'إيه أهم المتطلبات؟',
+                'title_en' => 'Key Requirements',
+                'subtitle_ar' => 'أبرز المستندات والأوراق المطلوبة لتجهيز ملف التقديم.',
+                'subtitle_en' => 'Main documents needed for application file preparation.',
+                'note_ar' => 'المستندات المطلوبة بتختلف حسب حالة كل متقدم، وفريق Travel Wave بيوضح لك الملف المناسب لحالتك.',
+                'note_en' => 'Required documents vary based on applicant status. Travel Wave guides you to the right checklist for your case.',
+                'items' => [
+                    ['icon' => '🛂', 'title_ar' => 'جواز سفر ساري', 'title_en' => 'Valid Passport', 'text_ar' => 'جواز سفر يتضمن فتره صلاحية لا تقل عن 6 أشهر مع صفحات فارغة.', 'text_en' => 'Passport valid for at least 6 months with blank pages.', 'is_active' => true, 'sort_order' => 1],
+                    ['icon' => '📸', 'title_ar' => 'صور شخصية', 'title_en' => 'Personal Photos', 'text_ar' => 'صور شخصية حديثة بخلفية بيضاء مطابقة للمواصفات المطلوبة.', 'text_en' => 'Recent passport-sized photos with white background.', 'is_active' => true, 'sort_order' => 2],
+                    ['icon' => '🏦', 'title_ar' => 'كشف حساب بنكي', 'title_en' => 'Bank Statement', 'text_ar' => 'كشف حساب بنكي يوضح حركة الحساب للتعاملات المالية.', 'text_en' => 'Bank statement showing recent financial transactions.', 'is_active' => true, 'sort_order' => 3],
+                    ['icon' => '💼', 'title_ar' => 'إثبات الوظيفة أو مصدر الدخل', 'title_en' => 'Employment Proof', 'text_ar' => 'خطاب مفردات مرتب أو سجل تجاري وبطاقة ضريبية حسب الحالة.', 'text_en' => 'HR letter or commercial registry depending on status.', 'is_active' => true, 'sort_order' => 4],
+                    ['icon' => '🏨', 'title_ar' => 'إثبات الإقامة وخطة السفر', 'title_en' => 'Travel & Accommodation Proof', 'text_ar' => 'حجوزات طيران وفنادق مبدئية توضح خطة السفر بالكامل.', 'text_en' => 'Flight and hotel reservations reflecting travel itinerary.', 'is_active' => true, 'sort_order' => 5],
+                    ['icon' => '🛡️', 'title_ar' => 'تأمين سفر', 'title_en' => 'Travel Insurance', 'text_ar' => 'وثيقة تأمين صحي وسفر تغطي منطقة الشنغن.', 'text_en' => 'Health & travel insurance policy covering Schengen area.', 'is_active' => true, 'sort_order' => 6],
+                    ['icon' => '📑', 'title_ar' => 'مستندات إضافية حسب الحالة', 'title_en' => 'Additional Case Documents', 'text_ar' => 'أي مستندات دعمة إضافية تعزز موقف الطالب.', 'text_en' => 'Additional supporting documents strengthening the application.', 'is_active' => true, 'sort_order' => 7],
+                ],
+            ],
+            'steps' => [
+                'enabled' => true,
+                'title_ar' => 'إجراءات التقديم ببساطة',
+                'title_en' => 'Simple Application Steps',
+                'subtitle_ar' => '4 خطوات عملية للحصول على الدعم الكامل لملفك.',
+                'subtitle_en' => '4 practical steps for complete application support.',
+                'items' => [
+                    [
+                        'step_number' => '01',
+                        'title_ar' => 'تقييم حالتك',
+                        'title_en' => 'Case Assessment',
+                        'text_ar' => 'نفهم حالتك وهدف السفر ونحدد الخطوات المناسبة.',
+                        'text_en' => 'We understand your situation and trip purpose to determine the right path.',
+                        'is_active' => true,
+                        'sort_order' => 1,
+                    ],
+                    [
+                        'step_number' => '02',
+                        'title_ar' => 'تجهيز الملف',
+                        'title_en' => 'File Preparation',
+                        'text_ar' => 'نحدد المستندات المطلوبة ونراجع الملف قبل التقديم.',
+                        'text_en' => 'We specify required documents and review your file before submission.',
+                        'is_active' => true,
+                        'sort_order' => 2,
+                    ],
+                    [
+                        'step_number' => '03',
+                        'title_ar' => 'حجز الموعد',
+                        'title_en' => 'Appointment Scheduling',
+                        'text_ar' => 'نساعدك في إجراءات وحجز موعد التقديم.',
+                        'text_en' => 'We assist you in booking the submission appointment.',
+                        'is_active' => true,
+                        'sort_order' => 3,
+                    ],
+                    [
+                        'step_number' => '04',
+                        'title_ar' => 'التقديم',
+                        'title_en' => 'Application Submission',
+                        'text_ar' => 'تستكمل إجراءات التقديم والبيانات المطلوبة حسب حالتك.',
+                        'text_en' => 'You complete final submission steps and data as required.',
+                        'is_active' => true,
+                        'sort_order' => 4,
+                    ],
+                ],
+            ],
+            'services' => [
+                'enabled' => true,
+                'title_ar' => 'إحنا بنساعدك في إيه؟',
+                'title_en' => 'How Travel Wave Helps You',
+                'subtitle_ar' => 'خدمات متكاملة لتسهيل إجراءات فيزا فرنسا.',
+                'subtitle_en' => 'Comprehensive services for France visa support.',
+                'items' => [
+                    ['icon' => '📝', 'title_ar' => 'مراجعة وتجهيز ملف التأشيرة', 'title_en' => 'Visa File Preparation', 'text_ar' => 'تنظيم وتجهيز نموذج التقديم والملف الكامل.', 'text_en' => 'Organizing application forms and complete file.', 'is_active' => true, 'sort_order' => 1],
+                    ['icon' => '🔎', 'title_ar' => 'مراجعة المستندات', 'title_en' => 'Document Audit', 'text_ar' => 'مراجعة الأوراق والتأكد من توافقها مع الإرشادات.', 'text_en' => 'Auditing papers to ensure compliance with guidelines.', 'is_active' => true, 'sort_order' => 2],
+                    ['icon' => '📅', 'title_ar' => 'المساعدة في حجز الموعد', 'title_en' => 'Appointment Booking Help', 'text_ar' => 'متابعة وحجز المواعيد المتاحة بمركز التقديم.', 'text_en' => 'Tracking and booking available center slots.', 'is_active' => true, 'sort_order' => 3],
+                    ['icon' => '🌐', 'title_ar' => 'الترجمة المعتمدة عند الحاجة', 'title_en' => 'Certified Translation', 'text_ar' => 'خدمات ترجمة معتمدة للأوراق المطلوب تقديمها.', 'text_en' => 'Certified translation for required documents.', 'is_active' => true, 'sort_order' => 4],
+                    ['icon' => '✈️', 'title_ar' => 'تجهيز الحجوزات المطلوبة', 'title_en' => 'Flight & Hotel Bookings', 'text_ar' => 'توفير حجوزات مبدئية للطيران والإقامة.', 'text_en' => 'Providing itinerary flight and hotel bookings.', 'is_active' => true, 'sort_order' => 5],
+                    ['icon' => '🤝', 'title_ar' => 'توجيهك خلال خطوات التقديم', 'title_en' => 'Step-by-Step Guidance', 'text_ar' => 'إرشاد مستمر لتفادي الأخطاء أثناء التقديم.', 'text_en' => 'Continuous guidance to prevent application errors.', 'is_active' => true, 'sort_order' => 6],
+                ],
+            ],
+            'suitability' => [
+                'enabled' => true,
+                'title_ar' => 'مش عارف إذا كانت حالتك مناسبة؟',
+                'title_en' => 'Not Sure If You Qualify?',
+                'description_ar' => 'قبول طلب التأشيرة بيعتمد على مجموعة من العوامل، منها حالتك الوظيفية، وضعك المالي، سبب السفر، والمستندات المقدمة.',
+                'description_en' => 'Visa decisions depend on multiple factors including employment status, financial situation, trip purpose, and documents.',
+                'note_ar' => 'بدل ما تحاول تحدد موقفك بنفسك، تواصل معنا وفريقنا يراجع حالتك ويوضح لك الخطوات المناسبة.',
+                'note_en' => 'Instead of guessing your status, reach out to us and our team will review your case and clarify your best options.',
+                'button_text_ar' => 'تواصل معنا',
+                'button_text_en' => 'Contact Us',
+                'button_url' => '/contact#lead-form',
+            ],
+            'pricing_duration' => [
+                'enabled' => true,
+                'title_ar' => 'مدة الإجراءات والرسوم',
+                'title_en' => 'Duration & Fees',
+                'duration_title_ar' => 'مدة الإجراءات',
+                'duration_title_en' => 'Processing Time',
+                'duration_text_ar' => 'تختلف مدة دراسة الطلب حسب الحالة ومواعيد التقديم والجهة المختصة.',
+                'duration_text_en' => 'Processing time varies depending on case details, appointment slots, and embassy authority.',
+                'fees_title_ar' => 'الرسوم',
+                'fees_title_en' => 'Service Fees',
+                'fees_text_ar' => 'تختلف الرسوم حسب نوع الطلب والخدمات المطلوبة.',
+                'fees_text_en' => 'Fees vary based on application type and required services.',
+            ],
+            'faq' => [
+                'enabled' => true,
+                'title_ar' => 'أسئلة شائعة عن فيزا فرنسا',
+                'title_en' => 'France Visa FAQs',
+                'items' => [
+                    [
+                        'question_ar' => 'هل فيزا فرنسا فيزا شنغن؟',
+                        'question_en' => 'Is France Visa a Schengen Visa?',
+                        'answer_ar' => 'نعم، فيزا فرنسا قصيرة الإقامة هي تأشيرة شنغن تتيح السفر إلى فرنسا ودول الشنغن حسب شروط التأشيرة.',
+                        'answer_en' => 'Yes, France short-stay visa is a Schengen visa allowing entry to France and Schengen states.',
+                        'is_active' => true,
+                        'sort_order' => 1,
+                    ],
+                    [
+                        'question_ar' => 'هل لازم أحضر بنفسي للتقديم؟',
+                        'question_en' => 'Do I Need to Apply in Person?',
+                        'answer_ar' => 'نعم، يتطلب التقديم الحضور الشخصي لمركز التأشيرات لتقديم البصمات والمستندات الرسمية.',
+                        'answer_en' => 'Yes, personal attendance at the visa application center is required for biometrics and document submission.',
+                        'is_active' => true,
+                        'sort_order' => 2,
+                    ],
+                    [
+                        'question_ar' => 'هل أقدر أقدم لأول مرة؟',
+                        'question_en' => 'Can First-Time Applicants Apply?',
+                        'answer_ar' => 'نعم، يمكنك التقديم لأول مرة بشرط تجهيز ملف مكتمل ومناسب لحالتك.',
+                        'answer_en' => 'Yes, first-time applicants can apply provided their documentation is thorough and suitable for their case.',
+                        'is_active' => true,
+                        'sort_order' => 3,
+                    ],
+                    [
+                        'question_ar' => 'هل لازم يكون عندي حساب بنكي؟',
+                        'question_en' => 'Is a Bank Account Required?',
+                        'answer_ar' => 'نعم، كشف الحساب البنكي من المستندات الأساسية لإثبات القدرة المالية على السفر.',
+                        'answer_en' => 'Yes, a bank statement is a key document to demonstrate financial solvency.',
+                        'is_active' => true,
+                        'sort_order' => 4,
+                    ],
+                    [
+                        'question_ar' => 'هل Travel Wave تضمن قبول الفيزا؟',
+                        'question_en' => 'Does Travel Wave Guarantee Visa Approval?',
+                        'answer_ar' => 'لا، القرار النهائي يكون دائماً للجهة المختصة والسفارة، ولكننا نساعدك في تجهيز ملف مكتمل بأعلى دقة لزيادة فرص القبول.',
+                        'answer_en' => 'No, final decisions belong solely to the embassy. We assist in preparing an accurate, complete application.',
+                        'is_active' => true,
+                        'sort_order' => 5,
+                    ],
+                    [
+                        'question_ar' => 'إزاي أعرف المستندات المطلوبة لحالتي؟',
+                        'question_en' => 'How Do I Know the Documents Required for My Case?',
+                        'answer_ar' => 'يمكنك التواصل معنا وفريقنا سيقوم بمراجعة حالتك وتحديد المستندات المناسبة لك.',
+                        'answer_en' => 'Contact us and our team will review your status and tailor the exact document list for your situation.',
+                        'is_active' => true,
+                        'sort_order' => 6,
+                    ],
+                ],
+            ],
+            'notice' => [
+                'enabled' => true,
+                'title_ar' => 'مهم تعرف',
+                'title_en' => 'Important Notice',
+                'text_ar' => 'Travel Wave تساعدك في تجهيز ومراجعة ملف التأشيرة والإجراءات المتعلقة بالتقديم، لكن القرار النهائي بقبول أو رفض طلب التأشيرة يكون من الجهة المختصة.',
+                'text_en' => 'Travel Wave assists with file preparation and review, but final visa approval or rejection decisions rest exclusively with the relevant authority.',
+            ],
+            'cta' => [
+                'enabled' => true,
+                'title_ar' => 'جاهز تبدأ إجراءات فيزا فرنسا؟',
+                'title_en' => 'Ready to Start France Visa Steps?',
+                'description_ar' => 'سيب بياناتك وفريق Travel Wave هيتواصل معاك، يفهم حالتك ويوضح لك الخطوات والمستندات المناسبة.',
+                'description_en' => 'Leave your details and Travel Wave team will reach out, evaluate your case, and outline the proper steps.',
+                'button_text_ar' => 'تواصل معنا الآن',
+                'button_text_en' => 'Contact Us Now',
+                'button_url' => '/contact#lead-form',
+            ],
+        ];
+
+        Page::updateOrCreate(
+            ['key' => 'france-2'],
+            [
+                'key' => 'france-2',
+                'title_ar' => 'فرنسا 2 - فيزا فرنسا',
+                'title_en' => 'France 2 - France Visa',
+                'slug' => 'france-2',
+                'hero_badge_ar' => 'فيزا فرنسا 🇫🇷 | شنغن',
+                'hero_badge_en' => 'France Visa 🇫🇷 | Schengen',
+                'hero_title_ar' => 'فيزا فرنسا',
+                'hero_title_en' => 'France Schengen Visa',
+                'hero_subtitle_ar' => 'تأشيرة شنغن للسفر إلى فرنسا. بنساعدك في تجهيز ملف التأشيرة ومراجعة المستندات وإجراءات التقديم خطوة بخطوة بثقة واحترافية.',
+                'hero_subtitle_en' => 'Schengen visa for traveling to France. Travel Wave assists you in preparing your visa file and submission procedures.',
+                'hero_primary_cta_text_ar' => 'قيّم حالتك الآن',
+                'hero_primary_cta_text_en' => 'Assess Your Case Now',
+                'hero_primary_cta_url' => '/contact#lead-form',
+                'intro_title_ar' => 'فيزا فرنسا',
+                'intro_title_en' => 'France Visa Overview',
+                'intro_body_ar' => 'فيزا فرنسا قصيرة الإقامة هي تأشيرة شنغن تتيح السفر إلى فرنسا ودول الشنغن وفق مدة وشروط التأشيرة.',
+                'intro_body_en' => 'The France short-stay visa is a Schengen visa allowing travel to France and Schengen states.',
+                'sections' => $france2Sections,
+                'meta_title_ar' => 'فرنسا 2 | فيزا الشنغن لفرنسا مع ترافل ويف',
+                'meta_title_en' => 'France 2 | France Schengen Visa Services - Travel Wave',
+                'meta_description_ar' => 'فيزا فرنسا شنغن مع ترافل ويف. نساعدك في تجهيز المستندات وحجز المواعيد ومراجعة ملف التأشيرة بأسلوب بسيط واحترافي.',
+                'meta_description_en' => 'Get your France Schengen visa with Travel Wave. Professional application file preparation, appointment assistance, and document review.',
+                'is_active' => true,
+            ]
+        );
+    }
+}

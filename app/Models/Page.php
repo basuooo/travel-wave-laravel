@@ -51,7 +51,7 @@ class Page extends Model
         'deleted_at' => 'datetime',
     ];
 
-    public const CORE_KEYS = ['home', 'visas', 'domestic', 'flights', 'hotels', 'about', 'contact', 'blog'];
+    public const CORE_KEYS = ['home', 'visas', 'domestic', 'flights', 'hotels', 'about', 'contact', 'blog', 'france-2'];
 
     public function deletedBy(): BelongsTo
     {
@@ -142,6 +142,18 @@ class Page extends Model
                 'faq'          => ['enabled' => true, 'sort_order' => 4, 'name_ar' => 'الأسئلة الشائعة والاستفسارات', 'name_en' => 'FAQs'],
                 'cta'          => ['enabled' => true, 'sort_order' => 5, 'name_ar' => 'شريط البدء بالتقديم', 'name_en' => 'Start Now CTA'],
             ],
+            'france-2' => [
+                'hero'             => ['enabled' => true, 'sort_order' => 1,  'name_ar' => 'البانر الهيرو الرئيسي (فيزا فرنسا 2)', 'name_en' => 'Hero Banner'],
+                'intro'            => ['enabled' => true, 'sort_order' => 2,  'name_ar' => 'نبذة بسيطة عن فيزا فرنسا', 'name_en' => 'About France Visa'],
+                'requirements'     => ['enabled' => true, 'sort_order' => 3,  'name_ar' => 'المتطلبات الأساسية', 'name_en' => 'Key Requirements'],
+                'steps'            => ['enabled' => true, 'sort_order' => 4,  'name_ar' => 'إجراءات التقديم ببساطة', 'name_en' => 'Application Steps'],
+                'services'         => ['enabled' => true, 'sort_order' => 5,  'name_ar' => 'خدمات ترافل ويف', 'name_en' => 'Travel Wave Services'],
+                'suitability'      => ['enabled' => true, 'sort_order' => 6,  'name_ar' => 'تقييم مناسبة الحالة للتقديم', 'name_en' => 'Suitability Assessment'],
+                'pricing_duration' => ['enabled' => true, 'sort_order' => 7,  'name_ar' => 'مدة الإجراءات والرسوم', 'name_en' => 'Duration & Fees'],
+                'faq'              => ['enabled' => true, 'sort_order' => 8,  'name_ar' => 'الأسئلة الشائعة والإجابات', 'name_en' => 'FAQs'],
+                'notice'           => ['enabled' => true, 'sort_order' => 9,  'name_ar' => 'تنبيه مهم للعميل', 'name_en' => 'Important Notice'],
+                'cta'              => ['enabled' => true, 'sort_order' => 10, 'name_ar' => 'شريط الدعوة للتواصل النهائي', 'name_en' => 'Final CTA Banner'],
+            ],
             'default' => [
                 'hero'           => ['enabled' => true, 'sort_order' => 1, 'name_ar' => 'البانر الهيرو الرئيسي', 'name_en' => 'Hero Banner'],
                 'feature_blocks' => ['enabled' => true, 'sort_order' => 2, 'name_ar' => 'كوت المميزات والخدمات', 'name_en' => 'Feature Blocks'],
@@ -223,6 +235,7 @@ class Page extends Model
             'blog' => route('blog.index'),
             'umrah' => route('umrah'),
             'hajj' => route('hajj'),
+            'france-2' => route('france-2'),
             default => $this->slug ? route('pages.show', $this) : null,
         };
     }
