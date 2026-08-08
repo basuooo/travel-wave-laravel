@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\MenuItem;
+use App\Models\Page;
 use App\Models\Setting;
 use App\Support\SeoManager;
 use Illuminate\Pagination\Paginator;
@@ -31,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Paginator::useBootstrapFive();
+
+        $this->ensureSchemaAndDataAutoSync();
 
         view()->composer('*', function ($view) {
             $payload = [
@@ -70,6 +73,39 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
+    protected function ensureSchemaAndDataAutoSync(): void
+    {
+        try {
+            if ($this->safeHasTable('menu_items')) {
+                Schema::table('menu_items', function ($table) {
+                    if (! Schema::hasColumn('menu_items', 'type')) {
+                        $table->string('type')->default('custom')->nullable();
+                    }
+                    if (! Schema::hasColumn('menu_items', 'page_id')) {
+                        $table->unsignedBigInteger('page_id')->nullable();
+                    }
+                    if (! Schema::hasColumn('menu_items', 'icon')) {
+                        $table->string('icon')->nullable();
+                    }
+                });
+            }
+
+            if ($this->safeHasTable('pages')) {
+                if (! Page::where('key', 'umrah')->exists() || ! Page::where('key', 'hajj')->exists()) {
+                    (new \Database\Seeders\UmrahHajjPagesSeeder())->run();
+                }
+            }
+
+            if ($this->safeHasTable('menu_items')) {
+                if (MenuItem::where('location', 'header')->count() === 0) {
+                    (new \Database\Seeders\MainMenuSeeder())->run();
+                }
+            }
+        } catch (Throwable $e) {
+            report($e);
+        }
+    }
+
     protected function safeHasTable(string $table): bool
     {
         try {
@@ -83,31 +119,12 @@ class AppServiceProvider extends ServiceProvider
 
     protected function menuItemsForLocation(string $location): Collection
     {
-        $query = MenuItem::query()
+        return MenuItem::query()
             ->where('location', $location)
             ->whereNull('parent_id')
             ->where('is_active', true)
             ->with(['page', 'children' => fn ($q) => $q->where('is_active', true)->with('page')->orderBy('sort_order')])
-            ->orderBy('sort_order');
-
-        $items = $query->get();
-
-        if ($location === 'header' && $this->safeHasTable('pages')) {
-            try {
-                if (! Page::where('key', 'umrah')->exists() || ! Page::where('key', 'hajj')->exists()) {
-                    app(\Database\Seeders\UmrahHajjPagesSeeder::class)->run();
-                    return $query->get();
-                }
-
-                if ($items->isEmpty()) {
-                    app(\Database\Seeders\MainMenuSeeder::class)->run();
-                    return $query->get();
-                }
-            } catch (Throwable $e) {
-                report($e);
-            }
-        }
-
-        return $items;
+            ->orderBy('sort_order')
+            ->get();
     }
 }

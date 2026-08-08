@@ -11,6 +11,7 @@
             <p class="text-muted mb-0">Manage active pages here, and move any page safely to Trash when it should leave the live list.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
+            <a href="{{ route('admin.sync-pages') }}" class="btn btn-outline-primary fw-bold" onclick="return confirm('هل تريد مزامنة وتحديث صفحات العمرة والحج والقوائم الآن؟')">🔄 مزامنة الصفحات والقوائم</a>
             <a href="{{ route('admin.pages.trash') }}" class="btn btn-outline-secondary">Pages Trash</a>
             <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">Create New Page</a>
         </div>
