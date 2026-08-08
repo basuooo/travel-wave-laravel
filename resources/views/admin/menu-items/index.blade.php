@@ -117,6 +117,10 @@
                                     <button type="button" class="btn btn-outline-secondary js-move-item-up" title="للأعلى">▲</button>
                                     <button type="button" class="btn btn-outline-secondary js-move-item-down" title="للأسفل">▼</button>
                                     <a href="{{ route('admin.menu-items.edit', $item) }}" class="btn btn-outline-primary" title="تعديل">تعديل</a>
+                                    <form method="post" action="{{ route('admin.menu-items.duplicate', $item) }}" class="d-inline">
+                                        @csrf
+                                        <button class="btn btn-outline-success" title="تكرار / Duplicate">📋 تكرار</button>
+                                    </form>
                                     @if($item->frontendUrl() && $item->frontendUrl() !== '#')
                                         <a href="{{ $item->frontendUrl() }}" class="btn btn-outline-info" target="_blank" rel="noopener noreferrer" title="معاينة">معاينة</a>
                                     @endif
@@ -177,6 +181,10 @@
                                         <button type="button" class="btn btn-outline-secondary js-move-item-up" title="للأعلى">▲</button>
                                         <button type="button" class="btn btn-outline-secondary js-move-item-down" title="للأسفل">▼</button>
                                         <a href="{{ route('admin.menu-items.edit', $child) }}" class="btn btn-outline-primary" title="تعديل">تعديل</a>
+                                        <form method="post" action="{{ route('admin.menu-items.duplicate', $child) }}" class="d-inline">
+                                            @csrf
+                                            <button class="btn btn-outline-success" title="تكرار / Duplicate">📋 تكرار</button>
+                                        </form>
                                         @if($child->frontendUrl() && $child->frontendUrl() !== '#')
                                             <a href="{{ $child->frontendUrl() }}" class="btn btn-outline-info" target="_blank" rel="noopener noreferrer" title="معاينة">معاينة</a>
                                         @endif

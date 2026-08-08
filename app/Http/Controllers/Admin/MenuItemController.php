@@ -103,10 +103,19 @@ class MenuItemController extends Controller
         $copy = $menu_item->replicate();
         $copy->title_en = trim($menu_item->title_en . ' Copy');
         $copy->title_ar = trim($menu_item->title_ar . ' - نسخة');
+        $copy->sort_order = $menu_item->sort_order + 1;
         $copy->is_active = false;
         $copy->save();
 
-        return redirect()->route('admin.menu-items.edit', $copy)->with('success', 'تم نسخ عنصر القائمة بنجاح.');
+        // Duplicate child submenus if present
+        foreach ($menu_item->children as $child) {
+            $childCopy = $child->replicate();
+            $childCopy->parent_id = $copy->id;
+            $childCopy->save();
+        }
+
+        return redirect()->route('admin.menu-items.index', ['location' => $copy->location])
+            ->with('success', 'تم تكرار عنصر القائمة بنجاح.');
     }
 
     public function destroy(MenuItem $menu_item)
