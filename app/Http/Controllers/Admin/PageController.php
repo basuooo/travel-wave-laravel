@@ -188,6 +188,7 @@ class PageController extends Controller
     {
         $sections = match ($key) {
             'home' => [
+                'section_order' => $this->mapHomeSectionOrder($request, data_get($existing, 'section_order', [])),
                 'services' => $this->mapLocalizedBlocks(
                     $request->input('services_title_en'),
                     $request->input('services_title_ar'),
@@ -268,7 +269,45 @@ class PageController extends Controller
 
         $filtered = array_filter($sections, fn ($value) => ! empty($value));
 
-        return empty($filtered) ? $existing : $filtered;
+        return array_merge($existing, $filtered);
+    }
+
+    protected function mapHomeSectionOrder(Request $request, array $existing): array
+    {
+        $rawOrders = (array) $request->input('home_section_order', []);
+        $rawEnabled = (array) $request->input('home_section_enabled', []);
+
+        if (empty($rawOrders)) {
+            return $existing;
+        }
+
+        $sectionKeys = [
+            'hero_slider',
+            'why_choose_travel_wave',
+            'search_box',
+            'country_strip',
+            'services',
+            'popular_destinations',
+            'featured_categories',
+            'why_choose_us',
+            'featured_destinations',
+            'promo',
+            'testimonials',
+            'blog',
+            'final_cta',
+        ];
+
+        $result = [];
+        foreach ($sectionKeys as $idx => $key) {
+            $result[$key] = [
+                'sort_order' => (int) ($rawOrders[$key] ?? ($idx + 1)),
+                'enabled' => isset($rawEnabled[$key]) ? (bool) $rawEnabled[$key] : false,
+            ];
+        }
+
+        uasort($result, fn ($a, $b) => $a['sort_order'] <=> $b['sort_order']);
+
+        return $result;
     }
 
     protected function serviceSectionsFromRequest(Request $request, array $existing): array

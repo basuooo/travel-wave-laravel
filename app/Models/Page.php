@@ -58,6 +58,47 @@ class Page extends Model
         return $this->belongsTo(User::class, 'deleted_by');
     }
 
+    public function getOrderedHomeSections(): array
+    {
+        $defaultSections = [
+            'hero_slider'           => ['enabled' => true, 'sort_order' => 1,  'name_ar' => 'البانر والسلايدر الرئيسي', 'name_en' => 'Hero Banner & Slider'],
+            'why_choose_travel_wave'=> ['enabled' => true, 'sort_order' => 2,  'name_ar' => 'مميزات ترافل ويف', 'name_en' => 'Why Choose Travel Wave'],
+            'search_box'            => ['enabled' => true, 'sort_order' => 3,  'name_ar' => 'شريط البحث وتصفح الخدمات', 'name_en' => 'Services Search Bar'],
+            'country_strip'         => ['enabled' => true, 'sort_order' => 4,  'name_ar' => 'شريط التأشيرات المتميزة', 'name_en' => 'Featured Visas Strip'],
+            'services'              => ['enabled' => true, 'sort_order' => 5,  'name_ar' => 'خدمات الصفحة الرئيسية', 'name_en' => 'Homepage Services'],
+            'popular_destinations'  => ['enabled' => true, 'sort_order' => 6,  'name_ar' => 'أبرز التأشيرات والوجهات الموصى بها', 'name_en' => 'Popular Visas & Destinations'],
+            'featured_categories'   => ['enabled' => true, 'sort_order' => 7,  'name_ar' => 'أقسام وتصنيفات التأشيرات', 'name_en' => 'Visa Categories'],
+            'why_choose_us'         => ['enabled' => true, 'sort_order' => 8,  'name_ar' => 'لماذا ترافل ويف وكيف نعمل', 'name_en' => 'Why Us & How It Works'],
+            'featured_destinations' => ['enabled' => true, 'sort_order' => 9,  'name_ar' => 'السياحة الداخلية والبرامج', 'name_en' => 'Domestic Tourism Destinations'],
+            'promo'                 => ['enabled' => true, 'sort_order' => 10, 'name_ar' => 'شريط العروض والترويج', 'name_en' => 'Promo Banner'],
+            'testimonials'          => ['enabled' => true, 'sort_order' => 11, 'name_ar' => 'آراء العملاء والتقييمات', 'name_en' => 'Testimonials'],
+            'blog'                  => ['enabled' => true, 'sort_order' => 12, 'name_ar' => 'أحدث المقالات والنصائح', 'name_en' => 'Latest Articles / Blog'],
+            'final_cta'             => ['enabled' => true, 'sort_order' => 13, 'name_ar' => 'شريط الدعوة للتواصل النهائي', 'name_en' => 'Final CTA Banner'],
+        ];
+
+        $saved = data_get($this->sections, 'section_order', []);
+        if (empty($saved) || !is_array($saved)) {
+            return $defaultSections;
+        }
+
+        $merged = [];
+        $i = 1;
+        foreach ($defaultSections as $key => $meta) {
+            $savedItem = $saved[$key] ?? [];
+            $merged[$key] = [
+                'enabled' => array_key_exists('enabled', $savedItem) ? (bool) $savedItem['enabled'] : $meta['enabled'],
+                'sort_order' => (int) ($savedItem['sort_order'] ?? $i),
+                'name_ar' => $meta['name_ar'],
+                'name_en' => $meta['name_en'],
+            ];
+            $i++;
+        }
+
+        uasort($merged, fn($a, $b) => $a['sort_order'] <=> $b['sort_order']);
+
+        return $merged;
+    }
+
     public function isCorePage(): bool
     {
         return in_array($this->key, self::CORE_KEYS, true);
