@@ -66,16 +66,7 @@ class MenuItem extends Model
         if ($this->type === 'page' || filled($this->page_id)) {
             $linkedPage = $this->page ?? Page::find($this->page_id);
             if ($linkedPage) {
-                return match ($linkedPage->key) {
-                    'home' => route('home'),
-                    'visas' => route('visas.index'),
-                    'domestic' => route('pages.show', $linkedPage->slug ?: 'domestic'),
-                    'flights' => route('pages.show', $linkedPage->slug ?: 'flights'),
-                    'hotels' => route('pages.show', $linkedPage->slug ?: 'hotels'),
-                    'about' => route('pages.show', $linkedPage->slug ?: 'about'),
-                    'contact' => route('pages.show', $linkedPage->slug ?: 'contact'),
-                    default => $linkedPage->frontendUrl() ?: route('pages.show', $linkedPage->slug),
-                };
+                return $linkedPage->frontendUrl() ?: ($linkedPage->slug ? route('pages.show', $linkedPage->slug) : '#');
             }
         }
 
@@ -83,10 +74,7 @@ class MenuItem extends Model
         if ($this->type === 'section' && filled($this->url)) {
             $anchor = Str::startsWith($this->url, '#') ? $this->url : '#' . ltrim($this->url, '#');
             if ($this->page_id && ($linkedPage = $this->page ?? Page::find($this->page_id))) {
-                $baseUrl = match ($linkedPage->key) {
-                    'home' => route('home'),
-                    default => route('pages.show', $linkedPage->slug),
-                };
+                $baseUrl = $linkedPage->frontendUrl() ?: route('home');
                 return $baseUrl . $anchor;
             }
             return route('home') . $anchor;

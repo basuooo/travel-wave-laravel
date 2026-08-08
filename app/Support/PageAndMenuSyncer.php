@@ -309,7 +309,7 @@ class PageAndMenuSyncer
                         $existing = MenuItem::where('location', 'header')->where('title_ar', $itemData['title_ar'])->first();
                         if ($existing) {
                             $existing->update([
-                                'page_id' => $existing->page_id ?: $pageId,
+                                'page_id' => $pageId ?: $existing->page_id,
                                 'title_en' => $existing->title_en ?: $itemData['title_en'],
                                 'type' => $existing->type ?: ($itemData['type'] ?? 'custom'),
                             ]);

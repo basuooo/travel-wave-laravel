@@ -56,7 +56,7 @@
                                 data-title-ar="{{ $page->title_ar }}"
                                 data-title-en="{{ $page->title_en }}"
                                 @selected(old('page_id', $item->page_id) == $page->id)>
-                            {{ $page->title_ar }} ({{ $page->title_en }}) [slug: {{ $page->slug ?: $page->key }}]
+                            {{ $page->title_ar }} ({{ $page->title_en }}) [رابط الصفحة: {{ $page->frontendUrl() }}]
                         </option>
                     @endforeach
                 </select>
