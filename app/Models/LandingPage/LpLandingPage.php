@@ -18,6 +18,8 @@ class LpLandingPage extends Model
     use HasLocalizedContent;
     use SoftDeletes;
 
+    protected $table = 'lp_landing_pages';
+
     public const STATUS_DRAFT = 'draft';
     public const STATUS_PUBLISHED = 'published';
     public const STATUS_ARCHIVED = 'archived';

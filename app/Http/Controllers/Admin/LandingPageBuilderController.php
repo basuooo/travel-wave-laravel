@@ -32,6 +32,23 @@ class LandingPageBuilderController extends Controller
     }
 
     /**
+     * One-Click Safe Migration Executor for Live Server
+     */
+    public function runMigrations()
+    {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate', [
+                '--path' => 'database/migrations/2026_08_09_100000_create_landing_page_builder_tables.php',
+                '--force' => true,
+            ]);
+
+            return redirect()->route('admin.landing-pages.dashboard')->with('success', 'Landing Page Builder tables created successfully in database!');
+        } catch (\Throwable $e) {
+            return response('Migration Error: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
      * Landing Pages Dashboard Overview
      */
     public function dashboard()

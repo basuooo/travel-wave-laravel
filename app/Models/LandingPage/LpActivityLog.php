@@ -10,6 +10,8 @@ class LpActivityLog extends Model
 {
     use HasFactory;
 
+    protected $table = 'lp_activity_logs';
+
     protected $fillable = [
         'user_id',
         'landing_page_id',

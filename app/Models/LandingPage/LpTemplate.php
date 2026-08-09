@@ -10,6 +10,8 @@ class LpTemplate extends Model
 {
     use HasFactory;
 
+    protected $table = 'lp_templates';
+
     protected $fillable = [
         'brand_id',
         'template_category_id',

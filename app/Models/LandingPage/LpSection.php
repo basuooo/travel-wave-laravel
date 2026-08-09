@@ -9,6 +9,8 @@ class LpSection extends Model
 {
     use HasFactory;
 
+    protected $table = 'lp_sections';
+
     protected $fillable = [
         'section_category_id',
         'name_en',

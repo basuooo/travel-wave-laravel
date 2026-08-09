@@ -297,6 +297,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::middleware('permission:marketing.manage')->group(function () {
             Route::prefix('landing-pages')->name('landing-pages.')->group(function () {
+                Route::get('/run-migrations', [LandingPageBuilderController::class, 'runMigrations'])->name('run-migrations');
                 Route::get('/dashboard', [LandingPageBuilderController::class, 'dashboard'])->name('dashboard');
                 Route::get('/', [LandingPageBuilderController::class, 'index'])->name('index');
                 Route::get('/create', [LandingPageBuilderController::class, 'create'])->name('create');
