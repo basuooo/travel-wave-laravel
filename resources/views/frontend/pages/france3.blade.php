@@ -38,7 +38,7 @@
                                     </p>
                                 @endif
                                 @if(!empty($hero['primary_cta_text_ar']) || !empty($hero['primary_cta_text_en']))
-                                    <a href="{{ $hero['primary_cta_url'] ?? '/contact#lead-form' }}" class="btn btn-primary btn-lg tw-btn-primary px-5 py-3 rounded-pill fw-bold shadow-lg">
+                                    <a href="{{ $hero['primary_cta_url'] ?? '/contact#lead-form' }}" class="btn btn-primary btn-lg tw-btn-primary px-5 py-3 rounded-pill fw-bold shadow-lg js-cta-form-trigger">
                                         {{ $isRtl ? ($hero['primary_cta_text_ar'] ?? 'قيّم حالتك الآن') : ($hero['primary_cta_text_en'] ?? 'Assess Your Case Now') }} ✨
                                     </a>
                                 @endif
@@ -255,7 +255,7 @@
                                 {{ $isRtl ? ($suit['note_ar'] ?? '') : ($suit['note_en'] ?? '') }}
                             </p>
                         @endif
-                        <a href="{{ $suit['button_url'] ?? '/contact#lead-form' }}" class="btn btn-primary btn-lg tw-btn-primary px-5 py-3 rounded-pill fw-bold">
+                        <a href="{{ $suit['button_url'] ?? '/contact#lead-form' }}" class="btn btn-primary btn-lg tw-btn-primary px-5 py-3 rounded-pill fw-bold js-cta-form-trigger">
                             {{ $isRtl ? ($suit['button_text_ar'] ?? 'قيّم حالتك الآن') : ($suit['button_text_en'] ?? 'Assess Your Case Now') }} 💬
                         </a>
                     </div>
@@ -346,7 +346,7 @@
                             {{ $isRtl ? ($cta['description_ar'] ?? '') : ($cta['description_en'] ?? '') }}
                         </p>
                         @if(!empty($cta['button_text_ar']) || !empty($cta['button_text_en']))
-                            <a href="{{ $cta['button_url'] ?? '/contact#lead-form' }}" class="btn btn-primary btn-lg tw-btn-primary px-5 py-3 rounded-pill fw-bold shadow">
+                            <a href="{{ $cta['button_url'] ?? '/contact#lead-form' }}" class="btn btn-primary btn-lg tw-btn-primary px-5 py-3 rounded-pill fw-bold shadow js-cta-form-trigger">
                                 {{ $isRtl ? ($cta['button_text_ar'] ?? 'تواصل معنا الآن') : ($cta['button_text_en'] ?? 'Contact Us Now') }} 🚀
                             </a>
                         @endif
@@ -357,7 +357,35 @@
         @endswitch
     @endforeach
 
-    @include('partials.frontend.form-zone', ['assignments' => $managedForms['middle'] ?? [], 'position' => 'middle', 'sourcePage' => 'france-3'])
-    @include('partials.frontend.form-zone', ['assignments' => $managedForms['bottom'] ?? [], 'position' => 'bottom', 'sourcePage' => 'france-3'])
+    <div id="lead-form" class="tw-lead-form-anchor">
+        @include('partials.frontend.form-zone', ['assignments' => $managedForms['middle'] ?? [], 'position' => 'middle', 'sourcePage' => 'france-3'])
+        @include('partials.frontend.form-zone', ['assignments' => $managedForms['bottom'] ?? [], 'position' => 'bottom', 'sourcePage' => 'france-3'])
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ctaTriggers = document.querySelectorAll('a[href*="#lead-form"], a[href*="contact#lead-form"], .js-cta-form-trigger');
+
+    ctaTriggers.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            const formSection = document.getElementById('lead-form') 
+                             || document.getElementById('inquiry-form')
+                             || document.getElementById('visa-inquiry')
+                             || document.querySelector('.tw-managed-form-zone')
+                             || document.querySelector('form');
+
+            const hasVisibleForm = formSection && (formSection.offsetHeight > 0 || formSection.getClientRects().length > 0);
+
+            if (hasVisibleForm) {
+                e.preventDefault();
+                formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                // If there is NO lead form on the current page, do nothing as requested!
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
 @endsection

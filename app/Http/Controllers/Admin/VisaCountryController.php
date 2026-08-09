@@ -301,7 +301,11 @@ class VisaCountryController extends Controller
     {
         $data['hero_image'] = $this->uploadFile($request, 'hero_image', 'visa-countries', $country?->hero_image);
         $data['hero_mobile_image'] = $this->uploadFile($request, 'hero_mobile_image', 'visa-countries', $country?->hero_mobile_image);
-        $data['flag_image'] = $this->uploadFile($request, 'flag_image', 'visa-countries', $country?->flag_image);
+        if ($request->hasFile('flag_image')) {
+            $data['flag_image'] = $this->uploadFile($request, 'flag_image', 'visa-countries', $country?->flag_image);
+        } elseif ($request->filled('preset_flag_url')) {
+            $data['flag_image'] = trim($request->input('preset_flag_url'));
+        }
         $data['intro_image'] = $this->uploadFile($request, 'intro_image', 'visa-countries', $country?->intro_image);
         $data['final_cta_background_image'] = $this->uploadFile($request, 'final_cta_background_image', 'visa-countries', $country?->final_cta_background_image);
         $data['og_image'] = $this->uploadFile($request, 'og_image', 'visa-countries', $country?->og_image);

@@ -91,4 +91,18 @@ class HomeCountryStripItem extends Model
     {
         return $this->flag_image_path ?: $this->visaCountry?->flag_image;
     }
+
+    public function displayFlagUrl(): ?string
+    {
+        $flag = $this->displayFlagPath();
+        if (! $flag) {
+            return null;
+        }
+
+        if (str_starts_with($flag, 'http://') || str_starts_with($flag, 'https://') || str_starts_with($flag, 'data:')) {
+            return $flag;
+        }
+
+        return asset('storage/' . $flag);
+    }
 }

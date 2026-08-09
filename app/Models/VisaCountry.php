@@ -256,6 +256,19 @@ class VisaCountry extends Model
         return $ordered;
     }
 
+    public function displayFlagUrl(): ?string
+    {
+        if (! $this->flag_image) {
+            return null;
+        }
+
+        if (str_starts_with($this->flag_image, 'http://') || str_starts_with($this->flag_image, 'https://') || str_starts_with($this->flag_image, 'data:')) {
+            return $this->flag_image;
+        }
+
+        return asset('storage/' . $this->flag_image);
+    }
+
     public function buildSectionsFromModel(): array
     {
         if (filled($this->sections) && is_array($this->sections) && ! empty(data_get($this->sections, 'hero'))) {

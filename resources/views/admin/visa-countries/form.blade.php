@@ -176,10 +176,14 @@
                         @endif
                     </div>
                     <div class="col-lg-4">
-                        <label class="form-label">{{ __('admin.flag_image') }}</label>
-                        <input type="file" class="form-control" name="flag_image" accept="image/*">
+                        <label class="form-label fw-bold">{{ __('admin.flag_image') }} (علم الدولة)</label>
+                        @include('admin.partials.world-flag-picker', [
+                            'currentValue' => $item->flag_image,
+                            'fileInputName' => 'flag_image'
+                        ])
                         @if($item->flag_image)
-                            <img src="{{ asset('storage/' . $item->flag_image) }}" alt="" class="img-fluid rounded mt-2 border" style="max-height: 100px;">
+                            <div class="mt-2 small text-muted">العلم الحالي:</div>
+                            <img src="{{ $item->displayFlagUrl() }}" alt="" class="img-fluid rounded border mt-1" style="max-height: 80px; object-fit: contain; background: #fff;">
                         @endif
                     </div>
                     <div class="col-md-6"><label class="form-label">{{ __('admin.meta_title_en') }}</label><input class="form-control" name="meta_title_en" value="{{ old('meta_title_en', $item->meta_title_en) }}"></div>

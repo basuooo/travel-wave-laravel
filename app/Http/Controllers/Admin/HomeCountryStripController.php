@@ -44,7 +44,13 @@ class HomeCountryStripController extends Controller
     {
         $data = $this->validatedData($request);
         $data['image_path'] = $this->uploadFile($request, 'image', 'home-country-strip');
-        $data['flag_image_path'] = $this->uploadFile($request, 'flag_image', 'home-country-strip');
+
+        if ($request->hasFile('flag_image')) {
+            $data['flag_image_path'] = $this->uploadFile($request, 'flag_image', 'home-country-strip');
+        } elseif ($request->filled('preset_flag_url')) {
+            $data['flag_image_path'] = trim($request->input('preset_flag_url'));
+        }
+
         $data['is_active'] = $request->boolean('is_active');
         $data['show_on_homepage'] = $request->boolean('show_on_homepage');
 
@@ -65,7 +71,13 @@ class HomeCountryStripController extends Controller
     {
         $data = $this->validatedData($request);
         $data['image_path'] = $this->uploadFile($request, 'image', 'home-country-strip', $home_country_strip->image_path);
-        $data['flag_image_path'] = $this->uploadFile($request, 'flag_image', 'home-country-strip', $home_country_strip->flag_image_path);
+
+        if ($request->hasFile('flag_image')) {
+            $data['flag_image_path'] = $this->uploadFile($request, 'flag_image', 'home-country-strip', $home_country_strip->flag_image_path);
+        } elseif ($request->filled('preset_flag_url')) {
+            $data['flag_image_path'] = trim($request->input('preset_flag_url'));
+        }
+
         $data['is_active'] = $request->boolean('is_active');
         $data['show_on_homepage'] = $request->boolean('show_on_homepage');
 

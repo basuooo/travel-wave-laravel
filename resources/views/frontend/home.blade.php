@@ -243,16 +243,15 @@
                                             <div class="tw-home-destination-placeholder">{{ strtoupper(substr($itemName, 0, 2)) }}</div>
                                         @endif
                                         <div class="tw-home-destination-overlay"></div>
-                                        <div class="tw-home-destination-flag-wrap">
-                                            <div class="tw-home-destination-flag">
-                                                @if($itemFlag)
-                                                    <img src="{{ asset('storage/' . $itemFlag) }}" alt="{{ $itemName }} flag">
-                                                @else
-                                                    <span>{{ strtoupper(substr($itemName, 0, 1)) }}</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <div class="tw-home-destination-line" aria-hidden="true"></div>
+                                         <div class="tw-home-destination-flag-wrap">
+                                             <div class="tw-home-destination-flag">
+                                                 @if($item->displayFlagUrl())
+                                                     <img src="{{ $item->displayFlagUrl() }}" alt="{{ $itemName }} flag">
+                                                 @else
+                                                     <span>{{ strtoupper(substr($itemName, 0, 1)) }}</span>
+                                                 @endif
+                                             </div>
+                                         </div><div class="tw-home-destination-line" aria-hidden="true"></div>
                                     </div>
                                     <div class="tw-home-destination-body">
                                         <div class="tw-home-destination-copy">
