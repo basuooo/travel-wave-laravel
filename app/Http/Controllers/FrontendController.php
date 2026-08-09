@@ -48,7 +48,7 @@ class FrontendController extends Controller
             'page' => $page,
             'managedForms' => $this->formsForContext(LeadFormManager::contextForPageKey('home')),
             'managedMaps' => $this->mapsForContext(MapSectionManager::contextForPageKey('home')),
-            'heroSlides' => HeroSlide::where('is_active', true)->orderBy('sort_order')->limit(3)->get(),
+            'heroSlides' => HeroSlide::where('is_active', true)->orderBy('sort_order')->get(),
             'heroSliderSettings' => $settings,
             'homeSearchConfig' => $homeSearchConfig,
             'homeCountryStripItems' => HomeCountryStripItem::where('is_active', true)

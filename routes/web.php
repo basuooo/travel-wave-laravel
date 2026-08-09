@@ -51,6 +51,8 @@ use App\Http\Controllers\Admin\UtmController;
 use App\Http\Controllers\Admin\WorkflowAutomationController;
 use App\Http\Controllers\Admin\VisaCategoryController;
 use App\Http\Controllers\Admin\VisaCountryController;
+use App\Http\Controllers\Admin\LandingPageBuilderController;
+use App\Http\Controllers\Frontend\LandingPagePublicController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\SeoPublicController;
@@ -88,6 +90,7 @@ Route::get('/hajj', function () {
 Route::get('/france-2', [FrontendController::class, 'france2'])->name('france-2');
 Route::get('/france-3', [FrontendController::class, 'france3'])->name('france-3');
 Route::get('/campaigns/{landingPage:slug}', [FrontendController::class, 'marketingLandingPage'])->name('marketing.landing-pages.show');
+Route::get('/lp/{slug}', [LandingPagePublicController::class, 'show'])->name('landing-pages.public.show');
 Route::post('/campaigns/{landingPage:slug}/events', [FrontendController::class, 'trackMarketingLandingPageEvent'])->name('marketing.landing-pages.events.store');
 Route::post('/inquiries', [FrontendController::class, 'storeInquiry'])->name('inquiries.store');
 Route::post('/tracking/meta/events', [FrontendController::class, 'trackMetaEvent'])->name('tracking.meta.events.store');
@@ -293,6 +296,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::middleware('permission:marketing.manage')->group(function () {
+            Route::prefix('landing-pages')->name('landing-pages.')->group(function () {
+                Route::get('/dashboard', [LandingPageBuilderController::class, 'dashboard'])->name('dashboard');
+                Route::get('/', [LandingPageBuilderController::class, 'index'])->name('index');
+                Route::get('/create', [LandingPageBuilderController::class, 'create'])->name('create');
+                Route::post('/', [LandingPageBuilderController::class, 'store'])->name('store');
+                Route::get('/{landingPage}/builder', [LandingPageBuilderController::class, 'builder'])->name('builder');
+                Route::put('/{landingPage}/builder', [LandingPageBuilderController::class, 'update'])->name('update');
+                Route::patch('/{landingPage}/toggle-active', [LandingPageBuilderController::class, 'toggleActive'])->name('toggle-active');
+                Route::post('/{landingPage}/duplicate', [LandingPageBuilderController::class, 'duplicate'])->name('duplicate');
+                Route::post('/{landingPage}/save-as-template', [LandingPageBuilderController::class, 'saveAsTemplate'])->name('save-as-template');
+                Route::get('/{landingPage}/export', [LandingPageBuilderController::class, 'export'])->name('export');
+                Route::post('/import', [LandingPageBuilderController::class, 'import'])->name('import');
+                Route::get('/{landingPage}/versions', [LandingPageBuilderController::class, 'versions'])->name('versions');
+                Route::post('/{landingPage}/versions/{version}/restore', [LandingPageBuilderController::class, 'restoreVersion'])->name('versions.restore');
+                Route::get('/{landingPage}/leads', [LandingPageBuilderController::class, 'leads'])->name('leads');
+                Route::delete('/{landingPage}', [LandingPageBuilderController::class, 'destroy'])->name('destroy');
+            });
             Route::post('/marketing-landing-pages/{marketing_landing_page}/duplicate', [MarketingLandingPageController::class, 'duplicate'])->name('marketing-landing-pages.duplicate');
             Route::resource('marketing-landing-pages', MarketingLandingPageController::class);
             Route::prefix('marketing-campaigns')->name('marketing-campaigns.')->group(function () {
