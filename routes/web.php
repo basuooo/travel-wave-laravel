@@ -298,8 +298,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('permission:marketing.manage')->group(function () {
             Route::prefix('landing-pages')->name('landing-pages.')->group(function () {
                 Route::get('/run-migrations', [LandingPageBuilderController::class, 'runMigrations'])->name('run-migrations');
+                Route::get('/seed-templates', [LandingPageBuilderController::class, 'seedTemplates'])->name('seed-templates');
                 Route::get('/dashboard', [LandingPageBuilderController::class, 'dashboard'])->name('dashboard');
                 Route::get('/', [LandingPageBuilderController::class, 'index'])->name('index');
+                Route::get('/templates/{template}/preview', [LandingPageBuilderController::class, 'previewTemplate'])->name('templates.preview');
                 Route::get('/create', [LandingPageBuilderController::class, 'create'])->name('create');
                 Route::post('/', [LandingPageBuilderController::class, 'store'])->name('store');
                 Route::get('/{landingPage}/builder', [LandingPageBuilderController::class, 'builder'])->name('builder');

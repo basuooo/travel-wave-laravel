@@ -49,10 +49,25 @@ class LandingPageBuilderController extends Controller
     }
 
     /**
+     * One-Click Safe Starter Template Seeder for Live Server
+     */
+    public function seedTemplates()
+    {
+        try {
+            (new \Database\Seeders\LandingPageBuilderSeeder())->run();
+            return redirect()->route('admin.landing-pages.create')->with('success', 'Starter templates seeded successfully!');
+        } catch (\Throwable $e) {
+            return response('Seeding Error: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
      * Landing Pages Dashboard Overview
      */
     public function dashboard()
     {
+        $this->ensureTablesExist();
+
         $totalPages = LpLandingPage::count();
         $publishedPages = LpLandingPage::where('status', LpLandingPage::STATUS_PUBLISHED)->count();
         $draftPages = LpLandingPage::where('status', LpLandingPage::STATUS_DRAFT)->count();
@@ -86,6 +101,8 @@ class LandingPageBuilderController extends Controller
      */
     public function index(Request $request)
     {
+        $this->ensureTablesExist();
+
         $query = LpLandingPage::with(['brand', 'leadForm', 'creator']);
 
         if ($request->filled('search')) {
@@ -121,11 +138,31 @@ class LandingPageBuilderController extends Controller
      */
     public function create()
     {
+        $this->ensureTablesExist();
+
         $templates = LpTemplate::with(['category', 'brand'])->where('is_active', true)->latest()->get();
         $templateCategories = LpTemplateCategory::orderBy('sort_order')->get();
         $brands = Brand::where('is_active', true)->get();
 
         return view('admin.landing-pages.create', compact('templates', 'templateCategories', 'brands'));
+    }
+
+    /**
+     * Preview Master Template in iframe/modal
+     */
+    public function previewTemplate(LpTemplate $template)
+    {
+        return view('frontend.landing-pages.show', [
+            'landingPage' => new LpLandingPage([
+                'title_ar' => $template->name_ar,
+                'title_en' => $template->name_en,
+                'seo_description_ar' => $template->description_ar,
+                'seo_description_en' => $template->description_en,
+                'structure' => $template->structure,
+            ]),
+            'pageTrackingIntegrations' => collect(),
+            'trackingContext' => [],
+        ]);
     }
 
     /**
@@ -179,8 +216,8 @@ class LandingPageBuilderController extends Controller
         $templateCategories = LpTemplateCategory::with(['templates' => fn ($q) => $q->where('is_active', true)])->orderBy('sort_order')->get();
         
         // Data Sources for Dynamic Binding
-        $visaCountries = VisaCountry::where('is_active', true)->orderBy('name_ar')->get(['id', 'name_en', 'name_ar', 'price', 'hero_image', 'flag_image']);
-        $destinations = Destination::where('is_active', true)->orderBy('title_ar')->get(['id', 'title_en', 'title_ar', 'price', 'hero_image']);
+        $visaCountries = VisaCountry::where('is_active', true)->orderBy('name_ar')->get(['id', 'name_en', 'name_ar', 'hero_image', 'flag_image']);
+        $destinations = Destination::where('is_active', true)->orderBy('title_ar')->get(['id', 'title_en', 'title_ar', 'hero_image']);
 
         return view('admin.landing-pages.builder', compact(
             'landingPage',
@@ -400,5 +437,30 @@ class LandingPageBuilderController extends Controller
         $landingPage->delete();
 
         return redirect()->route('admin.landing-pages.index')->with('success', 'Landing page moved to trash.');
+    }
+
+    /**
+     * Ensure database tables exist before querying
+     */
+    protected function ensureTablesExist(): void
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('lp_landing_pages')) {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('migrate', [
+                    '--path' => 'database/migrations/2026_08_09_100000_create_landing_page_builder_tables.php',
+                    '--force' => true,
+                ]);
+            } catch (\Throwable $e) {
+                // Ignore migration errors if already present
+            }
+        }
+
+        try {
+            if (LpTemplate::count() === 0) {
+                (new \Database\Seeders\LandingPageBuilderSeeder())->run();
+            }
+        } catch (\Throwable $e) {
+            // Ignore seeding errors
+        }
     }
 }

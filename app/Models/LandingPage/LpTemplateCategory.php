@@ -9,6 +9,8 @@ class LpTemplateCategory extends Model
 {
     use HasFactory;
 
+    protected $table = 'lp_template_categories';
+
     protected $fillable = [
         'name_en',
         'name_ar',

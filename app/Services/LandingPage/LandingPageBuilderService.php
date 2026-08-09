@@ -155,7 +155,7 @@ class LandingPageBuilderService
                     'description_ar' => $country->short_description_ar ?? $country->meta_description_ar,
                     'featured_image' => asset('storage/' . ($country->hero_image ?: $country->flag_image)),
                     'flag_image' => asset('storage/' . $country->flag_image),
-                    'price' => $country->price,
+                    'price' => $country->price ?? null,
                     'currency' => 'SAR',
                     'requirements' => $country->requirements ?? [],
                 ];
@@ -170,7 +170,7 @@ class LandingPageBuilderService
                     'description_en' => $dest->description_en,
                     'description_ar' => $dest->description_ar,
                     'featured_image' => asset('storage/' . ($dest->hero_image ?: $dest->featured_image)),
-                    'price' => $dest->price,
+                    'price' => $dest->price ?? null,
                     'currency' => 'SAR',
                 ];
 
