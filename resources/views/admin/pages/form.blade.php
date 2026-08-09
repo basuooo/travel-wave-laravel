@@ -18,6 +18,11 @@
                     🌐 معاينة الصفحة
                 </a>
             @endif
+            @if(!empty($page->id))
+                <a href="{{ route('admin.pages.export', $page) }}" class="btn btn-outline-info">
+                    📥 تصدير (Export)
+                </a>
+            @endif
             <button type="submit" class="btn btn-primary tw-btn-primary px-4 fw-bold">
                 💾 {{ $submitLabel ?? 'حفظ الصفحة' }}
             </button>

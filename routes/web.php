@@ -215,6 +215,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/pages/trash', [PageController::class, 'trash'])->middleware('permission:pages.delete')->name('pages.trash');
             Route::get('/pages/create', [PageController::class, 'create'])->middleware('permission:pages.create')->name('pages.create');
             Route::post('/pages', [PageController::class, 'store'])->middleware('permission:pages.create')->name('pages.store');
+            Route::post('/pages/import', [PageController::class, 'import'])->middleware('permission:pages.create')->name('pages.import');
+            Route::get('/pages/{page:key}/export', [PageController::class, 'export'])->name('pages.export');
             Route::post('/pages/{page:key}/duplicate', [PageController::class, 'duplicate'])->middleware('permission:pages.create')->name('pages.duplicate');
             Route::get('/pages/{page:key}/edit', [PageController::class, 'edit'])->middleware('permission:pages.edit')->name('pages.edit');
             Route::put('/pages/{page:key}', [PageController::class, 'update'])->middleware('permission:pages.edit')->name('pages.update');

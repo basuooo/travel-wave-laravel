@@ -92,6 +92,56 @@ class PageController extends Controller
         return redirect()->route('admin.pages.edit', $copy)->with('success', 'Page duplicated successfully.');
     }
 
+    public function export(Page $page)
+    {
+        if (empty($page->sections)) {
+            $page->sections = $page->buildSectionsFromModel();
+            $page->save();
+        }
+
+        $data = $page->makeHidden(['id', 'created_at', 'updated_at', 'deleted_at', 'deleted_by'])->toArray();
+        $data['_export_type'] = 'page';
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        return response($json)
+            ->header('Content-Type', 'application/json')
+            ->header('Content-Disposition', 'attachment; filename="page-' . ($page->slug ?: $page->key) . '.json"');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:json'],
+        ]);
+
+        $data = json_decode(file_get_contents($request->file('file')->path()), true);
+
+        if (! $data || (! isset($data['title_en']) && ! isset($data['title_ar']) && ! isset($data['name_en']) && ! isset($data['name_ar']))) {
+            return back()->with('error', 'Invalid JSON file.');
+        }
+
+        unset($data['id'], $data['created_at'], $data['updated_at'], $data['deleted_at'], $data['deleted_by']);
+
+        $titleEn = $data['title_en'] ?? $data['name_en'] ?? 'Imported Page';
+        $titleAr = $data['title_ar'] ?? $data['name_ar'] ?? 'صفحة مستوردة';
+        $baseSlug = $data['slug'] ?? $data['key'] ?? 'imported-page';
+
+        $data['title_en'] = $titleEn . ' (Imported)';
+        $data['title_ar'] = $titleAr . ' (مستورد)';
+        $data['key'] = $this->makeUniqueKey($baseSlug . '_imported');
+        $data['slug'] = Page::makeUniqueSlug($baseSlug . '-imported');
+        $data['is_active'] = false;
+
+        $newPage = Page::query()->create($data);
+
+        if (empty($newPage->sections)) {
+            $newPage->sections = $newPage->buildSectionsFromModel();
+            $newPage->save();
+        }
+
+        return redirect()->route('admin.pages.edit', $newPage)->with('success', 'Page imported successfully as draft.');
+    }
+
     public function destroy(Page $page)
     {
         $page->forceFill([

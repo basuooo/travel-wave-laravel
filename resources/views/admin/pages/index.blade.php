@@ -1,19 +1,24 @@
 @extends('layouts.admin')
 
 @section('page_title', 'Pages')
-@section('page_description', 'Create, edit, duplicate, view, and safely manage both core pages and custom pages.')
+@section('page_description', 'Create, edit, duplicate, view, export, import, and safely manage both core pages and custom pages.')
 
 @section('content')
 <div class="card admin-card p-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
             <h2 class="h5 mb-1">Pages Manager</h2>
-            <p class="text-muted mb-0">Manage active pages here, and move any page safely to Trash when it should leave the live list.</p>
+            <p class="text-muted mb-0">Manage active pages here, export/import pages, and move any page safely to Trash when needed.</p>
         </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{{ route('admin.sync-pages') }}" class="btn btn-outline-primary fw-bold" onclick="return confirm('هل تريد مزامنة وتحديث صفحات العمرة والحج والقوائم الآن؟')">🔄 مزامنة الصفحات والقوائم</a>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <form action="{{ route('admin.pages.import') }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
+                @csrf
+                <input type="file" name="file" class="form-control form-control-sm" accept=".json" required>
+                <button type="submit" class="btn btn-sm btn-outline-success fw-bold">📥 استيراد صفحة (Import)</button>
+            </form>
+            <a href="{{ route('admin.sync-pages') }}" class="btn btn-outline-primary fw-bold" onclick="return confirm('هل تريد مزامنة وتحديث صفحات العمرة والحج والقوائم الآن؟')">🔄 مزامنة الصفحات</a>
             <a href="{{ route('admin.pages.trash') }}" class="btn btn-outline-secondary">Pages Trash</a>
-            <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">Create New Page</a>
+            <a href="{{ route('admin.pages.create') }}" class="btn btn-primary fw-bold">➕ Create New Page</a>
         </div>
     </div>
     <div class="table-responsive">
@@ -44,6 +49,7 @@
                                 @if($page->frontendUrl())
                                     <a href="{{ $page->frontendUrl() }}" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener noreferrer">View</a>
                                 @endif
+                                <a href="{{ route('admin.pages.export', $page) }}" class="btn btn-sm btn-outline-info" title="تصدير هذه الصفحة">Export</a>
                                 <form method="post" action="{{ route('admin.pages.duplicate', $page) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-sm btn-outline-primary">Duplicate</button>
@@ -58,7 +64,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4">No pages found yet.</td>
+                        <td colspan="5" class="text-center text-muted py-4">No pages found.</td>
                     </tr>
                 @endforelse
             </tbody>

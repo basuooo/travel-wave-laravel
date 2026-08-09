@@ -130,15 +130,19 @@ class VisaCountryController extends Controller
 
         $data = json_decode(file_get_contents($request->file('file')->path()), true);
 
-        if (! $data || (! isset($data['name_en']) && ! isset($data['name_ar']))) {
+        if (! $data || (! isset($data['name_en']) && ! isset($data['name_ar']) && ! isset($data['title_en']) && ! isset($data['title_ar']))) {
             return back()->with('error', 'Invalid JSON file.');
         }
 
         unset($data['id'], $data['created_at'], $data['updated_at'], $data['deleted_at'], $data['deleted_by']);
 
-        $data['slug'] = VisaCountry::makeUniqueSlug(($data['slug'] ?? 'imported-country') . '-imported');
-        $data['name_en'] = ($data['name_en'] ?? 'Imported Country') . ' (Imported)';
-        $data['name_ar'] = ($data['name_ar'] ?? 'وجهة مستوردة') . ' (مستورد)';
+        $nameEn = $data['name_en'] ?? $data['title_en'] ?? 'Imported Visa Country';
+        $nameAr = $data['name_ar'] ?? $data['title_ar'] ?? 'وجهة مستوردة';
+        $baseSlug = $data['slug'] ?? $data['key'] ?? 'imported-country';
+
+        $data['name_en'] = $nameEn . ' (Imported)';
+        $data['name_ar'] = $nameAr . ' (مستورد)';
+        $data['slug'] = VisaCountry::makeUniqueSlug($baseSlug . '-imported');
         $data['is_active'] = false;
 
         VisaCountry::ensureTableSchema();

@@ -223,6 +223,135 @@ class Page extends Model
         return $merged;
     }
 
+    public function buildSectionsFromModel(): array
+    {
+        if (filled($this->sections) && is_array($this->sections) && ! empty(data_get($this->sections, 'hero'))) {
+            return $this->sections;
+        }
+
+        return [
+            'section_order' => [
+                'hero' => ['sort_order' => 1, 'enabled' => true],
+                'quick_summary' => ['sort_order' => 2, 'enabled' => true],
+                'intro' => ['sort_order' => 3, 'enabled' => true],
+                'best_time' => ['sort_order' => 4, 'enabled' => true],
+                'requirements' => ['sort_order' => 5, 'enabled' => true],
+                'services' => ['sort_order' => 6, 'enabled' => true],
+                'steps' => ['sort_order' => 7, 'enabled' => true],
+                'why_choose' => ['sort_order' => 8, 'enabled' => true],
+                'suitability' => ['sort_order' => 9, 'enabled' => true],
+                'pricing_duration' => ['sort_order' => 10, 'enabled' => true],
+                'faq' => ['sort_order' => 11, 'enabled' => true],
+                'notice' => ['sort_order' => 12, 'enabled' => true],
+                'cta' => ['sort_order' => 13, 'enabled' => true],
+            ],
+
+            'hero' => [
+                'eyebrow_en' => $this->hero_badge_en ?: 'Travel Wave',
+                'eyebrow_ar' => $this->hero_badge_ar ?: 'ترافل ويف',
+                'title_en' => $this->hero_title_en ?: $this->title_en,
+                'title_ar' => $this->hero_title_ar ?: $this->title_ar,
+                'subtitle_en' => $this->hero_subtitle_en ?: $this->meta_description_en,
+                'subtitle_ar' => $this->hero_subtitle_ar ?: $this->meta_description_ar,
+                'primary_cta_text_en' => $this->hero_primary_cta_text_en ?: 'Contact Us',
+                'primary_cta_text_ar' => $this->hero_primary_cta_text_ar ?: 'تواصل معنا',
+                'primary_cta_url' => $this->hero_primary_cta_url ?: '/contact#lead-form',
+            ],
+
+            'quick_summary' => [
+                'title_en' => 'Quick Summary',
+                'title_ar' => 'ملخص سريع',
+                'items' => [],
+            ],
+
+            'intro' => [
+                'title_en' => $this->intro_title_en ?: $this->title_en,
+                'title_ar' => $this->intro_title_ar ?: $this->title_ar,
+                'description_en' => $this->intro_body_en ?: $this->meta_description_en,
+                'description_ar' => $this->intro_body_ar ?: $this->meta_description_ar,
+            ],
+
+            'best_time' => [
+                'title_en' => 'Best Time to Apply',
+                'title_ar' => 'متى تبدأ الإجراءات؟',
+                'text_en' => 'Start procedures early before your travel date.',
+                'text_ar' => 'يفضل البدء في الإجراءات مبكراً قبل موعد السفر بوقت كافٍ.',
+                'note_en' => 'Early preparation saves effort and secures prime slots.',
+                'note_ar' => 'التجهيز المبكر يمنحك وقتاً كافياً لاستكمال الملف.',
+            ],
+
+            'requirements' => [
+                'title_en' => 'Key Requirements',
+                'title_ar' => 'المتطلبات الأساسية',
+                'note_en' => 'Requirements depend on your status.',
+                'note_ar' => 'تختلف المستندات المطلوبة حسب حالة كل متقدم.',
+                'items' => [],
+            ],
+
+            'services' => [
+                'title_en' => 'Services',
+                'title_ar' => 'الخدمات',
+                'items' => [],
+            ],
+
+            'steps' => [
+                'title_en' => 'Application Steps',
+                'title_ar' => 'خطوات العمل',
+                'items' => [],
+            ],
+
+            'why_choose' => [
+                'title_en' => 'Why Choose Travel Wave',
+                'title_ar' => 'ليه تختار ترافل ويف؟',
+                'items' => [],
+            ],
+
+            'suitability' => [
+                'title_en' => 'Suitability Assessment',
+                'title_ar' => 'تقييم مناسبة الحالة',
+                'description_en' => 'Reach out to our team to assess your status.',
+                'description_ar' => 'تواصل معنا وفريق ترافل ويف يراجع حالتك مباشرة.',
+                'button_text_en' => 'Assess Your Case',
+                'button_text_ar' => 'قيّم حالتك الآن',
+                'button_url' => '/contact#lead-form',
+            ],
+
+            'pricing_duration' => [
+                'duration_title_en' => 'Duration',
+                'duration_title_ar' => 'مدة الإجراءات',
+                'duration_text_en' => 'Varies by service category.',
+                'duration_text_ar' => 'تختلف حسب نوع الخدمة المطلوبة.',
+                'fees_title_en' => 'Fees',
+                'fees_title_ar' => 'الرسوم',
+                'fees_text_en' => 'Clear, transparent pricing.',
+                'fees_text_ar' => 'أسعار ممتازة وشفافة.',
+            ],
+
+            'faq' => [
+                'title_en' => 'Frequently Asked Questions',
+                'title_ar' => 'الأسئلة الشائعة والإجابات',
+                'items' => [],
+            ],
+
+            'notice' => [
+                'title_en' => 'Important Notice',
+                'title_ar' => 'تنبيه مهم للعميل',
+                'text_en' => 'Travel Wave assists with complete application file setup.',
+                'text_ar' => 'ترافل ويف تساعدك في تجهيز ومراجعة طلبك بأعلى احترافية.',
+            ],
+
+            'cta' => [
+                'title_en' => 'Ready to Start?',
+                'title_ar' => 'جاهز تبدأ الإجراءات؟',
+                'description_en' => 'Leave your details and our team will get in touch.',
+                'description_ar' => 'سيب بياناتك وفريق ترافل ويف هيتواصل معاك فوراً.',
+                'button_text_en' => 'Contact Us Now',
+                'button_text_ar' => 'تواصل معنا الآن',
+                'button_url' => '/contact#lead-form',
+            ],
+        ];
+    }
+
     public function getOrderedHomeSections(): array
     {
         return $this->getOrderedSections();
