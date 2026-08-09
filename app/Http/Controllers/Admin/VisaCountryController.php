@@ -16,7 +16,10 @@ class VisaCountryController extends Controller
 
     public function index()
     {
-        if (VisaCountry::where('slug', 'france-3-visa')->doesntExist()) {
+        VisaCountry::ensureTableSchema();
+
+        $france3 = VisaCountry::where('slug', 'france-3-visa')->first();
+        if (! $france3 || empty($france3->sections)) {
             require_once database_path('seeders/France3VisaCountrySeeder.php');
             (new \Database\Seeders\France3VisaCountrySeeder())->run();
         }
@@ -62,6 +65,11 @@ class VisaCountryController extends Controller
 
     public function edit(VisaCountry $visa_country)
     {
+        if (empty($visa_country->sections)) {
+            $visa_country->sections = $visa_country->buildSectionsFromModel();
+            $visa_country->save();
+        }
+
         return view('admin.visa-countries.form', [
             'item' => $visa_country,
             'categories' => VisaCategory::orderBy('sort_order')->get(),
@@ -74,9 +82,7 @@ class VisaCountryController extends Controller
         $data = $this->validatedData($request, $visa_country->id);
         $data = $this->transformData($request, $data, $visa_country);
 
-        if ($visa_country->slug === 'france-3-visa' || $request->has('france3_hero_title_ar') || filled($visa_country->sections)) {
-            $data['sections'] = $this->france3SectionsFromRequest($request, $visa_country->sections ?? []);
-        }
+        $data['sections'] = $this->france3SectionsFromRequest($request, $visa_country->sections ?? []);
 
         $visa_country->update($data);
 
@@ -91,6 +97,9 @@ class VisaCountryController extends Controller
         $copy->slug = VisaCountry::makeUniqueSlug(($visa_country->slug ?: $visa_country->name_en) . '-copy');
         $copy->is_active = false;
         $copy->is_featured = false;
+        if (empty($copy->sections)) {
+            $copy->sections = $visa_country->buildSectionsFromModel();
+        }
         $copy->save();
 
         return redirect()->route('admin.visa-countries.edit', $copy)->with('success', 'Visa country duplicated.');
@@ -98,6 +107,13 @@ class VisaCountryController extends Controller
 
     public function export(VisaCountry $visa_country)
     {
+        VisaCountry::ensureTableSchema();
+
+        if (empty($visa_country->sections)) {
+            $visa_country->sections = $visa_country->buildSectionsFromModel();
+            $visa_country->save();
+        }
+
         $data = $visa_country->makeHidden(['id', 'created_at', 'updated_at', 'deleted_at', 'deleted_by'])->toArray();
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
@@ -114,25 +130,34 @@ class VisaCountryController extends Controller
 
         $data = json_decode(file_get_contents($request->file('file')->path()), true);
 
-        if (!$data || !isset($data['name_en'])) {
+        if (! $data || (! isset($data['name_en']) && ! isset($data['name_ar']))) {
             return back()->with('error', 'Invalid JSON file.');
         }
 
-        $data['slug'] = VisaCountry::makeUniqueSlug($data['slug'] . '-imported');
-        $data['name_en'] .= ' (Imported)';
-        $data['name_ar'] .= ' (مستورد)';
+        unset($data['id'], $data['created_at'], $data['updated_at'], $data['deleted_at'], $data['deleted_by']);
+
+        $data['slug'] = VisaCountry::makeUniqueSlug(($data['slug'] ?? 'imported-country') . '-imported');
+        $data['name_en'] = ($data['name_en'] ?? 'Imported Country') . ' (Imported)';
+        $data['name_ar'] = ($data['name_ar'] ?? 'وجهة مستوردة') . ' (مستورد)';
         $data['is_active'] = false;
 
+        VisaCountry::ensureTableSchema();
+
         // Ensure visa_category_id is present and exists
-        if (!isset($data['visa_category_id']) || !VisaCategory::where('id', $data['visa_category_id'])->exists()) {
+        if (! isset($data['visa_category_id']) || ! VisaCategory::where('id', $data['visa_category_id'])->exists()) {
             $data['visa_category_id'] = VisaCategory::first()?->id;
         }
 
-        if (!$data['visa_category_id']) {
+        if (! $data['visa_category_id']) {
             return back()->with('error', 'No visa categories found. Please create a category first.');
         }
 
         $newCountry = VisaCountry::create($data);
+
+        if (empty($newCountry->sections)) {
+            $newCountry->sections = $newCountry->buildSectionsFromModel();
+            $newCountry->save();
+        }
 
         return redirect()->route('admin.visa-countries.edit', $newCountry)->with('success', 'Visa country imported as draft.');
     }

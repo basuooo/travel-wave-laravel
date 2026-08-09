@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class VisaCountry extends Model
@@ -14,6 +16,40 @@ class VisaCountry extends Model
     use HasFactory;
     use HasLocalizedContent;
     use SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::ensureTableSchema();
+    }
+
+    public static function ensureTableSchema(): void
+    {
+        if (! Schema::hasTable('visa_countries')) {
+            return;
+        }
+
+        if (
+            ! Schema::hasColumn('visa_countries', 'content_mode') ||
+            ! Schema::hasColumn('visa_countries', 'html_content_en') ||
+            ! Schema::hasColumn('visa_countries', 'html_content_ar') ||
+            ! Schema::hasColumn('visa_countries', 'sections')
+        ) {
+            Schema::table('visa_countries', function (Blueprint $table) {
+                if (! Schema::hasColumn('visa_countries', 'content_mode')) {
+                    $table->string('content_mode', 20)->default('normal')->after('is_active');
+                }
+                if (! Schema::hasColumn('visa_countries', 'html_content_en')) {
+                    $table->longText('html_content_en')->nullable()->after('content_mode');
+                }
+                if (! Schema::hasColumn('visa_countries', 'html_content_ar')) {
+                    $table->longText('html_content_ar')->nullable()->after('html_content_en');
+                }
+                if (! Schema::hasColumn('visa_countries', 'sections')) {
+                    $table->json('sections')->nullable()->after('html_content_ar');
+                }
+            });
+        }
+    }
 
     protected $fillable = [
         'visa_category_id',
@@ -218,6 +254,142 @@ class VisaCountry extends Model
         uasort($ordered, fn ($a, $b) => $a['sort_order'] <=> $b['sort_order']);
 
         return $ordered;
+    }
+
+    public function buildSectionsFromModel(): array
+    {
+        if (filled($this->sections) && is_array($this->sections) && ! empty(data_get($this->sections, 'hero'))) {
+            return $this->sections;
+        }
+
+        return [
+            'section_order' => [
+                'hero' => ['sort_order' => 1, 'enabled' => true],
+                'quick_summary' => ['sort_order' => 2, 'enabled' => true],
+                'intro' => ['sort_order' => 3, 'enabled' => true],
+                'best_time' => ['sort_order' => 4, 'enabled' => true],
+                'requirements' => ['sort_order' => 5, 'enabled' => true],
+                'services' => ['sort_order' => 6, 'enabled' => true],
+                'steps' => ['sort_order' => 7, 'enabled' => true],
+                'why_choose' => ['sort_order' => 8, 'enabled' => true],
+                'suitability' => ['sort_order' => 9, 'enabled' => true],
+                'pricing_duration' => ['sort_order' => 10, 'enabled' => true],
+                'faq' => ['sort_order' => 11, 'enabled' => true],
+                'notice' => ['sort_order' => 12, 'enabled' => true],
+                'cta' => ['sort_order' => 13, 'enabled' => true],
+            ],
+
+            'hero' => [
+                'eyebrow_en' => $this->hero_badge_en ?: 'Visa Destination',
+                'eyebrow_ar' => $this->hero_badge_ar ?: 'وجهة تأشيرة',
+                'title_en' => $this->hero_title_en ?: $this->name_en,
+                'title_ar' => $this->hero_title_ar ?: $this->name_ar,
+                'subtitle_en' => $this->hero_subtitle_en ?: $this->excerpt_en,
+                'subtitle_ar' => $this->hero_subtitle_ar ?: $this->excerpt_ar,
+                'primary_cta_text_en' => $this->hero_cta_text_en ?: 'Assess Your Case Now',
+                'primary_cta_text_ar' => $this->hero_cta_text_ar ?: 'قيّم حالتك الآن',
+                'primary_cta_url' => $this->hero_cta_url ?: '/contact#lead-form',
+            ],
+
+            'quick_summary' => [
+                'title_en' => 'Quick Summary',
+                'title_ar' => 'ملخص سريع عن الفيزا',
+                'items' => is_array($this->quick_summary_items) && ! empty($this->quick_summary_items)
+                    ? $this->quick_summary_items
+                    : [
+                        ['label_ar' => 'الدولة', 'label_en' => 'Country', 'value_ar' => $this->name_ar, 'value_en' => $this->name_en, 'icon' => '🌍', 'is_active' => true, 'sort_order' => 1],
+                        ['label_ar' => 'نوع التأشيرة', 'label_en' => 'Visa Type', 'value_ar' => $this->visa_type_ar ?: 'تأشيرة دخول', 'value_en' => $this->visa_type_en ?: 'Entry Visa', 'icon' => '📄', 'is_active' => true, 'sort_order' => 2],
+                        ['label_ar' => 'مدة الإقامة', 'label_en' => 'Stay Duration', 'value_ar' => $this->stay_duration_ar ?: 'حسب الشروط', 'value_en' => $this->stay_duration_en ?: 'Per terms', 'icon' => '📅', 'is_active' => true, 'sort_order' => 3],
+                        ['label_ar' => 'مدة الإجراءات', 'label_en' => 'Processing Time', 'value_ar' => $this->processing_time_ar ?: 'حسب الحالة', 'value_en' => $this->processing_time_en ?: 'Varies by case', 'icon' => '⏱️', 'is_active' => true, 'sort_order' => 4],
+                    ],
+            ],
+
+            'intro' => [
+                'title_en' => $this->introduction_title_en ?: 'About Visa',
+                'title_ar' => $this->introduction_title_ar ?: 'نبذة عن التأشيرة',
+                'description_en' => $this->overview_en ?: $this->excerpt_en,
+                'description_ar' => $this->overview_ar ?: $this->excerpt_ar,
+            ],
+
+            'best_time' => [
+                'title_en' => $this->best_time_title_en ?: 'Best Time to Apply',
+                'title_ar' => $this->best_time_title_ar ?: 'متى تبدأ الإجراءات؟',
+                'text_en' => $this->best_time_description_en ?: 'It is recommended to apply early before travel date.',
+                'text_ar' => $this->best_time_description_ar ?: 'يفضل البدء في إجراءات التأشيرة مبكراً قبل موعد السفر بوقت كافٍ.',
+                'note_en' => 'Early preparation allows sufficient buffer to secure appointments.',
+                'note_ar' => 'التجهيز المبكر يمنحك وقتاً كافياً لاستكمال الملف وحجز الموعد المناسب.',
+            ],
+
+            'requirements' => [
+                'title_en' => $this->documents_title_en ?: 'Key Requirements',
+                'title_ar' => $this->documents_title_ar ?: 'المتطلبات الأساسية',
+                'note_en' => $this->documents_subtitle_en ?: 'Requirements depend on applicant status.',
+                'note_ar' => $this->documents_subtitle_ar ?: 'تختلف المستندات المطلوبة حسب حالة كل متقدم.',
+                'items' => is_array($this->document_items) ? $this->document_items : [],
+            ],
+
+            'services' => [
+                'title_en' => 'Travel Wave Services',
+                'title_ar' => 'خدمات ترافل ويف',
+                'items' => is_array($this->services) ? $this->services : [],
+            ],
+
+            'steps' => [
+                'title_en' => $this->steps_title_en ?: 'Application Steps',
+                'title_ar' => $this->steps_title_ar ?: 'خطوات التقديم',
+                'items' => is_array($this->step_items) ? $this->step_items : [],
+            ],
+
+            'why_choose' => [
+                'title_en' => $this->why_choose_title_en ?: 'Why Choose Travel Wave?',
+                'title_ar' => $this->why_choose_title_ar ?: 'ليه تختار ترافل ويف؟',
+                'items' => is_array($this->why_choose_items) ? $this->why_choose_items : [],
+            ],
+
+            'suitability' => [
+                'title_en' => 'Suitability Assessment',
+                'title_ar' => 'تقييم مناسبة الحالة للتقديم',
+                'description_en' => 'Reach out to Travel Wave team to assess your profile.',
+                'description_ar' => 'تواصل معنا وفريق ترافل ويف يراجع حالتك ويوضح لك التقييم المباشر.',
+                'button_text_en' => 'Assess Your Case Now',
+                'button_text_ar' => 'قيّم حالتك الآن',
+                'button_url' => '/contact#lead-form',
+            ],
+
+            'pricing_duration' => [
+                'duration_title_en' => 'Processing Time',
+                'duration_title_ar' => 'مدة الإجراءات',
+                'duration_text_en' => $this->processing_time_en ?: 'Varies by case and appointment availability.',
+                'duration_text_ar' => $this->processing_time_ar ?: 'تختلف حسب الحالة ومواعيد التقديم المتاحة.',
+                'fees_title_en' => $this->fees_title_en ?: 'Fees',
+                'fees_title_ar' => $this->fees_title_ar ?: 'الرسوم',
+                'fees_text_en' => $this->fees_en ?: 'Varies by service requested.',
+                'fees_text_ar' => $this->fees_ar ?: 'تختلف حسب نوع الخدمة المطلوبة.',
+            ],
+
+            'faq' => [
+                'title_en' => $this->faq_title_en ?: 'Frequently Asked Questions',
+                'title_ar' => $this->faq_title_ar ?: 'الأسئلة الشائعة والإجابات',
+                'items' => is_array($this->faqs) ? $this->faqs : [],
+            ],
+
+            'notice' => [
+                'title_en' => 'Important Notice',
+                'title_ar' => 'تنبيه مهم للعميل',
+                'text_en' => 'Travel Wave assists with file preparation. Final decisions rest solely with official authorities.',
+                'text_ar' => 'ترافل ويف تساعدك في تجهيز ومراجعة ملف التأشيرة، والقرار النهائي بقبول أو رفض الطلب يكون من الجهة الرسمية المختصة.',
+            ],
+
+            'cta' => [
+                'title_en' => $this->cta_title_en ?: 'Ready to Start?',
+                'title_ar' => $this->cta_title_ar ?: 'جاهز تبدأ إجراءات التأشيرة؟',
+                'description_en' => $this->cta_text_en ?: 'Leave your details and our team will get in touch.',
+                'description_ar' => $this->cta_text_ar ?: 'سيب بياناتك وفريق ترافل ويف هيتواصل معاك ويوضح لك الخطوات والمستندات المناسبة.',
+                'button_text_en' => $this->cta_button_en ?: 'Contact Us Now',
+                'button_text_ar' => $this->cta_button_ar ?: 'تواصل معنا الآن',
+                'button_url' => $this->cta_url ?: '/contact#lead-form',
+            ],
+        ];
     }
 
     public function resolveRouteBinding($value, $field = null)
