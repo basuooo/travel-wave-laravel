@@ -1,6 +1,7 @@
 @php
     $currentVal = $currentValue ?? '';
     $pickerId = 'flag_picker_' . \Illuminate\Support\Str::random(6);
+    $modalId = 'flag_modal_' . \Illuminate\Support\Str::random(6);
     $allWorldFlags = [
         ['code' => 'eu', 'name_ar' => 'الاتحاد الأوروبي (شنغن)', 'name_en' => 'European Union (Schengen)'],
         ['code' => 'fr', 'name_ar' => 'فرنسا', 'name_en' => 'France'],
@@ -92,7 +93,12 @@
     <input type="hidden" name="preset_flag_url" class="js-preset-flag-input" value="{{ old('preset_flag_url', $presetUrl) }}">
 
     <div class="d-flex align-items-center gap-2 mb-2">
-        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold js-open-flag-modal">
+        <button type="button" 
+                class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold js-open-flag-modal"
+                data-bs-toggle="modal" 
+                data-bs-target="#{{ $modalId }}"
+                data-toggle="modal"
+                data-target="#{{ $modalId }}">
             🚩 اختر علم الدولة جاهزاً من القائمة
         </button>
         <span class="text-muted small">أو ارفع صورة خاصة أدناه</span>
@@ -115,16 +121,16 @@
     <input type="file" class="form-control form-control-sm" name="{{ $fileInputName ?? 'flag_image' }}" accept="image/*,.svg">
 
     <!-- FLAG SELECTION MODAL -->
-    <div class="modal fade js-flag-modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-navy text-white">
+    <div class="modal fade js-flag-modal" id="{{ $modalId }}" tabindex="-1" aria-hidden="true" style="z-index: 10600;">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-bold">🚩 اختر علم الدولة (World Flags Selector)</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white js-close-flag-modal" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-3">
-                    <div class="mb-3">
-                        <input type="text" class="form-control form-control-lg text-end js-flag-search-input" dir="rtl" placeholder="🔍 ابحث عن اسم الدولة بالعربي أو الإنجليزي (مثل: فرنسا، مصر، السعودية، ألمانيا)...">
+                <div class="modal-body p-3" style="max-height: 65vh; overflow-y: auto;">
+                    <div class="mb-3 sticky-top bg-white pt-1 pb-2">
+                        <input type="text" class="form-control form-control-lg text-end js-flag-search-input shadow-sm" dir="rtl" placeholder="🔍 ابحث عن اسم الدولة بالعربي أو الإنجليزي (مثل: فرنسا، مصر، السعودية، ألمانيا)...">
                     </div>
                     <div class="row g-2 js-flag-grid">
                         @foreach($allWorldFlags as $flag)
@@ -144,60 +150,125 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const container = document.getElementById('{{ $pickerId }}');
-    if (!container) return;
+(function () {
+    function initPicker() {
+        const container = document.getElementById('{{ $pickerId }}');
+        if (!container) return;
 
-    const openBtn = container.querySelector('.js-open-flag-modal');
-    const modalEl = container.querySelector('.js-flag-modal');
-    const searchInput = container.querySelector('.js-flag-search-input');
-    const flagCols = container.querySelectorAll('.js-flag-card-col');
-    const selectBtns = container.querySelectorAll('.js-select-flag-btn');
-    const hiddenInput = container.querySelector('.js-preset-flag-input');
-    const previewBox = container.querySelector('.js-flag-preview-box');
-    const previewImg = container.querySelector('.js-flag-preview-img');
-    const previewName = container.querySelector('.js-flag-preview-name');
-    const clearBtn = container.querySelector('.js-clear-flag');
+        const openBtn = container.querySelector('.js-open-flag-modal');
+        const modalEl = container.querySelector('.js-flag-modal');
 
-    const bsModal = new bootstrap.Modal(modalEl);
+        if (modalEl && modalEl.parentNode !== document.body) {
+            document.body.appendChild(modalEl);
+        }
 
-    openBtn.addEventListener('click', function () {
-        bsModal.show();
-    });
+        const searchInput = modalEl.querySelector('.js-flag-search-input');
+        const flagCols = modalEl.querySelectorAll('.js-flag-card-col');
+        const selectBtns = modalEl.querySelectorAll('.js-select-flag-btn');
+        const hiddenInput = container.querySelector('.js-preset-flag-input');
+        const previewBox = container.querySelector('.js-flag-preview-box');
+        const previewImg = container.querySelector('.js-flag-preview-img');
+        const previewName = container.querySelector('.js-flag-preview-name');
+        const clearBtn = container.querySelector('.js-clear-flag');
+        const closeBtns = modalEl.querySelectorAll('.js-close-flag-modal');
 
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            const query = this.value.trim().toLowerCase();
-            flagCols.forEach(col => {
-                const text = col.getAttribute('data-search') || '';
-                if (!query || text.includes(query)) {
-                    col.style.display = 'block';
-                } else {
-                    col.style.display = 'none';
-                }
+        function openModal() {
+            if (window.bootstrap && window.bootstrap.Modal) {
+                try {
+                    const inst = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    inst.show();
+                    return;
+                } catch (e) {}
+            }
+            if (window.jQuery && typeof window.jQuery(modalEl).modal === 'function') {
+                window.jQuery(modalEl).modal('show');
+                return;
+            }
+            modalEl.style.display = 'block';
+            modalEl.classList.add('show');
+            document.body.classList.add('modal-open');
+            let backdrop = document.querySelector('.js-custom-flag-backdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show js-custom-flag-backdrop';
+                backdrop.style.zIndex = '10550';
+                document.body.appendChild(backdrop);
+            }
+        }
+
+        function closeModal() {
+            if (window.bootstrap && window.bootstrap.Modal) {
+                try {
+                    const inst = bootstrap.Modal.getInstance(modalEl);
+                    if (inst) inst.hide();
+                } catch (e) {}
+            }
+            if (window.jQuery && typeof window.jQuery(modalEl).modal === 'function') {
+                window.jQuery(modalEl).modal('hide');
+            }
+            modalEl.style.display = 'none';
+            modalEl.classList.remove('show');
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.js-custom-flag-backdrop');
+            if (backdrop) backdrop.remove();
+        }
+
+        if (openBtn) {
+            openBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openModal();
+            });
+        }
+
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                closeModal();
             });
         });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const query = this.value.trim().toLowerCase();
+                flagCols.forEach(col => {
+                    const text = col.getAttribute('data-search') || '';
+                    if (!query || text.includes(query)) {
+                        col.style.display = 'block';
+                    } else {
+                        col.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        selectBtns.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('data-url');
+                const name = this.getAttribute('data-name');
+
+                hiddenInput.value = url;
+                if (previewImg) previewImg.src = url;
+                if (previewName) previewName.textContent = name;
+                if (previewBox) previewBox.style.display = 'block';
+
+                closeModal();
+            });
+        });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                hiddenInput.value = '';
+                if (previewBox) previewBox.style.display = 'none';
+            });
+        }
     }
 
-    selectBtns.forEach(btn => {
-        btn.addEventListener('click', function () {
-            const url = this.getAttribute('data-url');
-            const name = this.getAttribute('data-name');
-
-            hiddenInput.value = url;
-            previewImg.src = url;
-            previewName.textContent = name;
-            previewBox.style.display = 'block';
-
-            bsModal.hide();
-        });
-    });
-
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function () {
-            hiddenInput.value = '';
-            previewBox.style.display = 'none';
-        });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPicker);
+    } else {
+        initPicker();
     }
-});
+})();
 </script>
