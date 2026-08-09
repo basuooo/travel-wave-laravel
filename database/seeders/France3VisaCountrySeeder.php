@@ -316,40 +316,48 @@ class France3VisaCountrySeeder extends Seeder
             ],
         ];
 
-        VisaCountry::query()->updateOrCreate(
-            ['slug' => 'france-3-visa'],
-            [
-                'visa_category_id' => $category->id,
-                'name_en' => 'France 3',
-                'name_ar' => 'فرنسا 3',
-                'excerpt_en' => 'France 3 visa destination - Schengen visa support with high conversion landing layout.',
-                'excerpt_ar' => 'فرنسا 3 في قسم وجهات التأشيرات — تجمع بين محتوى فيزا فرنسا الشنغن القوي وتنظيم وتصميم الهبوط العالي.',
-                'hero_badge_en' => 'France Visa 🇫🇷 | Schengen',
-                'hero_badge_ar' => 'فيزا فرنسا 🇫🇷 | شنغن',
-                'hero_title_en' => 'France Visa 🇫🇷',
-                'hero_title_ar' => 'فيزا فرنسا 🇫🇷',
-                'hero_subtitle_en' => 'At Travel Wave, we help you prepare your France visa application file, review documents, and navigate submission steps with confidence.',
-                'hero_subtitle_ar' => 'في Travel Wave بنساعدك في تجهيز ملف فيزا فرنسا ومراجعة المستندات والحجوزات وإجراءات التقديم خطوة بخطوة بثقة واحترافية.',
-                'hero_cta_text_en' => 'Assess Your Case Now',
-                'hero_cta_text_ar' => 'قيّم حالتك الآن',
-                'hero_cta_url' => '/contact#lead-form',
-                'hero_overlay_opacity' => 0.50,
-                'hero_image' => $heroSlideTwo,
-                'hero_mobile_image' => $heroSlideTwo,
-                'flag_image' => 'visa-countries/france-flag.svg',
-                'visa_type_en' => 'Short-Stay Schengen',
-                'visa_type_ar' => 'شنغن قصيرة الإقامة',
-                'stay_duration_en' => 'Per visa terms',
-                'stay_duration_ar' => 'حسب شروط التأشيرة',
-                'sections' => $france3Sections,
-                'meta_title_ar' => 'فرنسا 3 | فيزا شنغن فرنسا - قسم وجهات التأشيرات - ترافل ويف',
-                'meta_title_en' => 'France 3 | France Visa Destinations - Travel Wave',
-                'meta_description_ar' => 'تأشيرة فرنسا 3 في قسم وجهات التأشيرات. نساعدك في تقييم حالتك وتجهيز ومراجعة الملف بحرفية عالية.',
-                'meta_description_en' => 'France 3 Schengen visa under Visa Destinations. Profile evaluation, file review, and appointment support.',
-                'is_active' => true,
-                'is_featured' => true,
-                'sort_order' => 2,
-            ]
-        );
+        $existing = VisaCountry::withTrashed()->where('slug', 'france-3-visa')->first();
+
+        $attributes = [
+            'visa_category_id' => $category->id,
+            'name_en' => 'France 3',
+            'name_ar' => 'فرنسا 3',
+            'excerpt_en' => 'France 3 visa destination - Schengen visa support with high conversion landing layout.',
+            'excerpt_ar' => 'فرنسا 3 في قسم وجهات التأشيرات — تجمع بين محتوى فيزا فرنسا الشنغن القوي وتنظيم وتصميم الهبوط العالي.',
+            'hero_badge_en' => 'France Visa 🇫🇷 | Schengen',
+            'hero_badge_ar' => 'فيزا فرنسا 🇫🇷 | شنغن',
+            'hero_title_en' => 'France Visa 🇫🇷',
+            'hero_title_ar' => 'فيزا فرنسا 🇫🇷',
+            'hero_subtitle_en' => 'At Travel Wave, we help you prepare your France visa application file, review documents, and navigate submission steps with confidence.',
+            'hero_subtitle_ar' => 'في Travel Wave بنساعدك في تجهيز ملف فيزا فرنسا ومراجعة المستندات والحجوزات وإجراءات التقديم خطوة بخطوة بثقة واحترافية.',
+            'hero_cta_text_en' => 'Assess Your Case Now',
+            'hero_cta_text_ar' => 'قيّم حالتك الآن',
+            'hero_cta_url' => '/contact#lead-form',
+            'hero_overlay_opacity' => 0.50,
+            'hero_image' => $heroSlideTwo,
+            'hero_mobile_image' => $heroSlideTwo,
+            'flag_image' => 'visa-countries/france-flag.svg',
+            'visa_type_en' => 'Short-Stay Schengen',
+            'visa_type_ar' => 'شنغن قصيرة الإقامة',
+            'stay_duration_en' => 'Per visa terms',
+            'stay_duration_ar' => 'حسب شروط التأشيرة',
+            'sections' => $france3Sections,
+            'meta_title_ar' => 'فرنسا 3 | فيزا شنغن فرنسا - قسم وجهات التأشيرات - ترافل ويف',
+            'meta_title_en' => 'France 3 | France Visa Destinations - Travel Wave',
+            'meta_description_ar' => 'تأشيرة فرنسا 3 في قسم وجهات التأشيرات. نساعدك في تقييم حالتك وتجهيز ومراجعة الملف بحرفية عالية.',
+            'meta_description_en' => 'France 3 Schengen visa under Visa Destinations. Profile evaluation, file review, and appointment support.',
+            'is_active' => true,
+            'is_featured' => true,
+            'sort_order' => 2,
+        ];
+
+        if ($existing) {
+            if ($existing->trashed()) {
+                $existing->restore();
+            }
+            $existing->update($attributes);
+        } else {
+            VisaCountry::create(array_merge(['slug' => 'france-3-visa'], $attributes));
+        }
     }
 }

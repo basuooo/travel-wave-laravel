@@ -16,14 +16,6 @@ class VisaCountryController extends Controller
 
     public function index()
     {
-        VisaCountry::ensureTableSchema();
-
-        $france3 = VisaCountry::where('slug', 'france-3-visa')->first();
-        if (! $france3 || empty($france3->sections)) {
-            require_once database_path('seeders/France3VisaCountrySeeder.php');
-            (new \Database\Seeders\France3VisaCountrySeeder())->run();
-        }
-
         return view('admin.visa-countries.index', [
             'items' => VisaCountry::with('category')->orderBy('sort_order')->paginate(15),
         ]);
