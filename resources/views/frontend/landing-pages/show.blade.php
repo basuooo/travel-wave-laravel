@@ -1,4 +1,4 @@
-@extends('layouts.site')
+@extends('layouts.app')
 
 @section('title', $landingPage->seo_title_ar ?: ($landingPage->seo_title_en ?: $landingPage->title_ar))
 @section('meta_description', $landingPage->seo_description_ar ?: $landingPage->seo_description_en)

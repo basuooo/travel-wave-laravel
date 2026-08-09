@@ -9,7 +9,6 @@
     <!-- Bootstrap 5 CSS & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="{{ asset('assets/css/site.css') }}">
     
     <style>
         :root {
@@ -112,6 +111,10 @@
         .builder-element-card:hover {
             border-color: var(--builder-accent);
             transform: translateY(-2px);
+            background: #1e293b;
+        }
+        .builder-element-card:active {
+            cursor: grabbing;
         }
 
         /* Center Canvas */
@@ -130,9 +133,14 @@
             background: #ffffff;
             color: #1e293b;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-            transition: width 0.3s ease;
+            transition: width 0.3s ease, border-color 0.2s ease;
             min-height: 800px;
             position: relative;
+            border: 2px dashed transparent;
+        }
+        .builder-canvas-frame.drag-over {
+            border-color: var(--builder-accent) !important;
+            background: #f0f9ff !important;
         }
 
         .builder-canvas-frame.device-desktop { width: 100%; max-width: 1200px; }
@@ -144,6 +152,7 @@
             position: relative;
             outline: 1px dashed transparent;
             transition: outline 0.15s;
+            margin-bottom: 2px;
         }
         .canvas-element:hover {
             outline: 2px dashed var(--builder-accent);
@@ -154,15 +163,15 @@
 
         .canvas-element-toolbar {
             position: absolute;
-            top: -30px;
+            top: -28px;
             right: 0;
             background: var(--builder-accent);
             color: #ffffff;
             font-size: 11px;
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 4px 4px 0 0;
             display: none;
-            gap: 6px;
+            gap: 8px;
             z-index: 50;
         }
         .canvas-element:hover .canvas-element-toolbar,
@@ -196,11 +205,6 @@
             text-transform: uppercase;
             margin-bottom: 10px;
         }
-
-        /* Drag ghost helper */
-        .dragging-ghost {
-            opacity: 0.5;
-        }
     </style>
 </head>
 <body>
@@ -222,9 +226,6 @@
 
         <!-- Action Controls -->
         <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-sm btn-dark text-white border-secondary" id="btnUndo" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>
-            <button class="btn btn-sm btn-dark text-white border-secondary" id="btnRedo" title="Redo"><i class="bi bi-arrow-clockwise"></i></button>
-            
             <a href="{{ route('admin.landing-pages.versions', $landingPage) }}" class="btn btn-sm btn-outline-light"><i class="bi bi-clock-history"></i> History</a>
             
             <form method="post" action="{{ route('admin.landing-pages.save-as-template', $landingPage) }}" class="d-inline">
@@ -256,6 +257,9 @@
             <div class="tab-content flex-grow-1 overflow-auto">
                 <!-- Elements Tab -->
                 <div class="tab-pane fade show active" id="tabElements">
+                    <div class="p-2 text-center text-white-50 small border-bottom border-secondary">
+                        💡 Drag & Drop or Click to Add Elements
+                    </div>
                     <div class="builder-elements-grid">
                         <div class="builder-element-card" draggable="true" data-type="heading">
                             <i class="bi bi-type-h1 fs-3 text-info"></i>
@@ -302,7 +306,7 @@
                     <div class="d-grid gap-2">
                         @foreach($sectionCategories as $cat)
                             <div class="card bg-dark border-secondary p-2 text-white">
-                                <div class="fw-bold text-info small">{{ $cat->name_en }}</div>
+                                <div class="fw-bold text-info small">{{ $cat->name_en }} / {{ $cat->name_ar }}</div>
                                 <div class="small text-muted">{{ $cat->sections->count() }} preset blocks</div>
                             </div>
                         @endforeach
@@ -319,7 +323,7 @@
                         <select class="form-select form-select-sm bg-dark text-white border-secondary" id="dynamicVisaSelect">
                             <option value="">-- Select Country --</option>
                             @foreach($visaCountries as $country)
-                                <option value="{{ $country->id }}" data-en="{{ $country->name_en }}" data-ar="{{ $country->name_ar }}" data-price="{{ $country->price }}">
+                                <option value="{{ $country->id }}">
                                     {{ $country->name_en }} / {{ $country->name_ar }}
                                 </option>
                             @endforeach
@@ -331,7 +335,7 @@
                         <select class="form-select form-select-sm bg-dark text-white border-secondary" id="dynamicDestSelect">
                             <option value="">-- Select Destination --</option>
                             @foreach($destinations as $dest)
-                                <option value="{{ $dest->id }}" data-en="{{ $dest->title_en }}" data-ar="{{ $dest->title_ar }}" data-price="{{ $dest->price }}">
+                                <option value="{{ $dest->id }}">
                                     {{ $dest->title_en }} / {{ $dest->title_ar }}
                                 </option>
                             @endforeach
@@ -342,7 +346,7 @@
         </div>
 
         <!-- CENTER CANVAS -->
-        <div class="builder-canvas-wrap">
+        <div class="builder-canvas-wrap" id="builderCanvasWrap">
             <div class="builder-canvas-frame device-desktop" id="builderCanvasStage">
                 <!-- Elements will be rendered here dynamically -->
             </div>
@@ -453,8 +457,8 @@
                 toolbar.className = 'canvas-element-toolbar';
                 toolbar.innerHTML = `
                     <span>${el.type}</span>
-                    <button class="btn btn-sm btn-link text-white p-0" onclick="duplicateElement('${el.id}')"><i class="bi bi-copy"></i></button>
-                    <button class="btn btn-sm btn-link text-white p-0" onclick="deleteElement('${el.id}')"><i class="bi bi-trash"></i></button>
+                    <button class="btn btn-sm btn-link text-white p-0" onclick="duplicateElement('${el.id}')" title="Duplicate"><i class="bi bi-copy"></i></button>
+                    <button class="btn btn-sm btn-link text-white p-0" onclick="deleteElement('${el.id}')" title="Delete"><i class="bi bi-trash"></i></button>
                 `;
                 wrapper.appendChild(toolbar);
 
@@ -466,22 +470,47 @@
                 if (el.type === 'hero' || el.type === 'heading') {
                     contentDiv.className = 'p-5 text-center';
                     contentDiv.innerHTML = `
-                        <h1 class="display-5 fw-bold mb-2">${el.content?.title_ar || el.content?.title_en || 'Heading Title'}</h1>
+                        <h1 class="display-5 fw-bold mb-2">${el.content?.title_ar || el.content?.title_en || 'عنوان جديد'}</h1>
                         <p class="lead mb-0">${el.content?.subtitle_ar || el.content?.subtitle_en || ''}</p>
                     `;
+                } else if (el.type === 'paragraph') {
+                    contentDiv.className = 'p-4';
+                    contentDiv.innerHTML = `<p class="fs-5 mb-0">${el.content?.title_ar || el.content?.title_en || 'فقرة نصية جديدة هنا...'}</p>`;
+                } else if (el.type === 'image') {
+                    contentDiv.className = 'p-3 text-center';
+                    contentDiv.innerHTML = `<img src="${el.content?.image_url || 'https://via.placeholder.com/800x350'}" class="img-fluid rounded shadow-sm" alt="Image">`;
                 } else if (el.type === 'button') {
                     contentDiv.className = 'p-3 text-center';
-                    contentDiv.innerHTML = `<button class="btn btn-primary px-4 py-2 fw-bold">${el.content?.title_ar || el.content?.title_en || 'Click Here'}</button>`;
-                } else if (el.type === 'lead_form') {
-                    contentDiv.className = 'p-4 border rounded bg-light text-dark';
+                    contentDiv.innerHTML = `<button class="btn btn-primary px-5 py-3 fs-5 fw-bold shadow-sm">${el.content?.title_ar || el.content?.title_en || 'اضغط هنا للتقديم'}</button>`;
+                } else if (el.type === 'visa_card') {
+                    contentDiv.className = 'p-4 border rounded-4 bg-light text-dark shadow-sm text-center';
                     contentDiv.innerHTML = `
-                        <h4 class="fw-bold mb-3">${el.content?.title_ar || 'نموذج التقديم والاستفسار'}</h4>
-                        <div class="row g-2">
-                            <div class="col-6"><input type="text" class="form-control" placeholder="الاسم الكامل"></div>
-                            <div class="col-6"><input type="text" class="form-control" placeholder="رقم الهاتف"></div>
-                            <div class="col-12"><button class="btn btn-success w-100 fw-bold mt-2">إرسال الطلب</button></div>
+                        <div class="display-4 text-primary mb-2"><i class="bi bi-passport"></i></div>
+                        <h3 class="fw-bold mb-2">${el.content?.title_ar || 'تأشيرة دخول إلكترونية'}</h3>
+                        <div class="fs-4 text-success fw-bold">${el.content?.price || 'SAR 450'}</div>
+                    `;
+                } else if (el.type === 'destination_grid') {
+                    contentDiv.className = 'p-4 bg-white text-dark';
+                    contentDiv.innerHTML = `
+                        <h3 class="fw-bold text-center mb-4">${el.content?.title_ar || 'أبرز الوجهات السياحية'}</h3>
+                        <div class="row g-3">
+                            <div class="col-6"><div class="p-3 bg-light rounded text-center border fw-bold">باريس</div></div>
+                            <div class="col-6"><div class="p-3 bg-light rounded text-center border fw-bold">لندن</div></div>
                         </div>
                     `;
+                } else if (el.type === 'lead_form') {
+                    contentDiv.className = 'p-4 border rounded-4 bg-light text-dark shadow-sm';
+                    contentDiv.innerHTML = `
+                        <h4 class="fw-bold mb-3 text-center">${el.content?.title_ar || 'نموذج استقبال استفسارات العملاء'}</h4>
+                        <div class="row g-3">
+                            <div class="col-md-6"><input type="text" class="form-control form-control-lg" placeholder="الاسم الكامل"></div>
+                            <div class="col-md-6"><input type="text" class="form-control form-control-lg" placeholder="رقم الهاتف"></div>
+                            <div class="col-12"><button class="btn btn-success w-100 fw-bold py-3 fs-5">إرسال الطلب الآن</button></div>
+                        </div>
+                    `;
+                } else if (el.type === 'custom_code') {
+                    contentDiv.className = 'p-3 bg-dark text-warning font-monospace small';
+                    contentDiv.innerHTML = el.content?.html || '&lt;div class="custom-html"&gt;كود مخصص Custom HTML&lt;/div&gt;';
                 } else {
                     contentDiv.className = 'p-3';
                     contentDiv.innerHTML = `<div>${el.content?.title_ar || el.content?.title_en || 'Content Block'}</div>`;
@@ -497,6 +526,85 @@
                 stage.appendChild(wrapper);
             });
         }
+
+        // Add New Element to Canvas
+        function addElementToCanvas(type) {
+            const newId = 'el_' + type + '_' + Math.random().toString(36).substr(2, 7);
+            let newEl = {
+                id: newId,
+                type: type,
+                content: {},
+                style: { background_color: 'transparent', text_color: '#1e293b' },
+                responsive: { hide_desktop: false, hide_tablet: false, hide_mobile: false }
+            };
+
+            if (type === 'heading') {
+                newEl.content = { title_ar: 'عنوان جديد', title_en: 'New Heading' };
+            } else if (type === 'paragraph') {
+                newEl.content = { title_ar: 'نص فقرة جديد استعراضي هنا...', title_en: 'New paragraph content here...' };
+            } else if (type === 'button') {
+                newEl.content = { title_ar: 'احجز الآن', title_en: 'Book Now' };
+                newEl.style = { background_color: '#0284c7', text_color: '#ffffff' };
+            } else if (type === 'hero') {
+                newEl.content = { title_ar: 'عنوان الهيدر الرئيسي', title_en: 'Hero Heading', subtitle_ar: 'وصف جذب للعملاء والاستفسارات' };
+                newEl.style = { background_color: '#0f172a', text_color: '#ffffff' };
+            } else if (type === 'visa_card') {
+                newEl.content = { title_ar: 'تأشيرة دخول إلكترونية', price: 'SAR 450' };
+            } else if (type === 'destination_grid') {
+                newEl.content = { title_ar: 'أبرز الوجهات السياحية 2026' };
+            } else if (type === 'lead_form') {
+                newEl.content = { title_ar: 'نموذج استقبال الاستفسارات والطلبات' };
+            } else if (type === 'image') {
+                newEl.content = { image_url: 'https://via.placeholder.com/800x400' };
+            } else if (type === 'custom_code') {
+                newEl.content = { html: '<div class="p-3 bg-light text-dark">كود مخصص Custom HTML</div>' };
+            }
+
+            canvasData.push(newEl);
+            renderCanvas();
+            selectElement(newId);
+        }
+
+        // HTML5 DRAG AND DROP ENGINE
+        const elementCards = document.querySelectorAll('.builder-element-card');
+        const canvasStage = document.getElementById('builderCanvasStage');
+        const canvasWrap = document.getElementById('builderCanvasWrap');
+
+        elementCards.forEach(card => {
+            // Click to Add
+            card.addEventListener('click', () => {
+                const type = card.dataset.type;
+                if (type) addElementToCanvas(type);
+            });
+
+            // Drag Start
+            card.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', card.dataset.type);
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+        });
+
+        // Drag Over (Crucial: preventDefault allows drop!)
+        [canvasStage, canvasWrap].forEach(target => {
+            target.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                canvasStage.classList.add('drag-over');
+            });
+
+            target.addEventListener('dragleave', () => {
+                canvasStage.classList.remove('drag-over');
+            });
+
+            target.addEventListener('drop', (e) => {
+                e.preventDefault();
+                canvasStage.classList.remove('drag-over');
+                const elementType = e.dataTransfer.getData('text/plain');
+                if (elementType) {
+                    addElementToCanvas(elementType);
+                }
+            });
+        });
 
         function selectElement(id) {
             selectedElementId = id;

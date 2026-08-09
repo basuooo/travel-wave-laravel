@@ -4,6 +4,24 @@
 @section('page_description', 'Choose between starting from scratch with a blank canvas or previewing and using a pre-built template.')
 
 @section('content')
+<style>
+    .modal-backdrop {
+        z-index: 1040 !important;
+    }
+    #previewTemplateModal {
+        z-index: 1060 !important;
+    }
+    #useTemplateModal {
+        z-index: 1070 !important;
+    }
+    #scratchModal {
+        z-index: 1060 !important;
+    }
+    .modal-dialog {
+        z-index: 1080 !important;
+    }
+</style>
+
 <div class="mb-4">
     <a href="{{ route('admin.landing-pages.index') }}" class="btn btn-sm btn-outline-secondary mb-2">← {{ __('admin.all_pages') }}</a>
     <h3 class="fw-bold mb-1">✨ {{ __('admin.create_landing_page') }}</h3>
@@ -18,7 +36,7 @@
             <p class="text-muted mb-0">افتح مسرح البناء الفضي وابنِ تصميمك خطوة بخطوة باستخدام مكتبة العناصر والأقسام.</p>
         </div>
         <div>
-            <button type="button" class="btn btn-primary fw-bold px-4 py-2" data-bs-toggle="modal" data-bs-target="#scratchModal">
+            <button type="button" class="btn btn-primary fw-bold px-4 py-2 btn-open-scratch">
                 إنشاء صفحة فارغة الآن →
             </button>
         </div>
@@ -59,15 +77,18 @@
                     </p>
                 </div>
 
-                <!-- Action Buttons: Preview & Use with direct OnClick handlers -->
+                <!-- Action Buttons: Data Attributes -->
                 <div class="d-grid gap-2 pt-3 border-top mt-auto">
-                    <button type="button" class="btn btn-outline-primary fw-bold" 
-                            onclick="previewTemplate({{ $template->id }}, '{{ addslashes($tplName) }}', '{{ $previewUrl }}')">
+                    <button type="button" class="btn btn-outline-primary fw-bold btn-preview-tpl" 
+                            data-id="{{ $template->id }}" 
+                            data-name="{{ $tplName }}" 
+                            data-url="{{ $previewUrl }}">
                         <i class="bi bi-eye me-1"></i> معاينة القالب
                     </button>
                     
-                    <button type="button" class="btn btn-warning text-dark fw-bold" 
-                            onclick="useTemplate({{ $template->id }}, '{{ addslashes($tplName) }}')">
+                    <button type="button" class="btn btn-warning text-dark fw-bold btn-use-tpl" 
+                            data-id="{{ $template->id }}" 
+                            data-name="{{ $tplName }}">
                         <i class="bi bi-box-arrow-in-right me-1"></i> استخدام القالب وتنفيذه
                     </button>
                 </div>
@@ -84,7 +105,7 @@
 
 <!-- Modal 1: Scratch Creation -->
 <div class="modal fade" id="scratchModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form method="post" action="{{ route('admin.landing-pages.store') }}" class="modal-content">
             @csrf
             <input type="hidden" name="creation_mode" value="scratch">
@@ -108,7 +129,7 @@
 
 <!-- Modal 2: Use Template Form -->
 <div class="modal fade" id="useTemplateModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form method="post" action="{{ route('admin.landing-pages.store') }}" class="modal-content">
             @csrf
             <input type="hidden" name="creation_mode" value="template">
@@ -136,59 +157,89 @@
 
 <!-- Modal 3: Preview Template Full Screen Modal -->
 <div class="modal fade" id="previewTemplateModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content" style="height: 85vh;">
-            <div class="modal-header bg-dark text-white">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="max-width: 92vw; height: 90vh;">
+        <div class="modal-content" style="height: 100%;">
+            <div class="modal-header bg-dark text-white" style="z-index: 10;">
                 <h5 class="modal-title fw-bold" id="previewModalTitle">معاينة القالب</h5>
                 <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-sm btn-warning fw-bold" id="previewModalUseBtn">
+                    <button type="button" class="btn btn-sm btn-warning text-dark fw-bold" id="previewModalUseBtn">
                         استخدام هذا القالب 🚀
                     </button>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
             </div>
-            <div class="modal-body p-0 bg-light">
+            <div class="modal-body p-0 bg-light" style="height: calc(100% - 60px); overflow: hidden;">
                 <iframe id="previewIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Inline JavaScript Handlers -->
+@push('scripts')
 <script>
-    function useTemplate(id, name) {
+    function moveAndShowModal(modalEl) {
+        if (modalEl.parentNode !== document.body) {
+            document.body.appendChild(modalEl);
+        }
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            var instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            instance.show();
+        } else if (window.jQuery) {
+            $(modalEl).modal('show');
+        }
+    }
+
+    function hideModal(modalEl) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            var instance = bootstrap.Modal.getInstance(modalEl);
+            if (instance) instance.hide();
+        } else if (window.jQuery) {
+            $(modalEl).modal('hide');
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        var scratchBtn = e.target.closest('.btn-open-scratch');
+        if (scratchBtn) {
+            e.preventDefault();
+            moveAndShowModal(document.getElementById('scratchModal'));
+            return;
+        }
+
+        var prevBtn = e.target.closest('.btn-preview-tpl');
+        if (prevBtn) {
+            e.preventDefault();
+            var id = prevBtn.getAttribute('data-id');
+            var name = prevBtn.getAttribute('data-name');
+            var url = prevBtn.getAttribute('data-url');
+            
+            document.getElementById('previewModalTitle').textContent = 'معاينة القالب: ' + name;
+            document.getElementById('previewIframe').src = url;
+
+            document.getElementById('previewModalUseBtn').onclick = function() {
+                hideModal(document.getElementById('previewTemplateModal'));
+                openUseModal(id, name);
+            };
+
+            moveAndShowModal(document.getElementById('previewTemplateModal'));
+            return;
+        }
+
+        var useBtn = e.target.closest('.btn-use-tpl');
+        if (useBtn) {
+            e.preventDefault();
+            var id = useBtn.getAttribute('data-id');
+            var name = useBtn.getAttribute('data-name');
+            openUseModal(id, name);
+            return;
+        }
+    });
+
+    function openUseModal(id, name) {
         document.getElementById('modalTemplateId').value = id;
         document.getElementById('modalTemplateName').textContent = name;
-
-        if (typeof bootstrap !== 'undefined') {
-            var useModal = new bootstrap.Modal(document.getElementById('useTemplateModal'));
-            useModal.show();
-        } else {
-            $('#useTemplateModal').modal('show');
-        }
-    }
-
-    function previewTemplate(id, name, previewUrl) {
-        document.getElementById('previewModalTitle').textContent = 'معاينة القالب: ' + name;
-        document.getElementById('previewIframe').src = previewUrl;
-
-        document.getElementById('previewModalUseBtn').onclick = function() {
-            var prevModalEl = document.getElementById('previewTemplateModal');
-            if (typeof bootstrap !== 'undefined') {
-                var prevModal = bootstrap.Modal.getInstance(prevModalEl) || new bootstrap.Modal(prevModalEl);
-                prevModal.hide();
-            } else {
-                $('#previewTemplateModal').modal('hide');
-            }
-            useTemplate(id, name);
-        };
-
-        if (typeof bootstrap !== 'undefined') {
-            var prevModal = new bootstrap.Modal(document.getElementById('previewTemplateModal'));
-            prevModal.show();
-        } else {
-            $('#previewTemplateModal').modal('show');
-        }
+        moveAndShowModal(document.getElementById('useTemplateModal'));
     }
 </script>
+@endpush
 @endsection
