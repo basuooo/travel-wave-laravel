@@ -149,7 +149,7 @@ class CrmController extends Controller
             $query->where('status', $request->string('status'));
         }
 
-        return view('admin.crm.tasks', [
+        return view('admin.crm.tasks.index', [
             'items' => $query->paginate(20)->withQueryString(),
         ]);
     }

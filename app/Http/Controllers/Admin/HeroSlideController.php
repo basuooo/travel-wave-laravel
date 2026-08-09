@@ -89,7 +89,8 @@ class HeroSlideController extends Controller
 
     protected function validatedData(Request $request, bool $requireImage = true): array
     {
-        $imageRules = $requireImage ? ['required', 'image'] : ['nullable', 'image'];
+        $hasExistingImage = filled($request->input('image_existing_path'));
+        $imageRules = ($requireImage && ! $hasExistingImage) ? ['required', 'image'] : ['nullable', 'image'];
 
         return $request->validate([
             'headline_en' => ['nullable', 'string', 'max:255'],
