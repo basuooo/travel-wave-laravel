@@ -100,31 +100,36 @@
 
             <div class="tab-content">
 
-                <!-- TAB 1: 10+ READY POPUP PRESETS IN A CLEAN DROPDOWN -->
+                <!-- TAB 1: 10+ READY POPUP PRESETS WITH PERSISTENT SAVED TEMPLATE SELECTION -->
                 <div id="tabPresets" class="tab-pane active">
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
                         <h6 class="fw-bold text-info small mb-2"><i class="bi bi-palette me-1"></i> اختر شكل القالب المناسب (10+ قوالب جاهزة):</h6>
+                        
+                        @php
+                            $savedTemplateId = (string)($popup->structure['template_id'] ?? '');
+                        @endphp
+
                         <select id="presetTemplateSelect" class="form-select form-select-lg bg-secondary text-white border-0" onchange="applyPresetTemplate(this.value)">
-                            <option value="">-- اختر من القائمة لتطبيق القالب --</option>
-                            <option value="1">🔥 1. عرض الخصم الذهبي (Golden Discount Modal)</option>
-                            <option value="2">✈️ 2. استشارة سريعة للتأشيرة (Visa Fast Consultation)</option>
-                            <option value="3">⏳ 3. عداد تنازلي طارئ (Urgent Countdown Offer)</option>
-                            <option value="4">💬 4. شات واتساب مباشر (Floating WhatsApp Chat)</option>
-                            <option value="5">🎁 5. هدية كود خصم (Coupon Gift Box)</option>
-                            <option value="6">📝 6. نموذج طلب سريع (Quick Lead Form Card)</option>
-                            <option value="7">📢 7. تنويه هام / إعلان (Important Announcement)</option>
-                            <option value="8">🚀 8. حزمة توفير (Saver Bundle Offer)</option>
-                            <option value="9">🌟 9. صورة بنر كاملة (Full Banner Image Modal)</option>
-                            <option value="10">💎 10. دعوة حصريّة VIP (Exclusive VIP Invitation)</option>
+                            <option value="" @selected(empty($savedTemplateId))>-- اختر من القائمة لتطبيق القالب --</option>
+                            <option value="1" @selected($savedTemplateId === '1')>🔥 1. عرض الخصم الذهبي (Golden Discount Modal)</option>
+                            <option value="2" @selected($savedTemplateId === '2')>✈️ 2. استشارة سريعة للتأشيرة (Visa Fast Consultation)</option>
+                            <option value="3" @selected($savedTemplateId === '3')>⏳ 3. عداد تنازلي طارئ (Urgent Countdown Offer)</option>
+                            <option value="4" @selected($savedTemplateId === '4')>💬 4. شات واتساب مباشر (Floating WhatsApp Chat)</option>
+                            <option value="5" @selected($savedTemplateId === '5')>🎁 5. هدية كود خصم (Coupon Gift Box)</option>
+                            <option value="6" @selected($savedTemplateId === '6')>📝 6. نموذج طلب سريع (Quick Lead Form Card)</option>
+                            <option value="7" @selected($savedTemplateId === '7')>📢 7. تنويه هام / إعلان (Important Announcement)</option>
+                            <option value="8" @selected($savedTemplateId === '8')>🚀 8. حزمة توفير (Saver Bundle Offer)</option>
+                            <option value="9" @selected($savedTemplateId === '9')>🌟 9. صورة بنر كاملة (Full Banner Image Modal)</option>
+                            <option value="10" @selected($savedTemplateId === '10')>💎 10. دعوة حصريّة VIP (Exclusive VIP Invitation)</option>
                         </select>
-                        <small class="text-muted text-xs d-block mt-2">اختيار القالب يطبق التنسيق والمكونات فوراً في مساحة المعاينة الحية.</small>
+                        <small class="text-muted text-xs d-block mt-2">اختيار القالب يطبق التنسيق والمكونات فوراً ويتم حفظ القالب المحدد بصفة دائمة.</small>
                     </div>
                 </div>
 
                 <!-- TAB 2: TYPOGRAPHY, COLORS, BUTTON ACTION, IMAGE OPTIONS & EMOJI -->
                 <div id="tabContent" class="tab-pane">
 
-                    <!-- 1. IMAGE SOURCE OPTIONS (MEDIA LIBRARY OR DIRECT URL) -->
+                    <!-- 1. IMAGE SOURCE OPTIONS (SITE MEDIA LIBRARY OR DIRECT URL) -->
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
                         <h6 class="fw-bold text-warning small mb-2"><i class="bi bi-image me-1"></i> مصدر وصورة الـ Popup</h6>
                         
@@ -134,9 +139,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label text-white-50 text-xs fw-bold">الخيار 2: اختيار من مكتبة وسائط السيستم</label>
+                            <label class="form-label text-white-50 text-xs fw-bold">الخيار 2: اختيار من مكتبة وسائط الموقع</label>
                             <button type="button" class="btn btn-sm btn-outline-info w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#mediaLibraryModal">
-                                📂 فتح مكتبة الصور المتاحة بموقعك
+                                📂 فتح مكتبة الوسائط المتاحة بموقعك
                             </button>
                         </div>
 
@@ -299,7 +304,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: EXIT CONFIRMATION WARNING & LIVE PREVIEW -->
+                <!-- TAB 4: EXIT CONFIRMATION WARNING (RETAINING ONLY "العودة" BUTTON AS REQUESTED) -->
                 <div id="tabWarning" class="tab-pane">
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -309,13 +314,10 @@
                             </div>
                         </div>
 
-                        <!-- LIVE PREVIEW BUTTON FOR WARNING POPUP -->
-                        <div class="d-flex gap-2 mb-3">
-                            <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold" onclick="previewExitWarningLive()">
-                                👁️ معاينة شكل تحذير الإغلاق في الشاشة
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-light" onclick="restoreOriginalPopupPreview()" title="العودة لمعاينة الـ Popup الأصلي">
-                                ↺ العودة
+                        <!-- RESTORE BUTTON ONLY (REMOVED PREVIEW BUTTON PER REQUEST 3) -->
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-light w-100 fw-bold" onclick="restoreOriginalPopupPreview()" title="العودة لمعاينة الـ Popup الأصلي">
+                                ↺ العودة لمعاينة الـ Popup الأصلي
                             </button>
                         </div>
 
@@ -336,12 +338,12 @@
 
                         <div class="mb-2">
                             <label class="form-label text-white-50 text-xs fw-bold">عنوان التحذير</label>
-                            <input type="text" id="exitWarningTitle" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->structure['exit_warning']['title'] ?? '⚠️ هل أنت متأكد من الإلغاء؟' }}" onkeyup="previewExitWarningLive()">
+                            <input type="text" id="exitWarningTitle" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->structure['exit_warning']['title'] ?? '⚠️ هل أنت متأكد من الإلغاء؟' }}">
                         </div>
 
                         <div class="mb-2">
                             <label class="form-label text-white-50 text-xs fw-bold">رسالة التحذير</label>
-                            <textarea id="exitWarningMsg" class="form-control form-control-sm bg-dark text-white border-secondary" rows="3" onkeyup="previewExitWarningLive()">{{ $popup->structure['exit_warning']['msg'] ?? 'بإغلاقك لهذه النافذة ستخسر فرصة الحصول على الخصم الحصري اليوم!' }}</textarea>
+                            <textarea id="exitWarningMsg" class="form-control form-control-sm bg-dark text-white border-secondary" rows="3">{{ $popup->structure['exit_warning']['msg'] ?? 'بإغلاقك لهذه النافذة ستخسر فرصة الحصول على الخصم الحصري اليوم!' }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -351,24 +353,25 @@
 
     </div>
 
-    <!-- MEDIA LIBRARY MODAL WITH REAL STORAGE URLS -->
+    <!-- SITE MEDIA LIBRARY MODAL (MediaAsset MODEL) -->
     <div class="modal fade" id="mediaLibraryModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content bg-dark text-white border-secondary">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-folder-fill text-warning me-2"></i> مكتبة صور السيستم المتاحة بالموقع</h5>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-folder-fill text-warning me-2"></i> مكتبة وسائط الموقع (Media Asset Library)</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" style="max-height: 450px; overflow-y: auto;">
                     <div class="row g-3">
                         @forelse($assets as $asset)
                             @php
-                                $imgUrl = $asset->storageUrl();
+                                $imgUrl = $asset->public_url ?: $asset->url;
+                                $title = $asset->title ?: ($asset->file_name ?: 'مكـون وسائط');
                             @endphp
                             <div class="col-4 col-md-3">
                                 <div class="media-grid-item p-2 text-center" onclick="selectMediaAsset('{{ $imgUrl }}')">
                                     <img src="{{ $imgUrl }}" class="img-fluid rounded max-h-120 object-fit-cover w-100" alt="Asset" onerror="this.src='https://via.placeholder.com/200x150?text=Media+Image'">
-                                    <span class="d-block text-truncate text-white-50 text-xs mt-2">{{ $asset->original_path ?: $asset->filename }}</span>
+                                    <span class="d-block text-truncate text-white-50 text-xs mt-2">{{ $title }}</span>
                                 </div>
                             </div>
                         @empty
@@ -553,28 +556,7 @@
                 if (titleInput) titleInput.value = warnings[id].title;
                 if (msgInput) msgInput.value = warnings[id].msg;
                 if (toggle) toggle.checked = true;
-
-                previewExitWarningLive();
             }
-        }
-
-        function previewExitWarningLive() {
-            isPreviewingWarning = true;
-            const title = document.getElementById('exitWarningTitle') ? document.getElementById('exitWarningTitle').value : '⚠️ هل أنت متأكد من الإلغاء؟';
-            const msg = document.getElementById('exitWarningMsg') ? document.getElementById('exitWarningMsg').value : 'بإغلاقك لهذه النافذة ستخسر فرصة الحصول على الخصم الحصري اليوم!';
-            const liveContent = document.getElementById('popupLiveContent');
-
-            liveContent.innerHTML = `
-                <div class="p-4 text-center bg-white rounded-4 border border-danger">
-                    <div class="fs-1 mb-2">⚠️</div>
-                    <h3 class="fw-bold text-danger mb-2">${title}</h3>
-                    <p class="text-muted mb-4">${msg}</p>
-                    <div class="d-flex flex-column gap-2">
-                        <button type="button" class="btn btn-success btn-lg rounded-pill fw-bold">الاستمرار والاستفادة بالخصم 🎁</button>
-                        <button type="button" class="btn btn-link text-muted">إلغاء وخسارة العرض الآن</button>
-                    </div>
-                </div>
-            `;
         }
 
         function restoreOriginalPopupPreview() {
@@ -593,6 +575,9 @@
                 }
 
                 const htmlToSave = originalPopupHtml || document.getElementById('popupLiveContent').innerHTML;
+
+                const templateSelect = document.getElementById('presetTemplateSelect');
+                const selectedTemplateId = templateSelect ? templateSelect.value : '';
 
                 const btnUrlEl = document.getElementById('btnUrlControl');
                 const exitToggleEl = document.getElementById('exitWarningToggle');
@@ -623,6 +608,7 @@
                     },
                     structure: {
                         html: htmlToSave,
+                        template_id: selectedTemplateId,
                         btn_url: btnUrlEl ? btnUrlEl.value : '#lead-form',
                         exit_warning: {
                             enable: exitToggleEl ? exitToggleEl.checked : false,
