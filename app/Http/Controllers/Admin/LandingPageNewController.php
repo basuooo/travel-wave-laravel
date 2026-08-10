@@ -271,12 +271,14 @@ class LandingPageNewController extends Controller
         $forms = LeadForm::where('is_active', true)->get();
         $sections = LpNewSection::where('is_active', true)->get();
         $templates = LpNewTemplate::where('is_active', true)->get();
+        $brands = Brand::where('is_active', true)->get();
 
         return view('admin.landing-pages-new.builder', [
             'page' => $landingPage,
             'forms' => $forms,
             'sections' => $sections,
             'templates' => $templates,
+            'brands' => $brands,
         ]);
     }
 

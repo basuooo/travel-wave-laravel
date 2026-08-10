@@ -3,301 +3,602 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛠️ البناء المرئي الهجين | {{ $page->internal_name }}</title>
+    <title>🎨 محرر صفحات الهبوط المتقدم (GrapesJS Visual Builder) | {{ $page->internal_name }}</title>
+
+    <!-- Bootstrap 5 RTL & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- GrapesJS Core CSS & Preset -->
+    <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/grapesjs-preset-webpage/dist/grapesjs-preset-webpage.min.css">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <style>
         :root {
-            --builder-topbar-h: 60px;
-            --builder-sidebar-w: 320px;
-            --builder-inspector-w: 300px;
-            --builder-bg: #0f172a;
-            --panel-bg: #1e293b;
-            --panel-border: #334155;
-            --accent-color: #3b82f6;
+            --gjs-topbar-h: 62px;
+            --gjs-sidebar-w: 320px;
+            --gjs-bg-dark: #0f172a;
+            --gjs-panel-bg: #1e293b;
+            --gjs-border-color: #334155;
+            --gjs-accent: #3b82f6;
+            --gjs-success: #10b981;
         }
 
-        body {
-            background-color: var(--builder-bg);
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--gjs-bg-dark);
             color: #f8fafc;
             font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            overflow: hidden;
-            height: 100vh;
         }
 
-        /* TOPBAR */
-        .builder-topbar {
-            height: var(--builder-topbar-h);
+        /* TOPBAR CONTAINER */
+        .gjs-top-bar {
+            height: var(--gjs-topbar-h);
             background: #020617;
-            border-bottom: 1px solid var(--panel-border);
+            border-bottom: 1px solid var(--gjs-border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 1.5rem;
-            z-index: 100;
+            padding: 0 1rem;
+            z-index: 1000;
+            position: relative;
         }
 
-        .builder-viewport-controls .btn {
-            color: #94a3b8;
-            border-color: var(--panel-border);
-        }
-        .builder-viewport-controls .btn.active {
-            background-color: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
-        }
-
-        /* WORKSPACE CONTAINER */
-        .builder-workspace {
-            display: flex;
-            height: calc(100vh - var(--builder-topbar-h));
-        }
-
-        /* SIDEBARS */
-        .builder-sidebar, .builder-inspector {
-            width: var(--builder-sidebar-w);
-            background-color: var(--panel-bg);
-            border-left: 1px solid var(--panel-border);
-            border-right: 1px solid var(--panel-border);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-        .builder-inspector {
-            width: var(--builder-inspector-w);
-        }
-
-        .sidebar-section-title {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #94a3b8;
+        /* GREEN & BLUE ACTION BUTTONS (Matching Reference Image) */
+        .btn-top-green {
+            background-color: #10b981;
+            color: #ffffff;
             font-weight: 700;
-            padding: 1rem;
-            border-bottom: 1px solid var(--panel-border);
-            background: #0f172a;
+            border: none;
+            border-radius: 8px;
+            padding: 0.45rem 1.1rem;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+        }
+        .btn-top-green:hover {
+            background-color: #059669;
+            color: #ffffff;
+            transform: translateY(-1px);
         }
 
-        .component-item {
-            background: #0f172a;
-            border: 1px solid var(--panel-border);
+        .btn-top-blue {
+            background-color: #2563eb;
+            color: #ffffff;
+            font-weight: 700;
+            border: none;
             border-radius: 8px;
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem;
+            padding: 0.45rem 1.25rem;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        .btn-top-blue:hover {
+            background-color: #1d4ed8;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* LOGO & BRANDING */
+        .gjs-brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        /* VIEWPORT SWITCHER CONTROLS */
+        .gjs-viewport-btns {
+            background: #0f172a;
+            border: 1px solid var(--gjs-border-color);
+            border-radius: 8px;
+            padding: 2px;
+            display: flex;
+            gap: 2px;
+        }
+        .gjs-viewport-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 5px;
         }
-        .component-item:hover {
-            border-color: var(--accent-color);
-            transform: translateY(-2px);
+        .gjs-viewport-btn:hover {
+            color: #ffffff;
+            background: #1e293b;
+        }
+        .gjs-viewport-btn.active {
+            background: var(--gjs-accent);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* ACTION TOOL ICONS */
+        .gjs-tool-btn {
+            background: transparent;
+            border: 1px solid var(--gjs-border-color);
+            color: #cbd5e1;
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+        .gjs-tool-btn:hover {
+            background: #1e293b;
+            color: #ffffff;
+            border-color: var(--gjs-accent);
+        }
+        .gjs-tool-btn.active {
+            background: var(--gjs-accent);
+            color: white;
+            border-color: var(--gjs-accent);
+        }
+
+        /* WORKSPACE LAYOUT */
+        .gjs-workspace {
+            display: flex;
+            height: calc(100vh - var(--gjs-topbar-h));
+            position: relative;
+        }
+
+        /* LEFT SIDEBAR PANELS */
+        .gjs-sidebar-panel {
+            width: var(--gjs-sidebar-w);
+            background-color: var(--gjs-panel-bg);
+            border-left: 1px solid var(--gjs-border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            z-index: 10;
+        }
+
+        /* SIDEBAR TAB BUTTONS */
+        .gjs-panel-tabs {
+            display: flex;
+            background: #0f172a;
+            border-bottom: 1px solid var(--gjs-border-color);
+        }
+        .gjs-panel-tab {
+            flex: 1;
+            padding: 0.75rem 0.25rem;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .gjs-panel-tab i {
+            font-size: 1.1rem;
+        }
+        .gjs-panel-tab:hover {
+            color: #f1f5f9;
+        }
+        .gjs-panel-tab.active {
+            color: var(--gjs-accent);
+            border-bottom-color: var(--gjs-accent);
             background: #1e293b;
         }
 
-        /* CANVAS AREA */
-        .builder-canvas-wrapper {
+        .gjs-panel-content {
             flex: 1;
-            background-color: #020617;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
             overflow-y: auto;
-            padding: 2rem;
+            padding: 1rem;
         }
 
-        .canvas-frame {
-            background: #ffffff;
-            color: #000000;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-            transition: width 0.3s ease;
-            min-height: 800px;
-            width: 100%;
-            position: relative;
-        }
-        .canvas-frame.viewport-tablet { width: 768px; }
-        .canvas-frame.viewport-mobile { width: 375px; }
-
-        /* SECTION HOVER & CONTROLS */
-        .builder-section-block {
-            position: relative;
-            border: 2px transparent dashed;
-            transition: border-color 0.2s ease;
-        }
-        .builder-section-block:hover {
-            border-color: var(--accent-color);
-        }
-
-        .section-control-bar {
-            position: absolute;
-            top: 8px;
-            left: 8px;
+        .gjs-tab-pane {
             display: none;
-            background: rgba(15, 23, 42, 0.9);
-            padding: 4px 8px;
-            border-radius: 6px;
-            z-index: 50;
-            gap: 4px;
         }
-        .builder-section-block:hover .section-control-bar {
-            display: flex;
+        .gjs-tab-pane.active {
+            display: block;
         }
 
-        /* CODE EDITOR OVERLAY */
-        #codeEditorModal .modal-content {
+        /* CANVAS CONTAINER */
+        .gjs-editor-canvas {
+            flex: 1;
+            position: relative;
+            background-color: #020617;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #gjs {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* FLOATING NAVIGATOR PANEL */
+        .gjs-floating-navigator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 280px;
+            max-height: 400px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--gjs-border-color);
+            border-radius: 8px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: opacity 0.3s ease;
+        }
+        .gjs-floating-header {
+            padding: 0.6rem 1rem;
+            background: #020617;
+            border-bottom: 1px solid var(--gjs-border-color);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: move;
+        }
+        .gjs-floating-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        /* BOTTOM BREADCRUMBS BAR */
+        .gjs-breadcrumbs-bar {
+            height: 36px;
+            background: #020617;
+            border-top: 1px solid var(--gjs-border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-family: monospace;
+            z-index: 100;
+        }
+        .gjs-breadcrumbs-trail {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .gjs-breadcrumb-item {
+            color: var(--gjs-accent);
+            cursor: pointer;
+        }
+        .gjs-breadcrumb-item:hover {
+            text-decoration: underline;
+        }
+
+        /* GRAPESJS OVERRIDES FOR DARK THEME & RTL */
+        .gjs-one-bg {
+            background-color: var(--gjs-panel-bg);
+        }
+        .gjs-two-color {
+            color: #cbd5e1;
+        }
+        .gjs-three-bg {
+            background-color: #0f172a;
+        }
+        .gjs-four-color, .gjs-four-color-h:hover {
+            color: var(--gjs-accent);
+        }
+        .gjs-block {
             background: #0f172a;
+            border: 1px solid var(--gjs-border-color);
+            border-radius: 6px;
             color: #f8fafc;
-            border: 1px solid var(--panel-border);
+            box-shadow: none;
+            transition: all 0.2s ease;
+        }
+        .gjs-block:hover {
+            border-color: var(--gjs-accent);
+            color: var(--gjs-accent);
+            transform: translateY(-2px);
+        }
+        .gjs-block-label {
+            font-size: 0.8rem;
+            color: #e2e8f0;
+        }
+        .gjs-sm-sector .gjs-sm-title {
+            background: #0f172a;
+            border-bottom: 1px solid var(--gjs-border-color);
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        .gjs-sm-field input, .gjs-sm-field select, .gjs-clm-tags input {
+            background: #0f172a !important;
+            border: 1px solid var(--gjs-border-color) !important;
+            color: #f8fafc !important;
+            border-radius: 4px;
+        }
+        .gjs-trt-trait {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--gjs-border-color);
+        }
+        .gjs-trt-trait .gjs-label {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+        .gjs-layer {
+            background: #0f172a;
+            border-bottom: 1px solid var(--gjs-border-color);
+            color: #e2e8f0;
+        }
+        .gjs-layer.gjs-selected {
+            background: #1e3a8a;
+            color: #ffffff;
+        }
+
+        /* CUSTOM MODAL OVERLAYS */
+        .modal-content {
+            background-color: #0f172a;
+            border: 1px solid var(--gjs-border-color);
+            color: #f8fafc;
+        }
+        .form-control, .form-select {
+            background-color: #1e293b;
+            border-color: var(--gjs-border-color);
+            color: #f8fafc;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #1e293b;
+            border-color: var(--gjs-accent);
+            color: #ffffff;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
         }
     </style>
 </head>
 <body>
 
     <!-- TOPBAR -->
-    <header class="builder-topbar">
-        <div class="d-flex align-items-center gap-3">
-            <a href="{{ route('admin.landing-pages-new.index') }}" class="btn btn-sm btn-outline-light rounded-pill px-3">
-                ← العودة لوحة التحكم
+    <header class="gjs-top-bar">
+        <!-- RIGHT TOP ACTIONS (RTL) -->
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ route('admin.landing-pages-new.index') }}" class="btn-top-green">
+                <i class="bi bi-arrow-right-short fs-5"></i> العودة للقائمة
             </a>
-            <div>
-                <span class="fw-bold text-white fs-6">{{ $page->internal_name }}</span>
-                <span id="saveStatusBadge" class="badge text-bg-success ms-2">جاهز</span>
-            </div>
+
+            <button type="button" class="btn-top-green" data-bs-toggle="modal" data-bs-target="#funnelSettingsModal">
+                <i class="bi bi-gear-fill"></i> إعدادات الـ Funnel
+            </button>
         </div>
 
-        <!-- VIEWPORT SWITCHER -->
-        <div class="builder-viewport-controls btn-group" role="group">
-            <button type="button" class="btn btn-sm active" id="btnViewDesktop" onclick="setViewport('desktop')" title="شاشات سطح المكتب">
+        <!-- CENTER VIEWPORT SWITCHER -->
+        <div class="gjs-viewport-btns">
+            <button class="gjs-viewport-btn active" id="viewDesktop" onclick="setDevice('Desktop')" title="عرض الشاشة">
                 <i class="bi bi-display"></i> Desktop
             </button>
-            <button type="button" class="btn btn-sm" id="btnViewTablet" onclick="setViewport('tablet')" title="شاشات الأيباد والتابلت">
+            <button class="gjs-viewport-btn" id="viewTablet" onclick="setDevice('Tablet')" title="عرض الأيباد والتابلت">
                 <i class="bi bi-tablet"></i> Tablet
             </button>
-            <button type="button" class="btn btn-sm" id="btnViewMobile" onclick="setViewport('mobile')" title="شاشات الجوال">
+            <button class="gjs-viewport-btn" id="viewMobile" onclick="setDevice('Mobile')" title="عرض الجوال">
                 <i class="bi bi-phone"></i> Mobile
             </button>
         </div>
 
-        <!-- ACTIONS -->
+        <!-- LEFT TOP ACTIONS & SAVE BUTTON -->
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#codeEditorModal">
-                💻 محرر الكود (Code Editor)
+            <button type="button" class="gjs-tool-btn" id="btnOutlines" onclick="toggleOutlines()" title="إظهار/إخفاء حدود العناصر">
+                <i class="bi bi-border-outer"></i>
             </button>
-            <a href="{{ $page->publicUrl() }}" target="_blank" class="btn btn-sm btn-outline-light rounded-pill px-3">
-                👁️ معاينة الرابط
-            </a>
-            <button type="button" class="btn btn-sm btn-primary rounded-pill px-4 fw-bold" onclick="saveCanvasData()">
-                💾 حفظ التعديلات
+            <button type="button" class="gjs-tool-btn" onclick="editor.UndoManager.undo()" title="تراجع Undo">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+            <button type="button" class="gjs-tool-btn" onclick="editor.UndoManager.redo()" title="إعادة Redo">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+            <button type="button" class="gjs-tool-btn" onclick="togglePreview()" title="معاينة الصفحة Preview">
+                <i class="bi bi-eye"></i>
+            </button>
+            <button type="button" class="gjs-tool-btn" onclick="toggleFullscreen()" title="ملء الشاشة Fullscreen">
+                <i class="bi bi-arrows-fullscreen"></i>
+            </button>
+            <button type="button" class="gjs-tool-btn" onclick="clearCanvas()" title="مسح اللوحة Clear">
+                <i class="bi bi-trash text-danger"></i>
+            </button>
+            <button type="button" class="gjs-tool-btn" data-bs-toggle="modal" data-bs-target="#codeEditorModal" title="محرر الكود">
+                <i class="bi bi-code-slash text-info"></i>
+            </button>
+
+            <span id="saveStatusBadge" class="badge bg-secondary">جاهز</span>
+
+            <button type="button" class="btn-top-blue" onclick="savePageData()">
+                <i class="bi bi-floppy-fill"></i> Save Page
             </button>
         </div>
     </header>
 
     <!-- WORKSPACE -->
-    <div class="builder-workspace">
+    <div class="gjs-workspace">
 
-        <!-- LEFT SIDEBAR: ELEMENTS & SECTIONS -->
-        <aside class="builder-sidebar">
-            <div class="sidebar-section-title">🧩 العناصر والأقسام Ready Sections</div>
-            <div class="p-3">
-                <div class="component-item" onclick="addNewSection('hero')">
-                    <i class="bi bi-star-fill text-warning fs-5"></i>
-                    <div>
-                        <div class="fw-bold text-white small">قسم الهيرو (Hero Banner)</div>
-                        <div class="text-muted text-xs">عنوان رئيسي، وصف، وزر طلب.</div>
-                    </div>
+        <!-- LEFT SIDEBAR: CONTENT, STYLE, ADVANCED, NAVIGATOR -->
+        <aside class="gjs-sidebar-panel">
+            <div class="gjs-panel-tabs">
+                <button class="gjs-panel-tab active" onclick="switchTab('contentTab', this)">
+                    <i class="bi bi-box-seam"></i> Content
+                </button>
+                <button class="gjs-panel-tab" onclick="switchTab('styleTab', this)">
+                    <i class="bi bi-palette"></i> Style
+                </button>
+                <button class="gjs-panel-tab" onclick="switchTab('advancedTab', this)">
+                    <i class="bi bi-sliders"></i> Advanced
+                </button>
+                <button class="gjs-panel-tab" onclick="switchTab('navigatorTab', this)">
+                    <i class="bi bi-diagram-3"></i> Navigator
+                </button>
+            </div>
+
+            <div class="gjs-panel-content">
+                <!-- TAB 1: CONTENT (BLOCK MANAGER) -->
+                <div id="contentTab" class="gjs-tab-pane active">
+                    <div class="text-white-50 small mb-2 fw-bold uppercase">🧩 عناصر وأقسام جاهزة</div>
+                    <div id="blocks-container"></div>
                 </div>
-                <div class="component-item" onclick="addNewSection('features')">
-                    <i class="bi bi-grid-fill text-info fs-5"></i>
-                    <div>
-                        <div class="fw-bold text-white small">قسم المميزات (Features)</div>
-                        <div class="text-muted text-xs">أعمدة وبطاقات مميزات.</div>
-                    </div>
+
+                <!-- TAB 2: STYLE (STYLE MANAGER) -->
+                <div id="styleTab" class="gjs-tab-pane">
+                    <div class="text-white-50 small mb-2 fw-bold uppercase">🎨 خصائص التنسيق والمظهر</div>
+                    <div id="style-container"></div>
                 </div>
-                <div class="component-item" onclick="addNewSection('cta_form')">
-                    <i class="bi bi-ui-checks text-success fs-5"></i>
-                    <div>
-                        <div class="fw-bold text-white small">قسم النموذج والطلب (Lead Form)</div>
-                        <div class="text-muted text-xs">نموذج تواصل وجمع بيانات.</div>
-                    </div>
+
+                <!-- TAB 3: ADVANCED (TRAIT MANAGER) -->
+                <div id="advancedTab" class="gjs-tab-pane">
+                    <div class="text-white-50 small mb-2 fw-bold uppercase">⚙️ الخصائص والمعرفات (Id & Class & Attributes)</div>
+                    <div id="traits-container"></div>
                 </div>
-                <div class="component-item" onclick="addNewSection('faq')">
-                    <i class="bi bi-patch-question-fill text-primary fs-5"></i>
-                    <div>
-                        <div class="fw-bold text-white small">قسم الأسئلة الشائعة (FAQ)</div>
-                        <div class="text-muted text-xs">قائمة أوردون وأسئلة إجابات.</div>
-                    </div>
-                </div>
-                <div class="component-item" onclick="addNewSection('custom_html')">
-                    <i class="bi bi-code-slash text-danger fs-5"></i>
-                    <div>
-                        <div class="fw-bold text-white small">قسم كود HTML مخصص (Custom Section)</div>
-                        <div class="text-muted text-xs">إضافة كود HTML/CSS مخصص.</div>
-                    </div>
+
+                <!-- TAB 4: NAVIGATOR (LAYER MANAGER) -->
+                <div id="navigatorTab" class="gjs-tab-pane">
+                    <div class="text-white-50 small mb-2 fw-bold uppercase">🌲 شجرة الطبقات والمكونات</div>
+                    <div id="layers-container"></div>
                 </div>
             </div>
         </aside>
 
-        <!-- CENTER CANVAS AREA -->
-        <main class="builder-canvas-wrapper">
-            <div id="canvasFrame" class="canvas-frame p-0">
-                <div id="canvasElementsContainer">
-                    @php
-                        $structure = is_string($page->structure) ? json_decode($page->structure, true) : ($page->structure ?? []);
-                        $elements = $structure['elements'] ?? [];
-                    @endphp
+        <!-- CENTER EDITOR CANVAS -->
+        <main class="gjs-editor-canvas">
+            <div id="gjs"></div>
 
-                    @forelse($elements as $index => $el)
-                        <div class="builder-section-block" data-id="{{ $el['id'] ?? 'sec_' . $index }}" data-index="{{ $index }}">
-                            <div class="section-control-bar">
-                                <button type="button" class="btn btn-sm btn-dark text-white p-1 px-2" onclick="moveSectionUp(this)" title="تحريك لأعلى">⬆️</button>
-                                <button type="button" class="btn btn-sm btn-dark text-white p-1 px-2" onclick="moveSectionDown(this)" title="تحريك لأسفل">⬇️</button>
-                                <button type="button" class="btn btn-sm btn-danger text-white p-1 px-2" onclick="deleteSection(this)" title="حذف القسم">🗑️</button>
-                            </div>
-                            <div class="section-content-editable" contenteditable="true" spellcheck="false">
-                                {!! $el['html'] ?? '' !!}
-                            </div>
-                        </div>
-                    @empty
-                        <div class="builder-section-block" data-id="sec_hero_default" data-index="0">
-                            <div class="section-control-bar">
-                                <button type="button" class="btn btn-sm btn-dark text-white p-1 px-2" onclick="moveSectionUp(this)">⬆️</button>
-                                <button type="button" class="btn btn-sm btn-dark text-white p-1 px-2" onclick="moveSectionDown(this)">⬇️</button>
-                                <button type="button" class="btn btn-sm btn-danger text-white p-1 px-2" onclick="deleteSection(this)">🗑️</button>
-                            </div>
-                            <div class="section-content-editable" contenteditable="true" spellcheck="false">
-                                <div class="container py-5 text-center">
-                                    <h1 class="display-4 fw-bold text-primary mb-3">مرحباً بك في صفحة الهبوط الجديدة</h1>
-                                    <p class="lead text-muted mb-4">انقر على أي نص هنا للتعديل المباشر، أو اضف أقسام جديدة من القائمة الجانبية.</p>
-                                    <a href="#lead-form" class="btn btn-primary btn-lg rounded-pill px-5">قدم طلبك الآن</a>
-                                </div>
-                            </div>
-                        </div>
-                    @endforelse
+            <!-- FLOATING NAVIGATOR PANEL (TOGGLEABLE LIKE SCREENSHOT) -->
+            <div class="gjs-floating-navigator" id="floatingNavigator">
+                <div class="gjs-floating-header">
+                    <span>:: Navigator</span>
+                    <button type="button" class="btn-close btn-close-white btn-sm" onclick="document.getElementById('floatingNavigator').style.display='none'"></button>
+                </div>
+                <div class="gjs-floating-body" id="floating-layers-container"></div>
+            </div>
+
+            <!-- BOTTOM BREADCRUMBS & CODE EDITOR BAR -->
+            <div class="gjs-breadcrumbs-bar">
+                <div class="gjs-breadcrumbs-trail" id="breadcrumbsTrail">
+                    <span class="text-white-50">body</span>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-info border-0 text-white-50 px-2" data-bs-toggle="modal" data-bs-target="#codeEditorModal">
+                        <i class="bi bi-code-slash"></i> &lt;/&gt; Code editor
+                    </button>
                 </div>
             </div>
         </main>
+    </div>
 
-        <!-- RIGHT INSPECTOR PANEL -->
-        <aside class="builder-inspector">
-            <div class="sidebar-section-title">🎨 خصائص النمط والإعدادات</div>
-            <div class="p-3">
-                <div class="mb-3">
-                    <label class="form-label text-white-50 small">لون خلفية المعاينة</label>
-                    <input type="color" class="form-control form-control-color w-100" id="bgColorPicker" value="#ffffff" onchange="document.getElementById('canvasFrame').style.backgroundColor = this.value">
+    <!-- FUNNEL & PAGE SETTINGS MODAL -->
+    <div class="modal fade" id="funnelSettingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title fw-bold text-success"><i class="bi bi-gear-fill"></i> إعدادات الـ Funnel والصفحة</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label text-white-50 small">حالة الحفظ التلقائي</label>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="autosaveToggle" checked>
-                        <label class="form-check-label text-white small" for="autosaveToggle">تفعيل Autosave</label>
-                    </div>
+                <div class="modal-body">
+                    <form id="funnelSettingsForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-white-50 fw-bold">الاسم الداخلي (Internal Name)</label>
+                                <input type="text" class="form-control" name="internal_name" value="{{ $page->internal_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-white-50 fw-bold">رابط الصفحة (Slug)</label>
+                                <div class="input-group" dir="ltr">
+                                    <span class="input-group-text bg-dark border-secondary text-white-50">/lp-new/</span>
+                                    <input type="text" class="form-control" name="slug" value="{{ $page->slug }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-white-50 fw-bold">العنوان بالعربية (Title AR)</label>
+                                <input type="text" class="form-control" name="title_ar" value="{{ $page->title_ar }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-white-50 fw-bold">العنوان بالإنجليزية (Title EN)</label>
+                                <input type="text" class="form-control" name="title_en" value="{{ $page->title_en }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-white-50 fw-bold">البراند (Brand)</label>
+                                <select class="form-select" name="brand_id">
+                                    <option value="">-- بدون براند --</option>
+                                    @foreach($brands as $brand)
+                                        <option value="{{ $brand->id }}" {{ $page->brand_id == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-white-50 fw-bold">نموذج تجميع البيانات (Assigned Lead Form)</label>
+                                <select class="form-select" name="assigned_lead_form_id">
+                                    <option value="">-- بدون نموذج --</option>
+                                    @foreach($forms as $form)
+                                        <option value="{{ $form->id }}" {{ $page->assigned_lead_form_id == $form->id ? 'selected' : '' }}>{{ $form->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-white-50 fw-bold">حالة الصفحة (Status)</label>
+                                <select class="form-select" name="status">
+                                    <option value="draft" {{ $page->status === 'draft' ? 'selected' : '' }}>مسودة (Draft)</option>
+                                    <option value="published" {{ $page->status === 'published' ? 'selected' : '' }}>منشورة (Published)</option>
+                                    <option value="archived" {{ $page->status === 'archived' ? 'selected' : '' }}>أرشيف (Archived)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-white-50 fw-bold">تفعيل الصفحة</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="is_active" id="isActiveSwitch" value="1" {{ $page->is_active ? 'checked' : '' }}>
+                                    <label class="form-check-label text-white" for="isActiveSwitch">مفعلة وتستقبل الزيارات</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-success fw-bold px-4" onclick="saveFunnelSettings()">تحديث الإعدادات</button>
                 </div>
             </div>
-        </aside>
+        </div>
     </div>
 
     <!-- CODE EDITOR MODAL -->
@@ -305,8 +606,8 @@
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title fw-bold">💻 محرر الأكواد المخصص (Custom CSS & JS)</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title fw-bold text-info"><i class="bi bi-code-slash"></i> محرر الأكواد المباشر (&lt;/&gt; Code Editor)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
@@ -328,110 +629,314 @@
         </div>
     </div>
 
+    <!-- GrapesJS Scripts & Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/grapesjs"></script>
+    <script src="https://unpkg.com/grapesjs-preset-webpage"></script>
+
     <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const updateUrl = "{{ route('admin.landing-pages-new.builder.update', $page) }}";
-        const autosaveUrl = "{{ route('admin.landing-pages-new.autosave', $page) }}";
+        const pageUpdateUrl = "{{ route('admin.landing-pages-new.update', $page) }}";
 
-        function setViewport(mode) {
-            const frame = document.getElementById('canvasFrame');
-            document.querySelectorAll('.builder-viewport-controls .btn').forEach(b => b.classList.remove('active'));
+        @php
+            $structure = is_string($page->structure) ? json_decode($page->structure, true) : ($page->structure ?? []);
+            $gjsProject = $structure['gjs_project'] ?? null;
+            $initialHtml = $structure['html'] ?? '';
 
-            if (mode === 'desktop') {
-                frame.className = 'canvas-frame p-0';
-                document.getElementById('btnViewDesktop').classList.add('active');
-            } else if (mode === 'tablet') {
-                frame.className = 'canvas-frame p-0 viewport-tablet';
-                document.getElementById('btnViewTablet').classList.add('active');
-            } else if (mode === 'mobile') {
-                frame.className = 'canvas-frame p-0 viewport-mobile';
-                document.getElementById('btnViewMobile').classList.add('active');
+            if (empty($initialHtml) && !empty($structure['elements'])) {
+                foreach ($structure['elements'] as $el) {
+                    $initialHtml .= ($el['html'] ?? '');
+                }
+            }
+
+            if (empty($initialHtml)) {
+                $initialHtml = '<div class="container py-5 text-center"><h1 class="display-4 fw-bold text-dark mb-3">مرحباً بك في صفحة الهبوط الجديدة</h1><p class="lead text-muted mb-4">انقر على أي نص للتعديل المباشر، أو اسحب عناصر جديدة من القائمة الجانبية.</p><a href="#lead-form" class="btn btn-primary btn-lg rounded-pill px-5">قدم طلبك الآن</a></div>';
+            }
+        @endphp
+
+        const initialGjsProject = @json($gjsProject);
+        const initialHtmlContent = @json($initialHtml);
+        const initialCustomCss = @json($page->custom_css ?? '');
+
+        // INITIALIZE GRAPESJS BUILDER
+        const editor = grapesjs.init({
+            container: '#gjs',
+            height: '100%',
+            width: 'auto',
+            storageManager: false,
+            fromElement: false,
+            blockManager: {
+                appendTo: '#blocks-container'
+            },
+            styleManager: {
+                appendTo: '#style-container',
+                sectors: [{
+                    name: 'General / العام',
+                    open: true,
+                    buildProps: ['display', 'position', 'top', 'right', 'left', 'bottom']
+                }, {
+                    name: 'Dimension / الأحجام والهوامش',
+                    open: false,
+                    buildProps: ['width', 'height', 'max-width', 'min-height', 'margin', 'padding']
+                }, {
+                    name: 'Typography / الخطوط والنصوص',
+                    open: false,
+                    buildProps: ['font-family', 'font-size', 'font-weight', 'letter-spacing', 'color', 'line-height', 'text-align', 'text-shadow']
+                }, {
+                    name: 'Decorator / المظهر والخلفية',
+                    open: false,
+                    buildProps: ['background-color', 'background-image', 'border-radius', 'border', 'box-shadow']
+                }, {
+                    name: 'Flexbox / مرونة العناصر',
+                    open: false,
+                    buildProps: ['flex-direction', 'flex-wrap', 'justify-content', 'align-items', 'align-content', 'order', 'flex-grow']
+                }]
+            },
+            traitManager: {
+                appendTo: '#traits-container'
+            },
+            layerManager: {
+                appendTo: '#layers-container'
+            },
+            deviceManager: {
+                devices: [
+                    { name: 'Desktop', width: '' },
+                    { name: 'Tablet', width: '768px', widthMedia: '992px' },
+                    { name: 'Mobile', width: '375px', widthMedia: '480px' }
+                ]
+            },
+            canvas: {
+                styles: [
+                    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css',
+                    'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css'
+                ],
+                scripts: [
+                    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'
+                ]
+            }
+        });
+
+        // LOAD INITIAL CONTENT INTO GRAPESJS
+        if (initialGjsProject) {
+            try {
+                editor.loadProjectData(initialGjsProject);
+            } catch (e) {
+                editor.setComponents(initialHtmlContent);
+            }
+        } else {
+            editor.setComponents(initialHtmlContent);
+            if (initialCustomCss) {
+                editor.setStyle(initialCustomCss);
             }
         }
 
-        function moveSectionUp(btn) {
-            const block = btn.closest('.builder-section-block');
-            if (block.previousElementSibling) {
-                block.parentNode.insertBefore(block, block.previousElementSibling);
-                triggerAutosave();
-            }
+        // ADD CUSTOM READY BLOCKS
+        const bm = editor.BlockManager;
+
+        bm.add('hero-section', {
+            label: '🌟 قسم الهيرو (Hero)',
+            category: 'أقسام جاهزة',
+            content: `
+                <section class="py-5 bg-light text-center border-bottom">
+                    <div class="container py-4">
+                        <span class="badge bg-primary px-3 py-2 rounded-pill mb-3">نمط الحياة الجديد</span>
+                        <h1 class="display-3 fw-bold text-dark mb-3">الواقع الجديد أمتع مما تتصور</h1>
+                        <p class="lead text-muted max-w-700 mx-auto mb-4">لتوفير رحلة وسفر مثالي، قمنا بصناعة واختيار كل عنصر بعناية فائقة.</p>
+                        <a href="#order" class="btn btn-success btn-lg px-5 rounded-pill fw-bold">اطلب الآن 🛒</a>
+                    </div>
+                </section>
+            `
+        });
+
+        bm.add('features-grid', {
+            label: '⚡ شبكة المميزات (Features)',
+            category: 'أقسام جاهزة',
+            content: `
+                <section class="py-5 bg-white">
+                    <div class="container">
+                        <h2 class="text-center fw-bold mb-5">لماذا تختار خدماتنا؟</h2>
+                        <div class="row g-4 text-center">
+                            <div class="col-md-4">
+                                <div class="p-4 border rounded-4 bg-light shadow-sm">
+                                    <i class="bi bi-lightning-charge-fill text-warning fs-1 mb-3"></i>
+                                    <h4 class="fw-bold">سرعة وإنجاز</h4>
+                                    <p class="text-muted">استخراج التأشيرات والخدمات بأقصى سرعة ممكنة.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-4 border rounded-4 bg-light shadow-sm">
+                                    <i class="bi bi-shield-check text-success fs-1 mb-3"></i>
+                                    <h4 class="fw-bold">ضمان وموثوقية</h4>
+                                    <p class="text-muted">نضمن لك أعلى معدلات القبول والدقة في الأوراق.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-4 border rounded-4 bg-light shadow-sm">
+                                    <i class="bi bi-headset text-primary fs-1 mb-3"></i>
+                                    <h4 class="fw-bold">دعم متواصل 24/7</h4>
+                                    <p class="text-muted">فريق خدمة العملاء متواجد دائماً للإجابة على أسئلتك.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `
+        });
+
+        bm.add('lead-form-section', {
+            label: '📝 نموذج الطلب (Lead Form)',
+            category: 'أقسام جاهزة',
+            content: `
+                <section class="py-5 bg-dark text-white" id="order">
+                    <div class="container">
+                        <div class="max-w-600 mx-auto bg-secondary bg-opacity-25 p-4 p-md-5 rounded-4 border border-secondary shadow">
+                            <h3 class="fw-bold text-center mb-3">احجز استشارتك المجانية الآن</h3>
+                            <p class="text-center text-white-50 mb-4">سجل بياناتك وسيقوم أحد مستشارينا بالتواصل معك فوراً.</p>
+                            <form onsubmit="event.preventDefault(); alert('تم استلام طلبك بنجاح');">
+                                <div class="mb-3">
+                                    <label class="form-label">الاسم الكامل</label>
+                                    <input type="text" class="form-control form-control-lg" placeholder="أدخل اسمك هنا" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">رقم الجوال / الواتساب</label>
+                                    <input type="tel" class="form-control form-control-lg" placeholder="0500000000" required>
+                                </div>
+                                <button type="submit" class="btn btn-success btn-lg w-100 fw-bold rounded-pill">تأكيد وإرسال الطلب</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            `
+        });
+
+        bm.add('basic-heading', {
+            label: '📌 عنوان (Heading)',
+            category: 'عناصر بسيطة',
+            content: '<h2 class="fw-bold">اكتب عنوانك هنا</h2>'
+        });
+
+        bm.add('basic-paragraph', {
+            label: '📄 فقرة نصية (Text)',
+            category: 'عناصر بسيطة',
+            content: '<p class="lead">اكتب الفقرة النصية والتفاصيل هنا...</p>'
+        });
+
+        bm.add('basic-button', {
+            label: '🔘 زر إجراء (Button)',
+            category: 'عناصر بسيطة',
+            content: '<a href="#" class="btn btn-primary rounded-pill px-4">اضغط هنا</a>'
+        });
+
+        bm.add('basic-image', {
+            label: '🖼️ صورة (Image)',
+            category: 'عناصر بسيطة',
+            content: '<img src="https://via.placeholder.com/600x400" class="img-fluid rounded-3" alt="صورة توضيحية">'
+        });
+
+        // VIEWPORT SWITCHING
+        function setDevice(deviceName) {
+            editor.setDevice(deviceName);
+            document.querySelectorAll('.gjs-viewport-btn').forEach(btn => btn.classList.remove('active'));
+            if (deviceName === 'Desktop') document.getElementById('viewDesktop').classList.add('active');
+            if (deviceName === 'Tablet') document.getElementById('viewTablet').classList.add('active');
+            if (deviceName === 'Mobile') document.getElementById('viewMobile').classList.add('active');
         }
 
-        function moveSectionDown(btn) {
-            const block = btn.closest('.builder-section-block');
-            if (block.nextElementSibling) {
-                block.parentNode.insertBefore(block.nextElementSibling, block);
-                triggerAutosave();
-            }
+        // SIDEBAR TAB SWITCHING
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.gjs-panel-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.gjs-tab-pane').forEach(p => p.classList.remove('active'));
+
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
         }
 
-        function deleteSection(btn) {
-            if (confirm('هل أنت تأكد من حذف هذا القسم؟')) {
-                const block = btn.closest('.builder-section-block');
-                block.remove();
-                triggerAutosave();
-            }
-        }
-
-        function addNewSection(type) {
-            const container = document.getElementById('canvasElementsContainer');
-            const id = 'sec_' + type + '_' + Math.random().toString(36).substr(2, 6);
-
-            let htmlSnippet = '';
-            if (type === 'hero') {
-                htmlSnippet = `<div class="container py-5 text-center"><h2 class="display-5 fw-bold text-dark mb-3">قسم الهيرو الجديد</h2><p class="lead text-muted mb-4">اكتب هنا نص جذاب يعرض تفاصيل الخدمات والتأشيرات.</p><button class="btn btn-primary btn-lg rounded-pill px-5">قدم طلبك</button></div>`;
-            } else if (type === 'features') {
-                htmlSnippet = `<div class="container py-5"><h3 class="text-center fw-bold mb-4">مميزات خدماتنا</h3><div class="row g-4"><div class="col-md-4 text-center"><div class="p-4 bg-light rounded-4"><h5>⚡ سرعة الإنجاز</h5><p class="text-muted small">متابعة دقيقة لكل الطلبات.</p></div></div><div class="col-md-4 text-center"><div class="p-4 bg-light rounded-4"><h5>🛡️ موثوقية كاملة</h5><p class="text-muted small">ضمان تقديم الأوراق بالشكل الصحيح.</p></div></div><div class="col-md-4 text-center"><div class="p-4 bg-light rounded-4"><h5>📞 دعم 24/7</h5><p class="text-muted small">فريق مخصص للرد على كافة الاستفسارات.</p></div></div></div></div>`;
-            } else if (type === 'cta_form') {
-                htmlSnippet = `<div class="container py-5" id="lead-form"><div class="card border-0 shadow p-4 rounded-4 max-w-600 mx-auto"><h3 class="fw-bold text-center mb-3">سجل بياناتك للتواصل معك</h3><form onsubmit="event.preventDefault(); alert('تم استلام الطلب بنجاح');"><div class="mb-3"><input type="text" class="form-control" placeholder="الاسم الكامل" required></div><div class="mb-3"><input type="tel" class="form-control" placeholder="رقم الواتساب / الهاتف" required></div><button type="submit" class="btn btn-success w-100 btn-lg rounded-pill fw-bold">إرسال الطلب الآن</button></form></div></div>`;
+        // TOGGLE ACTIONS
+        function toggleOutlines() {
+            const cmd = editor.Commands;
+            if (cmd.isActive('sw-visibility')) {
+                cmd.stop('sw-visibility');
+                document.getElementById('btnOutlines').classList.remove('active');
             } else {
-                htmlSnippet = `<div class="container py-4"><div class="p-4 bg-light rounded-3 text-center"><h4>قسم مخصص جديد</h4><p class="text-muted">انقر للتعديل على المحتوى.</p></div></div>`;
+                cmd.run('sw-visibility');
+                document.getElementById('btnOutlines').classList.add('active');
+            }
+        }
+
+        function togglePreview() {
+            const cmd = editor.Commands;
+            if (cmd.isActive('core:preview')) {
+                cmd.stop('core:preview');
+            } else {
+                cmd.run('core:preview');
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function clearCanvas() {
+            if (confirm('هل أنت متاكد من مسح جميع مكونات اللوحة؟')) {
+                editor.DomComponents.clear();
+            }
+        }
+
+        // BREADCRUMBS TRAIL UPDATE ON SELECTION
+        editor.on('component:selected', (component) => {
+            const trail = document.getElementById('breadcrumbsTrail');
+            if (!component) {
+                trail.innerHTML = '<span class="text-white-50">body</span>';
+                return;
             }
 
-            const newBlock = document.createElement('div');
-            newBlock.className = 'builder-section-block';
-            newBlock.setAttribute('data-id', id);
-            newBlock.innerHTML = `
-                <div class="section-control-bar">
-                    <button type="button" class="btn btn-sm btn-dark text-white p-1 px-2" onclick="moveSectionUp(this)">⬆️</button>
-                    <button type="button" class="btn btn-sm btn-dark text-white p-1 px-2" onclick="moveSectionDown(this)">⬇️</button>
-                    <button type="button" class="btn btn-sm btn-danger text-white p-1 px-2" onclick="deleteSection(this)">🗑️</button>
-                </div>
-                <div class="section-content-editable" contenteditable="true" spellcheck="false">
-                    ${htmlSnippet}
-                </div>
-            `;
+            const parents = [];
+            let curr = component;
+            while (curr) {
+                const tag = curr.get('tagName') || 'div';
+                const id = curr.get('attributes').id ? '#' + curr.get('attributes').id : '';
+                parents.unshift({ tag: tag + id, comp: curr });
+                curr = curr.parent();
+            }
 
-            container.appendChild(newBlock);
-            triggerAutosave();
+            trail.innerHTML = parents.map(p => `<span class="gjs-breadcrumb-item" onclick="selectComponentById('${p.comp.getId()}')">${p.tag}</span>`).join(' > ');
+        });
+
+        function selectComponentById(id) {
+            const comp = editor.DomComponents.findById(id);
+            if (comp) editor.select(comp);
         }
 
-        function extractCanvasElements() {
-            const blocks = document.querySelectorAll('.builder-section-block');
-            const elements = [];
-
-            blocks.forEach((b, idx) => {
-                const id = b.getAttribute('data-id') || 'sec_' + idx;
-                const editable = b.querySelector('.section-content-editable');
-                elements.push({
-                    id: id,
-                    type: 'section',
-                    html: editable ? editable.innerHTML : b.innerHTML,
-                });
-            });
-
-            return { elements: elements };
-        }
-
-        function saveCanvasData() {
+        // SAVE PAGE DATA TO BACKEND
+        function savePageData() {
             const badge = document.getElementById('saveStatusBadge');
-            badge.className = 'badge text-bg-warning ms-2';
+            badge.className = 'badge bg-warning text-dark';
             badge.innerText = 'جاري الحفظ...';
 
-            const structure = extractCanvasElements();
+            const projectData = editor.getProjectData();
+            const html = editor.getHtml();
+            const css = editor.getCss();
+
             const customCss = document.getElementById('modalCustomCss').value;
             const customJs = document.getElementById('modalCustomJs').value;
+
+            const payload = {
+                structure: {
+                    gjs_project: projectData,
+                    html: html,
+                    css: css,
+                    updated_at: new Date().toISOString()
+                },
+                custom_css: customCss || css,
+                custom_js: customJs
+            };
 
             fetch(updateUrl, {
                 method: 'PUT',
@@ -440,48 +945,59 @@
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    structure: structure,
-                    custom_css: customCss,
-                    custom_js: customJs
-                })
+                body: JSON.stringify(payload)
             })
             .then(res => res.json())
             .then(data => {
-                badge.className = 'badge text-bg-success ms-2';
+                badge.className = 'badge bg-success';
                 badge.innerText = 'تم الحفظ (' + new Date().toLocaleTimeString('ar-EG') + ')';
             })
             .catch(err => {
-                badge.className = 'badge text-bg-danger ms-2';
+                badge.className = 'badge bg-danger';
                 badge.innerText = 'خطأ بالحفظ';
             });
         }
 
-        let autosaveTimer = null;
-        function triggerAutosave() {
-            if (!document.getElementById('autosaveToggle').checked) return;
+        // FUNNEL SETTINGS SAVE HANDLER
+        function saveFunnelSettings() {
+            const form = document.getElementById('funnelSettingsForm');
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((val, key) => data[key] = val);
+            data['is_active'] = document.getElementById('isActiveSwitch').checked ? 1 : 0;
 
-            clearTimeout(autosaveTimer);
-            autosaveTimer = setTimeout(() => {
-                const structure = extractCanvasElements();
-                fetch(autosaveUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ structure: structure })
-                });
-            }, 3000);
+            fetch(pageUpdateUrl, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => {
+                if (res.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('funnelSettingsModal')).hide();
+                    alert('تم تحديث إعدادات الـ Funnel والصفحة بنجاح!');
+                } else {
+                    alert('حدث خطأ أثناء تحديث الإعدادات.');
+                }
+            });
         }
 
+        // APPLY CUSTOM CODE FROM MODAL
         function applyCustomCodeModal() {
-            saveCanvasData();
+            savePageData();
             bootstrap.Modal.getInstance(document.getElementById('codeEditorModal')).hide();
         }
 
-        document.getElementById('canvasElementsContainer').addEventListener('input', triggerAutosave);
+        // KEYBOARD SHORTCUT (CTRL + S) FOR QUICK SAVE
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                savePageData();
+            }
+        });
     </script>
 </body>
 </html>

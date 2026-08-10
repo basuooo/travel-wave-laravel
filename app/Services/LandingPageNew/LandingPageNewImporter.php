@@ -84,6 +84,7 @@ class LandingPageNewImporter
         }
 
         $structure = [
+            'html' => $processedHtml,
             'elements' => $analysis['sections'],
             'imported_at' => now()->toIso8601String(),
             'source_zip' => $zipFile->getClientOriginalName(),

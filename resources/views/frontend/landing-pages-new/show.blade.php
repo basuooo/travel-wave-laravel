@@ -23,16 +23,20 @@
 <body class="bg-white text-dark">
 
     <main class="landing-page-new-wrapper">
-        @forelse($elements as $el)
-            <div class="landing-section-item" id="{{ $el['id'] ?? '' }}">
-                {!! $el['html'] ?? '' !!}
-            </div>
-        @empty
-            <div class="container py-5 text-center">
-                <h1 class="fw-bold">{{ $page->title_ar ?: $page->internal_name }}</h1>
-                <p class="lead text-muted">مرحباً بك في صفحة الهبوط.</p>
-            </div>
-        @endforelse
+        @if(!empty($structure['html']))
+            {!! $structure['html'] !!}
+        @else
+            @forelse($elements as $el)
+                <div class="landing-section-item" id="{{ $el['id'] ?? '' }}">
+                    {!! $el['html'] ?? '' !!}
+                </div>
+            @empty
+                <div class="container py-5 text-center">
+                    <h1 class="fw-bold">{{ $page->title_ar ?: $page->internal_name }}</h1>
+                    <p class="lead text-muted">مرحباً بك في صفحة الهبوط.</p>
+                </div>
+            @endforelse
+        @endif
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
