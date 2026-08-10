@@ -32,6 +32,18 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFive();
 
+        // Purge compiled view cache files dynamically to force instant view compilation on live server
+        try {
+            $viewsPath = storage_path('framework/views');
+            if (is_dir($viewsPath)) {
+                foreach (glob($viewsPath . '/*.php') as $file) {
+                    @unlink($file);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignore if storage permissions restrict deletion
+        }
+
         $this->ensureSchemaOnly();
 
         view()->composer('*', function ($view) {

@@ -82,8 +82,8 @@
     [
         'title' => __('admin.nav_marketing'),
         'items' => array_values(array_filter([
-            $adminUser?->hasPermission('marketing.manage') ? ['label' => '🚀 Landing Page Builder New', 'route' => 'admin.landing-pages-new.dashboard', 'match' => 'admin.landing-pages-new.*'] : null,
-            $adminUser?->hasPermission('marketing.manage') ? ['label' => '🚀 Landing Page Builder (Old)', 'route' => 'admin.landing-pages.dashboard', 'match' => 'admin.landing-pages.*'] : null,
+            ['label' => '🚀 Landing Page Builder New', 'route' => 'admin.landing-pages-new.dashboard', 'match' => 'admin.landing-pages-new.*'],
+            ['label' => 'Landing Page 🚀 Builder', 'route' => 'admin.landing-pages.dashboard', 'match' => 'admin.landing-pages.*'],
             $adminUser?->hasPermission('marketing.manage') ? ['label' => __('admin.marketing_campaigns'), 'route' => 'admin.marketing-campaigns.index', 'match' => 'admin.marketing-campaigns.*'] : null,
             $adminUser?->hasPermission('marketing.manage') ? ['label' => __('admin.marketing_manager'), 'route' => 'admin.marketing-landing-pages.index', 'match' => 'admin.marketing-landing-pages.*'] : null,
             $adminUser?->hasPermission('tracking.manage') ? ['label' => __('admin.tracking_manager'), 'route' => 'admin.tracking-integrations.index', 'match' => 'admin.tracking-integrations.*'] : null,
@@ -152,6 +152,11 @@
             <nav class="nav flex-column gap-1">
                 @if($adminUser?->hasPermission('dashboard.access'))
                     <a class="nav-link rounded px-3 py-2 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">{{ __('admin.dashboard') }}</a>
+                    @if($adminUser?->hasPermission('marketing.manage') || $adminUser?->is_admin)
+                        <a class="nav-link rounded px-3 py-2 fw-bold text-warning {{ request()->routeIs('admin.landing-pages-new.*') ? 'active' : '' }}" href="{{ \Illuminate\Support\Facades\Route::has('admin.landing-pages-new.dashboard') ? route('admin.landing-pages-new.dashboard') : url('/admin/landing-pages-new/dashboard') }}">
+                            🚀 Landing Page Builder New
+                        </a>
+                    @endif
                     @if($adminUser?->hasPermission('reports.view'))
                         <a class="nav-link rounded px-3 py-2 {{ request()->routeIs('admin.kpi.*') ? 'active' : '' }}" href="{{ route('admin.kpi.dashboard') }}">{{ __('admin.kpi_dashboard') }}</a>
                     @endif
