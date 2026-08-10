@@ -103,4 +103,14 @@ class DashboardController extends Controller
             'latestCountries' => VisaCountry::latest()->limit(5)->get(),
         ]);
     }
+
+    public function clearCache()
+    {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+            return redirect()->back()->with('success', 'تم مسح الكاش والتخزين المؤقت للنظام بنجاح!');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'حدث خطأ أثناء مسح الكاش: ' . $e->getMessage());
+        }
+    }
 }

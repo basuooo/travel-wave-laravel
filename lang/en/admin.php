@@ -194,6 +194,7 @@ return [
     'navigation' => 'Navigation',
     'inquiries' => 'Inquiries',
     'view_website' => 'View Website',
+    'clear_cache' => 'Clear Cache',
     'logout' => 'Logout',
     'create_tracking' => 'Create Tracking Integration',
     'edit_tracking' => 'Edit Tracking Integration',

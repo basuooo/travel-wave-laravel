@@ -103,6 +103,7 @@ return [
     'navigation' => 'إدارة القوائم والتنقل',
     'inquiries' => 'الاستفسارات',
     'view_website' => 'عرض الموقع',
+    'clear_cache' => 'مسح الكاش',
     'logout' => 'تسجيل الخروج',
     'create_tracking' => 'إضافة أداة تتبع',
     'edit_tracking' => 'تعديل أداة التتبع',

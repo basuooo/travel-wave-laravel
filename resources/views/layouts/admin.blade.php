@@ -265,6 +265,12 @@
                             <span>{{ __('admin.admin_dashboard') }}</span>
                         </div>
                     </div>
+                    <form action="{{ route('admin.clear-cache') }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت تأكد من تنفيذ مسح كاش النظام؟');">
+                        @csrf
+                        <button type="submit" class="btn btn-warning text-dark fw-bold d-inline-flex align-items-center gap-1" title="مسح التخزين المؤقت والنظام">
+                            <i class="bi bi-arrow-repeat"></i> {{ __('admin.clear_cache') }}
+                        </button>
+                    </form>
                     <a class="btn btn-primary" href="{{ route('home') }}" target="_blank">{{ __('admin.view_website') }}</a>
                 </div>
             </div>

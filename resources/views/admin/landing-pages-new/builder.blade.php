@@ -660,7 +660,7 @@
             }
 
             // Automatically convert {{slides #}} and non-editable placeholders to native editable components
-            $gallerySliderSnippet = '<div class="product-gallery-slider my-4 text-center"><div class="main-image-preview mb-3 bg-light p-2 rounded-4 shadow-sm"><img src="https://via.placeholder.com/800x600" id="mainGalleryImage" class="img-fluid rounded-3 max-h-500 w-100 object-fit-cover" alt="معرض صور المنتج"></div><div class="row g-2 justify-content-center thumbnails-row"><div class="col-2"><img src="https://via.placeholder.com/150?text=1" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(&quot;mainGalleryImage&quot;).src=this.src" alt="صورة 1"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=2" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(&quot;mainGalleryImage&quot;).src=this.src" alt="صورة 2"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=3" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(&quot;mainGalleryImage&quot;).src=this.src" alt="صورة 3"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=4" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(&quot;mainGalleryImage&quot;).src=this.src" alt="صورة 4"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=5" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(&quot;mainGalleryImage&quot;).src=this.src" alt="صورة 5"></div></div></div>';
+            $gallerySliderSnippet = '<div class="product-gallery-slider my-4 text-center"><div class="main-image-preview mb-3 bg-light p-2 rounded-4 shadow-sm"><img src="https://via.placeholder.com/800x600" id="mainGalleryImage" class="img-fluid rounded-3 max-h-500 w-100 object-fit-cover" alt="معرض صور المنتج"></div><div class="row g-2 justify-content-center thumbnails-row"><div class="col-2"><img src="https://via.placeholder.com/150?text=1" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 1"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=2" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 2"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=3" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 3"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=4" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 4"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=5" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 5"></div></div></div>';
 
             $initialHtml = preg_replace('/\{\{\s*slides\s*#?\s*\}\}/i', $gallerySliderSnippet, $initialHtml);
             $initialHtml = preg_replace('/contenteditable=["\']false["\']/i', 'contenteditable="true"', $initialHtml);
@@ -929,14 +929,14 @@
             content: `
                 <div class="product-gallery-slider my-4 text-center">
                     <div class="main-image-preview mb-3 bg-light p-2 rounded-4 shadow-sm">
-                        <img src="https://via.placeholder.com/800x600?text=%D0%A5%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3+%D0%A1%D0%BE%D1%80%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0+%D0%A1%D0%BE%D1%80%D1%82" id="mainGalleryImage" class="img-fluid rounded-3 max-h-500 w-100 object-fit-cover" alt="معرض صور المنتج">
+                        <img src="https://via.placeholder.com/800x600" id="mainGalleryImage" class="img-fluid rounded-3 max-h-500 w-100 object-fit-cover" alt="معرض صور المنتج">
                     </div>
                     <div class="row g-2 justify-content-center thumbnails-row">
-                        <div class="col-2"><img src="https://via.placeholder.com/150?text=1" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById('mainGalleryImage').src=this.src" alt="صورة 1"></div>
-                        <div class="col-2"><img src="https://via.placeholder.com/150?text=2" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById('mainGalleryImage').src=this.src" alt="صورة 2"></div>
-                        <div class="col-2"><img src="https://via.placeholder.com/150?text=3" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById('mainGalleryImage').src=this.src" alt="صورة 3"></div>
-                        <div class="col-2"><img src="https://via.placeholder.com/150?text=4" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById('mainGalleryImage').src=this.src" alt="صورة 4"></div>
-                        <div class="col-2"><img src="https://via.placeholder.com/150?text=5" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById('mainGalleryImage').src=this.src" alt="صورة 5"></div>
+                        <div class="col-2"><img src="https://via.placeholder.com/150?text=1" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 1"></div>
+                        <div class="col-2"><img src="https://via.placeholder.com/150?text=2" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 2"></div>
+                        <div class="col-2"><img src="https://via.placeholder.com/150?text=3" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 3"></div>
+                        <div class="col-2"><img src="https://via.placeholder.com/150?text=4" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 4"></div>
+                        <div class="col-2"><img src="https://via.placeholder.com/150?text=5" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 5"></div>
                     </div>
                 </div>
             `
@@ -953,7 +953,7 @@
                     <form action="{{ route('inquiries.store') }}" method="POST" class="mb-4">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="landing_page_id" value="{{ $page->id }}">
-                        <input type="hidden" name="lead_form_id" value="{{ $page->assigned_lead_form_id }}">
+                        <input type="hidden" name="lead_form_id" value="{{ $page->assigned_lead_form_id ?? '' }}">
 
                         <div class="mb-3 position-relative">
                             <input type="text" name="name" class="form-control form-control-lg bg-light" placeholder="الاسم الكامل" required>
@@ -1035,7 +1035,7 @@
                     <form action="{{ route('inquiries.store') }}" method="POST">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="landing_page_id" value="{{ $page->id }}">
-                        <input type="hidden" name="lead_form_id" value="{{ $page->assigned_lead_form_id }}">
+                        <input type="hidden" name="lead_form_id" value="{{ $page->assigned_lead_form_id ?? '' }}">
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">الاسم الكامل</label>
@@ -1272,6 +1272,17 @@
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 savePageData();
+            }
+        });
+
+        // GALLERY THUMBNAIL CLICK DELEGATION
+        document.addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('gallery-thumb')) {
+                const wrapper = e.target.closest('.product-gallery-slider');
+                if (wrapper) {
+                    const mainImg = wrapper.querySelector('#mainGalleryImage') || wrapper.querySelector('.main-image-preview img');
+                    if (mainImg) mainImg.src = e.target.src;
+                }
             }
         });
     </script>
