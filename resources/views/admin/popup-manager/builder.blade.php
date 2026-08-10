@@ -143,7 +143,7 @@
                         <button type="button" class="btn btn-sm btn-primary w-100 fw-bold" onclick="insertOrUpdateImage()"><i class="bi bi-plus-circle me-1"></i> إدراج / استبدال الصورة</button>
                     </div>
 
-                    <!-- 2. EMOJI GRID & EXTERNAL COPY/PASTE INPUT -->
+                    <!-- 2. EMOJI GRID & GETEMOJI.COM ACTIVE EXTERNAL LINK -->
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
                         <label class="form-label text-info fw-bold small mb-2"><i class="bi bi-emoji-smile me-1"></i> مكتبة الإيموجي المشهورة</label>
                         <div class="emoji-grid mb-3">
@@ -170,11 +170,16 @@
                             <button type="button" class="emoji-btn" onclick="addEmoji('👑')">👑</button>
                         </div>
 
-                        <label class="form-label text-white-50 text-xs fw-bold">أو انسخ/الصق أي إيموجي من مواقع خارجية (مثل getemoji.com)</label>
-                        <div class="input-group input-group-sm">
+                        <label class="form-label text-white-50 text-xs fw-bold">أو أدخل/الصق إيموجي مخصص:</label>
+                        <div class="input-group input-group-sm mb-2">
                             <input type="text" id="externalEmojiInput" class="form-control bg-dark text-white border-secondary" placeholder="الصق الإيموجي هنا (Ctrl+V)...">
                             <button type="button" class="btn btn-primary" onclick="addCustomExternalEmoji()"><i class="bi bi-plus-lg"></i> إدراج</button>
                         </div>
+
+                        <!-- ACTIVE LINK TO GETEMOJI.COM -->
+                        <a href="https://getemoji.com" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-warning w-100 fw-bold">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> 🔗 فتح موقع getemoji.com للنسخ المباشر
+                        </a>
                     </div>
 
                     <!-- 3. BUTTON STYLING & ACTION LINK (التحكم بالزر والرابط) -->
@@ -294,7 +299,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: EXIT CONFIRMATION WARNING & 10+ WARNING PRESETS -->
+                <!-- TAB 4: EXIT CONFIRMATION WARNING & LIVE PREVIEW -->
                 <div id="tabWarning" class="tab-pane">
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -302,6 +307,16 @@
                             <div class="form-check form-switch mb-0">
                                 <input class="form-check-input" type="checkbox" id="exitWarningToggle" @checked($popup->structure['exit_warning']['enable'] ?? false)>
                             </div>
+                        </div>
+
+                        <!-- LIVE PREVIEW BUTTON FOR WARNING POPUP -->
+                        <div class="d-flex gap-2 mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-warning w-100 fw-bold" onclick="previewExitWarningLive()">
+                                👁️ معاينة شكل تحذير الإغلاق في الشاشة
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="restoreOriginalPopupPreview()" title="العودة لمعاينة الـ Popup الأصلي">
+                                ↺ العودة
+                            </button>
                         </div>
 
                         <label class="form-label text-white-50 text-xs fw-bold">اختر من 10+ تحذيرات جاهزة:</label>
@@ -321,12 +336,12 @@
 
                         <div class="mb-2">
                             <label class="form-label text-white-50 text-xs fw-bold">عنوان التحذير</label>
-                            <input type="text" id="exitWarningTitle" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->structure['exit_warning']['title'] ?? '⚠️ هل أنت متأكد من الإلغاء؟' }}">
+                            <input type="text" id="exitWarningTitle" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->structure['exit_warning']['title'] ?? '⚠️ هل أنت متأكد من الإلغاء؟' }}" onkeyup="previewExitWarningLive()">
                         </div>
 
                         <div class="mb-2">
                             <label class="form-label text-white-50 text-xs fw-bold">رسالة التحذير</label>
-                            <textarea id="exitWarningMsg" class="form-control form-control-sm bg-dark text-white border-secondary" rows="3">{{ $popup->structure['exit_warning']['msg'] ?? 'بإغلاقك لهذه النافذة ستخسر فرصة الحصول على الخصم الحصري اليوم!' }}</textarea>
+                            <textarea id="exitWarningMsg" class="form-control form-control-sm bg-dark text-white border-secondary" rows="3" onkeyup="previewExitWarningLive()">{{ $popup->structure['exit_warning']['msg'] ?? 'بإغلاقك لهذه النافذة ستخسر فرصة الحصول على الخصم الحصري اليوم!' }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -373,6 +388,9 @@
     <script>
         const updateUrl = "{{ route('admin.popups.builder.update', $popup) }}";
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        let originalPopupHtml = `{!! is_array($popup->structure) ? ($popup->structure['html'] ?? '') : '' !!}`;
+        let isPreviewingWarning = false;
 
         function showTab(tabId, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -394,10 +412,13 @@
         }
 
         function updateCanvasFromHtml(html) {
+            isPreviewingWarning = false;
+            originalPopupHtml = html;
             document.getElementById('popupLiveContent').innerHTML = html;
         }
 
         function addEmoji(emoji) {
+            if (isPreviewingWarning) restoreOriginalPopupPreview();
             const liveContent = document.getElementById('popupLiveContent');
             const h = liveContent.querySelector('h1, h2, h3, h4, h5, h6');
             if (h) {
@@ -405,6 +426,7 @@
             } else {
                 liveContent.innerHTML = `<h3>${emoji}</h3>` + liveContent.innerHTML;
             }
+            originalPopupHtml = liveContent.innerHTML;
             document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
         }
 
@@ -424,6 +446,7 @@
         }
 
         function insertOrUpdateImage() {
+            if (isPreviewingWarning) restoreOriginalPopupPreview();
             const url = document.getElementById('popupImageUrl').value.trim();
             if (!url) { alert('يرجى إدخال رابط الصورة أو اختيارها من المكتبة.'); return; }
             const liveContent = document.getElementById('popupLiveContent');
@@ -433,17 +456,21 @@
             } else {
                 liveContent.innerHTML = `<img src="${url}" class="img-fluid rounded-3 mb-3 w-100 object-fit-cover" style="max-height: 250px;">` + liveContent.innerHTML;
             }
+            originalPopupHtml = liveContent.innerHTML;
             document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
         }
 
         function updateButtonText(text) {
+            if (isPreviewingWarning) restoreOriginalPopupPreview();
             const liveContent = document.getElementById('popupLiveContent');
             const btn = liveContent.querySelector('a, button');
             if (btn) btn.innerText = text;
+            originalPopupHtml = liveContent.innerHTML;
             document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
         }
 
         function updateButtonUrl(url) {
+            if (isPreviewingWarning) restoreOriginalPopupPreview();
             const liveContent = document.getElementById('popupLiveContent');
             let btn = liveContent.querySelector('a');
             if (btn) {
@@ -458,10 +485,12 @@
                     buttonEl.parentNode.replaceChild(newLink, buttonEl);
                 }
             }
+            originalPopupHtml = liveContent.innerHTML;
             document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
         }
 
         function updateButtonStyles() {
+            if (isPreviewingWarning) restoreOriginalPopupPreview();
             const color = document.getElementById('btnBgColor').value;
             const fontSize = document.getElementById('btnFontSize').value;
             const liveContent = document.getElementById('popupLiveContent');
@@ -471,11 +500,13 @@
                 btn.style.borderColor = color;
                 btn.style.fontSize = fontSize;
             }
+            originalPopupHtml = liveContent.innerHTML;
             document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
         }
 
         function applyPresetTemplate(id) {
             if (!id) return;
+            isPreviewingWarning = false;
             const liveContent = document.getElementById('popupLiveContent');
             const btnUrl = document.getElementById('btnUrlControl') ? document.getElementById('btnUrlControl').value || '#lead-form' : '#lead-form';
 
@@ -493,8 +524,10 @@
             };
 
             if (templates[id]) {
+                originalPopupHtml = templates[id];
                 liveContent.innerHTML = templates[id];
-                document.getElementById('rawHtmlCode').value = templates[id];
+                const rawInput = document.getElementById('rawHtmlCode');
+                if (rawInput) rawInput.value = templates[id];
             }
         }
 
@@ -520,7 +553,33 @@
                 if (titleInput) titleInput.value = warnings[id].title;
                 if (msgInput) msgInput.value = warnings[id].msg;
                 if (toggle) toggle.checked = true;
+
+                previewExitWarningLive();
             }
+        }
+
+        function previewExitWarningLive() {
+            isPreviewingWarning = true;
+            const title = document.getElementById('exitWarningTitle') ? document.getElementById('exitWarningTitle').value : '⚠️ هل أنت متأكد من الإلغاء؟';
+            const msg = document.getElementById('exitWarningMsg') ? document.getElementById('exitWarningMsg').value : 'بإغلاقك لهذه النافذة ستخسر فرصة الحصول على الخصم الحصري اليوم!';
+            const liveContent = document.getElementById('popupLiveContent');
+
+            liveContent.innerHTML = `
+                <div class="p-4 text-center bg-white rounded-4 border border-danger">
+                    <div class="fs-1 mb-2">⚠️</div>
+                    <h3 class="fw-bold text-danger mb-2">${title}</h3>
+                    <p class="text-muted mb-4">${msg}</p>
+                    <div class="d-flex flex-column gap-2">
+                        <button type="button" class="btn btn-success btn-lg rounded-pill fw-bold">الاستمرار والاستفادة بالخصم 🎁</button>
+                        <button type="button" class="btn btn-link text-muted">إلغاء وخسارة العرض الآن</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function restoreOriginalPopupPreview() {
+            isPreviewingWarning = false;
+            document.getElementById('popupLiveContent').innerHTML = originalPopupHtml;
         }
 
         function savePopupAllData() {
@@ -529,7 +588,11 @@
             badge.innerText = 'جاري الحفظ...';
 
             try {
-                const html = document.getElementById('popupLiveContent').innerHTML;
+                if (isPreviewingWarning) {
+                    restoreOriginalPopupPreview();
+                }
+
+                const htmlToSave = originalPopupHtml || document.getElementById('popupLiveContent').innerHTML;
 
                 const btnUrlEl = document.getElementById('btnUrlControl');
                 const exitToggleEl = document.getElementById('exitWarningToggle');
@@ -559,7 +622,7 @@
                         mode: document.getElementById('frequencySelect') ? document.getElementById('frequencySelect').value : 'once_per_session'
                     },
                     structure: {
-                        html: html,
+                        html: htmlToSave,
                         btn_url: btnUrlEl ? btnUrlEl.value : '#lead-form',
                         exit_warning: {
                             enable: exitToggleEl ? exitToggleEl.checked : false,

@@ -152,6 +152,10 @@ class PopupManagerController extends Controller
             'custom_js' => ['nullable', 'string'],
         ]);
 
+        $incomingStructure = $request->input('structure');
+        $currentStructure = $popup->structure ?? [];
+        $mergedStructure = is_array($incomingStructure) ? array_merge(is_array($currentStructure) ? $currentStructure : [], $incomingStructure) : $currentStructure;
+
         $popup->update([
             'name' => $validated['name'] ?? $popup->name,
             'is_active' => $request->has('is_active') ? $request->boolean('is_active') : $popup->is_active,
@@ -167,7 +171,7 @@ class PopupManagerController extends Controller
             'overlay_settings' => $validated['overlay_settings'] ?? $popup->overlay_settings,
             'close_button_settings' => $validated['close_button_settings'] ?? $popup->close_button_settings,
             'animation_settings' => $validated['animation_settings'] ?? $popup->animation_settings,
-            'structure' => $validated['structure'] ?? $popup->structure,
+            'structure' => $mergedStructure,
             'custom_css' => $validated['custom_css'] ?? $popup->custom_css,
             'custom_js' => $validated['custom_js'] ?? $popup->custom_js,
             'updated_by' => auth()->id(),
