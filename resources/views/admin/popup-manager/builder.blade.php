@@ -39,11 +39,13 @@
 
         .form-switch .form-check-input { width: 2.5em; height: 1.25em; cursor: pointer; }
         .page-list-scroll { max-height: 160px; overflow-y: auto; background: #030712; border-radius: 8px; padding: 0.5rem; }
-        .emoji-bar { display: flex; gap: 6px; overflow-x: auto; padding: 6px; background: #030712; border-radius: 8px; }
-        .emoji-btn { background: #1f2937; border: 1px solid #374151; font-size: 1.2rem; border-radius: 6px; padding: 2px 8px; cursor: pointer; color: white; }
-        .emoji-btn:hover { background: #374151; }
-        .media-grid-item { cursor: pointer; border: 2px solid transparent; transition: all 0.2s; border-radius: 8px; overflow: hidden; }
-        .media-grid-item:hover { border-color: #3b82f6; transform: scale(1.03); }
+        
+        .emoji-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background: #030712; border-radius: 8px; padding: 6px; }
+        .emoji-btn { background: #1f2937; border: 1px solid #374151; font-size: 1.25rem; border-radius: 6px; padding: 4px; cursor: pointer; color: white; text-align: center; }
+        .emoji-btn:hover { background: #3b82f6; }
+        
+        .media-grid-item { cursor: pointer; border: 2px solid #374151; transition: all 0.2s; border-radius: 8px; overflow: hidden; background: #1f2937; }
+        .media-grid-item:hover { border-color: #3b82f6; transform: scale(1.04); }
     </style>
 </head>
 <body>
@@ -98,41 +100,24 @@
 
             <div class="tab-content">
 
-                <!-- TAB 1: 10+ READY POPUP PRESETS & TEMPLATES -->
+                <!-- TAB 1: 10+ READY POPUP PRESETS IN A CLEAN DROPDOWN -->
                 <div id="tabPresets" class="tab-pane active">
-                    <h6 class="fw-bold text-info small mb-3"><i class="bi bi-palette me-1"></i> اختر من 10+ تصاميم جاهزة واحترافية:</h6>
-                    
-                    <div class="d-flex flex-column gap-2 mb-4">
-                        <button type="button" class="btn btn-sm btn-outline-warning text-start p-2 rounded-3" onclick="applyPresetTemplate(1)">
-                            🔥 1. عرض الخصم الذهبي (Golden Discount Modal)
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-info text-start p-2 rounded-3" onclick="applyPresetTemplate(2)">
-                            ✈️ 2. استشارة سريعة للتأشيرة (Visa Fast Consultation)
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger text-start p-2 rounded-3" onclick="applyPresetTemplate(3)">
-                            ⏳ 3. عداد تنازلي طارئ (Urgent Countdown Offer)
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-success text-start p-2 rounded-3" onclick="applyPresetTemplate(4)">
-                            💬 4. شات واتساب مباشر (Floating WhatsApp Chat)
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-primary text-start p-2 rounded-3" onclick="applyPresetTemplate(5)">
-                            🎁 5. هدية كود خصم (Coupon Gift Box)
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-light text-start p-2 rounded-3" onclick="applyPresetTemplate(6)">
-                            📝 6. نموذج طلب سريع (Quick Lead Form Card)
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-warning text-start p-2 rounded-3" onclick="applyPresetTemplate(7)">
-                            📢 7. تنويه هام / إعلان (Important Announcement)
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-info text-start p-2 rounded-3" onclick="applyPresetTemplate(8)">
-                            🚀 8. حزمة توفير (Saver Bundle Offer)
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-success text-start p-2 rounded-3" onclick="applyPresetTemplate(9)">
-                            🌟 9. صورة بنر كاملة (Full Banner Image Modal)
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary text-start p-2 rounded-3" onclick="applyPresetTemplate(10)">
-                            💎 10. دعوة حصريّة VIP (Exclusive VIP Invitation)
-                        </button>
+                    <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
+                        <h6 class="fw-bold text-info small mb-2"><i class="bi bi-palette me-1"></i> اختر شكل القالب المناسب (10+ قوالب جاهزة):</h6>
+                        <select id="presetTemplateSelect" class="form-select form-select-lg bg-secondary text-white border-0" onchange="applyPresetTemplate(this.value)">
+                            <option value="">-- اختر من القائمة لتطبيق القالب --</option>
+                            <option value="1">🔥 1. عرض الخصم الذهبي (Golden Discount Modal)</option>
+                            <option value="2">✈️ 2. استشارة سريعة للتأشيرة (Visa Fast Consultation)</option>
+                            <option value="3">⏳ 3. عداد تنازلي طارئ (Urgent Countdown Offer)</option>
+                            <option value="4">💬 4. شات واتساب مباشر (Floating WhatsApp Chat)</option>
+                            <option value="5">🎁 5. هدية كود خصم (Coupon Gift Box)</option>
+                            <option value="6">📝 6. نموذج طلب سريع (Quick Lead Form Card)</option>
+                            <option value="7">📢 7. تنويه هام / إعلان (Important Announcement)</option>
+                            <option value="8">🚀 8. حزمة توفير (Saver Bundle Offer)</option>
+                            <option value="9">🌟 9. صورة بنر كاملة (Full Banner Image Modal)</option>
+                            <option value="10">💎 10. دعوة حصريّة VIP (Exclusive VIP Invitation)</option>
+                        </select>
+                        <small class="text-muted text-xs d-block mt-2">اختيار القالب يطبق التنسيق والمكونات فوراً في مساحة المعاينة الحية.</small>
                     </div>
                 </div>
 
@@ -151,17 +136,17 @@
                         <div class="mb-3">
                             <label class="form-label text-white-50 text-xs fw-bold">الخيار 2: اختيار من مكتبة وسائط السيستم</label>
                             <button type="button" class="btn btn-sm btn-outline-info w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#mediaLibraryModal">
-                                📂 فتح مكتبة الصور بالموقع
+                                📂 فتح مكتبة الصور المتاحة بموقعك
                             </button>
                         </div>
 
                         <button type="button" class="btn btn-sm btn-primary w-100 fw-bold" onclick="insertOrUpdateImage()"><i class="bi bi-plus-circle me-1"></i> إدراج / استبدال الصورة</button>
                     </div>
 
-                    <!-- 2. EMOJI BAR PICKER -->
+                    <!-- 2. EMOJI GRID & EXTERNAL COPY/PASTE INPUT -->
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
-                        <label class="form-label text-info fw-bold small mb-2"><i class="bi bi-emoji-smile me-1"></i> شريط الإيموجي (انقر للإضافة للعنوان)</label>
-                        <div class="emoji-bar mb-1">
+                        <label class="form-label text-info fw-bold small mb-2"><i class="bi bi-emoji-smile me-1"></i> مكتبة الإيموجي المشهورة</label>
+                        <div class="emoji-grid mb-3">
                             <button type="button" class="emoji-btn" onclick="addEmoji('🔥')">🔥</button>
                             <button type="button" class="emoji-btn" onclick="addEmoji('⚠️')">⚠️</button>
                             <button type="button" class="emoji-btn" onclick="addEmoji('🎁')">🎁</button>
@@ -169,15 +154,32 @@
                             <button type="button" class="emoji-btn" onclick="addEmoji('💎')">💎</button>
                             <button type="button" class="emoji-btn" onclick="addEmoji('⏳')">⏳</button>
                             <button type="button" class="emoji-btn" onclick="addEmoji('🌟')">🌟</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('✨')">✨</button>
                             <button type="button" class="emoji-btn" onclick="addEmoji('✈️')">✈️</button>
                             <button type="button" class="emoji-btn" onclick="addEmoji('💬')">💬</button>
                             <button type="button" class="emoji-btn" onclick="addEmoji('🛑')">🛑</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('🚨')">🚨</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('🛒')">🛒</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('🏷️')">🏷️</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('📍')">📍</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('📞')">📞</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('📌')">📌</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('🎯')">🎯</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('💯')">💯</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('🎉')">🎉</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('👑')">👑</button>
+                        </div>
+
+                        <label class="form-label text-white-50 text-xs fw-bold">أو انسخ/الصق أي إيموجي من مواقع خارجية (مثل getemoji.com)</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="externalEmojiInput" class="form-control bg-dark text-white border-secondary" placeholder="الصق الإيموجي هنا (Ctrl+V)...">
+                            <button type="button" class="btn btn-primary" onclick="addCustomExternalEmoji()"><i class="bi bi-plus-lg"></i> إدراج</button>
                         </div>
                     </div>
 
                     <!-- 3. BUTTON STYLING & ACTION LINK (التحكم بالزر والرابط) -->
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
-                        <h6 class="fw-bold text-success small mb-2"><i class="bi bi-cursor-fill me-1"></i> التحكم في الزر والرابط الفعلي (Button Action)</h6>
+                        <h6 class="fw-bold text-success small mb-2"><i class="bi bi-cursor-fill me-1"></i> التحكم في الزر ورابط التوجيه المباشر</h6>
                         
                         <div class="mb-2">
                             <label class="form-label text-white-50 text-xs fw-bold">نص الكتابة على الزر</label>
@@ -187,7 +189,6 @@
                         <div class="mb-2">
                             <label class="form-label text-white-50 text-xs fw-bold">رابط التوجيه عند النقر على الزر (Button URL)</label>
                             <input type="text" id="btnUrlControl" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="مثال: #lead-form أو https://wa.me/2010..." value="{{ $popup->structure['btn_url'] ?? '#lead-form' }}" onkeyup="updateButtonUrl(this.value)">
-                            <small class="text-muted text-xs d-block mt-1">يمكنك وضع رابط واتساب، رابط صفحة أخرى، أو `#lead-form` للانتقال للنموذج.</small>
                         </div>
 
                         <div class="row g-2 mb-2">
@@ -335,25 +336,31 @@
 
     </div>
 
-    <!-- MEDIA LIBRARY MODAL -->
+    <!-- MEDIA LIBRARY MODAL WITH REAL STORAGE URLS -->
     <div class="modal fade" id="mediaLibraryModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content bg-dark text-white border-secondary">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title fw-bold">📂 مكتبة الوسائط والصور بالموقع</h5>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-folder-fill text-warning me-2"></i> مكتبة صور السيستم المتاحة بالموقع</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="max-height: 450px; overflow-y: auto;">
                     <div class="row g-3">
                         @forelse($assets as $asset)
-                            <div class="col-3">
-                                <div class="media-grid-item bg-secondary p-1 text-center" onclick="selectMediaAsset('{{ asset('storage/' . $asset->file_path) }}')">
-                                    <img src="{{ asset('storage/' . $asset->file_path) }}" class="img-fluid rounded max-h-100 object-fit-cover" alt="Asset">
-                                    <span class="d-block text-truncate text-white-50 text-xs mt-1">{{ $asset->original_name }}</span>
+                            @php
+                                $imgUrl = $asset->storageUrl();
+                            @endphp
+                            <div class="col-4 col-md-3">
+                                <div class="media-grid-item p-2 text-center" onclick="selectMediaAsset('{{ $imgUrl }}')">
+                                    <img src="{{ $imgUrl }}" class="img-fluid rounded max-h-120 object-fit-cover w-100" alt="Asset" onerror="this.src='https://via.placeholder.com/200x150?text=Media+Image'">
+                                    <span class="d-block text-truncate text-white-50 text-xs mt-2">{{ $asset->original_path ?: $asset->filename }}</span>
                                 </div>
                             </div>
                         @empty
-                            <div class="col-12 text-center py-4 text-white-50">لا توجد صور مرفوعة بالمكتبة حالياً. يمكنك استخدام رابط صورة مباشر.</div>
+                            <div class="col-12 text-center py-5 text-white-50">
+                                <i class="bi bi-images fs-1 d-block mb-2 text-muted"></i>
+                                يمكنك استخدام رابط صورة مباشر بالخانة الجانبية.
+                            </div>
                         @endforelse
                     </div>
                 </div>
@@ -375,12 +382,15 @@
         }
 
         function toggleTriggerOptions(mode) {
-            document.getElementById('randomTimeBox').style.display = (mode === 'random_time') ? 'block' : 'none';
-            document.getElementById('fixedTimeBox').style.display = (mode === 'delay') ? 'block' : 'none';
+            const randBox = document.getElementById('randomTimeBox');
+            const fixBox = document.getElementById('fixedTimeBox');
+            if (randBox) randBox.style.display = (mode === 'random_time') ? 'block' : 'none';
+            if (fixBox) fixBox.style.display = (mode === 'delay') ? 'block' : 'none';
         }
 
         function togglePagesList(mode) {
-            document.getElementById('specificPagesContainer').style.display = (mode === 'specific') ? 'block' : 'none';
+            const container = document.getElementById('specificPagesContainer');
+            if (container) container.style.display = (mode === 'specific') ? 'block' : 'none';
         }
 
         function updateCanvasFromHtml(html) {
@@ -396,6 +406,13 @@
                 liveContent.innerHTML = `<h3>${emoji}</h3>` + liveContent.innerHTML;
             }
             document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
+        }
+
+        function addCustomExternalEmoji() {
+            const input = document.getElementById('externalEmojiInput');
+            if (!input || !input.value.trim()) { alert('يرجى لصق الإيموجي في الخانة أولاً.'); return; }
+            addEmoji(input.value.trim());
+            input.value = '';
         }
 
         function selectMediaAsset(url) {
@@ -458,8 +475,9 @@
         }
 
         function applyPresetTemplate(id) {
+            if (!id) return;
             const liveContent = document.getElementById('popupLiveContent');
-            const btnUrl = document.getElementById('btnUrlControl').value || '#lead-form';
+            const btnUrl = document.getElementById('btnUrlControl') ? document.getElementById('btnUrlControl').value || '#lead-form' : '#lead-form';
 
             const templates = {
                 1: `<div class="p-4 bg-white rounded-4 text-center"><span class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-2 fw-bold">🔥 عرض حصري اليوم</span><h2 class="fw-bold text-dark mb-2">خصم 20% على خدمات التأشيرات</h2><p class="text-muted mb-4">أدخل بياناتك الآن للاستفادة من الخصم قبل انتهاء العداد.</p><a href="${btnUrl}" class="btn btn-warning btn-lg w-100 rounded-pill fw-bold text-dark shadow py-3">استلم الكوبون والخصم الآن 🎁</a></div>`,
@@ -481,6 +499,7 @@
         }
 
         function applyExitWarningPreset(id) {
+            if (!id) return;
             const warnings = {
                 1: { title: "⚠️ هل أنت متأكد من خسارة الخصم 20% الآن؟", msg: "بإغلاقك لهذه النافذة ستفقد خصم الـ 20% المتاح لليوم فقط." },
                 2: { title: "⏳ هذا العرض سينتهي ولن يظهر لك مجدداً!", msg: "الفرصة متاحة فقط للزوار الحاليين، هل ترغب بالاستمرار بالفقد؟" },
@@ -495,9 +514,12 @@
             };
 
             if (warnings[id]) {
-                document.getElementById('exitWarningTitle').value = warnings[id].title;
-                document.getElementById('exitWarningMsg').value = warnings[id].msg;
-                document.getElementById('exitWarningToggle').checked = true;
+                const titleInput = document.getElementById('exitWarningTitle');
+                const msgInput = document.getElementById('exitWarningMsg');
+                const toggle = document.getElementById('exitWarningToggle');
+                if (titleInput) titleInput.value = warnings[id].title;
+                if (msgInput) msgInput.value = warnings[id].msg;
+                if (toggle) toggle.checked = true;
             }
         }
 
@@ -506,56 +528,68 @@
             badge.className = 'badge bg-warning text-dark';
             badge.innerText = 'جاري الحفظ...';
 
-            const html = document.getElementById('popupLiveContent').innerHTML;
+            try {
+                const html = document.getElementById('popupLiveContent').innerHTML;
 
-            const payload = {
-                name: "{{ $popup->name }}",
-                is_active: document.getElementById('popupActiveToggle').checked,
-                layout: document.getElementById('popupLayout').value,
-                priority: parseInt(document.getElementById('popupPriority').value) || 10,
-                assigned_lead_form_id: document.getElementById('assignedLeadFormId').value || null,
-                trigger_settings: {
-                    mode: document.getElementById('triggerModeSelect').value,
-                    min_delay_seconds: parseInt(document.getElementById('minDelaySec').value) || 20,
-                    max_delay_seconds: parseInt(document.getElementById('maxDelaySec').value) || 60,
-                    delay_seconds: parseInt(document.getElementById('fixedDelaySec').value) || 10,
-                },
-                condition_settings: {
-                    pages_mode: document.getElementById('pagesModeSelect').value,
-                    devices: {
-                        desktop: document.getElementById('devDesktop').checked,
-                        mobile: document.getElementById('devMobile').checked
-                    }
-                },
-                frequency_settings: {
-                    mode: document.getElementById('frequencySelect').value
-                },
-                structure: {
-                    html: html,
-                    btn_url: document.getElementById('btnUrlControl').value,
-                    exit_warning: {
-                        enable: document.getElementById('exitWarningToggle').checked,
-                        title: document.getElementById('exitWarningTitle').value,
-                        msg: document.getElementById('exitWarningMsg').value
-                    }
-                },
-                custom_css: document.getElementById('customCssCode').value
-            };
+                const btnUrlEl = document.getElementById('btnUrlControl');
+                const exitToggleEl = document.getElementById('exitWarningToggle');
+                const exitTitleEl = document.getElementById('exitWarningTitle');
+                const exitMsgEl = document.getElementById('exitWarningMsg');
 
-            fetch(updateUrl, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                badge.className = 'badge bg-success';
-                badge.innerText = 'تم الحفظ (' + new Date().toLocaleTimeString('ar-EG') + ')';
-            })
-            .catch(err => {
+                const payload = {
+                    name: "{{ $popup->name }}",
+                    is_active: document.getElementById('popupActiveToggle') ? document.getElementById('popupActiveToggle').checked : true,
+                    layout: document.getElementById('popupLayout') ? document.getElementById('popupLayout').value : 'center',
+                    priority: parseInt(document.getElementById('popupPriority') ? document.getElementById('popupPriority').value : 10) || 10,
+                    assigned_lead_form_id: document.getElementById('assignedLeadFormId') ? document.getElementById('assignedLeadFormId').value : null,
+                    trigger_settings: {
+                        mode: document.getElementById('triggerModeSelect') ? document.getElementById('triggerModeSelect').value : 'random_time',
+                        min_delay_seconds: parseInt(document.getElementById('minDelaySec') ? document.getElementById('minDelaySec').value : 20) || 20,
+                        max_delay_seconds: parseInt(document.getElementById('maxDelaySec') ? document.getElementById('maxDelaySec').value : 60) || 60,
+                        delay_seconds: parseInt(document.getElementById('fixedDelaySec') ? document.getElementById('fixedDelaySec').value : 10) || 10,
+                    },
+                    condition_settings: {
+                        pages_mode: document.getElementById('pagesModeSelect') ? document.getElementById('pagesModeSelect').value : 'all',
+                        devices: {
+                            desktop: document.getElementById('devDesktop') ? document.getElementById('devDesktop').checked : true,
+                            mobile: document.getElementById('devMobile') ? document.getElementById('devMobile').checked : true
+                        }
+                    },
+                    frequency_settings: {
+                        mode: document.getElementById('frequencySelect') ? document.getElementById('frequencySelect').value : 'once_per_session'
+                    },
+                    structure: {
+                        html: html,
+                        btn_url: btnUrlEl ? btnUrlEl.value : '#lead-form',
+                        exit_warning: {
+                            enable: exitToggleEl ? exitToggleEl.checked : false,
+                            title: exitTitleEl ? exitTitleEl.value : '',
+                            msg: exitMsgEl ? exitMsgEl.value : ''
+                        }
+                    },
+                    custom_css: document.getElementById('customCssCode') ? document.getElementById('customCssCode').value : ''
+                };
+
+                fetch(updateUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    badge.className = 'badge bg-success';
+                    badge.innerText = 'تم الحفظ (' + new Date().toLocaleTimeString('ar-EG') + ')';
+                })
+                .catch(err => {
+                    console.error(err);
+                    badge.className = 'badge bg-danger';
+                    badge.innerText = 'خطأ بالحفظ';
+                });
+            } catch (err) {
+                console.error(err);
                 badge.className = 'badge bg-danger';
-                badge.innerText = 'خطأ بالحفظ';
-            });
+                badge.innerText = 'خطأ كود بالحفظ';
+            }
         }
     </script>
 </body>
