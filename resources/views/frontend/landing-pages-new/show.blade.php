@@ -45,5 +45,6 @@
             {!! $page->custom_js !!}
         </script>
     @endif
+    @include('partials.popup-runtime')
 </body>
 </html>

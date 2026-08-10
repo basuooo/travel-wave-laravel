@@ -19,7 +19,6 @@ class PublicPopupRuntimeController extends Controller
         $utmSource = $request->input('utm_source');
 
         $activePopups = Popup::where('is_active', true)
-            ->where('status', Popup::STATUS_ACTIVE)
             ->orderBy('priority', 'desc')
             ->get();
 
