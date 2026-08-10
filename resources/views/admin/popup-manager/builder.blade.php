@@ -13,7 +13,7 @@
     <style>
         :root {
             --topbar-h: 60px;
-            --sidebar-w: 380px;
+            --sidebar-w: 420px;
             --bg-dark: #090d16;
             --panel-bg: #111827;
             --border-color: #1f2937;
@@ -25,7 +25,7 @@
         .workspace { display: flex; height: calc(100vh - var(--topbar-h)); }
         .sidebar { width: var(--sidebar-w); background: var(--panel-bg); border-left: 1px solid var(--border-color); display: flex; flex-direction: column; height: 100%; }
 
-        .tab-btn { flex: 1; padding: 0.75rem 0.2rem; background: transparent; border: none; border-bottom: 2px solid transparent; color: #9ca3af; font-size: 0.8rem; font-weight: 700; cursor: pointer; text-align: center; }
+        .tab-btn { flex: 1; padding: 0.75rem 0.2rem; background: transparent; border: none; border-bottom: 2px solid transparent; color: #9ca3af; font-size: 0.78rem; font-weight: 700; cursor: pointer; text-align: center; }
         .tab-btn.active { color: #3b82f6; border-bottom-color: #3b82f6; background: #1f2937; }
 
         .tab-content { flex: 1; overflow-y: auto; padding: 1rem; }
@@ -35,10 +35,15 @@
         .canvas-area { flex: 1; background: #030712; display: flex; align-items: center; justify-content: center; position: relative; padding: 2rem; overflow: auto; }
 
         .popup-preview-box { background: white; color: #111827; border-radius: 20px; width: 100%; max-width: 520px; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); position: relative; overflow: hidden; }
-        .popup-overlay-preview { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .popup-overlay-preview { position: absolute; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 50; }
 
         .form-switch .form-check-input { width: 2.5em; height: 1.25em; cursor: pointer; }
-        .page-list-scroll { max-height: 180px; overflow-y: auto; background: #030712; border-radius: 8px; padding: 0.5rem; }
+        .page-list-scroll { max-height: 160px; overflow-y: auto; background: #030712; border-radius: 8px; padding: 0.5rem; }
+        .emoji-bar { display: flex; gap: 6px; overflow-x: auto; padding: 6px; background: #030712; border-radius: 8px; }
+        .emoji-btn { background: #1f2937; border: 1px solid #374151; font-size: 1.2rem; border-radius: 6px; padding: 2px 8px; cursor: pointer; color: white; }
+        .emoji-btn:hover { background: #374151; }
+        .media-grid-item { cursor: pointer; border: 2px solid transparent; transition: all 0.2s; border-radius: 8px; overflow: hidden; }
+        .media-grid-item:hover { border-color: #3b82f6; transform: scale(1.03); }
     </style>
 </head>
 <body>
@@ -85,19 +90,143 @@
         <!-- RIGHT SIDEBAR SETTINGS -->
         <aside class="sidebar">
             <div class="d-flex border-bottom border-secondary">
-                <button class="tab-btn active" onclick="showTab('tabTriggers', this)">⚡ الزناد والصفحات</button>
-                <button class="tab-btn" onclick="showTab('tabContent', this)">🖼️ الصور والمحتوى</button>
-                <button class="tab-btn" onclick="showTab('tabDesign', this)">🎨 التصميم والموضعة</button>
+                <button class="tab-btn active" onclick="showTab('tabPresets', this)">🎨 أشكال القوالب</button>
+                <button class="tab-btn" onclick="showTab('tabContent', this)">📝 الخطوط والألوان والزر</button>
+                <button class="tab-btn" onclick="showTab('tabTriggers', this)">⚡ الزناد والصفحات</button>
+                <button class="tab-btn" onclick="showTab('tabWarning', this)">⚠️ تحذير الإغلاق</button>
             </div>
 
             <div class="tab-content">
 
-                <!-- TAB 1: TRIGGERS, RANDOM TIMING & PAGE TARGETING -->
-                <div id="tabTriggers" class="tab-pane active">
+                <!-- TAB 1: 10+ READY POPUP PRESETS & TEMPLATES -->
+                <div id="tabPresets" class="tab-pane active">
+                    <h6 class="fw-bold text-info small mb-3"><i class="bi bi-palette me-1"></i> اختر من 10+ تصاميم جاهزة واحترافية:</h6>
+                    
+                    <div class="d-flex flex-column gap-2 mb-4">
+                        <button type="button" class="btn btn-sm btn-outline-warning text-start p-2 rounded-3" onclick="applyPresetTemplate(1)">
+                            🔥 1. عرض الخصم الذهبي (Golden Discount Modal)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-info text-start p-2 rounded-3" onclick="applyPresetTemplate(2)">
+                            ✈️ 2. استشارة سريعة للتأشيرة (Visa Fast Consultation)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger text-start p-2 rounded-3" onclick="applyPresetTemplate(3)">
+                            ⏳ 3. عداد تنازلي طارئ (Urgent Countdown Offer)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success text-start p-2 rounded-3" onclick="applyPresetTemplate(4)">
+                            💬 4. شات واتساب مباشر (Floating WhatsApp Chat)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary text-start p-2 rounded-3" onclick="applyPresetTemplate(5)">
+                            🎁 5. هدية كود خصم (Coupon Gift Box)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-light text-start p-2 rounded-3" onclick="applyPresetTemplate(6)">
+                            📝 6. نموذج طلب سريع (Quick Lead Form Card)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-warning text-start p-2 rounded-3" onclick="applyPresetTemplate(7)">
+                            📢 7. تنويه هام / إعلان (Important Announcement)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-info text-start p-2 rounded-3" onclick="applyPresetTemplate(8)">
+                            🚀 8. حزمة توفير (Saver Bundle Offer)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success text-start p-2 rounded-3" onclick="applyPresetTemplate(9)">
+                            🌟 9. صورة بنر كاملة (Full Banner Image Modal)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary text-start p-2 rounded-3" onclick="applyPresetTemplate(10)">
+                            💎 10. دعوة حصريّة VIP (Exclusive VIP Invitation)
+                        </button>
+                    </div>
+                </div>
 
-                    <!-- TRIGGER TYPE -->
+                <!-- TAB 2: TYPOGRAPHY, COLORS, BUTTON ACTION, IMAGE OPTIONS & EMOJI -->
+                <div id="tabContent" class="tab-pane">
+
+                    <!-- 1. IMAGE SOURCE OPTIONS (MEDIA LIBRARY OR DIRECT URL) -->
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
-                        <label class="form-label text-info fw-bold small">⚡ نوع الزناد الأساسي (Trigger Mode)</label>
+                        <h6 class="fw-bold text-warning small mb-2"><i class="bi bi-image me-1"></i> مصدر وصورة الـ Popup</h6>
+                        
+                        <div class="mb-2">
+                            <label class="form-label text-white-50 text-xs fw-bold">الخيار 1: رابط صورة مباشر (Image URL)</label>
+                            <input type="text" id="popupImageUrl" class="form-control form-control-sm bg-dark text-white border-secondary mb-2" placeholder="https://domain.com/image.jpg">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-white-50 text-xs fw-bold">الخيار 2: اختيار من مكتبة وسائط السيستم</label>
+                            <button type="button" class="btn btn-sm btn-outline-info w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#mediaLibraryModal">
+                                📂 فتح مكتبة الصور بالموقع
+                            </button>
+                        </div>
+
+                        <button type="button" class="btn btn-sm btn-primary w-100 fw-bold" onclick="insertOrUpdateImage()"><i class="bi bi-plus-circle me-1"></i> إدراج / استبدال الصورة</button>
+                    </div>
+
+                    <!-- 2. EMOJI BAR PICKER -->
+                    <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
+                        <label class="form-label text-info fw-bold small mb-2"><i class="bi bi-emoji-smile me-1"></i> شريط الإيموجي (انقر للإضافة للعنوان)</label>
+                        <div class="emoji-bar mb-1">
+                            <button type="button" class="emoji-btn" onclick="addEmoji('🔥')">🔥</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('⚠️')">⚠️</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('🎁')">🎁</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('🚀')">🚀</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('💎')">💎</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('⏳')">⏳</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('🌟')">🌟</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('✈️')">✈️</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('💬')">💬</button>
+                            <button type="button" class="emoji-btn" onclick="addEmoji('🛑')">🛑</button>
+                        </div>
+                    </div>
+
+                    <!-- 3. BUTTON STYLING & ACTION LINK (التحكم بالزر والرابط) -->
+                    <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
+                        <h6 class="fw-bold text-success small mb-2"><i class="bi bi-cursor-fill me-1"></i> التحكم في الزر والرابط الفعلي (Button Action)</h6>
+                        
+                        <div class="mb-2">
+                            <label class="form-label text-white-50 text-xs fw-bold">نص الكتابة على الزر</label>
+                            <input type="text" id="btnTextControl" class="form-control form-control-sm bg-dark text-white border-secondary" value="أطلب الآن والدفع عند الاستلام" onkeyup="updateButtonText(this.value)">
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label text-white-50 text-xs fw-bold">رابط التوجيه عند النقر على الزر (Button URL)</label>
+                            <input type="text" id="btnUrlControl" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="مثال: #lead-form أو https://wa.me/2010..." value="{{ $popup->structure['btn_url'] ?? '#lead-form' }}" onkeyup="updateButtonUrl(this.value)">
+                            <small class="text-muted text-xs d-block mt-1">يمكنك وضع رابط واتساب، رابط صفحة أخرى، أو `#lead-form` للانتقال للنموذج.</small>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label text-white-50 text-xs fw-bold">لون الزر</label>
+                                <input type="color" id="btnBgColor" class="form-control form-control-color w-100 bg-dark border-secondary" value="#10b981" onchange="updateButtonStyles()">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-white-50 text-xs fw-bold">حجم خط الزر</label>
+                                <select id="btnFontSize" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="updateButtonStyles()">
+                                    <option value="1rem">عادي (Medium)</option>
+                                    <option value="1.25rem" selected>كبير (Large)</option>
+                                    <option value="1.5rem">كبير جداً (XL)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. FORM INTEGRATION & HTML CODE -->
+                    <div class="mb-3">
+                        <label class="form-label text-info fw-bold small">نموذج السيستم المربوط</label>
+                        <select id="assignedLeadFormId" class="form-select form-select-sm bg-secondary text-white border-0">
+                            <option value="">-- بدون نموذج --</option>
+                            @foreach($forms as $form)
+                                <option value="{{ $form->id }}" @selected($popup->assigned_lead_form_id == $form->id)>{{ $form->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-info fw-bold small">كود HTML المباشر</label>
+                        <textarea id="rawHtmlCode" class="form-control form-control-sm bg-dark text-white border-secondary font-monospace" rows="6" onkeyup="updateCanvasFromHtml(this.value)">{!! is_array($popup->structure) ? ($popup->structure['html'] ?? '') : '' !!}</textarea>
+                    </div>
+                </div>
+
+                <!-- TAB 3: TRIGGERS, RANDOM TIMING & PAGE TARGETING -->
+                <div id="tabTriggers" class="tab-pane">
+                    <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
+                        <label class="form-label text-info fw-bold small">⚡ نوع الزناد (Trigger Mode)</label>
                         <select id="triggerModeSelect" class="form-select form-select-sm bg-secondary text-white border-0 mb-3" onchange="toggleTriggerOptions(this.value)">
                             <option value="random_time" @selected(($popup->trigger_settings['mode'] ?? '') === 'random_time')>🎲 توقيت عشوائي (Random Time Delay)</option>
                             <option value="delay" @selected(($popup->trigger_settings['mode'] ?? '') === 'delay')>⏱️ تأخير زمني محدد (Time Delay)</option>
@@ -106,7 +235,6 @@
                             <option value="exit_intent" @selected(($popup->trigger_settings['mode'] ?? '') === 'exit_intent')>🚪 Exit Intent (محاولة الخروج)</option>
                         </select>
 
-                        <!-- RANDOM TIMING SETTINGS (MIN - MAX) -->
                         <div id="randomTimeBox" class="p-3 bg-secondary bg-opacity-25 rounded-3 mb-2">
                             <h6 class="fw-bold text-warning small mb-2"><i class="bi bi-shuffle me-1"></i> إعدادات التوقيت العشوائي (Random Timing)</h6>
                             <div class="row g-2">
@@ -119,30 +247,23 @@
                                     <input type="number" id="maxDelaySec" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->trigger_settings['max_delay_seconds'] ?? 60 }}" min="1">
                                 </div>
                             </div>
-                            <small class="text-muted d-block mt-2 text-xs">يختار النظام وقتاً عشوائياً جديداً بين الخانتين في كل زيارة.</small>
                         </div>
 
-                        <!-- FIXED DELAY SETTINGS -->
                         <div id="fixedTimeBox" class="p-2 bg-secondary bg-opacity-25 rounded-3 mb-2" style="display:none;">
                             <label class="form-label text-white-50 text-xs fw-bold">المدة بالثواني</label>
                             <input type="number" id="fixedDelaySec" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->trigger_settings['delay_seconds'] ?? 10 }}">
                         </div>
                     </div>
 
-                    <!-- 🌐 PAGE TARGETING (اختيار مكان ظهور البوب اب بالظبط) -->
+                    <!-- PAGE TARGETING -->
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
-                        <h6 class="fw-bold text-info small mb-2"><i class="bi bi-geo-alt-fill me-1"></i> تحديد صفحات ظهور الـ Popup</h6>
-                        
-                        <div class="mb-2">
-                            <select id="pagesModeSelect" class="form-select form-select-sm bg-secondary text-white border-0" onchange="togglePagesList(this.value)">
-                                <option value="all" @selected(($popup->condition_settings['pages_mode'] ?? 'all') === 'all')>🌐 جميع صفحات الموقع (Everywhere)</option>
-                                <option value="specific" @selected(($popup->condition_settings['pages_mode'] ?? '') === 'specific')>🎯 صفحات محددة بالسيستم (Specific Pages)</option>
-                            </select>
-                        </div>
+                        <h6 class="fw-bold text-info small mb-2"><i class="bi bi-geo-alt-fill me-1"></i> تحديد صفحات الظهور</h6>
+                        <select id="pagesModeSelect" class="form-select form-select-sm bg-secondary text-white border-0 mb-2" onchange="togglePagesList(this.value)">
+                            <option value="all" @selected(($popup->condition_settings['pages_mode'] ?? 'all') === 'all')>🌐 جميع صفحات الموقع</option>
+                            <option value="specific" @selected(($popup->condition_settings['pages_mode'] ?? '') === 'specific')>🎯 صفحات محددة بالسيستم</option>
+                        </select>
 
-                        <!-- SYSTEM PAGES SELECTION LIST -->
                         <div id="specificPagesContainer" style="display: {{ ($popup->condition_settings['pages_mode'] ?? '') === 'specific' ? 'block' : 'none' }};">
-                            <label class="form-label text-white-50 text-xs fw-bold mt-2">اختر الصفحات المتاحة بالسيستم:</label>
                             <div class="page-list-scroll border border-secondary mb-2">
                                 <div class="form-check mb-1">
                                     <input class="form-check-input page-checkbox" type="checkbox" value="/" id="pageHome" @checked(in_array('/', $popup->condition_settings['specific_urls'] ?? []))>
@@ -152,108 +273,92 @@
                                 @foreach($landingPages as $lp)
                                     <div class="form-check mb-1">
                                         <input class="form-check-input page-checkbox" type="checkbox" value="/lp-new/{{ $lp->slug }}" id="pageLp_{{ $lp->id }}" @checked(in_array('/lp-new/' . $lp->slug, $popup->condition_settings['specific_urls'] ?? []))>
-                                        <label class="form-check-label text-white small" for="pageLp_{{ $lp->id }}">🚀 {{ $lp->internal_name }} ({{ $lp->slug }})</label>
+                                        <label class="form-check-label text-white small" for="pageLp_{{ $lp->id }}">🚀 {{ $lp->internal_name }}</label>
                                     </div>
                                 @endforeach
                             </div>
-
-                            <label class="form-label text-white-50 text-xs fw-bold">أو أدخل رابطاً مخصصاً (Custom Path)</label>
-                            <input type="text" id="customUrlPath" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="مثال: /visa-france أو /services" value="{{ $popup->condition_settings['custom_url'] ?? '' }}">
                         </div>
                     </div>
 
-                    <!-- TARGETING DEVICES -->
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
-                        <h6 class="fw-bold text-info small mb-3"><i class="bi bi-phone me-1"></i> الأجهزة المستهدفة</h6>
-
+                        <h6 class="fw-bold text-info small mb-2">الأجهزة المستهدفة</h6>
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small text-white">Desktop (كمبيوتر)</span>
-                            <div class="form-check form-switch mb-0">
-                                <input class="form-check-input" type="checkbox" id="devDesktop" @checked($popup->condition_settings['devices']['desktop'] ?? true)>
-                            </div>
+                            <span class="small text-white">Desktop</span>
+                            <input class="form-check-input" type="checkbox" id="devDesktop" @checked($popup->condition_settings['devices']['desktop'] ?? true)>
                         </div>
-
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small text-white">Mobile (جوال)</span>
-                            <div class="form-check form-switch mb-0">
-                                <input class="form-check-input" type="checkbox" id="devMobile" @checked($popup->condition_settings['devices']['mobile'] ?? true)>
-                            </div>
+                            <span class="small text-white">Mobile</span>
+                            <input class="form-check-input" type="checkbox" id="devMobile" @checked($popup->condition_settings['devices']['mobile'] ?? true)>
                         </div>
-
-                        <hr class="border-secondary my-3">
-
-                        <label class="form-label text-white-50 small fw-bold">الأولوية (Priority)</label>
-                        <input type="number" id="popupPriority" class="form-control form-control-sm bg-secondary text-white border-0" value="{{ $popup->priority ?? 10 }}">
-                    </div>
-
-                    <!-- FREQUENCY SETTINGS -->
-                    <div class="p-3 bg-dark border border-secondary rounded-3">
-                        <h6 class="fw-bold text-info small mb-2"><i class="bi bi-repeat me-1"></i> تكرار الظهور (Frequency)</h6>
-                        <select id="frequencySelect" class="form-select form-select-sm bg-secondary text-white border-0">
-                            <option value="once_per_session" @selected(($popup->frequency_settings['mode'] ?? '') === 'once_per_session')>مرة واحدة في الجلسة (Once Per Session)</option>
-                            <option value="every_visit" @selected(($popup->frequency_settings['mode'] ?? '') === 'every_visit')>في كل زيارة (Every Visit)</option>
-                            <option value="once_ever" @selected(($popup->frequency_settings['mode'] ?? '') === 'once_ever')>مرة واحدة فقط للأبد (Once Ever)</option>
-                        </select>
-                    </div>
-
-                </div>
-
-                <!-- TAB 2: IMAGE CONTROLS, CONTENT & FORMS -->
-                <div id="tabContent" class="tab-pane">
-
-                    <!-- 🖼️ POPUP IMAGE MANAGER (إضافة وتعديل الصور) -->
-                    <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
-                        <h6 class="fw-bold text-warning small mb-2"><i class="bi bi-image me-1"></i> صورة الـ Popup (Banner / Image)</h6>
-                        
-                        <div class="mb-3">
-                            <label class="form-label text-white-50 text-xs fw-bold">رابط الصورة (Image URL)</label>
-                            <input type="text" id="popupImageUrl" class="form-control form-control-sm bg-dark text-white border-secondary mb-2" placeholder="https://domain.com/banner.jpg">
-                            <button type="button" class="btn btn-sm btn-primary w-100 fw-bold" onclick="insertOrUpdateImage()"><i class="bi bi-plus-circle me-1"></i> إدراج / استبدال الصورة داخل الـ Popup</button>
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-success flex-1" onclick="insertBannerPreset('top')">صورة في الأعلى</button>
-                            <button type="button" class="btn btn-sm btn-outline-info flex-1" onclick="insertBannerPreset('bg')">خلفية بالكامل</button>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-info fw-bold small">نموذج السيستم المربوط</label>
-                        <select id="assignedLeadFormId" class="form-select form-select-sm bg-secondary text-white border-0">
-                            <option value="">-- بدون نموذج --</option>
-                            @foreach($forms as $form)
-                                <option value="{{ $form->id }}" @selected($popup->assigned_lead_form_id == $form->id)>{{ $form->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-info fw-bold small">تعديل كود ה-HTML المباشر</label>
-                        <textarea id="rawHtmlCode" class="form-control form-control-sm bg-dark text-white border-secondary font-monospace" rows="8" onkeyup="updateCanvasFromHtml(this.value)">{!! is_array($popup->structure) ? ($popup->structure['html'] ?? '') : '' !!}</textarea>
                     </div>
                 </div>
 
-                <!-- TAB 3: DESIGN & LAYOUT -->
-                <div id="tabDesign" class="tab-pane">
-                    <div class="mb-3">
-                        <label class="form-label text-info fw-bold small">موضع الـ Popup (Layout)</label>
-                        <select id="popupLayout" class="form-select form-select-sm bg-secondary text-white border-0">
-                            <option value="center" @selected($popup->layout === 'center')>منتصف الشاشة (Center)</option>
-                            <option value="top" @selected($popup->layout === 'top')>أعلى الشاشة (Top Banner)</option>
-                            <option value="bottom" @selected($popup->layout === 'bottom')>أسفل الشاشة (Bottom Bar)</option>
-                            <option value="fullscreen" @selected($popup->layout === 'fullscreen')>ملء الشاشة (Full Screen)</option>
-                        </select>
-                    </div>
+                <!-- TAB 4: EXIT CONFIRMATION WARNING & 10+ WARNING PRESETS -->
+                <div id="tabWarning" class="tab-pane">
+                    <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold text-warning mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> تحذير عند محاولة إغلاق الـ Popup</h6>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" id="exitWarningToggle" @checked($popup->structure['exit_warning']['enable'] ?? false)>
+                            </div>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-info fw-bold small">كود CSS مخصص للـ Popup</label>
-                        <textarea id="customCssCode" class="form-control form-control-sm bg-dark text-white border-secondary font-monospace" rows="6">{{ $popup->custom_css }}</textarea>
+                        <label class="form-label text-white-50 text-xs fw-bold">اختر من 10+ تحذيرات جاهزة:</label>
+                        <select class="form-select form-select-sm bg-secondary text-white border-0 mb-3" onchange="applyExitWarningPreset(this.value)">
+                            <option value="">-- اختر صيغة التحذير --</option>
+                            <option value="1">⚠️ 1. هل أنت متأكد من خسارة الخصم 20% الآن؟</option>
+                            <option value="2">⏳ 2. هذا العرض سينتهي ولن يظهر لك مجدداً!</option>
+                            <option value="3">🎁 3. نضمن لك استشارة مجانية عند إكمال الطلب الآن.</option>
+                            <option value="4">✈️ 4. هل تود تفويت فرصة حجز التأشيرة بسعر التكلفة؟</option>
+                            <option value="5">🔥 5. انتظر! خصم إضافي بقيمة 500 ج.م ينتظرك.</option>
+                            <option value="6">💎 6. احصل على هدية مجانية عند البقاء بالصفحة!</option>
+                            <option value="7">🛑 7. لا تغلق! يمكنك الاستفسار عبر الواتساب فوراً.</option>
+                            <option value="8">🚨 8. آخر فرصة للتسجيل اليوم!</option>
+                            <option value="9">⏱️ 9. المتبقي فقط 3 أماكن، هل ترغب بالإلغاء؟</option>
+                            <option value="10">🎯 10. اضغط هنا للحصول على الاستثناء الخاص بك!</option>
+                        </select>
+
+                        <div class="mb-2">
+                            <label class="form-label text-white-50 text-xs fw-bold">عنوان التحذير</label>
+                            <input type="text" id="exitWarningTitle" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->structure['exit_warning']['title'] ?? '⚠️ هل أنت متأكد من الإلغاء؟' }}">
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label text-white-50 text-xs fw-bold">رسالة التحذير</label>
+                            <textarea id="exitWarningMsg" class="form-control form-control-sm bg-dark text-white border-secondary" rows="3">{{ $popup->structure['exit_warning']['msg'] ?? 'بإغلاقك لهذه النافذة ستخسر فرصة الحصول على الخصم الحصري اليوم!' }}</textarea>
+                        </div>
                     </div>
                 </div>
 
             </div>
         </aside>
 
+    </div>
+
+    <!-- MEDIA LIBRARY MODAL -->
+    <div class="modal fade" id="mediaLibraryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title fw-bold">📂 مكتبة الوسائط والصور بالموقع</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        @forelse($assets as $asset)
+                            <div class="col-3">
+                                <div class="media-grid-item bg-secondary p-1 text-center" onclick="selectMediaAsset('{{ asset('storage/' . $asset->file_path) }}')">
+                                    <img src="{{ asset('storage/' . $asset->file_path) }}" class="img-fluid rounded max-h-100 object-fit-cover" alt="Asset">
+                                    <span class="d-block text-truncate text-white-50 text-xs mt-1">{{ $asset->original_name }}</span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-12 text-center py-4 text-white-50">لا توجد صور مرفوعة بالمكتبة حالياً. يمكنك استخدام رابط صورة مباشر.</div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -282,9 +387,28 @@
             document.getElementById('popupLiveContent').innerHTML = html;
         }
 
+        function addEmoji(emoji) {
+            const liveContent = document.getElementById('popupLiveContent');
+            const h = liveContent.querySelector('h1, h2, h3, h4, h5, h6');
+            if (h) {
+                h.innerText = emoji + ' ' + h.innerText;
+            } else {
+                liveContent.innerHTML = `<h3>${emoji}</h3>` + liveContent.innerHTML;
+            }
+            document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
+        }
+
+        function selectMediaAsset(url) {
+            document.getElementById('popupImageUrl').value = url;
+            const modalEl = document.getElementById('mediaLibraryModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            insertOrUpdateImage();
+        }
+
         function insertOrUpdateImage() {
             const url = document.getElementById('popupImageUrl').value.trim();
-            if (!url) { alert('يرجى إدخال رابط الصورة أولاً.'); return; }
+            if (!url) { alert('يرجى إدخال رابط الصورة أو اختيارها من المكتبة.'); return; }
             const liveContent = document.getElementById('popupLiveContent');
             let img = liveContent.querySelector('img');
             if (img) {
@@ -295,24 +419,92 @@
             document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
         }
 
-        function insertBannerPreset(type) {
-            const url = document.getElementById('popupImageUrl').value.trim() || 'https://via.placeholder.com/600x300';
+        function updateButtonText(text) {
             const liveContent = document.getElementById('popupLiveContent');
-            if (type === 'top') {
-                liveContent.innerHTML = `<img src="${url}" class="img-fluid rounded-top-4 w-100 object-fit-cover mb-3"><div class="p-3"><h4 class="fw-bold mb-2">عرض خاص لفترة محدودة 🔥</h4><p class="text-muted small mb-3">احصل على الاستشارة المجانية فور تسجيل بياناتك.</p><button type="button" class="btn btn-success w-100 rounded-pill fw-bold">أطلب الآن</button></div>`;
-            } else if (type === 'bg') {
-                liveContent.innerHTML = `<div class="p-4 rounded-4 text-white text-center position-relative overflow-hidden" style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${url}') center/cover no-repeat; min-height: 300px;"><h3 class="fw-bold mb-2">عرض خاص جداً 🌟</h3><p class="mb-4">تواصل معنا واستفد من خصم اليوم المتوفر.</p><button type="button" class="btn btn-warning btn-lg px-5 rounded-pill fw-bold text-dark">احجز مكانك الآن</button></div>`;
+            const btn = liveContent.querySelector('a, button');
+            if (btn) btn.innerText = text;
+            document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
+        }
+
+        function updateButtonUrl(url) {
+            const liveContent = document.getElementById('popupLiveContent');
+            let btn = liveContent.querySelector('a');
+            if (btn) {
+                btn.href = url;
+            } else {
+                const buttonEl = liveContent.querySelector('button');
+                if (buttonEl) {
+                    const newLink = document.createElement('a');
+                    newLink.href = url;
+                    newLink.className = buttonEl.className;
+                    newLink.innerText = buttonEl.innerText;
+                    buttonEl.parentNode.replaceChild(newLink, buttonEl);
+                }
             }
             document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
+        }
+
+        function updateButtonStyles() {
+            const color = document.getElementById('btnBgColor').value;
+            const fontSize = document.getElementById('btnFontSize').value;
+            const liveContent = document.getElementById('popupLiveContent');
+            const btn = liveContent.querySelector('a, button');
+            if (btn) {
+                btn.style.backgroundColor = color;
+                btn.style.borderColor = color;
+                btn.style.fontSize = fontSize;
+            }
+            document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
+        }
+
+        function applyPresetTemplate(id) {
+            const liveContent = document.getElementById('popupLiveContent');
+            const btnUrl = document.getElementById('btnUrlControl').value || '#lead-form';
+
+            const templates = {
+                1: `<div class="p-4 bg-white rounded-4 text-center"><span class="badge bg-warning text-dark px-3 py-1 rounded-pill mb-2 fw-bold">🔥 عرض حصري اليوم</span><h2 class="fw-bold text-dark mb-2">خصم 20% على خدمات التأشيرات</h2><p class="text-muted mb-4">أدخل بياناتك الآن للاستفادة من الخصم قبل انتهاء العداد.</p><a href="${btnUrl}" class="btn btn-warning btn-lg w-100 rounded-pill fw-bold text-dark shadow py-3">استلم الكوبون والخصم الآن 🎁</a></div>`,
+                2: `<div class="p-4 bg-white rounded-4 text-center"><div class="mb-3"><i class="bi bi-airplane-engines-fill text-primary display-3"></i></div><h3 class="fw-bold mb-2">استشارة مجانية لسفرك</h3><p class="text-muted small mb-4">فريقنا متواجد لمساعدتك في استخراج كافة أوراق السفر فوراً.</p><a href="${btnUrl}" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow py-3">تواصل مع المستشار الآن ✈️</a></div>`,
+                3: `<div class="p-4 bg-danger bg-opacity-10 rounded-4 text-center border border-danger"><h4 class="fw-bold text-danger mb-2">⏳ ينتهي العرض خلال وقت قصير!</h4><p class="text-muted mb-4">المقاعد المتبقية 3 فقط للحصول على تكلفة الاستخراج المخفضة.</p><a href="${btnUrl}" class="btn btn-danger btn-lg w-100 rounded-pill fw-bold shadow py-3">احجز مكانك فوراً 🚨</a></div>`,
+                4: `<div class="p-4 bg-success bg-opacity-10 rounded-4 text-center border border-success"><i class="bi bi-whatsapp text-success display-2 mb-2 d-block"></i><h4 class="fw-bold text-dark mb-2">تواصل مباشر عبر الواتساب</h4><p class="text-muted small mb-4">تحدث مع أحد ممثلي المبيعات مباشرة للاستفسارات السريعة.</p><a href="https://wa.me/201000000000" class="btn btn-success btn-lg w-100 rounded-pill fw-bold shadow py-3">فتح المحادثة الآن 💬</a></div>`,
+                5: `<div class="p-4 bg-white rounded-4 text-center border border-primary border-2"><div class="fs-1 mb-2">🎁</div><h3 class="fw-bold text-dark mb-2">كود خصم خاص بك</h3><code class="fs-4 d-block my-2 text-primary fw-bold">TRAVEL2026</code><p class="text-muted small mb-4">استخدم هذا الكود للحصول على خصم مباشر.</p><a href="${btnUrl}" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow py-3">تطبيق الخصم والطلب ✨</a></div>`,
+                6: `<div class="p-4 bg-white rounded-4 text-center"><h4 class="fw-bold mb-3">سجل طلبك السريع</h4><div class="mb-3"><input type="text" placeholder="الاسم الكامل" class="form-control form-control-lg"></div><div class="mb-3"><input type="tel" placeholder="رقم الهاتف" class="form-control form-control-lg"></div><a href="${btnUrl}" class="btn btn-success btn-lg w-100 rounded-pill fw-bold shadow py-3">تأكيد الطلب 📝</a></div>`,
+                7: `<div class="p-4 bg-dark text-white rounded-4 text-center"><h3 class="fw-bold text-warning mb-2">📢 تنبيه هام للعملاء</h3><p class="mb-4">تم فتح مواعيد التقديم للتأشيرات الأوروبية لهذا الشهر.</p><a href="${btnUrl}" class="btn btn-warning btn-lg w-100 rounded-pill fw-bold text-dark shadow py-3">اعرف المواعيد والأسعار 🚀</a></div>`,
+                8: `<div class="p-4 bg-white rounded-4 text-center border border-warning"><span class="badge bg-danger mb-2">توفير 30%</span><h3 class="fw-bold mb-2">حزمة التوفير الشاملة</h3><p class="text-muted mb-4">تأشيرة + تأمين سفر + ترجمة مستندات بسعر موحد.</p><a href="${btnUrl}" class="btn btn-warning btn-lg w-100 rounded-pill fw-bold text-dark shadow py-3">اطلب حزمة التوفير 💎</a></div>`,
+                9: `<img src="https://via.placeholder.com/600x300" class="img-fluid rounded-top-4 w-100 object-fit-cover"><div class="p-4 text-center"><h4 class="fw-bold mb-2">بنر الصور والتأشيرات</h4><a href="${btnUrl}" class="btn btn-success btn-lg w-100 rounded-pill fw-bold shadow">مشاهدة العرض 🌟</a></div>`,
+                10: `<div class="p-4 bg-dark text-warning rounded-4 text-center border border-warning"><div class="fs-1 mb-2">💎</div><h3 class="fw-bold mb-2">دعوة خاصة للعملاء المميزين</h3><p class="text-white-50 mb-4">احصل على خدمة المعاملة الفاخرة والاستخراج السريع.</p><a href="${btnUrl}" class="btn btn-warning btn-lg w-100 rounded-pill fw-bold text-dark shadow py-3">الانضمام لقائمة VIP ✨</a></div>`
+            };
+
+            if (templates[id]) {
+                liveContent.innerHTML = templates[id];
+                document.getElementById('rawHtmlCode').value = templates[id];
+            }
+        }
+
+        function applyExitWarningPreset(id) {
+            const warnings = {
+                1: { title: "⚠️ هل أنت متأكد من خسارة الخصم 20% الآن؟", msg: "بإغلاقك لهذه النافذة ستفقد خصم الـ 20% المتاح لليوم فقط." },
+                2: { title: "⏳ هذا العرض سينتهي ولن يظهر لك مجدداً!", msg: "الفرصة متاحة فقط للزوار الحاليين، هل ترغب بالاستمرار بالفقد؟" },
+                3: { title: "🎁 نضمن لك استشارة مجانية عند إكمال الطلب الآن", msg: "لا تضيع فرصة الحصول على التوجيه المستندي من الخبراء مجاناً." },
+                4: { title: "✈️ هل تود تفويت فرصة حجز التأشيرة بسعر التكلفة؟", msg: "الأسعار ستعود للاسعار الأصلية فور مغادرتك للصفحة." },
+                5: { title: "🔥 انتظر! خصم إضافي بقيمة 500 ج.م ينتظرك", msg: "سجل بياناتك الآن وحصل على قسيمة الـ 500 ج.م الفورية." },
+                6: { title: "💎 احصل على هدية مجانية عند البقاء بالصفحة!", msg: "اختر هديتك المستندية المباشرة قبل الإغلاق." },
+                7: { title: "🛑 لا تغلق! يمكنك الاستفسار عبر الواتساب فوراً", msg: "فريقنا متواجد ومستعد للإجابة على كافة أسئلتك بدون التزام." },
+                8: { title: "🚨 آخر فرصة للتسجيل اليوم!", msg: "أماكن التقديم المتاحة لهذا اليوم أوشكت على الانتهاء." },
+                9: { title: "⏱️ المتبقي فقط 3 أماكن، هل ترغب بالإلغاء؟", msg: "إلغاؤك الآن سيسمح لزائر آخر بأخذ مكانك." },
+                10: { title: "🎯 اضغط هنا للحصول على الاستثناء الخاص بك!", msg: "يمكننا تقديم استثناء خاص لك عند الاتصال بنا مباشرة." }
+            };
+
+            if (warnings[id]) {
+                document.getElementById('exitWarningTitle').value = warnings[id].title;
+                document.getElementById('exitWarningMsg').value = warnings[id].msg;
+                document.getElementById('exitWarningToggle').checked = true;
+            }
         }
 
         function savePopupAllData() {
             const badge = document.getElementById('saveStatusBadge');
             badge.className = 'badge bg-warning text-dark';
             badge.innerText = 'جاري الحفظ...';
-
-            const selectedPages = [];
-            document.querySelectorAll('.page-checkbox:checked').forEach(cb => selectedPages.push(cb.value));
 
             const html = document.getElementById('popupLiveContent').innerHTML;
 
@@ -330,8 +522,6 @@
                 },
                 condition_settings: {
                     pages_mode: document.getElementById('pagesModeSelect').value,
-                    specific_urls: selectedPages,
-                    custom_url: document.getElementById('customUrlPath').value,
                     devices: {
                         desktop: document.getElementById('devDesktop').checked,
                         mobile: document.getElementById('devMobile').checked
@@ -340,7 +530,15 @@
                 frequency_settings: {
                     mode: document.getElementById('frequencySelect').value
                 },
-                structure: { html: html },
+                structure: {
+                    html: html,
+                    btn_url: document.getElementById('btnUrlControl').value,
+                    exit_warning: {
+                        enable: document.getElementById('exitWarningToggle').checked,
+                        title: document.getElementById('exitWarningTitle').value,
+                        msg: document.getElementById('exitWarningMsg').value
+                    }
+                },
                 custom_css: document.getElementById('customCssCode').value
             };
 

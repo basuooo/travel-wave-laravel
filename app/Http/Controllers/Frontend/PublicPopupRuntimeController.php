@@ -65,6 +65,7 @@ class PublicPopupRuntimeController extends Controller
                 'close_button' => $popup->close_button_settings ?? ['show' => true],
                 'animation' => $popup->animation_settings ?? ['type' => 'fade_zoom'],
                 'html' => is_array($popup->structure) ? ($popup->structure['html'] ?? '') : '',
+                'exit_warning' => is_array($popup->structure) ? ($popup->structure['exit_warning'] ?? []) : [],
                 'custom_css' => $popup->custom_css ?? '',
                 'custom_js' => $popup->custom_js ?? '',
                 'assigned_lead_form_id' => $popup->assigned_lead_form_id,

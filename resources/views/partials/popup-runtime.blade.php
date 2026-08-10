@@ -36,11 +36,9 @@
         .then(data => {
             if (!data.success || !data.popups || data.popups.length === 0) return;
 
-            // Pick highest priority eligible popup
             const popup = data.popups[0];
             if (!popup) return;
 
-            // Frequency check
             const freqMode = popup.frequency ? popup.frequency.mode : 'once_per_session';
             if (freqMode === 'once_per_session' && sessionStorage.getItem('tw_popup_' + popup.id)) return;
             if (freqMode === 'once_ever' && localStorage.getItem('tw_popup_' + popup.id)) return;
@@ -96,8 +94,9 @@
         const closeBtn = document.createElement('button');
         closeBtn.className = 'tw-popup-close-btn';
         closeBtn.innerHTML = '&times;';
-        closeBtn.onclick = function() {
-            closePopup(overlay, popup.id);
+        closeBtn.onclick = function(e) {
+            e.stopPropagation();
+            handleCloseAttempt(overlay, popup, box);
         };
 
         const content = document.createElement('div');
@@ -108,42 +107,49 @@
         overlay.appendChild(box);
         container.appendChild(overlay);
 
-        // Click outside overlay to close
         overlay.onclick = function(e) {
             if (e.target === overlay && popup.overlay && popup.overlay.close_on_click !== false) {
-                closePopup(overlay, popup.id);
+                handleCloseAttempt(overlay, popup, box);
             }
         };
 
-        // ESC key to close
         document.addEventListener('keydown', function escClose(e) {
             if (e.key === 'Escape') {
                 document.removeEventListener('keydown', escClose);
-                closePopup(overlay, popup.id);
+                handleCloseAttempt(overlay, popup, box);
             }
         });
 
-        // Trigger animation
         requestAnimationFrame(() => {
             overlay.classList.add('active');
         });
 
-        // Save memory
         sessionStorage.setItem('tw_popup_' + popup.id, '1');
         localStorage.setItem('tw_popup_' + popup.id, '1');
 
-        // Track impression
         trackPopupEvent(popup.id, 'impression');
 
-        // Track clicks inside popup
+        // Click actions & URL redirects
         box.addEventListener('click', function(e) {
-            const btn = e.target.closest('a, button, input[type="submit"]');
+            const btn = e.target.closest('a, button');
             if (btn && btn !== closeBtn) {
                 trackPopupEvent(popup.id, 'click');
+                const href = btn.getAttribute('href');
+                if (href && href !== '#' && !href.startsWith('javascript:')) {
+                    if (href.startsWith('#')) {
+                        const target = document.querySelector(href);
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth' });
+                            closePopupImmediately(overlay, popup.id);
+                        }
+                    } else {
+                        window.open(href, btn.target || '_self');
+                        closePopupImmediately(overlay, popup.id);
+                    }
+                }
             }
         });
 
-        // Track form submissions
         const form = box.querySelector('form');
         if (form) {
             form.addEventListener('submit', function() {
@@ -152,7 +158,52 @@
         }
     }
 
-    function closePopup(overlay, popupId) {
+    function handleCloseAttempt(overlay, popup, box) {
+        const exitWarning = popup.exit_warning || {};
+        if (exitWarning.enable && !box.dataset.warningShown) {
+            box.dataset.warningShown = "true";
+
+            box.innerHTML = `
+                <div class="p-4 text-center">
+                    <div class="display-3 mb-2">⚠️</div>
+                    <h3 class="fw-bold text-danger mb-2">${exitWarning.title || 'هل أنت متأكد من الإلغاء؟'}</h3>
+                    <p class="text-muted mb-4">${exitWarning.msg || 'ستخسر الخصم والعرض المتاح حالياً بمجرد الإغلاق!'}</p>
+                    <div class="d-flex flex-column gap-2">
+                        <button type="button" class="btn btn-success btn-lg rounded-pill fw-bold" id="stayClaimBtn">الاستمرار والاستفادة بالخصم 🎁</button>
+                        <button type="button" class="btn btn-link text-muted" id="confirmLeaveBtn">إلغاء وخسارة العرض الآن</button>
+                    </div>
+                </div>
+            `;
+
+            const stayBtn = box.querySelector('#stayClaimBtn');
+            const leaveBtn = box.querySelector('#confirmLeaveBtn');
+
+            if (stayBtn) {
+                stayBtn.onclick = function() {
+                    const btnUrl = popup.structure ? (popup.structure.btn_url || '#lead-form') : '#lead-form';
+                    if (btnUrl.startsWith('#')) {
+                        const target = document.querySelector(btnUrl);
+                        if (target) target.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        window.open(btnUrl, '_self');
+                    }
+                    closePopupImmediately(overlay, popup.id);
+                };
+            }
+
+            if (leaveBtn) {
+                leaveBtn.onclick = function() {
+                    closePopupImmediately(overlay, popup.id);
+                };
+            }
+
+            return;
+        }
+
+        closePopupImmediately(overlay, popup.id);
+    }
+
+    function closePopupImmediately(overlay, popupId) {
         overlay.classList.remove('active');
         setTimeout(() => {
             overlay.remove();
