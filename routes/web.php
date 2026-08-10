@@ -52,7 +52,9 @@ use App\Http\Controllers\Admin\WorkflowAutomationController;
 use App\Http\Controllers\Admin\VisaCategoryController;
 use App\Http\Controllers\Admin\VisaCountryController;
 use App\Http\Controllers\Admin\LandingPageBuilderController;
+use App\Http\Controllers\Admin\LandingPageNew\LandingPageNewController;
 use App\Http\Controllers\Frontend\LandingPagePublicController;
+use App\Http\Controllers\Frontend\LandingPageNewPublicController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\SeoPublicController;
@@ -91,6 +93,7 @@ Route::get('/france-2', [FrontendController::class, 'france2'])->name('france-2'
 Route::get('/france-3', [FrontendController::class, 'france3'])->name('france-3');
 Route::get('/campaigns/{landingPage:slug}', [FrontendController::class, 'marketingLandingPage'])->name('marketing.landing-pages.show');
 Route::get('/lp/{slug}', [LandingPagePublicController::class, 'show'])->name('landing-pages.public.show');
+Route::get('/lp-new/{slug}', [LandingPageNewPublicController::class, 'show'])->name('landing-pages-new.public.show');
 Route::post('/campaigns/{landingPage:slug}/events', [FrontendController::class, 'trackMarketingLandingPageEvent'])->name('marketing.landing-pages.events.store');
 Route::post('/inquiries', [FrontendController::class, 'storeInquiry'])->name('inquiries.store');
 Route::post('/tracking/meta/events', [FrontendController::class, 'trackMetaEvent'])->name('tracking.meta.events.store');
@@ -325,6 +328,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/{marketingCampaign}', [MarketingCampaignController::class, 'show'])->name('show');
                 Route::get('/{marketingCampaign}/edit', [MarketingCampaignController::class, 'edit'])->name('edit');
                 Route::put('/{marketingCampaign}', [MarketingCampaignController::class, 'update'])->name('update');
+            });
+
+            // 🚀 Landing Page Builder New
+            Route::prefix('landing-pages-new')->name('landing-pages-new.')->group(function () {
+                Route::get('/dashboard', [LandingPageNewController::class, 'dashboard'])->name('dashboard');
+                Route::get('/', [LandingPageNewController::class, 'index'])->name('index');
+                Route::get('/create', [LandingPageNewController::class, 'create'])->name('create');
+                Route::post('/', [LandingPageNewController::class, 'store'])->name('store');
+                Route::get('/templates', [LandingPageNewController::class, 'templates'])->name('templates');
+                Route::get('/sections', [LandingPageNewController::class, 'sections'])->name('sections');
+                Route::get('/media', [LandingPageNewController::class, 'media'])->name('media');
+                Route::get('/leads', [LandingPageNewController::class, 'leads'])->name('leads');
+                Route::get('/analytics', [LandingPageNewController::class, 'analytics'])->name('analytics');
+                Route::get('/settings', [LandingPageNewController::class, 'settings'])->name('settings');
+                Route::post('/import', [LandingPageNewController::class, 'importZip'])->name('import');
+
+                Route::get('/{landingPage}/edit', [LandingPageNewController::class, 'edit'])->name('edit');
+                Route::put('/{landingPage}', [LandingPageNewController::class, 'update'])->name('update');
+                Route::post('/{landingPage}/toggle-active', [LandingPageNewController::class, 'toggleActive'])->name('toggle-active');
+                Route::post('/{landingPage}/duplicate', [LandingPageNewController::class, 'duplicate'])->name('duplicate');
+                Route::delete('/{landingPage}', [LandingPageNewController::class, 'destroy'])->name('destroy');
+                Route::get('/{landingPage}/export', [LandingPageNewController::class, 'exportZip'])->name('export');
+                Route::get('/{landingPage}/builder', [LandingPageNewController::class, 'builder'])->name('builder');
+                Route::put('/{landingPage}/builder', [LandingPageNewController::class, 'updateBuilder'])->name('builder.update');
+                Route::post('/{landingPage}/autosave', [LandingPageNewController::class, 'autosave'])->name('autosave');
+                Route::get('/{landingPage}/versions', [LandingPageNewController::class, 'versions'])->name('versions');
+                Route::post('/{landingPage}/versions/{version}/restore', [LandingPageNewController::class, 'restoreVersion'])->name('versions.restore');
             });
         });
 
