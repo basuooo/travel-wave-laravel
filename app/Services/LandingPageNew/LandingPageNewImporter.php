@@ -162,6 +162,25 @@ class LandingPageNewImporter
         $html = preg_replace('/data-gjs-hoverable=["\']false["\']/i', 'data-gjs-hoverable="true"', $html);
         $html = preg_replace('/\bnon-editable-area\b/i', 'editable-area', $html);
         $html = preg_replace('/\bnon-editable\b/i', 'is-editable', $html);
+
+        // Convert {{slides #}} liquid tags into native editable gallery slider
+        $galleryHtml = '
+            <div class="product-gallery-slider my-4 text-center">
+                <div class="main-image-preview mb-3 bg-light p-2 rounded-4 shadow-sm">
+                    <img src="https://via.placeholder.com/800x600?text=%D0%A5%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3+%D0%A1%D0%BE%D1%80%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0+%D0%A1%D0%BE%D1%80%D1%82" id="mainGalleryImage" class="img-fluid rounded-3 max-h-500 w-100 object-fit-cover" alt="معرض صور المنتج">
+                </div>
+                <div class="row g-2 justify-content-center thumbnails-row">
+                    <div class="col-2"><img src="https://via.placeholder.com/150?text=1" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(\'mainGalleryImage\').src=this.src" alt="صورة 1"></div>
+                    <div class="col-2"><img src="https://via.placeholder.com/150?text=2" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(\'mainGalleryImage\').src=this.src" alt="صورة 2"></div>
+                    <div class="col-2"><img src="https://via.placeholder.com/150?text=3" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(\'mainGalleryImage\').src=this.src" alt="صورة 3"></div>
+                    <div class="col-2"><img src="https://via.placeholder.com/150?text=4" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(\'mainGalleryImage\').src=this.src" alt="صورة 4"></div>
+                    <div class="col-2"><img src="https://via.placeholder.com/150?text=5" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(\'mainGalleryImage\').src=this.src" alt="صورة 5"></div>
+                </div>
+            </div>
+        ';
+
+        $html = preg_replace('/\{\{\s*slides\s*#?\s*\}\}/i', $galleryHtml, $html);
+
         return $html;
     }
 }

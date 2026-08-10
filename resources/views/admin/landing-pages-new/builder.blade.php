@@ -658,6 +658,14 @@
             if (empty($initialHtml)) {
                 $initialHtml = '<div class="container py-5 text-center"><h1 class="display-4 fw-bold text-dark mb-3">مرحباً بك في صفحة الهبوط الجديدة</h1><p class="lead text-muted mb-4">انقر على أي نص للتعديل المباشر، أو اسحب عناصر جديدة من القائمة الجانبية.</p><a href="#lead-form" class="btn btn-primary btn-lg rounded-pill px-5">قدم طلبك الآن</a></div>';
             }
+
+            // Automatically convert {{slides #}} and non-editable placeholders to native editable components
+            $gallerySliderSnippet = '<div class="product-gallery-slider my-4 text-center"><div class="main-image-preview mb-3 bg-light p-2 rounded-4 shadow-sm"><img src="https://via.placeholder.com/800x600" id="mainGalleryImage" class="img-fluid rounded-3 max-h-500 w-100 object-fit-cover" alt="معرض صور المنتج"></div><div class="row g-2 justify-content-center thumbnails-row"><div class="col-2"><img src="https://via.placeholder.com/150?text=1" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(&quot;mainGalleryImage&quot;).src=this.src" alt="صورة 1"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=2" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(&quot;mainGalleryImage&quot;).src=this.src" alt="صورة 2"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=3" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(&quot;mainGalleryImage&quot;).src=this.src" alt="صورة 3"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=4" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(&quot;mainGalleryImage&quot;).src=this.src" alt="صورة 4"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=5" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById(&quot;mainGalleryImage&quot;).src=this.src" alt="صورة 5"></div></div></div>';
+
+            $initialHtml = preg_replace('/\{\{\s*slides\s*#?\s*\}\}/i', $gallerySliderSnippet, $initialHtml);
+            $initialHtml = preg_replace('/contenteditable=["\']false["\']/i', 'contenteditable="true"', $initialHtml);
+            $initialHtml = preg_replace('/\bnon-editable-area\b/i', 'editable-area', $initialHtml);
+            $initialHtml = preg_replace('/\bnon-editable\b/i', 'is-editable', $initialHtml);
         @endphp
 
         const initialGjsProject = @json($gjsProject);
@@ -910,6 +918,139 @@
                         <div class="bg-danger text-white px-3 py-1 rounded-3">45 <span class="d-block text-xs fw-normal">دقيقة</span></div>
                         <div class="bg-danger text-white px-3 py-1 rounded-3">30 <span class="d-block text-xs fw-normal">ثانية</span></div>
                     </div>
+                </div>
+            `
+        });
+
+        // 1. PRODUCT IMAGE GALLERY SLIDER BLOCK (Replaces {{slides #}})
+        bm.add('product-gallery-slider', {
+            label: '🖼️ معرض صور المنتج التفاعلي (Slider)',
+            category: 'عناصر المنتجات والخصومات',
+            content: `
+                <div class="product-gallery-slider my-4 text-center">
+                    <div class="main-image-preview mb-3 bg-light p-2 rounded-4 shadow-sm">
+                        <img src="https://via.placeholder.com/800x600?text=%D0%A5%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3+%D0%A1%D0%BE%D1%80%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0+%D0%A1%D0%BE%D1%80%D1%82" id="mainGalleryImage" class="img-fluid rounded-3 max-h-500 w-100 object-fit-cover" alt="معرض صور المنتج">
+                    </div>
+                    <div class="row g-2 justify-content-center thumbnails-row">
+                        <div class="col-2"><img src="https://via.placeholder.com/150?text=1" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById('mainGalleryImage').src=this.src" alt="صورة 1"></div>
+                        <div class="col-2"><img src="https://via.placeholder.com/150?text=2" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById('mainGalleryImage').src=this.src" alt="صورة 2"></div>
+                        <div class="col-2"><img src="https://via.placeholder.com/150?text=3" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById('mainGalleryImage').src=this.src" alt="صورة 3"></div>
+                        <div class="col-2"><img src="https://via.placeholder.com/150?text=4" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById('mainGalleryImage').src=this.src" alt="صورة 4"></div>
+                        <div class="col-2"><img src="https://via.placeholder.com/150?text=5" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100" onclick="document.getElementById('mainGalleryImage').src=this.src" alt="صورة 5"></div>
+                    </div>
+                </div>
+            `
+        });
+
+        // 2. PRICING BUNDLES & DISCOUNT OFFERS BLOCK (Identical to User Reference Screenshot 2 & 4)
+        bm.add('pricing-bundles-checkout', {
+            label: '💰 حزم التوفير والأسعار (Bundles & Checkout)',
+            category: 'عناصر المنتجات والخصومات',
+            content: `
+                <div class="pricing-bundles-wrapper my-4 max-w-700 mx-auto p-4 bg-white rounded-4 shadow-sm border border-light">
+                    <h5 class="fw-bold mb-3 text-center text-dark">الرجاء إدخال معلوماتك هنا للطلب:</h5>
+                    
+                    <form action="{{ route('inquiries.store') }}" method="POST" class="mb-4">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="landing_page_id" value="{{ $page->id }}">
+                        <input type="hidden" name="lead_form_id" value="{{ $page->assigned_lead_form_id }}">
+
+                        <div class="mb-3 position-relative">
+                            <input type="text" name="name" class="form-control form-control-lg bg-light" placeholder="الاسم الكامل" required>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <input type="tel" name="phone" class="form-control form-control-lg bg-light" placeholder="رقم الهاتف / الواتساب" required>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <input type="text" name="address" class="form-control form-control-lg bg-light" placeholder="العنوان / المدينة">
+                        </div>
+
+                        <h6 class="fw-bold my-3 text-dark">اختر حزمة التوفير المناسبة:</h6>
+                        <div class="bundle-options-list d-flex flex-column gap-3 mb-4">
+                            <!-- BUNDLE 1 -->
+                            <label class="bundle-card p-3 border rounded-4 bg-light d-flex align-items-center justify-content-between cursor-pointer">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="radio" name="selected_bundle" value="1" class="form-check-input fs-4" checked>
+                                    <div>
+                                        <span class="fw-bold d-block text-dark">اشتري قطعة واحدة</span>
+                                        <span class="badge bg-secondary">سعر عادي</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fw-bold text-success fs-4">EGP 927.71</span>
+                                </div>
+                            </label>
+
+                            <!-- BUNDLE 2 -->
+                            <label class="bundle-card p-3 border border-primary border-2 rounded-4 bg-primary bg-opacity-10 d-flex align-items-center justify-content-between cursor-pointer">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="radio" name="selected_bundle" value="2" class="form-check-input fs-4">
+                                    <div>
+                                        <span class="fw-bold d-block text-dark">اشتري 2 واحصل على خصم إضافي</span>
+                                        <span class="badge bg-danger">الأكثر مبيعاً 🔥 (خصم 20%)</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-muted text-decoration-line-through small d-block">EGP 1855</span>
+                                    <span class="fw-bold text-success fs-4">EGP 1500.00</span>
+                                </div>
+                            </label>
+
+                            <!-- BUNDLE 3 -->
+                            <label class="bundle-card p-3 border border-success rounded-4 bg-success bg-opacity-10 d-flex align-items-center justify-content-between cursor-pointer">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input type="radio" name="selected_bundle" value="3" class="form-check-input fs-4">
+                                    <div>
+                                        <span class="fw-bold d-block text-dark">اشتري 3 واحصل على 1 مجاناً</span>
+                                        <span class="badge bg-success">شحن مجاني 🚚</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-muted text-decoration-line-through small d-block">EGP 2780</span>
+                                    <span class="fw-bold text-success fs-4">EGP 2200.00</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- TOTAL SUMMARY BAR -->
+                        <div class="total-summary-bar p-3 bg-dark text-white rounded-4 d-flex align-items-center justify-content-between mb-4">
+                            <span class="fw-bold fs-5">إجمالي المبلغ:</span>
+                            <span class="fw-bold text-warning fs-3">EGP 927.71</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill fw-bold fs-4 py-3 shadow">أطلب الآن والدفع عند الاستلام</button>
+                    </form>
+                </div>
+            `
+        });
+
+        // 3. SYSTEM LEAD FORM BLOCK (Connected directly to Lead Forms in DB)
+        bm.add('system-lead-form', {
+            label: '📝 نموذج السيستم (System Lead Form)',
+            category: 'عناصر المنتجات والخصومات',
+            content: `
+                <div class="system-lead-form-box p-4 bg-light rounded-4 shadow-sm border border-secondary my-4 max-w-600 mx-auto">
+                    <h4 class="fw-bold text-center mb-2">تواصل معنا وسجل طلبك</h4>
+                    <p class="text-muted text-center small mb-4">سجل بياناتك وسيتم التواصل معك مباشرة.</p>
+                    <form action="{{ route('inquiries.store') }}" method="POST">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="landing_page_id" value="{{ $page->id }}">
+                        <input type="hidden" name="lead_form_id" value="{{ $page->assigned_lead_form_id }}">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">الاسم الكامل</label>
+                            <input type="text" name="name" class="form-control form-control-lg" placeholder="أدخل اسمك" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">رقم الجوال / الواتساب</label>
+                            <input type="tel" name="phone" class="form-control form-control-lg" placeholder="أدخل رقم الجوال" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">المدينة / العنوان</label>
+                            <input type="text" name="address" class="form-control form-control-lg" placeholder="أدخل العنوان">
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold rounded-pill shadow">إرسال الطلب الآن</button>
+                    </form>
                 </div>
             `
         });
