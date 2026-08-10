@@ -744,6 +744,132 @@
             }
         }
 
+        const systemFormsList = @json($forms->map(fn($f) => ['id' => (string)$f->id, 'name' => $f->name]));
+
+        // 1. CUSTOM COUNTDOWN TIMER COMPONENT WITH LIVE SIDEBAR TRAITS
+        editor.DomComponents.addType('countdown-timer', {
+            model: {
+                defaults: {
+                    traits: [
+                        { type: 'number', label: 'الساعات', name: 'data-hours', changeProp: 1 },
+                        { type: 'number', label: 'الدقائق', name: 'data-minutes', changeProp: 1 },
+                        { type: 'number', label: 'الثواني', name: 'data-seconds', changeProp: 1 },
+                        { type: 'text', label: 'عنوان العرض', name: 'data-title', changeProp: 1 }
+                    ]
+                },
+                init() {
+                    this.on('change:data-hours change:data-minutes change:data-seconds change:data-title', this.updateCountdownDisplay);
+                },
+                updateCountdownDisplay() {
+                    const hrs = this.get('data-hours') || '02';
+                    const mins = this.get('data-minutes') || '45';
+                    const secs = this.get('data-seconds') || '30';
+                    const title = this.get('data-title') || '⚠️ ينتهي الخصم والعرض خلال:';
+
+                    const el = this.getEl();
+                    if (el) {
+                        const h6 = el.querySelector('h6');
+                        if (h6) h6.innerText = title;
+                        const spans = el.querySelectorAll('.fw-bold.fs-4 > div');
+                        if (spans.length >= 3) {
+                            spans[0].childNodes[0].nodeValue = (hrs < 10 ? '0' + parseInt(hrs) : hrs) + ' ';
+                            spans[1].childNodes[0].nodeValue = (mins < 10 ? '0' + parseInt(mins) : mins) + ' ';
+                            spans[2].childNodes[0].nodeValue = (secs < 10 ? '0' + parseInt(secs) : secs) + ' ';
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. CUSTOM SYSTEM LEAD FORM COMPONENT WITH FORM SELECTOR TRAIT
+        editor.DomComponents.addType('system-lead-form', {
+            model: {
+                defaults: {
+                    traits: [
+                        {
+                            type: 'select',
+                            label: 'اختيار نموذج من السيستم',
+                            name: 'data-lead-form-id',
+                            options: [
+                                { id: '', name: '-- اختر نموذج السيستم --' },
+                                ...systemFormsList
+                            ],
+                            changeProp: 1
+                        },
+                        {
+                            type: 'select',
+                            label: 'مصدر النموذج',
+                            name: 'data-form-source',
+                            options: [
+                                { id: 'existing', name: 'نموذج سيستم مسبق (System Form)' },
+                                { id: 'custom', name: 'نموذج HTML مخصص (Custom Form)' }
+                            ],
+                            changeProp: 1
+                        },
+                        { type: 'text', label: 'عنوان النموذج', name: 'data-form-title', changeProp: 1 },
+                        { type: 'text', label: 'نص زر الطلب', name: 'data-submit-text', changeProp: 1 }
+                    ]
+                },
+                init() {
+                    this.on('change:data-lead-form-id change:data-form-title change:data-submit-text', this.updateFormDisplay);
+                },
+                updateFormDisplay() {
+                    const formId = this.get('data-lead-form-id');
+                    const title = this.get('data-form-title');
+                    const btnText = this.get('data-submit-text');
+
+                    const el = this.getEl();
+                    if (el) {
+                        if (formId) {
+                            const hiddenInput = el.querySelector('input[name="lead_form_id"]');
+                            if (hiddenInput) hiddenInput.value = formId;
+                        }
+                        if (title) {
+                            const h4 = el.querySelector('h4');
+                            if (h4) h4.innerText = title;
+                        }
+                        if (btnText) {
+                            const btn = el.querySelector('button[type="submit"]');
+                            if (btn) btn.innerText = btnText;
+                        }
+                    }
+                }
+            }
+        });
+
+        // 3. IMAGE COMPONENT ENHANCEMENT WITH REPLACE IMAGE TOOLBAR BUTTON
+        editor.on('component:selected', (component) => {
+            if (component && component.is('image')) {
+                const tb = component.get('toolbar') || [];
+                const hasReplaceBtn = tb.some(item => item.command === 'custom-image-replace');
+
+                if (!hasReplaceBtn) {
+                    component.set('toolbar', [
+                        ...tb,
+                        {
+                            attributes: { class: 'fa fa-picture-o', title: '🖼️ استبدال الصورة (Replace Image)' },
+                            command: 'custom-image-replace'
+                        }
+                    ]);
+                }
+            }
+        });
+
+        editor.Commands.add('custom-image-replace', {
+            run(ed, sender) {
+                const selected = ed.getSelected();
+                if (selected && selected.is('image')) {
+                    const currentSrc = selected.get('src') || (selected.getAttributes ? selected.getAttributes().src : '') || '';
+                    const newUrl = prompt('أدخل رابط الصورة الجديدة لاستبدالها (Image URL):', currentSrc);
+                    if (newUrl && newUrl.trim() !== '') {
+                        selected.set('src', newUrl.trim());
+                        const el = selected.getEl();
+                        if (el) el.setAttribute('src', newUrl.trim());
+                    }
+                }
+            }
+        });
+
         // ADD CUSTOM READY BLOCKS
         const bm = editor.BlockManager;
 
