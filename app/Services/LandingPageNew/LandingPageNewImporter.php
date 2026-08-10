@@ -67,6 +67,7 @@ class LandingPageNewImporter
 
         // Rewrite asset references in HTML
         $processedHtml = $this->assetScanner->rewriteReferencesInHtml($rawHtml, $assetMap);
+        $processedHtml = $this->unlockNonEditableElements($processedHtml);
 
         // Analyze HTML structure, dependencies, forms & sections
         $analysis = $this->analyzer->analyze($processedHtml);
@@ -151,5 +152,16 @@ class LandingPageNewImporter
         }
 
         return $compiled;
+    }
+
+    protected function unlockNonEditableElements(string $html): string
+    {
+        $html = preg_replace('/contenteditable=["\']false["\']/i', 'contenteditable="true"', $html);
+        $html = preg_replace('/data-gjs-editable=["\']false["\']/i', 'data-gjs-editable="true"', $html);
+        $html = preg_replace('/data-gjs-selectable=["\']false["\']/i', 'data-gjs-selectable="true"', $html);
+        $html = preg_replace('/data-gjs-hoverable=["\']false["\']/i', 'data-gjs-hoverable="true"', $html);
+        $html = preg_replace('/\bnon-editable-area\b/i', 'editable-area', $html);
+        $html = preg_replace('/\bnon-editable\b/i', 'is-editable', $html);
+        return $html;
     }
 }

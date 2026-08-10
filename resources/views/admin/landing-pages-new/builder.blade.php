@@ -515,8 +515,13 @@
 
             <!-- BOTTOM BREADCRUMBS & CODE EDITOR BAR -->
             <div class="gjs-breadcrumbs-bar">
-                <div class="gjs-breadcrumbs-trail" id="breadcrumbsTrail">
-                    <span class="text-white-50">body</span>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="gjs-breadcrumbs-trail" id="breadcrumbsTrail">
+                        <span class="text-white-50">body</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-warning border-0 text-warning px-2 fw-bold" onclick="forceUnlockSelected()" title="إلغاء قفل العنصر المحدد وجعله قابل للتعديل بالكامل">
+                        <i class="bi bi-unlock-fill"></i> 🔓 إلغاء قفل العنصر (Unlock Element)
+                    </button>
                 </div>
                 <div>
                     <button type="button" class="btn btn-sm btn-outline-info border-0 text-white-50 px-2" data-bs-toggle="modal" data-bs-target="#codeEditorModal">
@@ -832,6 +837,136 @@
             label: '🖼️ صورة (Image)',
             category: 'عناصر بسيطة',
             content: '<img src="https://via.placeholder.com/600x400" class="img-fluid rounded-3" alt="صورة توضيحية">'
+        });
+
+        // DYNAMIC PRODUCT & E-COMMERCE BLOCKS (100% EDITABLE)
+        bm.add('sticky-buy-bar', {
+            label: '🛒 شريط الشراء السفلي (Sticky Bar)',
+            category: 'عناصر المنتجات والخصومات',
+            content: `
+                <div class="position-fixed bottom-0 start-0 w-100 bg-dark text-white p-3 border-top border-secondary shadow-lg z-3" id="stickyBuyContainer">
+                    <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://via.placeholder.com/60" class="rounded-3 border border-secondary" alt="صورة المنتج" width="50" height="50">
+                            <div>
+                                <h6 class="fw-bold mb-0 text-white">ساعة watcha الذكية</h6>
+                                <div class="d-flex align-items-center gap-2 small">
+                                    <span class="badge bg-danger rounded-pill">خصم -40%</span>
+                                    <span class="text-white-50 text-decoration-line-through">EGP 1500</span>
+                                    <span class="fw-bold text-success fs-5">EGP 899</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="#order" class="btn btn-success btn-lg rounded-pill px-4 fw-bold shadow">
+                                <i class="bi bi-cart-fill"></i> اطلب الآن والدفع عند الاستلام
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `
+        });
+
+        bm.add('product-card-showcase', {
+            label: '📦 بطاقة المنتج والخصم',
+            category: 'عناصر المنتجات والخصومات',
+            content: `
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden my-4 max-w-500 mx-auto">
+                    <div class="position-relative">
+                        <img src="https://via.placeholder.com/600x400" class="card-img-top" alt="اسم المنتج">
+                        <span class="position-absolute top-0 start-0 bg-danger text-white px-3 py-1 rounded-end-3 fw-bold small m-3">عرض لفترة محدودة</span>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <h4 class="fw-bold mb-2">اسم المنتج التجاري المميز</h4>
+                        <p class="text-muted small mb-3">وصف سريع للمنتج والمميزات التي يحصل عليها العميل فور الطلب.</p>
+                        <div class="d-flex align-items-center justify-content-center gap-3 mb-4">
+                            <span class="text-muted text-decoration-line-through fs-5">1500 ج.م</span>
+                            <span class="fw-bold text-success fs-2">899 ج.م</span>
+                        </div>
+                        <a href="#order" class="btn btn-success btn-lg w-100 rounded-pill fw-bold shadow">أطلب المنتج الآن (دفع عند الاستلام)</a>
+                    </div>
+                </div>
+            `
+        });
+
+        bm.add('floating-whatsapp', {
+            label: '💬 زر الواتساب العائم (WhatsApp)',
+            category: 'عناصر المنتجات والخصومات',
+            content: `
+                <a href="https://wa.me/201060500236?text=مرحباً،%20أريد%20الاستفسار%20عن%20العرض" target="_blank" class="position-fixed bottom-0 end-0 m-4 btn btn-success btn-lg rounded-circle shadow-lg d-flex align-items-center justify-content-center z-3" style="width: 60px; height: 60px;">
+                    <i class="bi bi-whatsapp fs-2"></i>
+                </a>
+            `
+        });
+
+        bm.add('countdown-timer', {
+            label: '⏱️ عداد تنازلي للخصومات',
+            category: 'عناصر المنتجات والخصومات',
+            content: `
+                <div class="p-3 bg-danger bg-opacity-10 border border-danger rounded-4 text-center my-3">
+                    <h6 class="fw-bold text-danger mb-2">⚠️ ينتهي الخصم والعرض خلال:</h6>
+                    <div class="d-flex justify-content-center gap-3 fw-bold fs-4 text-danger">
+                        <div class="bg-danger text-white px-3 py-1 rounded-3">02 <span class="d-block text-xs fw-normal">ساعة</span></div>
+                        <div class="bg-danger text-white px-3 py-1 rounded-3">45 <span class="d-block text-xs fw-normal">دقيقة</span></div>
+                        <div class="bg-danger text-white px-3 py-1 rounded-3">30 <span class="d-block text-xs fw-normal">ثانية</span></div>
+                    </div>
+                </div>
+            `
+        });
+
+        // FORCE UNLOCK & MAKE EVERY COMPONENT 100% EDITABLE
+        function forceUnlockSelected() {
+            const selected = editor.getSelected();
+            if (!selected) {
+                alert('يرجى تحديد عنصر أولاً من مساحة التصميم.');
+                return;
+            }
+            selected.set({
+                editable: true,
+                badgable: true,
+                stylable: true,
+                highlightable: true,
+                copyable: true,
+                resizable: true,
+                draggable: true,
+                droppable: true,
+                removable: true
+            });
+            const el = selected.getEl();
+            if (el) {
+                el.removeAttribute('contenteditable');
+                el.setAttribute('contenteditable', 'true');
+                el.classList.remove('non-editable-area', 'non-editable');
+                el.querySelectorAll('*').forEach(child => {
+                    child.removeAttribute('contenteditable');
+                    child.setAttribute('contenteditable', 'true');
+                    child.classList.remove('non-editable-area', 'non-editable');
+                });
+            }
+            editor.trigger('component:update', selected);
+            alert('🔓 تم إلغاء القفل بنجاح! يمكنك الآن تعديل النص، الأسعار، التنسيقات، والعناصر داخله بكل حرية.');
+        }
+
+        // AUTOMATIC UNLOCK LISTENER ON ALL COMPONENTS
+        editor.on('component:add component:selected', (component) => {
+            if (component) {
+                component.set({
+                    editable: true,
+                    badgable: true,
+                    stylable: true,
+                    highlightable: true,
+                    copyable: true,
+                    resizable: true,
+                    draggable: true,
+                    droppable: true,
+                    removable: true
+                });
+                const el = component.getEl();
+                if (el) {
+                    el.removeAttribute('contenteditable');
+                    el.classList.remove('non-editable-area', 'non-editable');
+                }
+            }
         });
 
         // VIEWPORT SWITCHING
