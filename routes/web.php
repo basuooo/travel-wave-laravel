@@ -364,6 +364,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Singular route aliases
             Route::get('/landing-page-new/dashboard', fn () => redirect()->route('admin.landing-pages-new.dashboard'));
             Route::get('/landing-page-new', fn () => redirect()->route('admin.landing-pages-new.dashboard'));
+
+            // 🎯 Popup Manager System Routes
+            Route::prefix('popup-manager')->name('popups.')->group(function () {
+                Route::get('/dashboard', [\App\Http\Controllers\Admin\PopupManagerController::class, 'dashboard'])->name('dashboard');
+                Route::get('/', [\App\Http\Controllers\Admin\PopupManagerController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Admin\PopupManagerController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\PopupManagerController::class, 'store'])->name('store');
+                Route::get('/{popup}/builder', [\App\Http\Controllers\Admin\PopupManagerController::class, 'builder'])->name('builder');
+                Route::put('/{popup}/builder', [\App\Http\Controllers\Admin\PopupManagerController::class, 'updateBuilder'])->name('builder.update');
+                Route::post('/{popup}/toggle-active', [\App\Http\Controllers\Admin\PopupManagerController::class, 'toggleActive'])->name('toggle-active');
+                Route::post('/{popup}/duplicate', [\App\Http\Controllers\Admin\PopupManagerController::class, 'duplicate'])->name('duplicate');
+                Route::delete('/{popup}', [\App\Http\Controllers\Admin\PopupManagerController::class, 'destroy'])->name('destroy');
+                Route::get('/{popup}/analytics', [\App\Http\Controllers\Admin\PopupManagerController::class, 'analytics'])->name('analytics');
+            });
         });
 
         Route::middleware('permission:maps.manage')->group(function () {
@@ -568,3 +582,7 @@ Route::get('/migrate-db', function() {
         return "<h1>Error</h1><p>" . $e->getMessage() . "</p>";
     }
 });
+
+// 🎯 Public Popup Runtime Endpoints
+Route::get('/api/v1/popups/runtime', [\App\Http\Controllers\Frontend\PublicPopupRuntimeController::class, 'getAvailablePopups'])->name('popups.public.runtime');
+Route::post('/api/v1/popups/track', [\App\Http\Controllers\Frontend\PublicPopupRuntimeController::class, 'trackEvent'])->name('popups.public.track');

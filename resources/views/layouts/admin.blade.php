@@ -83,6 +83,7 @@
         'title' => __('admin.nav_marketing'),
         'items' => array_values(array_filter([
             ['label' => '🚀 Landing Page Builder New', 'route' => 'admin.landing-pages-new.dashboard', 'match' => 'admin.landing-pages-new.*'],
+            ['label' => '🎯 Popup Manager', 'route' => 'admin.popups.dashboard', 'match' => 'admin.popups.*'],
             ['label' => 'Landing Page 🚀 Builder', 'route' => 'admin.landing-pages.dashboard', 'match' => 'admin.landing-pages.*'],
             $adminUser?->hasPermission('marketing.manage') ? ['label' => __('admin.marketing_campaigns'), 'route' => 'admin.marketing-campaigns.index', 'match' => 'admin.marketing-campaigns.*'] : null,
             $adminUser?->hasPermission('marketing.manage') ? ['label' => __('admin.marketing_manager'), 'route' => 'admin.marketing-landing-pages.index', 'match' => 'admin.marketing-landing-pages.*'] : null,
