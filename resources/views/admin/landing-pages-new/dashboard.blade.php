@@ -5,6 +5,20 @@
 
 @section('content')
 <div class="container-fluid">
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show rounded-4 fw-bold mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 fw-bold mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <!-- STATS CARDS -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
@@ -191,7 +205,7 @@
 </div>
 
 <!-- IMPORT ZIP MODAL -->
-<div class="modal fade" id="importZipModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="importZipModal" tabindex="-1" aria-hidden="true" style="z-index: 1056;">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
             <form action="{{ route('admin.landing-pages-new.import') }}" method="POST" enctype="multipart/form-data">
@@ -200,29 +214,39 @@
                     <h5 class="modal-title fw-bold">📦 استيراد صفحة هبوط من ملف ZIP</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">اختر ملف الحزمة (ZIP Package)</label>
+                <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold fs-6">اختر ملف الحزمة (ZIP Package) <span class="text-danger">*</span></label>
                         <input type="file" name="zip_file" class="form-control form-control-lg" accept=".zip" required>
-                        <div class="form-text">يجب أن يحتوي الملف على index.html ومجلدات css/ و js/ و images/ إن وجدت.</div>
+                        <div class="form-text mt-2 text-muted">💡 يجب أن يحتوي الملف على index.html ومجلدات css/ و js/ و images/ إن وجدت.</div>
                     </div>
-                    <div class="row g-3">
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">الاسم الداخلي للصفحة (اختياري)</label>
+                            <label class="form-label fw-bold">الاسم الداخلي للصفحة (اختياري)</label>
                             <input type="text" name="internal_name" class="form-control" placeholder="مثل: حملة فرنسا الشتوية">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">الـ Slug (اختياري)</label>
+                            <label class="form-label fw-bold">الـ Slug (اختياري)</label>
                             <input type="text" name="slug" class="form-control" placeholder="france-winter-campaign">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary px-4 fw-bold">🚀 بدء الاستيراد والتفكيك</button>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold">🚀 بدء الاستيراد والتفكيك</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalEl = document.getElementById('importZipModal');
+        if (modalEl) {
+            document.body.appendChild(modalEl);
+        }
+    });
+</script>
 @endsection
+

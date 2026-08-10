@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\LandingPageNew;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inquiry;
@@ -14,8 +14,8 @@ use App\Models\LandingPageNew\LpNewLandingPage;
 use App\Models\LandingPageNew\LpNewPageVersion;
 use App\Models\LandingPageNew\LpNewSection;
 use App\Models\LandingPageNew\LpNewTemplate;
-use App\Services\LandingPageNew\LandingPageNewImporter;
 use App\Services\LandingPageNew\LandingPageNewExporter;
+use App\Services\LandingPageNew\LandingPageNewImporter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;

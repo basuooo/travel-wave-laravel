@@ -45,8 +45,9 @@ class LandingPageNewImporter
         $rawHtml = File::get($mainHtmlFile->getRealPath());
 
         // Create landing page record placeholder
-        $internalName = $overrides['internal_name'] ?? pathinfo($zipFile->getClientOriginalName(), PATHINFO_FILENAME);
-        $slug = LpNewLandingPage::makeUniqueSlug($overrides['slug'] ?? $internalName);
+        $internalName = ! empty($overrides['internal_name']) ? $overrides['internal_name'] : pathinfo($zipFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $slugSeed = (! empty($overrides['slug']) && $overrides['slug'] !== 'null') ? $overrides['slug'] : $internalName;
+        $slug = LpNewLandingPage::makeUniqueSlug($slugSeed);
 
         $landingPage = LpNewLandingPage::create([
             'internal_name' => $internalName,

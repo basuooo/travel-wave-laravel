@@ -52,7 +52,7 @@ use App\Http\Controllers\Admin\WorkflowAutomationController;
 use App\Http\Controllers\Admin\VisaCategoryController;
 use App\Http\Controllers\Admin\VisaCountryController;
 use App\Http\Controllers\Admin\LandingPageBuilderController;
-use App\Http\Controllers\Admin\LandingPageNew\LandingPageNewController;
+use App\Http\Controllers\Admin\LandingPageNewController;
 use App\Http\Controllers\Frontend\LandingPagePublicController;
 use App\Http\Controllers\Frontend\LandingPageNewPublicController;
 use App\Http\Controllers\ChatbotController;
@@ -342,6 +342,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/leads', [LandingPageNewController::class, 'leads'])->name('leads');
                 Route::get('/analytics', [LandingPageNewController::class, 'analytics'])->name('analytics');
                 Route::get('/settings', [LandingPageNewController::class, 'settings'])->name('settings');
+                Route::get('/import', fn () => redirect()->route('admin.landing-pages-new.dashboard'));
                 Route::post('/import', [LandingPageNewController::class, 'importZip'])->name('import');
 
                 Route::get('/{landingPage}/edit', [LandingPageNewController::class, 'edit'])->name('edit');
