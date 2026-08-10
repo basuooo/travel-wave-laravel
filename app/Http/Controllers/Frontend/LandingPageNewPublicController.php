@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Frontend;
 
-use App\Models\Inquiry;
+use App\Http\Controllers\Controller;
 use App\Models\LandingPageNew\LpNewLandingPage;
 
 class LandingPageNewPublicController extends Controller
