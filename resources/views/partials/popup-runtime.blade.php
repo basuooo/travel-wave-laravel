@@ -39,21 +39,25 @@
             const popup = data.popups[0];
             if (!popup) return;
 
-            const freqMode = popup.frequency ? popup.frequency.mode : 'once_per_session';
-            if (freqMode === 'once_per_session' && sessionStorage.getItem('tw_popup_' + popup.id)) return;
-            if (freqMode === 'once_ever' && localStorage.getItem('tw_popup_' + popup.id)) return;
+            const isPreview = window.location.search.includes('popup_preview=1');
+            const freqMode = popup.frequency ? popup.frequency.mode : 'every_visit';
+
+            if (!isPreview) {
+                if (freqMode === 'once_per_session' && sessionStorage.getItem('tw_popup_' + popup.id)) return;
+                if (freqMode === 'once_ever' && localStorage.getItem('tw_popup_' + popup.id)) return;
+            }
 
             const trigger = popup.trigger || {};
             const mode = trigger.mode || 'random_time';
 
             let delayMs = 0;
             if (mode === 'random_time') {
-                const minSec = parseInt(trigger.min_delay_seconds) || 20;
-                const maxSec = parseInt(trigger.max_delay_seconds) || 60;
+                const minSec = parseInt(trigger.min_delay_seconds) || 3;
+                const maxSec = parseInt(trigger.max_delay_seconds) || 10;
                 const selectedSec = Math.floor(Math.random() * (maxSec - minSec + 1)) + minSec;
                 delayMs = selectedSec * 1000;
             } else if (mode === 'delay') {
-                delayMs = (parseInt(trigger.delay_seconds) || 10) * 1000;
+                delayMs = (parseInt(trigger.delay_seconds) || 3) * 1000;
             } else if (mode === 'immediately') {
                 delayMs = 100;
             }
@@ -129,7 +133,6 @@
 
         trackPopupEvent(popup.id, 'impression');
 
-        // Click actions & URL redirects
         box.addEventListener('click', function(e) {
             const btn = e.target.closest('a, button');
             if (btn && btn !== closeBtn) {

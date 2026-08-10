@@ -251,18 +251,18 @@
                             <div class="row g-2">
                                 <div class="col-6">
                                     <label class="form-label text-white-50 text-xs fw-bold">الحد الأدنى (ثانية)</label>
-                                    <input type="number" id="minDelaySec" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->trigger_settings['min_delay_seconds'] ?? 20 }}" min="1">
+                                    <input type="number" id="minDelaySec" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->trigger_settings['min_delay_seconds'] ?? 5 }}" min="1">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label text-white-50 text-xs fw-bold">الحد الأقصى (ثانية)</label>
-                                    <input type="number" id="maxDelaySec" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->trigger_settings['max_delay_seconds'] ?? 60 }}" min="1">
+                                    <input type="number" id="maxDelaySec" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->trigger_settings['max_delay_seconds'] ?? 15 }}" min="1">
                                 </div>
                             </div>
                         </div>
 
                         <div id="fixedTimeBox" class="p-2 bg-secondary bg-opacity-25 rounded-3 mb-2" style="display:none;">
                             <label class="form-label text-white-50 text-xs fw-bold">المدة بالثواني</label>
-                            <input type="number" id="fixedDelaySec" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->trigger_settings['delay_seconds'] ?? 10 }}">
+                            <input type="number" id="fixedDelaySec" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->trigger_settings['delay_seconds'] ?? 5 }}">
                         </div>
                     </div>
 
@@ -304,7 +304,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: EXIT CONFIRMATION WARNING (RETAINING ONLY "العودة" BUTTON AS REQUESTED) -->
+                <!-- TAB 4: EXIT CONFIRMATION WARNING (AUTOMATIC PREVIEW ON TEMPLATE SELECTION + RESTORE BUTTON) -->
                 <div id="tabWarning" class="tab-pane">
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -314,14 +314,14 @@
                             </div>
                         </div>
 
-                        <!-- RESTORE BUTTON ONLY (REMOVED PREVIEW BUTTON PER REQUEST 3) -->
+                        <!-- RESTORE BUTTON FOR ORIGINAL POPUP -->
                         <div class="mb-3">
                             <button type="button" class="btn btn-sm btn-outline-light w-100 fw-bold" onclick="restoreOriginalPopupPreview()" title="العودة لمعاينة الـ Popup الأصلي">
                                 ↺ العودة لمعاينة الـ Popup الأصلي
                             </button>
                         </div>
 
-                        <label class="form-label text-white-50 text-xs fw-bold">اختر من 10+ تحذيرات جاهزة:</label>
+                        <label class="form-label text-white-50 text-xs fw-bold">اختر من 10+ تحذيرات جاهزة (يتم إظهار المعاينة تلقائياً):</label>
                         <select class="form-select form-select-sm bg-secondary text-white border-0 mb-3" onchange="applyExitWarningPreset(this.value)">
                             <option value="">-- اختر صيغة التحذير --</option>
                             <option value="1">⚠️ 1. هل أنت متأكد من خسارة الخصم 20% الآن؟</option>
@@ -338,12 +338,12 @@
 
                         <div class="mb-2">
                             <label class="form-label text-white-50 text-xs fw-bold">عنوان التحذير</label>
-                            <input type="text" id="exitWarningTitle" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->structure['exit_warning']['title'] ?? '⚠️ هل أنت متأكد من الإلغاء؟' }}">
+                            <input type="text" id="exitWarningTitle" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->structure['exit_warning']['title'] ?? '⚠️ هل أنت متأكد من الإلغاء؟' }}" onkeyup="previewExitWarningLive()">
                         </div>
 
                         <div class="mb-2">
                             <label class="form-label text-white-50 text-xs fw-bold">رسالة التحذير</label>
-                            <textarea id="exitWarningMsg" class="form-control form-control-sm bg-dark text-white border-secondary" rows="3">{{ $popup->structure['exit_warning']['msg'] ?? 'بإغلاقك لهذه النافذة ستخسر فرصة الحصول على الخصم الحصري اليوم!' }}</textarea>
+                            <textarea id="exitWarningMsg" class="form-control form-control-sm bg-dark text-white border-secondary" rows="3" onkeyup="previewExitWarningLive()">{{ $popup->structure['exit_warning']['msg'] ?? 'بإغلاقك لهذه النافذة ستخسر فرصة الحصول على الخصم الحصري اليوم!' }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -353,7 +353,7 @@
 
     </div>
 
-    <!-- SITE MEDIA LIBRARY MODAL (MediaAsset MODEL) -->
+    <!-- SITE MEDIA LIBRARY MODAL (INSTANT SVG DATA-URI FALLBACK FOR ZERO LOADING HANGS) -->
     <div class="modal fade" id="mediaLibraryModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content bg-dark text-white border-secondary">
@@ -366,11 +366,11 @@
                         @forelse($assets as $asset)
                             @php
                                 $imgUrl = $asset->public_url ?: $asset->url;
-                                $title = $asset->title ?: ($asset->file_name ?: 'مكـون وسائط');
+                                $title = $asset->title ?: ($asset->file_name ?: 'مكون وسائط');
                             @endphp
                             <div class="col-4 col-md-3">
                                 <div class="media-grid-item p-2 text-center" onclick="selectMediaAsset('{{ $imgUrl }}')">
-                                    <img src="{{ $imgUrl }}" class="img-fluid rounded max-h-120 object-fit-cover w-100" alt="Asset" onerror="this.src='https://via.placeholder.com/200x150?text=Media+Image'">
+                                    <img src="{{ $imgUrl }}" class="img-fluid rounded max-h-120 object-fit-cover w-100" alt="Asset" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'150\' fill=\'%23374151\' viewBox=\'0 0 16 16\'><path d=\'M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z\'/><path d=\'M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z\'/></svg>';">
                                     <span class="d-block text-truncate text-white-50 text-xs mt-2">{{ $title }}</span>
                                 </div>
                             </div>
@@ -556,7 +556,29 @@
                 if (titleInput) titleInput.value = warnings[id].title;
                 if (msgInput) msgInput.value = warnings[id].msg;
                 if (toggle) toggle.checked = true;
+
+                // AUTOMATICALLY PREVIEW WARNING TEMPLATE ON SELECTION
+                previewExitWarningLive();
             }
+        }
+
+        function previewExitWarningLive() {
+            isPreviewingWarning = true;
+            const title = document.getElementById('exitWarningTitle') ? document.getElementById('exitWarningTitle').value : '⚠️ هل أنت متأكد من الإلغاء؟';
+            const msg = document.getElementById('exitWarningMsg') ? document.getElementById('exitWarningMsg').value : 'بإغلاقك لهذه النافذة ستخسر فرصة الحصول على الخصم الحصري اليوم!';
+            const liveContent = document.getElementById('popupLiveContent');
+
+            liveContent.innerHTML = `
+                <div class="p-4 text-center bg-white rounded-4 border border-danger">
+                    <div class="fs-1 mb-2">⚠️</div>
+                    <h3 class="fw-bold text-danger mb-2">${title}</h3>
+                    <p class="text-muted mb-4">${msg}</p>
+                    <div class="d-flex flex-column gap-2">
+                        <button type="button" class="btn btn-success btn-lg rounded-pill fw-bold">الاستمرار والاستفادة بالخصم 🎁</button>
+                        <button type="button" class="btn btn-link text-muted">إلغاء وخسارة العرض الآن</button>
+                    </div>
+                </div>
+            `;
         }
 
         function restoreOriginalPopupPreview() {
@@ -592,9 +614,9 @@
                     assigned_lead_form_id: document.getElementById('assignedLeadFormId') ? document.getElementById('assignedLeadFormId').value : null,
                     trigger_settings: {
                         mode: document.getElementById('triggerModeSelect') ? document.getElementById('triggerModeSelect').value : 'random_time',
-                        min_delay_seconds: parseInt(document.getElementById('minDelaySec') ? document.getElementById('minDelaySec').value : 20) || 20,
-                        max_delay_seconds: parseInt(document.getElementById('maxDelaySec') ? document.getElementById('maxDelaySec').value : 60) || 60,
-                        delay_seconds: parseInt(document.getElementById('fixedDelaySec') ? document.getElementById('fixedDelaySec').value : 10) || 10,
+                        min_delay_seconds: parseInt(document.getElementById('minDelaySec') ? document.getElementById('minDelaySec').value : 5) || 5,
+                        max_delay_seconds: parseInt(document.getElementById('maxDelaySec') ? document.getElementById('maxDelaySec').value : 15) || 15,
+                        delay_seconds: parseInt(document.getElementById('fixedDelaySec') ? document.getElementById('fixedDelaySec').value : 5) || 5,
                     },
                     condition_settings: {
                         pages_mode: document.getElementById('pagesModeSelect') ? document.getElementById('pagesModeSelect').value : 'all',
