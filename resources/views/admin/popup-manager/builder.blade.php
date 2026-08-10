@@ -234,7 +234,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: TRIGGERS, RANDOM TIMING & PAGE TARGETING -->
+                <!-- TAB 3: TRIGGERS, RANDOM TIMING, FREQUENCY & PAGE TARGETING -->
                 <div id="tabTriggers" class="tab-pane">
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
                         <label class="form-label text-info fw-bold small">⚡ نوع الزناد (Trigger Mode)</label>
@@ -264,6 +264,20 @@
                             <label class="form-label text-white-50 text-xs fw-bold">المدة بالثواني</label>
                             <input type="number" id="fixedDelaySec" class="form-control form-control-sm bg-dark text-white border-secondary" value="{{ $popup->trigger_settings['delay_seconds'] ?? 5 }}">
                         </div>
+                    </div>
+
+                    <!-- FREQUENCY SETTINGS (تكرار الظهور للزائر) -->
+                    <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
+                        <h6 class="fw-bold text-info small mb-2"><i class="bi bi-repeat me-1"></i> تكرار ظهور الـ Popup للزائر (Frequency)</h6>
+                        @php
+                            $freqMode = $popup->frequency_settings['mode'] ?? 'every_visit';
+                        @endphp
+                        <select id="frequencySelect" class="form-select form-select-sm bg-secondary text-white border-0">
+                            <option value="every_visit" @selected($freqMode === 'every_visit')>🔄 في كل زيارة وفي كل صفحة (Every Visit)</option>
+                            <option value="once_per_session" @selected($freqMode === 'once_per_session')>⏱️ مرة واحدة في الجلسة الواحدة (Once Per Session)</option>
+                            <option value="once_ever" @selected($freqMode === 'once_ever')>🔒 مرة واحدة فقط للزائر للأبد (Once Ever)</option>
+                        </select>
+                        <small class="text-muted text-xs d-block mt-2">يتحكم في عدد المرات التي يظهر فيها الـ Popup للزائر نفسه.</small>
                     </div>
 
                     <!-- PAGE TARGETING -->
@@ -626,7 +640,7 @@
                         }
                     },
                     frequency_settings: {
-                        mode: document.getElementById('frequencySelect') ? document.getElementById('frequencySelect').value : 'once_per_session'
+                        mode: document.getElementById('frequencySelect') ? document.getElementById('frequencySelect').value : 'every_visit'
                     },
                     structure: {
                         html: htmlToSave,
