@@ -124,8 +124,9 @@ class PopupManagerController extends Controller
     public function builder(Popup $popup)
     {
         $forms = LeadForm::where('is_active', true)->get();
+        $landingPages = \App\Models\LandingPageNew\LpNewLandingPage::where('is_active', true)->select('id', 'internal_name', 'title_ar', 'slug')->get();
 
-        return view('admin.popup-manager.builder', compact('popup', 'forms'));
+        return view('admin.popup-manager.builder', compact('popup', 'forms', 'landingPages'));
     }
 
     public function updateBuilder(Request $request, Popup $popup)

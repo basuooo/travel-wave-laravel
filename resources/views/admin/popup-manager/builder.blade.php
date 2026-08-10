@@ -13,7 +13,7 @@
     <style>
         :root {
             --topbar-h: 60px;
-            --sidebar-w: 360px;
+            --sidebar-w: 380px;
             --bg-dark: #090d16;
             --panel-bg: #111827;
             --border-color: #1f2937;
@@ -34,10 +34,11 @@
 
         .canvas-area { flex: 1; background: #030712; display: flex; align-items: center; justify-content: center; position: relative; padding: 2rem; overflow: auto; }
 
-        .popup-preview-box { background: white; color: #111827; border-radius: 20px; width: 100%; max-width: 500px; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); position: relative; }
+        .popup-preview-box { background: white; color: #111827; border-radius: 20px; width: 100%; max-width: 520px; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); position: relative; overflow: hidden; }
         .popup-overlay-preview { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 50; }
 
         .form-switch .form-check-input { width: 2.5em; height: 1.25em; cursor: pointer; }
+        .page-list-scroll { max-height: 180px; overflow-y: auto; background: #030712; border-radius: 8px; padding: 0.5rem; }
     </style>
 </head>
 <body>
@@ -73,7 +74,7 @@
         <main class="canvas-area">
             <div class="popup-overlay-preview" id="previewOverlay">
                 <div class="popup-preview-box" id="previewModalBox">
-                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3" id="previewCloseBtn"></button>
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3" id="previewCloseBtn" style="z-index: 10;"></button>
                     <div id="popupLiveContent" contenteditable="true" style="outline: none;">
                         {!! is_array($popup->structure) ? ($popup->structure['html'] ?? '') : '' !!}
                     </div>
@@ -84,14 +85,14 @@
         <!-- RIGHT SIDEBAR SETTINGS -->
         <aside class="sidebar">
             <div class="d-flex border-bottom border-secondary">
-                <button class="tab-btn active" onclick="showTab('tabTriggers', this)">⚡ الزناد والشروط</button>
-                <button class="tab-btn" onclick="showTab('tabContent', this)">📝 المحتوى</button>
-                <button class="tab-btn" onclick="showTab('tabDesign', this)">🎨 التصميم والموضع</button>
+                <button class="tab-btn active" onclick="showTab('tabTriggers', this)">⚡ الزناد والصفحات</button>
+                <button class="tab-btn" onclick="showTab('tabContent', this)">🖼️ الصور والمحتوى</button>
+                <button class="tab-btn" onclick="showTab('tabDesign', this)">🎨 التصميم والموضعة</button>
             </div>
 
             <div class="tab-content">
 
-                <!-- TAB 1: TRIGGERS & RANDOM TIMING -->
+                <!-- TAB 1: TRIGGERS, RANDOM TIMING & PAGE TARGETING -->
                 <div id="tabTriggers" class="tab-pane active">
 
                     <!-- TRIGGER TYPE -->
@@ -128,9 +129,42 @@
                         </div>
                     </div>
 
-                    <!-- TARGETING PAGES & DEVICES -->
+                    <!-- 🌐 PAGE TARGETING (اختيار مكان ظهور البوب اب بالظبط) -->
                     <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
-                        <h6 class="fw-bold text-info small mb-3"><i class="bi bi-phone me-1"></i> الأجهزة والصفحات المحددة</h6>
+                        <h6 class="fw-bold text-info small mb-2"><i class="bi bi-geo-alt-fill me-1"></i> تحديد صفحات ظهور الـ Popup</h6>
+                        
+                        <div class="mb-2">
+                            <select id="pagesModeSelect" class="form-select form-select-sm bg-secondary text-white border-0" onchange="togglePagesList(this.value)">
+                                <option value="all" @selected(($popup->condition_settings['pages_mode'] ?? 'all') === 'all')>🌐 جميع صفحات الموقع (Everywhere)</option>
+                                <option value="specific" @selected(($popup->condition_settings['pages_mode'] ?? '') === 'specific')>🎯 صفحات محددة بالسيستم (Specific Pages)</option>
+                            </select>
+                        </div>
+
+                        <!-- SYSTEM PAGES SELECTION LIST -->
+                        <div id="specificPagesContainer" style="display: {{ ($popup->condition_settings['pages_mode'] ?? '') === 'specific' ? 'block' : 'none' }};">
+                            <label class="form-label text-white-50 text-xs fw-bold mt-2">اختر الصفحات المتاحة بالسيستم:</label>
+                            <div class="page-list-scroll border border-secondary mb-2">
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input page-checkbox" type="checkbox" value="/" id="pageHome" @checked(in_array('/', $popup->condition_settings['specific_urls'] ?? []))>
+                                    <label class="form-check-label text-white small" for="pageHome">🏠 الصفحة الرئيسية (Home Page)</label>
+                                </div>
+
+                                @foreach($landingPages as $lp)
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input page-checkbox" type="checkbox" value="/lp-new/{{ $lp->slug }}" id="pageLp_{{ $lp->id }}" @checked(in_array('/lp-new/' . $lp->slug, $popup->condition_settings['specific_urls'] ?? []))>
+                                        <label class="form-check-label text-white small" for="pageLp_{{ $lp->id }}">🚀 {{ $lp->internal_name }} ({{ $lp->slug }})</label>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <label class="form-label text-white-50 text-xs fw-bold">أو أدخل رابطاً مخصصاً (Custom Path)</label>
+                            <input type="text" id="customUrlPath" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="مثال: /visa-france أو /services" value="{{ $popup->condition_settings['custom_url'] ?? '' }}">
+                        </div>
+                    </div>
+
+                    <!-- TARGETING DEVICES -->
+                    <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
+                        <h6 class="fw-bold text-info small mb-3"><i class="bi bi-phone me-1"></i> الأجهزة المستهدفة</h6>
 
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="small text-white">Desktop (كمبيوتر)</span>
@@ -164,8 +198,25 @@
 
                 </div>
 
-                <!-- TAB 2: CONTENT & FORMS -->
+                <!-- TAB 2: IMAGE CONTROLS, CONTENT & FORMS -->
                 <div id="tabContent" class="tab-pane">
+
+                    <!-- 🖼️ POPUP IMAGE MANAGER (إضافة وتعديل الصور) -->
+                    <div class="p-3 bg-dark border border-secondary rounded-3 mb-3">
+                        <h6 class="fw-bold text-warning small mb-2"><i class="bi bi-image me-1"></i> صورة الـ Popup (Banner / Image)</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-white-50 text-xs fw-bold">رابط الصورة (Image URL)</label>
+                            <input type="text" id="popupImageUrl" class="form-control form-control-sm bg-dark text-white border-secondary mb-2" placeholder="https://domain.com/banner.jpg">
+                            <button type="button" class="btn btn-sm btn-primary w-100 fw-bold" onclick="insertOrUpdateImage()"><i class="bi bi-plus-circle me-1"></i> إدراج / استبدال الصورة داخل الـ Popup</button>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-success flex-1" onclick="insertBannerPreset('top')">صورة في الأعلى</button>
+                            <button type="button" class="btn btn-sm btn-outline-info flex-1" onclick="insertBannerPreset('bg')">خلفية بالكامل</button>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label text-info fw-bold small">نموذج السيستم المربوط</label>
                         <select id="assignedLeadFormId" class="form-select form-select-sm bg-secondary text-white border-0">
@@ -178,7 +229,7 @@
 
                     <div class="mb-3">
                         <label class="form-label text-info fw-bold small">تعديل كود ה-HTML المباشر</label>
-                        <textarea id="rawHtmlCode" class="form-control form-control-sm bg-dark text-white border-secondary font-monospace" rows="10" onkeyup="updateCanvasFromHtml(this.value)">{!! is_array($popup->structure) ? ($popup->structure['html'] ?? '') : '' !!}</textarea>
+                        <textarea id="rawHtmlCode" class="form-control form-control-sm bg-dark text-white border-secondary font-monospace" rows="8" onkeyup="updateCanvasFromHtml(this.value)">{!! is_array($popup->structure) ? ($popup->structure['html'] ?? '') : '' !!}</textarea>
                     </div>
                 </div>
 
@@ -223,14 +274,45 @@
             document.getElementById('fixedTimeBox').style.display = (mode === 'delay') ? 'block' : 'none';
         }
 
+        function togglePagesList(mode) {
+            document.getElementById('specificPagesContainer').style.display = (mode === 'specific') ? 'block' : 'none';
+        }
+
         function updateCanvasFromHtml(html) {
             document.getElementById('popupLiveContent').innerHTML = html;
+        }
+
+        function insertOrUpdateImage() {
+            const url = document.getElementById('popupImageUrl').value.trim();
+            if (!url) { alert('يرجى إدخال رابط الصورة أولاً.'); return; }
+            const liveContent = document.getElementById('popupLiveContent');
+            let img = liveContent.querySelector('img');
+            if (img) {
+                img.src = url;
+            } else {
+                liveContent.innerHTML = `<img src="${url}" class="img-fluid rounded-3 mb-3 w-100 object-fit-cover" style="max-height: 250px;">` + liveContent.innerHTML;
+            }
+            document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
+        }
+
+        function insertBannerPreset(type) {
+            const url = document.getElementById('popupImageUrl').value.trim() || 'https://via.placeholder.com/600x300';
+            const liveContent = document.getElementById('popupLiveContent');
+            if (type === 'top') {
+                liveContent.innerHTML = `<img src="${url}" class="img-fluid rounded-top-4 w-100 object-fit-cover mb-3"><div class="p-3"><h4 class="fw-bold mb-2">عرض خاص لفترة محدودة 🔥</h4><p class="text-muted small mb-3">احصل على الاستشارة المجانية فور تسجيل بياناتك.</p><button type="button" class="btn btn-success w-100 rounded-pill fw-bold">أطلب الآن</button></div>`;
+            } else if (type === 'bg') {
+                liveContent.innerHTML = `<div class="p-4 rounded-4 text-white text-center position-relative overflow-hidden" style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${url}') center/cover no-repeat; min-height: 300px;"><h3 class="fw-bold mb-2">عرض خاص جداً 🌟</h3><p class="mb-4">تواصل معنا واستفد من خصم اليوم المتوفر.</p><button type="button" class="btn btn-warning btn-lg px-5 rounded-pill fw-bold text-dark">احجز مكانك الآن</button></div>`;
+            }
+            document.getElementById('rawHtmlCode').value = liveContent.innerHTML;
         }
 
         function savePopupAllData() {
             const badge = document.getElementById('saveStatusBadge');
             badge.className = 'badge bg-warning text-dark';
             badge.innerText = 'جاري الحفظ...';
+
+            const selectedPages = [];
+            document.querySelectorAll('.page-checkbox:checked').forEach(cb => selectedPages.push(cb.value));
 
             const html = document.getElementById('popupLiveContent').innerHTML;
 
@@ -247,6 +329,9 @@
                     delay_seconds: parseInt(document.getElementById('fixedDelaySec').value) || 10,
                 },
                 condition_settings: {
+                    pages_mode: document.getElementById('pagesModeSelect').value,
+                    specific_urls: selectedPages,
+                    custom_url: document.getElementById('customUrlPath').value,
                     devices: {
                         desktop: document.getElementById('devDesktop').checked,
                         mobile: document.getElementById('devMobile').checked
