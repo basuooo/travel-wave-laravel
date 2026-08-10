@@ -250,7 +250,7 @@ class LandingPageNewController extends Controller
             return redirect()->route('admin.landing-pages-new.builder', $landingPage)
                 ->with('success', 'تم استيراد وتفكيك حزمة الـ ZIP بنجاح!');
         } catch (\Throwable $e) {
-            return back()->with('error', 'حدث خطأ أثناء استيراد وتفكيك ملف الـ ZIP: ' . $e->getMessage());
+            return redirect()->route('admin.landing-pages-new.dashboard')->with('error', 'حدث خطأ أثناء استيراد وتفكيك ملف الـ ZIP: ' . $e->getMessage());
         }
     }
 

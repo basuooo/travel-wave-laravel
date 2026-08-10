@@ -88,6 +88,14 @@ class LpNewLandingPage extends Model
 
     public static function ensureTableSchema(): void
     {
+        // Automatically clear stale route cache if present on live server
+        foreach (['routes-v7.php', 'routes.php'] as $cacheFile) {
+            $path = base_path('bootstrap/cache/' . $cacheFile);
+            if (file_exists($path)) {
+                @unlink($path);
+            }
+        }
+
         if (Schema::hasTable('lp_new_landing_pages')) {
             return;
         }
@@ -400,5 +408,14 @@ class LpNewLandingPage extends Model
         }
 
         return $candidate;
+    }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        static::ensureTableSchema();
+
+        return $this->where('id', $value)
+            ->orWhere('slug', $value)
+            ->firstOrFail();
     }
 }

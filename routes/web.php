@@ -357,6 +357,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/{landingPage}/versions', [LandingPageNewController::class, 'versions'])->name('versions');
                 Route::post('/{landingPage}/versions/{version}/restore', [LandingPageNewController::class, 'restoreVersion'])->name('versions.restore');
             });
+
+            // Singular route aliases
+            Route::get('/landing-page-new/dashboard', fn () => redirect()->route('admin.landing-pages-new.dashboard'));
+            Route::get('/landing-page-new', fn () => redirect()->route('admin.landing-pages-new.dashboard'));
         });
 
         Route::middleware('permission:maps.manage')->group(function () {

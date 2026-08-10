@@ -178,7 +178,8 @@
                         <summary class="admin-sidebar-group-summary">{{ $section['title'] }}</summary>
                         <div class="admin-sidebar-group-links">
                             @foreach($section['items'] as $item)
-                                <a class="nav-link rounded px-3 py-2 {{ request()->routeIs($item['match']) ? 'active' : '' }}" href="{{ route($item['route']) }}">{{ $item['label'] }}</a>
+                                @php($itemUrl = \Illuminate\Support\Facades\Route::has($item['route']) ? route($item['route']) : url('/admin/' . str_replace(['admin.', '.dashboard', '.index'], '', $item['route'])))
+                                <a class="nav-link rounded px-3 py-2 {{ request()->routeIs($item['match']) ? 'active' : '' }}" href="{{ $itemUrl }}">{{ $item['label'] }}</a>
                             @endforeach
                         </div>
                     </details>
