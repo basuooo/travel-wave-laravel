@@ -282,6 +282,57 @@ class LandingPageNewController extends Controller
         ]);
     }
 
+    public function builderV2(LpNewLandingPage $landingPage)
+    {
+        $forms = LeadForm::where('is_active', true)->get();
+        $sections = LpNewSection::where('is_active', true)->get();
+        $templates = LpNewTemplate::where('is_active', true)->get();
+        $brands = Brand::where('is_active', true)->get();
+
+        return view('admin.landing-pages-new.builder-v2', [
+            'page' => $landingPage,
+            'forms' => $forms,
+            'sections' => $sections,
+            'templates' => $templates,
+            'brands' => $brands,
+        ]);
+    }
+
+    public function updateBuilderV2(Request $request, LpNewLandingPage $landingPage)
+    {
+        $validated = $request->validate([
+            'structure' => ['nullable'],
+            'custom_css' => ['nullable', 'string'],
+            'custom_js' => ['nullable', 'string'],
+            'custom_html_head' => ['nullable', 'string'],
+            'status' => ['nullable', 'in:draft,published,archived'],
+        ]);
+
+        $beforeState = ['structure' => $landingPage->structure];
+
+        $structure = $validated['structure'] ?? $landingPage->structure;
+        if (is_array($structure)) {
+            $structure = json_encode($structure, JSON_UNESCAPED_UNICODE);
+        }
+
+        $landingPage->update([
+            'structure' => $structure,
+            'custom_css' => $validated['custom_css'] ?? $landingPage->custom_css,
+            'custom_js' => $validated['custom_js'] ?? $landingPage->custom_js,
+            'custom_html_head' => $validated['custom_html_head'] ?? $landingPage->custom_html_head,
+            'status' => $validated['status'] ?? $landingPage->status,
+            'updated_by' => auth()->id(),
+        ]);
+
+        LpNewActivityLog::log('updated_builder_v2', $landingPage, $beforeState, ['structure' => $landingPage->structure]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حفظ تغييرات Builder V2 بنجاح!',
+            'page' => $landingPage->fresh(),
+        ]);
+    }
+
     public function updateBuilder(Request $request, LpNewLandingPage $landingPage)
     {
         $validated = $request->validate([

@@ -354,6 +354,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/{landingPage}/export', [LandingPageNewController::class, 'exportZip'])->name('export');
                 Route::get('/{landingPage}/builder', [LandingPageNewController::class, 'builder'])->name('builder');
                 Route::put('/{landingPage}/builder', [LandingPageNewController::class, 'updateBuilder'])->name('builder.update');
+                Route::get('/{landingPage}/builder-v2', [LandingPageNewController::class, 'builderV2'])->name('builder-v2');
+                Route::put('/{landingPage}/builder-v2', [LandingPageNewController::class, 'updateBuilderV2'])->name('builder-v2.update');
                 Route::post('/{landingPage}/autosave', [LandingPageNewController::class, 'autosave'])->name('autosave');
                 Route::get('/{landingPage}/versions', [LandingPageNewController::class, 'versions'])->name('versions');
                 Route::post('/{landingPage}/versions/{version}/restore', [LandingPageNewController::class, 'restoreVersion'])->name('versions.restore');

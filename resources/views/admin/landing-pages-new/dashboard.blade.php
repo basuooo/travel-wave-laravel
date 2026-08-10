@@ -163,10 +163,13 @@
                                 <span class="small text-muted" title="{{ $item->updated_at }}">{{ $item->updated_at->diffForHumans() }}</span>
                             </td>
                             <td class="text-end">
-                                <div class="d-inline-flex flex-wrap justify-content-end gap-1">
-                                    <a href="{{ route('admin.landing-pages-new.builder', $item) }}" class="btn btn-sm btn-primary fw-bold" title="البناء المرئي الهجين">
-                                        🛠️ Builder
-                                    </a>
+                                 <div class="d-inline-flex flex-wrap justify-content-end gap-1">
+                                     <a href="{{ route('admin.landing-pages-new.builder-v2', $item) }}" class="btn btn-sm btn-success fw-bold" title="⭐ Builder V2 — Easy & Advanced">
+                                         ⭐ Builder V2
+                                     </a>
+                                     <a href="{{ route('admin.landing-pages-new.builder', $item) }}" class="btn btn-sm btn-outline-primary fw-bold" title="🛠️ Builder V1 Legacy">
+                                         🛠️ Builder V1
+                                     </a>
                                     <a href="{{ route('admin.landing-pages-new.edit', $item) }}" class="btn btn-sm btn-outline-secondary" title="تعديل الإعدادات والـ SEO">
                                         ⚙️ Edit
                                     </a>

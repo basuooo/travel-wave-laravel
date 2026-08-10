@@ -11,8 +11,11 @@
                 <p class="text-muted mb-0">الرابط الحقيقي: <code>{{ $landingPage->publicUrl() }}</code></p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('admin.landing-pages-new.builder', $landingPage) }}" class="btn btn-primary fw-bold rounded-pill px-4">
-                    🛠️ الانتقال للبناء المرئي (Builder)
+                <a href="{{ route('admin.landing-pages-new.builder-v2', $landingPage) }}" class="btn btn-success fw-bold rounded-pill px-4">
+                    ⭐ Builder V2 (سهل ومتقدم)
+                </a>
+                <a href="{{ route('admin.landing-pages-new.builder', $landingPage) }}" class="btn btn-outline-primary fw-bold rounded-pill px-3">
+                    🛠️ Builder V1
                 </a>
                 <a href="{{ route('admin.landing-pages-new.index') }}" class="btn btn-outline-secondary rounded-pill px-3">
                     ← القائمة
