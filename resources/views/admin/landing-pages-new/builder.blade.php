@@ -659,7 +659,7 @@
                 $initialHtml = '<div class="container py-5 text-center"><h1 class="display-4 fw-bold text-dark mb-3">مرحباً بك في صفحة الهبوط الجديدة</h1><p class="lead text-muted mb-4">انقر على أي نص للتعديل المباشر، أو اسحب عناصر جديدة من القائمة الجانبية.</p><a href="#lead-form" class="btn btn-primary btn-lg rounded-pill px-5">قدم طلبك الآن</a></div>';
             }
 
-            // Automatically convert {{slides #}} and non-editable placeholders to native editable components
+            // Automatically convert slide placeholders and non-editable placeholders to native editable components
             $gallerySliderSnippet = '<div class="product-gallery-slider my-4 text-center"><div class="main-image-preview mb-3 bg-light p-2 rounded-4 shadow-sm"><img src="https://via.placeholder.com/800x600" id="mainGalleryImage" class="img-fluid rounded-3 max-h-500 w-100 object-fit-cover" alt="معرض صور المنتج"></div><div class="row g-2 justify-content-center thumbnails-row"><div class="col-2"><img src="https://via.placeholder.com/150?text=1" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 1"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=2" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 2"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=3" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 3"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=4" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 4"></div><div class="col-2"><img src="https://via.placeholder.com/150?text=5" class="img-thumbnail rounded-3 cursor-pointer opacity-75 hover-opacity-100 gallery-thumb" alt="صورة 5"></div></div></div>';
 
             $initialHtml = preg_replace('/\{\{\s*slides\s*#?\s*\}\}/i', $gallerySliderSnippet, $initialHtml);
@@ -922,7 +922,7 @@
             `
         });
 
-        // 1. PRODUCT IMAGE GALLERY SLIDER BLOCK (Replaces {{slides #}})
+        // 1. PRODUCT IMAGE GALLERY SLIDER BLOCK (Replaces slide placeholders)
         bm.add('product-gallery-slider', {
             label: '🖼️ معرض صور المنتج التفاعلي (Slider)',
             category: 'عناصر المنتجات والخصومات',
