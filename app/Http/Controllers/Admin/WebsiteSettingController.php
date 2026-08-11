@@ -7,17 +7,42 @@ use App\Http\Controllers\Concerns\InteractsWithSettingColumns;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class WebsiteSettingController extends Controller
 {
     use HandlesCmsData;
     use InteractsWithSettingColumns;
 
-    public function edit()
+    /**
+     * Get website settings with JSON fallback.
+     */
+    public static function getWebsiteSettings()
     {
         $setting = Setting::query()->firstOrCreate([]);
+        $fileData = [];
+
+        if (Storage::disk('local')->exists('website_status.json')) {
+            try {
+                $fileData = json_decode(Storage::disk('local')->get('website_status.json'), true) ?: [];
+            } catch (\Throwable $e) {
+                $fileData = [];
+            }
+        }
+
+        foreach ($fileData as $key => $value) {
+            if (!empty($value) || is_bool($value)) {
+                $setting->{$key} = $value;
+            }
+        }
+
+        return $setting;
+    }
+
+    public function edit()
+    {
+        $setting = self::getWebsiteSettings();
         $dbMigrated = Schema::hasColumn('settings', 'site_status');
 
         return view('admin.website-settings.edit', [
@@ -29,10 +54,6 @@ class WebsiteSettingController extends Controller
     public function update(Request $request)
     {
         $setting = Setting::query()->firstOrCreate([]);
-
-        if (!Schema::hasColumn('settings', 'site_status')) {
-            return back()->with('error', 'عفواً، يجب تشغيل أمر المايجريشن php artisan migrate أولاً لإنشاء حقول إعدادات الموقع في قاعدة البيانات.');
-        }
 
         $data = $request->validate([
             'site_status' => ['nullable', 'string', 'in:active,maintenance,redirect'],
@@ -48,8 +69,14 @@ class WebsiteSettingController extends Controller
 
         $data['maintenance_bypass_admin'] = $request->boolean('maintenance_bypass_admin');
 
-        $setting->update($this->filterExistingSettingColumns($data));
+        // 1. Save to JSON file storage (Works immediately without requiring DB migration)
+        Storage::disk('local')->put('website_status.json', json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-        return back()->with('success', 'تم تحديث إعدادات الموقع وتصميم صفحة الصيانة بنجاح.');
+        // 2. Save to DB if columns exist
+        if (Schema::hasColumn('settings', 'site_status')) {
+            $setting->update($this->filterExistingSettingColumns($data));
+        }
+
+        return back()->with('success', 'تم حفظ وتطبيق إعدادات الموقع وتصميم الصيانة بنجاح!');
     }
 }

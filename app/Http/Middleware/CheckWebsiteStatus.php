@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Setting;
+use App\Http\Controllers\Admin\WebsiteSettingController;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,11 +14,7 @@ class CheckWebsiteStatus
      */
     public function handle(Request $request, Closure $next)
     {
-        $setting = Setting::query()->first();
-
-        if (!$setting) {
-            return $next($request);
-        }
+        $setting = WebsiteSettingController::getWebsiteSettings();
 
         $status = $setting->site_status ?? 'active';
 
