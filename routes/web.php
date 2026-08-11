@@ -62,45 +62,47 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('locale/{locale}', [FrontendController::class, 'switchLocale'])->name('locale.switch');
 
-Route::get('/', [FrontendController::class, 'home'])->name('home');
-Route::get('/visas', [FrontendController::class, 'visaIndex'])->name('visas.index');
-Route::get('/visas/{category:slug}', [FrontendController::class, 'visaCategory'])->name('visas.category');
-Route::get('/visa-country/{country:slug}', [FrontendController::class, 'visaCountry'])->name('visas.country');
-Route::get('/domestic-tourism', [FrontendController::class, 'domesticIndex'])->name('destinations.index');
-Route::get('/domestic-tourism/{destination:slug}', [FrontendController::class, 'destinationShow'])->name('destinations.show');
-Route::get('/flights', [FrontendController::class, 'flights'])->name('flights');
-Route::get('/hotels', [FrontendController::class, 'hotels'])->name('hotels');
-Route::get('/about', [FrontendController::class, 'about'])->name('about');
-Route::get('/blog', [FrontendController::class, 'blogIndex'])->name('blog.index');
-Route::get('/blog/{post:slug}', [FrontendController::class, 'blogShow'])->name('blog.show');
-Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
-Route::get('/pages/{page:slug}', [FrontendController::class, 'pageShow'])->name('pages.show');
-Route::get('/umrah', function () {
-    $page = \App\Models\Page::where('key', 'umrah')->first();
-    if (! $page) {
-        $page = \App\Models\Page::where('slug', 'umrah')->firstOrFail();
-    }
-    return app(\App\Http\Controllers\FrontendController::class)->pageShow($page);
-})->name('umrah');
-Route::get('/hajj', function () {
-    $page = \App\Models\Page::where('key', 'hajj')->first();
-    if (! $page) {
-        $page = \App\Models\Page::where('slug', 'hajj')->firstOrFail();
-    }
-    return app(\App\Http\Controllers\FrontendController::class)->pageShow($page);
-})->name('hajj');
-Route::get('/france-2', [FrontendController::class, 'france2'])->name('france-2');
-Route::get('/france-3', [FrontendController::class, 'france3'])->name('france-3');
-Route::get('/campaigns/{landingPage:slug}', [FrontendController::class, 'marketingLandingPage'])->name('marketing.landing-pages.show');
-Route::get('/lp/{slug}', [LandingPagePublicController::class, 'show'])->name('landing-pages.public.show');
-Route::get('/lp-new/{slug}', [LandingPageNewPublicController::class, 'show'])->name('landing-pages-new.public.show');
-Route::post('/campaigns/{landingPage:slug}/events', [FrontendController::class, 'trackMarketingLandingPageEvent'])->name('marketing.landing-pages.events.store');
-Route::post('/inquiries', [FrontendController::class, 'storeInquiry'])->name('inquiries.store');
-Route::post('/tracking/meta/events', [FrontendController::class, 'trackMetaEvent'])->name('tracking.meta.events.store');
-Route::post('/chatbot/ask', [ChatbotController::class, 'ask'])->name('chatbot.ask');
-Route::get('/robots.txt', [SeoPublicController::class, 'robots'])->name('seo.robots');
-Route::get('/sitemap.xml', [SeoPublicController::class, 'sitemapIndex'])->name('seo.sitemap.index');
-Route::get('/sitemap-{file}.xml', [SeoPublicController::class, 'sitemapFile'])->where('file', '[A-Za-z0-9\-]+')->name('seo.sitemap.file');
+Route::middleware(['website.status'])->group(function () {
+    Route::get('/', [FrontendController::class, 'home'])->name('home');
+    Route::get('/visas', [FrontendController::class, 'visaIndex'])->name('visas.index');
+    Route::get('/visas/{category:slug}', [FrontendController::class, 'visaCategory'])->name('visas.category');
+    Route::get('/visa-country/{country:slug}', [FrontendController::class, 'visaCountry'])->name('visas.country');
+    Route::get('/domestic-tourism', [FrontendController::class, 'domesticIndex'])->name('destinations.index');
+    Route::get('/domestic-tourism/{destination:slug}', [FrontendController::class, 'destinationShow'])->name('destinations.show');
+    Route::get('/flights', [FrontendController::class, 'flights'])->name('flights');
+    Route::get('/hotels', [FrontendController::class, 'hotels'])->name('hotels');
+    Route::get('/about', [FrontendController::class, 'about'])->name('about');
+    Route::get('/blog', [FrontendController::class, 'blogIndex'])->name('blog.index');
+    Route::get('/blog/{post:slug}', [FrontendController::class, 'blogShow'])->name('blog.show');
+    Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
+    Route::get('/pages/{page:slug}', [FrontendController::class, 'pageShow'])->name('pages.show');
+    Route::get('/umrah', function () {
+        $page = \App\Models\Page::where('key', 'umrah')->first();
+        if (! $page) {
+            $page = \App\Models\Page::where('slug', 'umrah')->firstOrFail();
+        }
+        return app(\App\Http\Controllers\FrontendController::class)->pageShow($page);
+    })->name('umrah');
+    Route::get('/hajj', function () {
+        $page = \App\Models\Page::where('key', 'hajj')->first();
+        if (! $page) {
+            $page = \App\Models\Page::where('slug', 'hajj')->firstOrFail();
+        }
+        return app(\App\Http\Controllers\FrontendController::class)->pageShow($page);
+    })->name('hajj');
+    Route::get('/france-2', [FrontendController::class, 'france2'])->name('france-2');
+    Route::get('/france-3', [FrontendController::class, 'france3'])->name('france-3');
+    Route::get('/campaigns/{landingPage:slug}', [FrontendController::class, 'marketingLandingPage'])->name('marketing.landing-pages.show');
+    Route::get('/lp/{slug}', [LandingPagePublicController::class, 'show'])->name('landing-pages.public.show');
+    Route::get('/lp-new/{slug}', [LandingPageNewPublicController::class, 'show'])->name('landing-pages-new.public.show');
+    Route::post('/campaigns/{landingPage:slug}/events', [FrontendController::class, 'trackMarketingLandingPageEvent'])->name('marketing.landing-pages.events.store');
+    Route::post('/inquiries', [FrontendController::class, 'storeInquiry'])->name('inquiries.store');
+    Route::post('/tracking/meta/events', [FrontendController::class, 'trackMetaEvent'])->name('tracking.meta.events.store');
+    Route::post('/chatbot/ask', [ChatbotController::class, 'ask'])->name('chatbot.ask');
+    Route::get('/robots.txt', [SeoPublicController::class, 'robots'])->name('seo.robots');
+    Route::get('/sitemap.xml', [SeoPublicController::class, 'sitemapIndex'])->name('seo.sitemap.index');
+    Route::get('/sitemap-{file}.xml', [SeoPublicController::class, 'sitemapFile'])->where('file', '[A-Za-z0-9\-]+')->name('seo.sitemap.file');
+});
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest')->group(function () {

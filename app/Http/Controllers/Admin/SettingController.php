@@ -29,6 +29,13 @@ class SettingController extends Controller
             'site_name_ar' => ['nullable', 'string', 'max:255'],
             'site_tagline_en' => ['nullable', 'string', 'max:255'],
             'site_tagline_ar' => ['nullable', 'string', 'max:255'],
+            'site_status' => ['nullable', 'string', 'in:active,maintenance,redirect'],
+            'site_redirect_url' => ['nullable', 'string', 'max:500'],
+            'maintenance_title_ar' => ['nullable', 'string', 'max:255'],
+            'maintenance_title_en' => ['nullable', 'string', 'max:255'],
+            'maintenance_message_ar' => ['nullable', 'string'],
+            'maintenance_message_en' => ['nullable', 'string'],
+            'maintenance_bypass_admin' => ['nullable', 'boolean'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'secondary_phone' => ['nullable', 'string', 'max:255'],
@@ -77,6 +84,7 @@ class SettingController extends Controller
 
         $data = $request->validate($rules);
 
+        $data['maintenance_bypass_admin'] = $request->boolean('maintenance_bypass_admin');
         $data['favicon_path'] = $this->uploadFile($request, 'favicon', 'settings', $setting->favicon_path);
 
         $setting->update($this->filterExistingSettingColumns($data));

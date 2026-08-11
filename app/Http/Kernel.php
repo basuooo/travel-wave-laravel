@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\EnsureAdmin::class,
         'permission' => \App\Http\Middleware\EnsurePermission::class,
         'crm.followups.dispatch' => \App\Http\Middleware\DispatchCrmFollowUpReminders::class,
+        'website.status' => \App\Http\Middleware\CheckWebsiteStatus::class,
     ];
 }
