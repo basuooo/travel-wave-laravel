@@ -29,6 +29,7 @@
     [
         'title' => __('admin.nav_site_settings'),
         'items' => array_values(array_filter([
+            $adminUser?->hasPermission('settings.manage') ? ['label' => __('admin.website_settings'), 'route' => 'admin.website-settings.edit', 'match' => 'admin.website-settings.*'] : null,
             $adminUser?->hasPermission('settings.manage') ? ['label' => __('admin.brand_settings'), 'route' => 'admin.settings.edit', 'match' => 'admin.settings.*'] : null,
             $adminUser?->hasPermission('settings.manage') ? ['label' => __('admin.header_settings'), 'route' => 'admin.header-settings.edit', 'match' => 'admin.header-settings.*'] : null,
             $adminUser?->hasPermission('settings.manage') ? ['label' => __('admin.footer_settings'), 'route' => 'admin.footer-settings.edit', 'match' => 'admin.footer-settings.*'] : null,

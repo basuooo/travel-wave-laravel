@@ -9,6 +9,7 @@ return [
     'search_placeholder' => 'Search pages, destinations, forms, settings...',
     'search_intro' => 'Use the search bar to jump quickly to admin resources in Arabic or English.',
     'no_search_results' => 'No matching admin results were found.',
+    'website_settings' => 'Website Settings',
     'brand_settings' => 'Brand Settings',
     'header_settings' => 'Header Settings',
     'footer_settings' => 'Footer Settings',
