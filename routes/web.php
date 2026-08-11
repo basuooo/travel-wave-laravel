@@ -43,6 +43,7 @@ use App\Http\Controllers\Admin\SeoMetaController;
 use App\Http\Controllers\Admin\SeoRedirectController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\WebsiteSettingController;
+use App\Http\Controllers\Admin\SystemModuleController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\TrackingIntegrationController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -171,6 +172,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('permissions', PermissionController::class)->except(['show']);
 
         Route::middleware('permission:settings.manage')->group(function () {
+            Route::get('/modules-control', [SystemModuleController::class, 'edit'])->name('modules-control.edit');
+            Route::put('/modules-control', [SystemModuleController::class, 'update'])->name('modules-control.update');
             Route::get('/website-settings', [WebsiteSettingController::class, 'edit'])->name('website-settings.edit');
             Route::put('/website-settings', [WebsiteSettingController::class, 'update'])->name('website-settings.update');
             Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');

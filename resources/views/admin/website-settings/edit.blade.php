@@ -178,9 +178,11 @@
                 </label>
             </div>
         </div>
+        </div>
     </div>
 
     <button class="btn btn-primary px-4 shadow-sm"><i class="bi bi-save me-1"></i> حفظ إعدادات وتصميم الموقع</button>
+</form>
 </form>
 
 <script>

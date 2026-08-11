@@ -12,6 +12,14 @@
 @php($adminUser = auth()->user())
 @php($currentRoute = request()->route()?->getName())
 @php($notificationCenter = app(\App\Support\AdminNotificationCenterService::class))
+@php($sysSettings = \App\Http\Controllers\Admin\WebsiteSettingController::getWebsiteSettings())
+@php($modCrmEnabled = (bool)($sysSettings->module_crm_enabled ?? true))
+@php($modAccountingEnabled = (bool)($sysSettings->module_accounting_enabled ?? true))
+@php($modMarketingEnabled = (bool)($sysSettings->module_marketing_enabled ?? true))
+@php($modChatbotEnabled = (bool)($sysSettings->module_chatbot_enabled ?? true))
+@php($modBlogEnabled = (bool)($sysSettings->module_blog_enabled ?? true))
+@php($modDestinationsEnabled = (bool)($sysSettings->module_destinations_enabled ?? true))
+@php($modFormsEnabled = (bool)($sysSettings->module_forms_enabled ?? true))
 @php($crmInformationEnabled = $adminUser && \Illuminate\Support\Facades\Schema::hasTable('crm_information') && \Illuminate\Support\Facades\Schema::hasTable('crm_information_recipients'))
 @php($crmCustomersEnabled = $adminUser && \Illuminate\Support\Facades\Schema::hasTable('crm_customers'))
 @php($crmDocumentsEnabled = $adminUser && \Illuminate\Support\Facades\Schema::hasTable('crm_documents') && \Illuminate\Support\Facades\Schema::hasTable('crm_document_categories'))
@@ -29,6 +37,7 @@
     [
         'title' => __('admin.nav_site_settings'),
         'items' => array_values(array_filter([
+            $adminUser?->hasPermission('settings.manage') ? ['label' => '⚙️ إدارة موديولات النظام', 'route' => 'admin.modules-control.edit', 'match' => 'admin.modules-control.*'] : null,
             $adminUser?->hasPermission('settings.manage') ? ['label' => __('admin.website_settings'), 'route' => 'admin.website-settings.edit', 'match' => 'admin.website-settings.*'] : null,
             $adminUser?->hasPermission('settings.manage') ? ['label' => __('admin.brand_settings'), 'route' => 'admin.settings.edit', 'match' => 'admin.settings.*'] : null,
             $adminUser?->hasPermission('settings.manage') ? ['label' => __('admin.header_settings'), 'route' => 'admin.header-settings.edit', 'match' => 'admin.header-settings.*'] : null,
@@ -44,9 +53,9 @@
             $adminUser?->hasPermission('media.manage') ? ['label' => __('admin.media_library'), 'route' => 'admin.media-library.index', 'match' => 'admin.media-library.*'] : null,
             $adminUser?->hasPermission('pages.view') ? ['label' => __('admin.hero_slider'), 'route' => 'admin.hero-slides.index', 'match' => 'admin.hero-slides.*'] : null,
             $adminUser?->hasPermission('pages.view') ? ['label' => __('admin.homepage_country_strip'), 'route' => 'admin.home-country-strip.index', 'match' => 'admin.home-country-strip.*'] : null,
-            $adminUser?->hasPermission('destinations.manage') ? ['label' => __('admin.visa_categories'), 'route' => 'admin.visa-categories.index', 'match' => 'admin.visa-categories.*'] : null,
-            $adminUser?->hasPermission('destinations.manage') ? ['label' => __('admin.visa_destinations'), 'route' => 'admin.visa-countries.index', 'match' => 'admin.visa-countries.*'] : null,
-            $adminUser?->hasPermission('destinations.manage') ? ['label' => __('admin.destinations'), 'route' => 'admin.destinations.index', 'match' => 'admin.destinations.*'] : null,
+            ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => __('admin.visa_categories'), 'route' => 'admin.visa-categories.index', 'match' => 'admin.visa-categories.*'] : null,
+            ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => __('admin.visa_destinations'), 'route' => 'admin.visa-countries.index', 'match' => 'admin.visa-countries.*'] : null,
+            ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => __('admin.destinations'), 'route' => 'admin.destinations.index', 'match' => 'admin.destinations.*'] : null,
             $adminUser?->hasPermission('testimonials.manage') ? ['label' => __('admin.testimonials'), 'route' => 'admin.testimonials.index', 'match' => 'admin.testimonials.*'] : null,
             $adminUser?->hasPermission('menu.manage') ? ['label' => __('admin.navigation'), 'route' => 'admin.menu-items.index', 'match' => 'admin.menu-items.*'] : null,
             $adminUser?->hasPermission('maps.manage') ? ['label' => __('admin.maps_manager'), 'route' => 'admin.map-sections.index', 'match' => 'admin.map-sections.*'] : null,
@@ -54,15 +63,15 @@
     ],
     [
         'title' => __('admin.nav_forms_leads'),
-        'items' => array_values(array_filter([
+        'items' => $modFormsEnabled ? array_values(array_filter([
             $adminUser?->hasPermission('forms.manage') ? ['label' => __('admin.forms_manager'), 'route' => 'admin.forms.index', 'match' => 'admin.forms.*'] : null,
             $adminUser?->hasPermission('forms.submissions.view') ? ['label' => __('admin.form_submissions'), 'route' => 'admin.forms.submissions', 'match' => 'admin.forms.submissions'] : null,
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.inquiries'), 'route' => 'admin.inquiries.index', 'match' => 'admin.inquiries.*'] : null,
-        ])),
+        ])) : [],
     ],
     [
         'title' => __('admin.nav_crm'),
-        'items' => array_values(array_filter([
+        'items' => $modCrmEnabled ? array_values(array_filter([
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm'), 'route' => 'admin.crm.dashboard', 'match' => 'admin.crm.dashboard'] : null,
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_leads'), 'route' => 'admin.crm.leads.index', 'match' => 'admin.crm.leads.*'] : null,
             ($crmCustomersEnabled && $adminUser?->hasPermission('customers.view')) ? ['label' => __('admin.crm_customers'), 'route' => 'admin.crm.customers.index', 'match' => 'admin.crm.customers.*'] : null,
@@ -78,11 +87,11 @@
             $adminUser?->hasPermission('leads.delete') ? ['label' => __('admin.crm_deleted_leads'), 'route' => 'admin.crm.leads.trash', 'match' => 'admin.crm.leads.trash'] : null,
             $adminUser?->hasPermission('reports.view') ? ['label' => __('admin.crm_reports'), 'route' => 'admin.crm.reports', 'match' => 'admin.crm.reports'] : null,
             $adminUser?->hasPermission('reports.view') ? ['label' => __('admin.crm_reports2'), 'route' => 'admin.crm.reports2', 'match' => 'admin.crm.reports2'] : null,
-        ])),
+        ])) : [],
     ],
     [
         'title' => __('admin.nav_marketing'),
-        'items' => array_values(array_filter([
+        'items' => $modMarketingEnabled ? array_values(array_filter([
             ['label' => '🚀 Landing Page Builder New', 'route' => 'admin.landing-pages-new.dashboard', 'match' => 'admin.landing-pages-new.*'],
             ['label' => '🎯 Popup Manager', 'route' => 'admin.popups.dashboard', 'match' => 'admin.popups.*'],
             ['label' => 'Landing Page 🚀 Builder', 'route' => 'admin.landing-pages.dashboard', 'match' => 'admin.landing-pages.*'],
@@ -91,12 +100,12 @@
             $adminUser?->hasPermission('tracking.manage') ? ['label' => __('admin.tracking_manager'), 'route' => 'admin.tracking-integrations.index', 'match' => 'admin.tracking-integrations.*'] : null,
             $adminUser?->hasPermission('utm.manage') ? ['label' => __('admin.utm_analytics'), 'route' => 'admin.utm.dashboard', 'match' => 'admin.utm.*'] : null,
             $adminUser?->hasPermission('settings.manage') ? ['label' => __('admin.integrations_management'), 'route' => 'admin.integrations.index', 'match' => 'admin.integrations.*'] : null,
-            $adminUser?->hasPermission('chatbot.manage') ? ['label' => __('admin.chatbot_manager'), 'route' => 'admin.chatbot-settings.edit', 'match' => 'admin.chatbot-*'] : null,
-        ])),
+            ($modChatbotEnabled && $adminUser?->hasPermission('chatbot.manage')) ? ['label' => __('admin.chatbot_manager'), 'route' => 'admin.chatbot-settings.edit', 'match' => 'admin.chatbot-*'] : null,
+        ])) : [],
     ],
     [
         'title' => __('admin.nav_accounting'),
-        'items' => array_values(array_filter([
+        'items' => $modAccountingEnabled ? array_values(array_filter([
             $adminUser?->hasPermission('accounting.view') ? ['label' => __('admin.accounting_dashboard'), 'route' => 'admin.accounting.dashboard', 'match' => 'admin.accounting.dashboard'] : null,
             $adminUser?->hasPermission('accounting.view') ? ['label' => __('admin.accounting_customer_accounts'), 'route' => 'admin.accounting.customers.index', 'match' => 'admin.accounting.customers.*'] : null,
             $adminUser?->hasPermission('accounting.view') ? ['label' => __('admin.accounting_treasuries'), 'route' => 'admin.accounting.treasuries.index', 'match' => 'admin.accounting.treasuries.*'] : null,
@@ -104,7 +113,7 @@
             $adminUser?->hasPermission('accounting.view') ? ['label' => __('admin.accounting_employees'), 'route' => 'admin.accounting.employees.index', 'match' => 'admin.accounting.employees.*'] : null,
             $adminUser?->hasPermission('accounting.reports.view') ? ['label' => __('admin.accounting_reports'), 'route' => 'admin.accounting.reports', 'match' => 'admin.accounting.reports'] : null,
             $adminUser?->hasPermission('accounting.manage') ? ['label' => __('admin.accounting_settings'), 'route' => 'admin.accounting.settings', 'match' => 'admin.accounting.settings'] : null,
-        ])),
+        ])) : [],
     ],
     [
         'title' => 'SEO',
@@ -114,10 +123,10 @@
     ],
     [
         'title' => __('admin.nav_blog'),
-        'items' => array_values(array_filter([
+        'items' => $modBlogEnabled ? array_values(array_filter([
             $adminUser?->hasPermission('blog.manage') ? ['label' => __('admin.blog_categories'), 'route' => 'admin.blog-categories.index', 'match' => 'admin.blog-categories.*'] : null,
             $adminUser?->hasPermission('blog.manage') ? ['label' => __('admin.blog_posts'), 'route' => 'admin.blog-posts.index', 'match' => 'admin.blog-posts.*'] : null,
-        ])),
+        ])) : [],
     ],
 ])
 @php($notificationsEnabled = $adminUser && \Illuminate\Support\Facades\Schema::hasTable('notifications'))

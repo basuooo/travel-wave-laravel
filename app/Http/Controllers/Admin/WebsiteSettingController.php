@@ -37,6 +37,16 @@ class WebsiteSettingController extends Controller
             }
         }
 
+        // Set default module toggles to true if not set
+        $setting->module_website_enabled = $setting->module_website_enabled ?? true;
+        $setting->module_crm_enabled = $setting->module_crm_enabled ?? true;
+        $setting->module_accounting_enabled = $setting->module_accounting_enabled ?? true;
+        $setting->module_marketing_enabled = $setting->module_marketing_enabled ?? true;
+        $setting->module_chatbot_enabled = $setting->module_chatbot_enabled ?? true;
+        $setting->module_blog_enabled = $setting->module_blog_enabled ?? true;
+        $setting->module_destinations_enabled = $setting->module_destinations_enabled ?? true;
+        $setting->module_forms_enabled = $setting->module_forms_enabled ?? true;
+
         return $setting;
     }
 
@@ -65,9 +75,17 @@ class WebsiteSettingController extends Controller
             'maintenance_message_en' => ['nullable', 'string'],
             'maintenance_end_time' => ['nullable', 'date'],
             'maintenance_bypass_admin' => ['nullable', 'boolean'],
+            'module_crm_enabled' => ['nullable', 'boolean'],
+            'module_accounting_enabled' => ['nullable', 'boolean'],
+            'module_marketing_enabled' => ['nullable', 'boolean'],
+            'module_chatbot_enabled' => ['nullable', 'boolean'],
         ]);
 
         $data['maintenance_bypass_admin'] = $request->boolean('maintenance_bypass_admin');
+        $data['module_crm_enabled'] = $request->boolean('module_crm_enabled');
+        $data['module_accounting_enabled'] = $request->boolean('module_accounting_enabled');
+        $data['module_marketing_enabled'] = $request->boolean('module_marketing_enabled');
+        $data['module_chatbot_enabled'] = $request->boolean('module_chatbot_enabled');
 
         // 1. Save to JSON file storage (Works immediately without requiring DB migration)
         Storage::disk('local')->put('website_status.json', json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -77,6 +95,6 @@ class WebsiteSettingController extends Controller
             $setting->update($this->filterExistingSettingColumns($data));
         }
 
-        return back()->with('success', 'تم حفظ وتطبيق إعدادات الموقع وتصميم الصيانة بنجاح!');
+        return back()->with('success', 'تم حفظ وتطبيق إعدادات الموقع وموديولات النظام بنجاح!');
     }
 }
