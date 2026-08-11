@@ -15,8 +15,11 @@ return new class extends Migration
             if (!Schema::hasColumn('settings', 'site_redirect_url')) {
                 $table->string('site_redirect_url')->nullable()->after('site_status');
             }
+            if (!Schema::hasColumn('settings', 'maintenance_template')) {
+                $table->string('maintenance_template')->default('glassmorphism')->after('site_redirect_url');
+            }
             if (!Schema::hasColumn('settings', 'maintenance_title_ar')) {
-                $table->string('maintenance_title_ar')->nullable()->after('site_redirect_url');
+                $table->string('maintenance_title_ar')->nullable()->after('maintenance_template');
             }
             if (!Schema::hasColumn('settings', 'maintenance_title_en')) {
                 $table->string('maintenance_title_en')->nullable()->after('maintenance_title_ar');
@@ -27,8 +30,11 @@ return new class extends Migration
             if (!Schema::hasColumn('settings', 'maintenance_message_en')) {
                 $table->text('maintenance_message_en')->nullable()->after('maintenance_message_ar');
             }
+            if (!Schema::hasColumn('settings', 'maintenance_end_time')) {
+                $table->dateTime('maintenance_end_time')->nullable()->after('maintenance_message_en');
+            }
             if (!Schema::hasColumn('settings', 'maintenance_bypass_admin')) {
-                $table->boolean('maintenance_bypass_admin')->default(true)->after('maintenance_message_en');
+                $table->boolean('maintenance_bypass_admin')->default(true)->after('maintenance_end_time');
             }
         });
     }
@@ -39,10 +45,12 @@ return new class extends Migration
             $table->dropColumn([
                 'site_status',
                 'site_redirect_url',
+                'maintenance_template',
                 'maintenance_title_ar',
                 'maintenance_title_en',
                 'maintenance_message_ar',
                 'maintenance_message_en',
+                'maintenance_end_time',
                 'maintenance_bypass_admin',
             ]);
         });
