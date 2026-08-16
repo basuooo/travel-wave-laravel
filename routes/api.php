@@ -32,3 +32,31 @@ Route::prefix('webhooks')->group(function () {
     Route::post('/whatsapp', [\App\Http\Controllers\Api\WhatsAppWebhookController::class, 'handle'])
         ->name('whatsapp.webhook.handle');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Zapier Integration Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('v1/zapier')->middleware('auth:sanctum')->group(function () {
+    // Auth Verification
+    Route::get('/me', [\App\Http\Controllers\API\ZapierController::class, 'me']);
+
+    // REST Hooks Subscriptions
+    Route::post('/subscribe', [\App\Http\Controllers\API\ZapierSubscriptionController::class, 'subscribe']);
+    Route::delete('/unsubscribe', [\App\Http\Controllers\API\ZapierSubscriptionController::class, 'unsubscribe']);
+    Route::get('/subscriptions', [\App\Http\Controllers\API\ZapierSubscriptionController::class, 'index']);
+
+    // Triggers & Actions: Customers
+    Route::get('/customers', [\App\Http\Controllers\API\ZapierController::class, 'listCustomers']);
+    Route::post('/customers', [\App\Http\Controllers\API\ZapierController::class, 'createCustomer']);
+
+    // Triggers & Actions: Inquiries
+    Route::get('/inquiries', [\App\Http\Controllers\API\ZapierController::class, 'listInquiries']);
+    Route::post('/inquiries', [\App\Http\Controllers\API\ZapierController::class, 'createInquiry']);
+
+    // Triggers & Actions: Tasks
+    Route::get('/tasks', [\App\Http\Controllers\API\ZapierController::class, 'listTasks']);
+    Route::post('/tasks', [\App\Http\Controllers\API\ZapierController::class, 'createTask']);
+});
+

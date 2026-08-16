@@ -30,6 +30,9 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        \App\Models\CrmCustomer::observe(\App\Observers\ZapierObserver::class);
+        \App\Models\Inquiry::observe(\App\Observers\ZapierObserver::class);
+        \App\Models\CrmTask::observe(\App\Observers\ZapierObserver::class);
     }
+
 }
