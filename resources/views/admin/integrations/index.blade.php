@@ -6,6 +6,9 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
+        <a href="{{ route('admin.zapier.index') }}" class="btn btn-warning fw-bold text-dark me-2">
+            <i class="bi bi-lightning-charge-fill me-1"></i> إعدادات وتكامل Zapier
+        </a>
         <a href="{{ route('admin.integrations.logs') }}" class="btn btn-outline-secondary">
             <i class="bi bi-journal-text me-1"></i> {{ __('admin.view_api_logs') ?? 'View Logs' }}
         </a>
@@ -15,7 +18,26 @@
     </a>
 </div>
 
+{{-- Featured Zapier Card --}}
+<div class="card admin-card border-2 border-warning mb-4 shadow-sm">
+    <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center">
+            <div class="bg-warning-subtle text-warning p-3 rounded-3 me-3 d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                <i class="bi bi-lightning-charge-fill fs-2"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-1">تكامل Zapier - Automation & REST Hooks</h5>
+                <p class="text-muted small mb-0">ربط التلقائي للحجوزات والعملاء والمهام والاستفسارات مع 6,000+ تطبيق عبر Zapier.</p>
+            </div>
+        </div>
+        <a href="{{ route('admin.zapier.index') }}" class="btn btn-warning font-monospace fw-bold px-4">
+            <i class="bi bi-gear-fill me-1"></i> دخول صفحة Zapier والشرح
+        </a>
+    </div>
+</div>
+
 <div class="row g-4">
+
     @forelse($integrations as $integration)
         <div class="col-md-6 col-xl-4">
             <div class="card admin-card h-100">

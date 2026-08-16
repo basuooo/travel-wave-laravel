@@ -25,6 +25,8 @@ class ZapierSubscriptionController extends Controller
      */
     public function subscribe(Request $request): JsonResponse
     {
+        ZapierSubscription::ensureTableExists();
+
         $validated = $request->validate([
             'event' => ['required', 'string', Rule::in(self::ALLOWED_EVENTS)],
             'target_url' => ['required', 'url'],
@@ -51,6 +53,8 @@ class ZapierSubscriptionController extends Controller
      */
     public function unsubscribe(Request $request): JsonResponse
     {
+        ZapierSubscription::ensureTableExists();
+
         $subscriptionId = $request->input('id') ?? $request->route('id');
         $targetUrl = $request->input('target_url');
 
@@ -83,6 +87,8 @@ class ZapierSubscriptionController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        ZapierSubscription::ensureTableExists();
+
         $subscriptions = ZapierSubscription::where('user_id', $request->user()?->id)
             ->get(['id', 'event', 'target_url', 'is_active', 'created_at']);
 

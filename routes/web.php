@@ -417,6 +417,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/logs', [\App\Http\Controllers\Admin\IntegrationController::class, 'logs'])->name('logs');
         });
 
+        Route::middleware('permission:settings.manage')->prefix('zapier')->name('zapier.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\ZapierAdminController::class, 'index'])->name('index');
+            Route::post('/quick-webhook', [\App\Http\Controllers\Admin\ZapierAdminController::class, 'saveQuickWebhook'])->name('quick-webhook.save');
+            Route::post('/tokens/generate', [\App\Http\Controllers\Admin\ZapierAdminController::class, 'generateToken'])->name('tokens.generate');
+            Route::delete('/tokens/{token}', [\App\Http\Controllers\Admin\ZapierAdminController::class, 'revokeToken'])->name('tokens.revoke');
+            Route::delete('/subscriptions/{subscription}', [\App\Http\Controllers\Admin\ZapierAdminController::class, 'deleteSubscription'])->name('subscriptions.delete');
+        });
+
+
+
         Route::middleware('permission:pages.edit')->group(function () {
             Route::put('/hero-slides/settings', [HeroSlideController::class, 'updateSettings'])->name('hero-slides.settings');
             Route::resource('hero-slides', HeroSlideController::class);

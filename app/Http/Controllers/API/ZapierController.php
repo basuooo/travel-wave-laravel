@@ -28,6 +28,43 @@ class ZapierController extends Controller
     }
 
     /**
+     * Ultra-simple Incoming Webhook Endpoint for Zapier (No complex setup required).
+     */
+    public function incomingLead(Request $request): JsonResponse
+    {
+        $fullName = $request->input('full_name') ?? $request->input('name') ?? trim(($request->input('first_name') ?? '') . ' ' . ($request->input('last_name') ?? ''));
+        $phone = $request->input('phone') ?? $request->input('mobile') ?? $request->input('whatsapp');
+
+        if (empty($fullName) && empty($phone)) {
+            $fullName = 'عميل جديد من Zapier';
+        }
+
+        $inquiry = Inquiry::create([
+            'full_name' => $fullName,
+            'phone' => $phone,
+            'whatsapp_number' => $request->input('whatsapp_number') ?? $phone,
+            'email' => $request->input('email'),
+            'country' => $request->input('country'),
+            'destination' => $request->input('destination') ?? $request->input('service'),
+            'service_type' => $request->input('service_type') ?? 'Zapier Webhook',
+            'message' => $request->input('message') ?? $request->input('notes'),
+            'lead_source' => $request->input('lead_source') ?? 'Zapier Catch Hook',
+            'status' => 'new',
+        ]);
+
+        $formatted = $this->formatInquiry($inquiry);
+
+        ZapierWebhookService::dispatchEvent('inquiry.created', $formatted);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Lead created successfully in Travel Wave',
+            'inquiry_id' => $inquiry->id,
+            'data' => $formatted,
+        ], 201);
+    }
+
+    /**
      * List customers (Polling & Sample Data for Zapier Trigger).
      */
     public function listCustomers(Request $request): JsonResponse

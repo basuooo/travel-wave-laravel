@@ -33,6 +33,9 @@ Route::prefix('webhooks')->group(function () {
         ->name('whatsapp.webhook.handle');
 });
 
+// Public 1-Click Zapier Catch Endpoint (No Auth Needed)
+Route::post('v1/zapier/incoming-lead', [\App\Http\Controllers\API\ZapierController::class, 'incomingLead']);
+
 /*
 |--------------------------------------------------------------------------
 | Zapier Integration Routes
@@ -59,4 +62,5 @@ Route::prefix('v1/zapier')->middleware('auth:sanctum')->group(function () {
     Route::get('/tasks', [\App\Http\Controllers\API\ZapierController::class, 'listTasks']);
     Route::post('/tasks', [\App\Http\Controllers\API\ZapierController::class, 'createTask']);
 });
+
 

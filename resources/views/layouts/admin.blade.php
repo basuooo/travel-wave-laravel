@@ -99,8 +99,10 @@
             $adminUser?->hasPermission('marketing.manage') ? ['label' => __('admin.marketing_manager'), 'route' => 'admin.marketing-landing-pages.index', 'match' => 'admin.marketing-landing-pages.*'] : null,
             $adminUser?->hasPermission('tracking.manage') ? ['label' => __('admin.tracking_manager'), 'route' => 'admin.tracking-integrations.index', 'match' => 'admin.tracking-integrations.*'] : null,
             $adminUser?->hasPermission('utm.manage') ? ['label' => __('admin.utm_analytics'), 'route' => 'admin.utm.dashboard', 'match' => 'admin.utm.*'] : null,
+            $adminUser?->hasPermission('settings.manage') ? ['label' => '⚡ ربط Zapier', 'route' => 'admin.zapier.index', 'match' => 'admin.zapier.*'] : null,
             $adminUser?->hasPermission('settings.manage') ? ['label' => __('admin.integrations_management'), 'route' => 'admin.integrations.index', 'match' => 'admin.integrations.*'] : null,
             ($modChatbotEnabled && $adminUser?->hasPermission('chatbot.manage')) ? ['label' => __('admin.chatbot_manager'), 'route' => 'admin.chatbot-settings.edit', 'match' => 'admin.chatbot-*'] : null,
+
         ])) : [],
     ],
     [
