@@ -34,7 +34,8 @@ Route::prefix('webhooks')->group(function () {
 });
 
 // Public 1-Click Zapier Catch Endpoint (No Auth Needed)
-Route::post('v1/zapier/incoming-lead', [\App\Http\Controllers\API\ZapierController::class, 'incomingLead']);
+Route::match(['get', 'post'], 'v1/zapier/incoming-lead', [\App\Http\Controllers\API\ZapierController::class, 'incomingLead']);
+
 
 /*
 |--------------------------------------------------------------------------

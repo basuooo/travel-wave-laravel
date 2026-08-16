@@ -32,8 +32,19 @@ class ZapierController extends Controller
      */
     public function incomingLead(Request $request): JsonResponse
     {
+        if ($request->isMethod('get')) {
+            return response()->json([
+                'status' => 'online',
+                'service' => 'Travel Wave Zapier Incoming Webhook API',
+                'message' => 'هذا المسار شغال ومظبوط! مخصص لاستقبال بيانات العملاء عبر طلبات POST القادمة من Zapier أو أي منصة ربط خارجية.',
+                'expected_http_method' => 'POST',
+                'expected_fields' => ['full_name', 'phone', 'email', 'destination', 'message', 'country'],
+            ]);
+        }
+
         $fullName = $request->input('full_name') ?? $request->input('name') ?? trim(($request->input('first_name') ?? '') . ' ' . ($request->input('last_name') ?? ''));
         $phone = $request->input('phone') ?? $request->input('mobile') ?? $request->input('whatsapp');
+
 
         if (empty($fullName) && empty($phone)) {
             $fullName = 'عميل جديد من Zapier';
