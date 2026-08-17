@@ -174,7 +174,7 @@ class CrmLeadController extends Controller
             'phone' => $data['phone'],
             'whatsapp_number' => $data['whatsapp_number'] ?? null,
             'email' => $data['email'] ?? null,
-            'country' => $data['country'] ?? null,
+            'country' => $data['destination'] ?? ($data['country'] ?? null),
             'destination' => $data['destination'] ?? ($data['country'] ?? null),
             'admin_notes' => $data['admin_notes'] ?? null,
             'additional_notes' => $data['additional_notes'] ?? null,

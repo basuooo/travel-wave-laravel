@@ -27,8 +27,7 @@
                 <dt class="col-sm-4">{{ __('admin.email') }}</dt><dd class="col-sm-8">{{ $lead->email ?: '-' }}</dd>
                 <dt class="col-sm-4">{{ __('admin.crm_service_type') }}</dt><dd class="col-sm-8">{{ $lead->localizedServiceType() ?: '-' }}</dd>
                 <dt class="col-sm-4">{{ __('admin.crm_service_subtype') }}</dt><dd class="col-sm-8">{{ $lead->localizedServiceSubtype() ?: '-' }}</dd>
-                <dt class="col-sm-4">{{ $lead->localizedServiceDestinationLabel() ?: __('admin.destination') }}</dt><dd class="col-sm-8">{{ $lead->serviceDestinationValue() ?: '-' }}</dd>
-                <dt class="col-sm-4">{{ __('admin.country') }}</dt><dd class="col-sm-8">{{ $lead->country ?: $lead->nationality ?: '-' }}</dd>
+                <dt class="col-sm-4">{{ $lead->localizedServiceDestinationLabel() ?: __('admin.destination') }}</dt><dd class="col-sm-8">{{ $lead->serviceDestinationValue() ?: ($lead->country ?: ($lead->nationality ?: '-')) }}</dd>
                 <dt class="col-sm-4">{{ __('admin.crm_number_of_persons') }}</dt><dd class="col-sm-8">{{ $lead->travelers_count ?: '-' }}</dd>
                 <dt class="col-sm-4">{{ __('admin.source') }}</dt><dd class="col-sm-8">{{ $lead->crmSource?->localizedName() ?: ($lead->lead_source ?: '-') }}</dd>
                 <dt class="col-sm-4">{{ __('admin.marketing_campaign') }}</dt>
@@ -392,7 +391,6 @@
                 </div>
 
                 <div class="col-md-6"><label class="form-label">{{ __('admin.crm_number_of_persons') }}</label><input type="number" class="form-control" name="travelers_count" value="{{ old('travelers_count', $lead->travelers_count) }}"></div>
-                <div class="col-md-6"><label class="form-label">{{ __('admin.country') }}</label><input class="form-control" name="country" value="{{ old('country', $lead->country) }}"></div>
                 <div class="col-md-6">
                     <label class="form-label">{{ __('admin.marketing_campaign') }}</label>
                     <select class="form-select" name="utm_campaign_id">

@@ -55,14 +55,8 @@
         @endif
 
         <div class="col-md-6">
-            <label class="form-label">{{ __('admin.country') }}</label>
-            <input type="text" name="country" class="form-control @error('country') is-invalid @enderror" value="{{ old('country') }}">
-            @error('country')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label">{{ __('admin.destination') }}</label>
-            <input type="text" name="destination" class="form-control @error('destination') is-invalid @enderror" value="{{ old('destination') }}">
+            <label class="form-label">{{ __('admin.destination') }} / {{ __('admin.country') }}</label>
+            <input type="text" name="destination" class="form-control @error('destination') is-invalid @enderror" value="{{ old('destination', old('country')) }}" placeholder="مثال: فرنسا، مصر، دبي...">
             @error('destination')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
 
