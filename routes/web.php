@@ -510,7 +510,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/tasks/{task}', [CrmTaskController::class, 'update'])->name('tasks.update');
             Route::patch('/tasks/{task}/status', [CrmTaskController::class, 'updateStatus'])->name('tasks.status');
             Route::post('/statuses', [CrmController::class, 'storeStatus'])->name('statuses.store');
+            Route::post('/statuses/reorder', [CrmController::class, 'reorderStatuses'])->name('statuses.reorder');
             Route::put('/statuses/{status}', [CrmController::class, 'updateStatus'])->name('statuses.update');
+            Route::delete('/statuses/{status}', [CrmController::class, 'destroyStatus'])->name('statuses.destroy');
             Route::post('/sources', [CrmController::class, 'storeSource'])->name('sources.store');
             Route::put('/sources/{source}', [CrmController::class, 'updateSource'])->name('sources.update');
             Route::post('/service-types', [CrmController::class, 'storeServiceType'])->name('service-types.store');

@@ -406,9 +406,14 @@ class CrmLeadController extends Controller
             'accountingAccount.expenses.subcategory',
         ]);
 
+        $statuses = $this->activeStatuses();
+        if ($lead->crmStatus && ! $statuses->contains('id', $lead->crm_status_id)) {
+            $statuses->push($lead->crmStatus);
+        }
+
         return view('admin.crm.leads.show', [
             'lead' => $lead,
-            'statuses' => $this->activeStatuses(),
+            'statuses' => $statuses,
             'sources' => $this->activeSources(),
             'serviceTypes' => $this->activeServiceTypes(),
             'users' => $this->assignableUsers(),

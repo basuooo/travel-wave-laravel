@@ -216,13 +216,49 @@ class CrmController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $status->update($data + [
-            'is_active' => $request->boolean('is_active', true),
+        $status->update([
+            'name_en' => $data['name_en'],
+            'name_ar' => $data['name_ar'],
+            'color' => $data['color'] ?? $status->color,
             'sort_order' => $data['sort_order'] ?? $status->sort_order,
+            'is_active' => $request->boolean('is_active'),
             'status_group' => 'lead',
         ]);
 
         return back()->with('success', __('admin.crm_status_updated'));
+    }
+
+    public function destroyStatus(CrmStatus $status)
+    {
+        if ($status->is_system) {
+            return back()->with('error', 'لا يمكن حذف حالة خاصة بالنظام.');
+        }
+
+        $leadsCount = $status->leads()->count() + $status->secondaryLeads()->count();
+        if ($leadsCount > 0) {
+            return back()->with('error', "لا يمكن حذف هذه الحالة لأنها مرتبطة بـ ({$leadsCount}) من العملاء المحتملين. يمكنك تعطيلها بدلاً من حذفها.");
+        }
+
+        $status->delete();
+
+        return back()->with('success', 'تم حذف الحالة بنجاح.');
+    }
+
+    public function reorderStatuses(Request $request)
+    {
+        $orderData = $request->input('order', []);
+        if (is_array($orderData)) {
+            foreach ($orderData as $index => $itemData) {
+                $statusId = is_array($itemData) ? ($itemData['id'] ?? null) : $itemData;
+                if ($statusId) {
+                    CrmStatus::where('id', $statusId)->update([
+                        'sort_order' => $index + 1,
+                    ]);
+                }
+            }
+        }
+
+        return response()->json(['status' => 'success', 'message' => __('admin.crm_status_updated')]);
     }
 
     public function sources()
