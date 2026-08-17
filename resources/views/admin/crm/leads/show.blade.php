@@ -375,7 +375,7 @@
 
                 <div class="col-md-6 d-none" data-crm-country-group>
                     <label class="form-label" data-crm-country-label>{{ __('admin.country') }}</label>
-                    <input class="form-control" name="service_country_name" value="{{ old('service_country_name', $lead->service_country_name) }}">
+                    @include('admin.partials.country-select', ['name' => 'service_country_name', 'value' => old('service_country_name', $lead->service_country_name)])
                 </div>
                 <div class="col-md-6 d-none" data-crm-tourism-group>
                     <label class="form-label">{{ __('admin.crm_tourism_destination') }}</label>

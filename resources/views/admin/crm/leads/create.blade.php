@@ -56,8 +56,8 @@
 
         <div class="col-md-6">
             <label class="form-label">{{ __('admin.destination') }} / {{ __('admin.country') }}</label>
-            <input type="text" name="destination" class="form-control @error('destination') is-invalid @enderror" value="{{ old('destination', old('country')) }}" placeholder="مثال: فرنسا، مصر، دبي...">
-            @error('destination')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            @include('admin.partials.country-select', ['name' => 'destination', 'value' => old('destination', old('country')), 'placeholder' => 'اختر أو ابحث عن الدولة...'])
+            @error('destination')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
 
         <div class="col-md-6">

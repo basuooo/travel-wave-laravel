@@ -40,15 +40,15 @@
     </div>
     <div class="col-md-6">
         <label class="form-label">{{ __('admin.nationality') }}</label>
-        <input class="form-control" name="nationality" value="{{ old('nationality', $customer->nationality) }}">
+        @include('admin.partials.country-select', ['name' => 'nationality', 'value' => old('nationality', $customer->nationality), 'placeholder' => __('admin.nationality')])
     </div>
     <div class="col-md-6">
         <label class="form-label">{{ __('admin.country') }}</label>
-        <input class="form-control" name="country" value="{{ old('country', $customer->country) }}">
+        @include('admin.partials.country-select', ['name' => 'country', 'value' => old('country', $customer->country)])
     </div>
     <div class="col-md-6">
         <label class="form-label">{{ __('admin.destination') }}</label>
-        <input class="form-control" name="destination" value="{{ old('destination', $customer->destination) }}">
+        @include('admin.partials.country-select', ['name' => 'destination', 'value' => old('destination', $customer->destination), 'placeholder' => __('admin.destination')])
     </div>
     <div class="col-md-6">
         <label class="form-label">{{ __('admin.customer_stage') }}</label>
