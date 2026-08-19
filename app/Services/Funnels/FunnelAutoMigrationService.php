@@ -203,8 +203,19 @@ class FunnelAutoMigrationService
 
     private static function seedTemplates(): void
     {
-        // Run seeder if empty or if templates have fewer than 8 entries
-        if (! DB::table('funnel_templates')->where('slug', 'whatsapp-qualification-funnel')->exists()) {
+        $sample = DB::table('funnel_templates')->where('slug', 'visa-qualification-quiz')->first();
+        $needsUpdate = false;
+
+        if (! $sample) {
+            $needsUpdate = true;
+        } else {
+            $decoded = is_string($sample->schema_data) ? json_decode($sample->schema_data, true) : (array) $sample->schema_data;
+            if (empty($decoded['steps']) || count($decoded['steps']) < 2) {
+                $needsUpdate = true;
+            }
+        }
+
+        if ($needsUpdate) {
             (new \Database\Seeders\FunnelTemplateSeeder())->run();
         }
     }

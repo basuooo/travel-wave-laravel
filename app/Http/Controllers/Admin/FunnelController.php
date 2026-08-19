@@ -200,8 +200,12 @@ class FunnelController extends Controller
         return $copy;
     }
 
-    public function importSchemaToFunnel(Funnel $funnel, array $schema): void
+    public function importSchemaToFunnel(Funnel $funnel, $schema): void
     {
+        if (is_string($schema)) {
+            $schema = json_decode($schema, true) ?: [];
+        }
+
         if (! empty($schema['steps']) && is_array($schema['steps'])) {
             foreach ($schema['steps'] as $sIndex => $stepData) {
                 $step = $funnel->steps()->create([
