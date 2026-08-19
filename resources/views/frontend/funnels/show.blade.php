@@ -597,6 +597,8 @@
                                     <div class="d-flex flex-column gap-3">
                                         @foreach($cFields as $f)
                                             @php
+                                                $fVisible = is_array($f) ? (($f['visible'] ?? true) !== false) : true;
+                                                if (!$fVisible) continue;
                                                 $fKey = is_array($f) ? ($f['key'] ?? $f['name'] ?? ('f_' . $loop->index)) : 'f_' . $loop->index;
                                                 $fLabel = is_array($f) ? ($f['label'] ?? 'حقل ' . ($loop->index + 1)) : $f;
                                                 $fType = is_array($f) ? ($f['type'] ?? 'text') : 'text';

@@ -450,6 +450,7 @@
                 ];
                 html += `<div class="bg-light p-3 rounded-4 border"><h6 class="fw-bold text-primary mb-3">${escapeHtml(el.label || 'بيانات التواصل:')}</h6><div class="d-flex flex-column gap-2">`;
                 fields.forEach(f => {
+                    if (f.visible === false) return;
                     if (f.type === 'select' || f.type === 'dropdown') {
                         html += `<div><label class="form-label small fw-bold mb-1">${escapeHtml(f.label)}</label><select class="form-select"><option value="">${escapeHtml(f.placeholder || 'اختر...')}</option>${(f.options || []).map(o => `<option>${escapeHtml(o.label || o.value)}</option>`).join('')}</select></div>`;
                     } else if (f.type === 'tel' || f.type === 'phone') {

@@ -1065,56 +1065,61 @@
                     });
                     html += '</div>';
 
-                // 6. CUSTOMIZABLE CONTACT FORM (WITH DROPDOWN & INPUTS)
+                // 6. CUSTOMIZABLE CONTACT FORM (WITH DROPDOWN, INPUTS & VISIBILITY)
                 } else if (el.element_type === 'contact_form') {
-                    const fields = el.properties?.fields || [
-                        { key: 'full_name', label: 'الاسم الكريم', type: 'text', required: true, placeholder: 'أدخل اسمك الكريم' },
-                        { key: 'phone', label: 'رقم الواتساب', type: 'tel', required: true, placeholder: '05XXXXXXXX' },
-                        { key: 'email', label: 'البريد الإلكتروني', type: 'email', required: false, placeholder: 'example@domain.com' }
+                    const allFields = el.properties?.fields || [
+                        { key: 'full_name', label: 'الاسم الكريم', type: 'text', required: true, visible: true, placeholder: 'أدخل اسمك الكريم' },
+                        { key: 'phone', label: 'رقم الواتساب', type: 'tel', required: true, visible: true, placeholder: '05XXXXXXXX' },
+                        { key: 'email', label: 'البريد الإلكتروني', type: 'email', required: false, visible: true, placeholder: 'example@domain.com' }
                     ];
+                    const fields = allFields.filter(f => f.visible !== false);
 
                     html += `
                         <label class="fw-bold mb-2 text-primary d-block">${escapeHtml(el.label || 'نموذج بيانات التواصل (CRM):')}${reqStar}</label>
                         <div class="bg-light p-3 rounded-4 border">
                     `;
-                    fields.forEach(f => {
-                        const fReq = f.required ? '<span class="text-danger">*</span>' : '';
-                        if (f.type === 'tel' || f.type === 'phone') {
-                            html += `
-                                <div class="mb-2">
-                                    <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(f.label)} ${fReq}</label>
-                                    <div class="input-group">
-                                        <button class="phone-code-btn" type="button">🇸🇦 +966 ▾</button>
-                                        <input type="tel" class="form-control" placeholder="${escapeHtml(f.placeholder || 'رقم الجوال')}" disabled>
+                    if (fields.length === 0) {
+                        html += `<div class="text-center text-muted small py-3">⚠️ جميع حقول النموذج مخفية حالياً. قم بتفعيل إظهار الحقول من لوحة الخصائص على اليمين.</div>`;
+                    } else {
+                        fields.forEach(f => {
+                            const fReq = f.required ? '<span class="text-danger">*</span>' : '';
+                            if (f.type === 'tel' || f.type === 'phone') {
+                                html += `
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(f.label)} ${fReq}</label>
+                                        <div class="input-group">
+                                            <button class="phone-code-btn" type="button">🇸🇦 +966 ▾</button>
+                                            <input type="tel" class="form-control" placeholder="${escapeHtml(f.placeholder || 'رقم الجوال')}" disabled>
+                                        </div>
                                     </div>
-                                </div>
-                            `;
-                        } else if (f.type === 'select' || f.type === 'dropdown') {
-                            html += `
-                                <div class="mb-2">
-                                    <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(f.label)} ${fReq}</label>
-                                    <select class="form-select" disabled>
-                                        <option value="">${escapeHtml(f.placeholder || 'اختر من القائمة المنسدلة...')}</option>
-                                        ${(f.options || []).map(o => `<option>${escapeHtml(o.label || o.value)}</option>`).join('')}
-                                    </select>
-                                </div>
-                            `;
-                        } else if (f.type === 'textarea') {
-                            html += `
-                                <div class="mb-2">
-                                    <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(f.label)} ${fReq}</label>
-                                    <textarea class="form-control" rows="2" placeholder="${escapeHtml(f.placeholder || '')}" disabled></textarea>
-                                </div>
-                            `;
-                        } else {
-                            html += `
-                                <div class="mb-2">
-                                    <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(f.label)} ${fReq}</label>
-                                    <input type="${f.type || 'text'}" class="form-control" placeholder="${escapeHtml(f.placeholder || '')}" disabled>
-                                </div>
-                            `;
-                        }
-                    });
+                                `;
+                            } else if (f.type === 'select' || f.type === 'dropdown') {
+                                html += `
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(f.label)} ${fReq}</label>
+                                        <select class="form-select" disabled>
+                                            <option value="">${escapeHtml(f.placeholder || 'اختر من القائمة المنسدلة...')}</option>
+                                            ${(f.options || []).map(o => `<option>${escapeHtml(o.label || o.value)}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                `;
+                            } else if (f.type === 'textarea') {
+                                html += `
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(f.label)} ${fReq}</label>
+                                        <textarea class="form-control" rows="2" placeholder="${escapeHtml(f.placeholder || '')}" disabled></textarea>
+                                    </div>
+                                `;
+                            } else {
+                                html += `
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(f.label)} ${fReq}</label>
+                                        <input type="${f.type || 'text'}" class="form-control" placeholder="${escapeHtml(f.placeholder || '')}" disabled>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
                     html += `</div>`;
 
                 // 7. Phone with International Code
@@ -1528,16 +1533,22 @@
             `;
 
             el.properties.fields.forEach((f, fIdx) => {
+                const isVisible = f.visible !== false;
                 const isSelect = f.type === 'select' || f.type === 'dropdown';
                 if (isSelect && !f.options) {
                     f.options = [{ label: 'الخيار الأول', value: 'Option 1' }, { label: 'الخيار الثاني', value: 'Option 2' }];
                 }
 
                 html += `
-                    <div class="p-2 bg-secondary bg-opacity-10 rounded-3 border border-secondary mb-2">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <input type="text" class="form-control form-control-sm form-control-dark me-1" value="${escapeHtml(f.label)}" placeholder="اسم الحقل" oninput="updateContactFieldProp(${fIdx}, 'label', this.value)">
-                            <button type="button" class="btn btn-sm btn-outline-danger px-2 py-0" onclick="deleteContactField(${fIdx})">✕</button>
+                    <div class="p-2 rounded-3 border ${isVisible ? 'bg-secondary bg-opacity-10 border-secondary' : 'bg-dark border-danger opacity-75'} mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center gap-1 flex-grow-1 me-2">
+                                <span class="badge ${isVisible ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} small" style="font-size: 10px;">
+                                    ${isVisible ? '👁️ ظاهر' : '🚫 مخفي'}
+                                </span>
+                                <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(f.label)}" placeholder="اسم الحقل" oninput="updateContactFieldProp(${fIdx}, 'label', this.value)">
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger px-2 py-0" onclick="deleteContactField(${fIdx})" title="حذف الحقل نهائياً">✕</button>
                         </div>
                         <div class="row g-1 mb-2">
                             <div class="col-6">
@@ -1572,9 +1583,17 @@
                             </div>
                         ` : ''}
 
-                        <div class="form-check form-switch mb-0">
-                            <input class="form-check-input" type="checkbox" id="cf_req_${fIdx}" ${f.required?'checked':''} onchange="updateContactFieldProp(${fIdx}, 'required', this.checked)">
-                            <label class="form-check-label text-muted small" for="cf_req_${fIdx}">حقل إجباري (Required)</label>
+                        <div class="d-flex justify-content-between align-items-center pt-1 border-top border-secondary">
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" id="cf_vis_${fIdx}" ${isVisible?'checked':''} onchange="updateContactFieldProp(${fIdx}, 'visible', this.checked); inspectElement(${eIdx});">
+                                <label class="form-check-label small ${isVisible?'text-white':'text-danger'}" for="cf_vis_${fIdx}">
+                                    ${isVisible ? '👁️ إظهار في الفورم' : '🚫 إخفاء من الفورم'}
+                                </label>
+                            </div>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" id="cf_req_${fIdx}" ${f.required?'checked':''} onchange="updateContactFieldProp(${fIdx}, 'required', this.checked)">
+                                <label class="form-check-label text-muted small" for="cf_req_${fIdx}">إجباري (Required)</label>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1628,19 +1647,19 @@
             if (!el.properties) el.properties = {};
             html += `
                 <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
-                    <h6 class="fw-bold small text-white mb-2">⏰ إعدادات المؤقت التنازلي</h6>
+                    <h6 class="fw-bold small text-white mb-3">⏰ إعدادات المؤقت التنازلي (Countdown Timer):</h6>
                     <div class="row g-2 mb-2">
-                        <div class="col-4">
-                            <label class="form-label small text-muted">الساعات (Hours)</label>
-                            <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.duration_hours || 0}" min="0" max="99" oninput="updateTimerProp('duration_hours', parseInt(this.value)||0)">
+                        <div class="col-4 text-center">
+                            <label class="form-label small text-info fw-bold mb-1 d-block">الساعات (Hours)</label>
+                            <input type="number" class="form-control form-control-sm form-control-dark text-center fw-bold fs-6" value="${el.properties.duration_hours || 0}" min="0" max="99" oninput="updateTimerProp('duration_hours', parseInt(this.value)||0)">
                         </div>
-                        <div class="col-4">
-                            <label class="form-label small text-muted">الدقائق (Minutes)</label>
-                            <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.duration_minutes || 15}" min="0" max="59" oninput="updateTimerProp('duration_minutes', parseInt(this.value)||0)">
+                        <div class="col-4 text-center">
+                            <label class="form-label small text-info fw-bold mb-1 d-block">الدقائق (Minutes)</label>
+                            <input type="number" class="form-control form-control-sm form-control-dark text-center fw-bold fs-6" value="${el.properties.duration_minutes || 15}" min="0" max="59" oninput="updateTimerProp('duration_minutes', parseInt(this.value)||0)">
                         </div>
-                        <div class="col-4">
-                            <label class="form-label small text-muted">الثواني (Seconds)</label>
-                            <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.duration_seconds || 0}" min="0" max="59" oninput="updateTimerProp('duration_seconds', parseInt(this.value)||0)">
+                        <div class="col-4 text-center">
+                            <label class="form-label small text-info fw-bold mb-1 d-block">الثواني (Seconds)</label>
+                            <input type="number" class="form-control form-control-sm form-control-dark text-center fw-bold fs-6" value="${el.properties.duration_seconds || 0}" min="0" max="59" oninput="updateTimerProp('duration_seconds', parseInt(this.value)||0)">
                         </div>
                     </div>
                 </div>
