@@ -14,9 +14,7 @@
     
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    <!-- Iconify -->
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
     <style>
@@ -33,7 +31,6 @@
             flex-direction: column;
         }
 
-        /* Top Preview Toolbar */
         .preview-toolbar {
             background-color: #1e293b;
             border-bottom: 1px solid #334155;
@@ -64,7 +61,6 @@
             color: #fff;
         }
 
-        /* Simulator Container */
         .simulator-area {
             flex: 1;
             display: flex;
@@ -93,7 +89,6 @@
             border-radius: 36px;
         }
 
-        /* Funnel Content Elements */
         .funnel-header-bar {
             padding: 20px 24px 10px;
             border-bottom: 1px solid #f1f5f9;
@@ -202,7 +197,6 @@
             </div>
         </div>
 
-        <!-- Viewport switchers -->
         <div class="d-flex align-items-center gap-2">
             <button class="device-toggle-btn active" id="btn_desktop" onclick="setDevice('desktop')">
                 <iconify-icon icon="solar:laptop-minimalistic-bold" width="18"></iconify-icon>
@@ -214,7 +208,6 @@
             </button>
         </div>
 
-        <!-- Use Template Action -->
         <div>
             <form action="{{ route('admin.funnels.templates.use', $template) }}" method="POST" class="m-0">
                 @csrf
@@ -230,7 +223,6 @@
     <div class="simulator-area">
         <div class="simulator-viewport" id="simulator_box">
             
-            <!-- Progress Bar -->
             <div class="funnel-header-bar">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-muted small fw-bold" id="step_indicator_text">الخطوة 1 من {{ count($steps) }}</span>
@@ -258,21 +250,49 @@
 
                     <!-- Elements -->
                     @foreach($step['elements'] ?? [] as $eIndex => $element)
+                        @php
+                            $type = $element['element_type'] ?? 'text';
+                            $label = $element['label'] ?? '';
+                            $props = $element['properties'] ?? [];
+                        @endphp
+
                         <div class="mb-4">
-                            @if(($element['element_type'] ?? '') === 'heading')
-                                <h4 class="fw-bold text-primary mb-3">{{ $element['label'] ?? '' }}</h4>
-                            @elseif(($element['element_type'] ?? '') === 'text')
-                                <p class="text-muted mb-3 fs-6">{{ $element['label'] ?? '' }}</p>
-                            @elseif(($element['element_type'] ?? '') === 'single_choice')
+                            @if($type === 'heading')
+                                <h4 class="fw-bold text-primary mb-3">{{ $label }}</h4>
+
+                            @elseif(in_array($type, ['text', 'paragraph']))
+                                <p class="text-muted mb-3 fs-6">{{ $label }}</p>
+
+                            @elseif(in_array($type, ['single_choice', 'radio_choice', 'yes_no']))
                                 <div class="d-flex flex-column gap-2">
-                                    @foreach($element['properties']['options'] ?? [] as $opt)
+                                    @foreach($props['options'] ?? [] as $opt)
                                         <div class="option-choice-card" onclick="chooseOption({{ $sIndex }}, {{ $opt['score'] ?? 0 }}, '{{ addslashes($opt['value'] ?? $opt['label'] ?? '') }}', this)">
                                             <span>{{ $opt['label'] ?? $opt['value'] }}</span>
                                             <iconify-icon icon="solar:alt-arrow-left-linear" width="20" class="text-muted opacity-50"></iconify-icon>
                                         </div>
                                     @endforeach
                                 </div>
-                            @elseif(($element['element_type'] ?? '') === 'contact_form')
+
+                            @elseif(in_array($type, ['image_choice', 'single_image_choice', 'multiple_image_choice']))
+                                <div class="row g-2">
+                                    @foreach($props['options'] ?? [] as $opt)
+                                        <div class="col-6">
+                                            <div class="option-choice-card flex-column text-center p-3 h-100" onclick="chooseOption({{ $sIndex }}, {{ $opt['score'] ?? 0 }}, '{{ addslashes($opt['value'] ?? $opt['label'] ?? '') }}', this)">
+                                                <iconify-icon icon="solar:gallery-bold-duotone" width="36" class="text-primary mb-1"></iconify-icon>
+                                                <span class="small fw-bold">{{ $opt['label'] ?? $opt['value'] }}</span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                            @elseif(in_array($type, ['dropdown', 'country', 'autocomplete']))
+                                <select class="form-select form-select-lg rounded-3">
+                                    @foreach($props['options'] ?? [] as $opt)
+                                        <option>{{ $opt['label'] ?? $opt['value'] }}</option>
+                                    @endforeach
+                                </select>
+
+                            @elseif($type === 'contact_form')
                                 <div class="bg-light p-3 rounded-4 mb-3 border">
                                     <div class="mb-3">
                                         <label class="form-label fw-bold small">الاسم بالكامل <span class="text-danger">*</span></label>
@@ -287,12 +307,45 @@
                                         <input type="email" class="form-control rounded-3" placeholder="ahmad@example.com" value="ahmad@example.com">
                                     </div>
                                 </div>
+
+                            @elseif(in_array($type, ['slider', 'currency']))
+                                <div class="bg-light p-3 rounded-3 border text-center">
+                                    <h4 class="fw-bold text-primary mb-1">30,000 SAR</h4>
+                                    <input type="range" class="form-range" value="30000" min="1000" max="100000">
+                                </div>
+
+                            @elseif(in_array($type, ['rating', 'nps']))
+                                <div class="bg-light p-3 rounded-3 border text-center text-warning fs-3">
+                                    ⭐⭐⭐⭐⭐
+                                </div>
+
+                            @elseif($type === 'table')
+                                <div class="table-responsive bg-light p-2 rounded-3 border">
+                                    <table class="table table-sm table-bordered mb-0 small text-center">
+                                        <thead class="table-primary"><tr><th>الباقة</th><th>الخدمات</th><th>السعر</th></tr></thead>
+                                        <tbody><tr><td>الأساسية</td><td>طلب التأشيرة والموعد</td><td>250 SAR</td></tr></tbody>
+                                    </table>
+                                </div>
+
+                            @elseif($type === 'testimonials')
+                                <div class="bg-light p-3 rounded-3 border text-center">
+                                    <p class="fst-italic small mb-1">"خدمة سريعة جداً واحترافية في إنجاز المعاملات!"</p>
+                                    <strong class="text-primary small">— فهد الشمري ⭐⭐⭐⭐⭐</strong>
+                                </div>
+
+                            @elseif($type === 'coupon_code')
+                                <div class="p-3 bg-light rounded-3 border border-dashed text-center">
+                                    <h5 class="fw-bold text-danger mb-0">كود الخصم: WAVE2026 (20% OFF)</h5>
+                                </div>
+
+                            @else
+                                <input type="text" class="form-control form-control-lg rounded-3" placeholder="اكتب هنا...">
                             @endif
                         </div>
                     @endforeach
 
                     <!-- Navigation Action Buttons -->
-                    @if($sIndex === 0)
+                    @if($sIndex === 0 && ($step['step_type'] ?? '') === 'welcome')
                         <button type="button" class="btn-action-primary mt-3" onclick="nextStep({{ $sIndex }})">
                             <span>ابدأ التقييم الآن ➔</span>
                             <iconify-icon icon="solar:alt-arrow-left-bold" width="20"></iconify-icon>
@@ -411,7 +464,6 @@
             document.getElementById('progress_bar_fill').style.width = '100%';
             document.getElementById('step_indicator_text').innerText = 'تم التقييم بنجاح ✅';
 
-            // Match result based on calculated score
             let matchedResult = resultsList[0] || {};
             for (let res of resultsList) {
                 if (userScore >= (res.min_score || 0) && userScore <= (res.max_score || 100)) {
@@ -444,7 +496,6 @@
             updateProgress(0);
         }
 
-        // Initialize progress
         updateProgress(0);
     </script>
 </body>
