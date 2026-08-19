@@ -106,6 +106,15 @@
         ])) : [],
     ],
     [
+        'title' => '⚡ Interactive Funnels',
+        'items' => array_values(array_filter([
+            ['label' => '📊 Funnels Dashboard', 'route' => 'admin.funnels.dashboard', 'match' => 'admin.funnels.dashboard'],
+            ['label' => '⚡ All Funnels', 'route' => 'admin.funnels.index', 'match' => 'admin.funnels.index'],
+            ['label' => '🎨 Template Library', 'route' => 'admin.funnels.templates.index', 'match' => 'admin.funnels.templates.*'],
+            ['label' => '📬 Responses & Leads', 'route' => 'admin.funnels.responses.index', 'match' => 'admin.funnels.responses.*'],
+        ])),
+    ],
+    [
         'title' => __('admin.nav_accounting'),
         'items' => $modAccountingEnabled ? array_values(array_filter([
             $adminUser?->hasPermission('accounting.view') ? ['label' => __('admin.accounting_dashboard'), 'route' => 'admin.accounting.dashboard', 'match' => 'admin.accounting.dashboard'] : null,

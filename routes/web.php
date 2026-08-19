@@ -55,8 +55,15 @@ use App\Http\Controllers\Admin\VisaCategoryController;
 use App\Http\Controllers\Admin\VisaCountryController;
 use App\Http\Controllers\Admin\LandingPageBuilderController;
 use App\Http\Controllers\Admin\LandingPageNewController;
+use App\Http\Controllers\Admin\FunnelController;
+use App\Http\Controllers\Admin\FunnelBuilderController;
+use App\Http\Controllers\Admin\FunnelDashboardController;
+use App\Http\Controllers\Admin\FunnelAnalyticsController;
+use App\Http\Controllers\Admin\FunnelResponseController;
+use App\Http\Controllers\Admin\FunnelTemplateController;
 use App\Http\Controllers\Frontend\LandingPagePublicController;
 use App\Http\Controllers\Frontend\LandingPageNewPublicController;
+use App\Http\Controllers\Frontend\FunnelPublicController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\SeoPublicController;
@@ -97,6 +104,9 @@ Route::middleware(['website.status'])->group(function () {
     Route::get('/campaigns/{landingPage:slug}', [FrontendController::class, 'marketingLandingPage'])->name('marketing.landing-pages.show');
     Route::get('/lp/{slug}', [LandingPagePublicController::class, 'show'])->name('landing-pages.public.show');
     Route::get('/lp-new/{slug}', [LandingPageNewPublicController::class, 'show'])->name('landing-pages-new.public.show');
+    Route::get('/f/{slug}', [FunnelPublicController::class, 'show'])->name('funnels.public.show');
+    Route::post('/f/{slug}/submit', [FunnelPublicController::class, 'submit'])->name('funnels.public.submit');
+    Route::post('/f/{slug}/step-view', [FunnelPublicController::class, 'trackStepView'])->name('funnels.public.step-view');
     Route::post('/campaigns/{landingPage:slug}/events', [FrontendController::class, 'trackMarketingLandingPageEvent'])->name('marketing.landing-pages.events.store');
     Route::post('/inquiries', [FrontendController::class, 'storeInquiry'])->name('inquiries.store');
     Route::post('/tracking/meta/events', [FrontendController::class, 'trackMetaEvent'])->name('tracking.meta.events.store');
@@ -575,6 +585,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/settings/general-categories/{category}', [AccountingController::class, 'updateGeneralExpenseCategory'])->name('settings.general-categories.update');
             Route::delete('/settings/general-categories/{category}', [AccountingController::class, 'destroyGeneralExpenseCategory'])->name('settings.general-categories.destroy');
         });
+
+        // ⚡ Interactive Funnels Module Routes
+        Route::get('/funnels/dashboard', [FunnelDashboardController::class, 'index'])->name('funnels.dashboard');
+        Route::get('/funnels/templates', [FunnelTemplateController::class, 'index'])->name('funnels.templates.index');
+        Route::post('/funnels/templates/{template}/use', [FunnelTemplateController::class, 'useTemplate'])->name('funnels.templates.use');
+        Route::get('/funnels/responses', [FunnelResponseController::class, 'index'])->name('funnels.responses.index');
+        Route::get('/funnels/responses/{response}', [FunnelResponseController::class, 'show'])->name('funnels.responses.show');
+        Route::post('/funnels/responses/{response}/retry-crm', [FunnelResponseController::class, 'retryCrmSync'])->name('funnels.responses.retry-crm');
+        Route::get('/funnels/{funnel}/builder', [FunnelBuilderController::class, 'edit'])->name('funnels.builder');
+        Route::put('/funnels/{funnel}/builder', [FunnelBuilderController::class, 'update'])->name('funnels.builder.update');
+        Route::get('/funnels/{funnel}/analytics', [FunnelAnalyticsController::class, 'show'])->name('funnels.analytics');
+        Route::post('/funnels/{funnel}/publish', [FunnelController::class, 'publish'])->name('funnels.publish');
+        Route::post('/funnels/{funnel}/unpublish', [FunnelController::class, 'unpublish'])->name('funnels.unpublish');
+        Route::post('/funnels/{funnel}/duplicate', [FunnelController::class, 'duplicate'])->name('funnels.duplicate');
+        Route::resource('funnels', FunnelController::class);
 
         Route::middleware('permission:accounting.view')->prefix('accounting')->name('accounting.')->group(function () {
             Route::get('/treasuries/{treasury}', [AccountingTreasuryController::class, 'show'])->whereNumber('treasury')->name('treasuries.show');
