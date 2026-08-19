@@ -376,30 +376,63 @@
                         @php
                             $type = $element->element_type;
                             $props = $element->properties ?? [];
+                            if (!empty($props['always_hide'])) {
+                                continue;
+                            }
                             $label = $element->label;
+                            $subline = $props['subline'] ?? '';
                             $isRequired = !empty($element->is_required) || !empty($props['is_required']);
+                            $design = $props['design'] ?? [];
+                            $hasCustomDesign = !empty($design['custom_enabled']);
+
+                            $headingStyle = '';
+                            $sublineStyle = '';
+                            $containerStyle = '';
+
+                            if ($hasCustomDesign) {
+                                $headingStyle = 'font-family: ' . ($design['heading_font'] ?? 'inherit') . ';'
+                                    . 'font-size: ' . ($design['heading_size'] ?? 'inherit') . ';'
+                                    . 'font-weight: ' . (!empty($design['heading_bold']) ? '800' : 'normal') . ';'
+                                    . 'font-style: ' . (!empty($design['heading_italic']) ? 'italic' : 'normal') . ';'
+                                    . 'color: ' . ($design['text_color'] ?? 'inherit') . ';'
+                                    . 'text-align: ' . ($design['align'] ?? 'inherit') . ';';
+                                $sublineStyle = 'font-family: ' . ($design['subline_font'] ?? 'inherit') . ';'
+                                    . 'font-size: ' . ($design['subline_size'] ?? 'inherit') . ';'
+                                    . 'font-weight: ' . (!empty($design['subline_bold']) ? '700' : 'normal') . ';'
+                                    . 'font-style: ' . (!empty($design['subline_italic']) ? 'italic' : 'normal') . ';'
+                                    . 'color: ' . ($design['subline_color'] ?? '#64748b') . ';'
+                                    . 'text-align: ' . ($design['align'] ?? 'inherit') . ';';
+                                $containerStyle = 'text-align: ' . ($design['align'] ?? 'inherit') . ';'
+                                    . (!empty($design['bg_color']) ? 'background-color: ' . $design['bg_color'] . ';' : '');
+                            }
                         @endphp
 
-                        <div class="mb-4 element-block-wrapper" id="el_wrapper_{{ $element->id }}" data-element-id="{{ $element->id }}" data-required="{{ $isRequired ? '1' : '0' }}" data-type="{{ $type }}">
+                        <div class="mb-4 element-block-wrapper" id="el_wrapper_{{ $element->id }}" data-element-id="{{ $element->id }}" data-required="{{ $isRequired ? '1' : '0' }}" data-type="{{ $type }}" style="{{ $containerStyle }}">
                             
                             {{-- 1. HEADING --}}
                             @if($type === 'heading')
-                                <h3 class="fw-bold text-dark mb-2 border-start border-4 ps-2 border-primary">
+                                <h3 class="fw-bold text-dark mb-1" style="{{ $headingStyle }}">
                                     {{ $label ?: 'عنوان رئيسي' }}
                                     @if($isRequired) <span class="text-danger">*</span> @endif
                                 </h3>
+                                @if($subline)
+                                    <p class="text-muted small mb-2" style="{{ $sublineStyle }}">{{ $subline }}</p>
+                                @endif
 
                             {{-- 2. PARAGRAPH / TEXT --}}
                             @elseif(in_array($type, ['text', 'paragraph']))
-                                <p class="text-muted fs-6 mb-3 leading-relaxed">{{ $label }}</p>
+                                <p class="text-muted fs-6 mb-3 leading-relaxed" style="{{ $headingStyle }}">{{ $label }}</p>
 
                             {{-- 3. RADIO CHOICE --}}
                             @elseif($type === 'radio_choice')
                                 @if($label) 
-                                    <label class="fw-bold mb-2 d-block fs-6 text-dark">
+                                    <label class="fw-bold mb-1 d-block fs-6 text-dark" style="{{ $headingStyle }}">
                                         {{ $label }}
                                         @if($isRequired) <span class="text-danger">*</span> @endif
                                     </label> 
+                                @endif
+                                @if($subline)
+                                    <p class="text-muted small mb-2" style="{{ $sublineStyle }}">{{ $subline }}</p>
                                 @endif
                                 <div class="d-flex flex-column gap-2">
                                     @foreach($props['options'] ?? [] as $opt)
@@ -418,10 +451,13 @@
                             {{-- 4. CHECKBOX CHOICE --}}
                             @elseif(in_array($type, ['checkbox_choice', 'multiple_choice']))
                                 @if($label) 
-                                    <label class="fw-bold mb-2 d-block fs-6 text-dark">
+                                    <label class="fw-bold mb-1 d-block fs-6 text-dark" style="{{ $headingStyle }}">
                                         {{ $label }}
                                         @if($isRequired) <span class="text-danger">*</span> @endif
                                     </label> 
+                                @endif
+                                @if($subline)
+                                    <p class="text-muted small mb-2" style="{{ $sublineStyle }}">{{ $subline }}</p>
                                 @endif
                                 <div class="d-flex flex-column gap-2">
                                     @foreach($props['options'] ?? [] as $opt)
@@ -440,10 +476,13 @@
                             {{-- 5. SINGLE CHOICE / YES-NO --}}
                             @elseif(in_array($type, ['single_choice', 'yes_no']))
                                 @if($label) 
-                                    <label class="fw-bold mb-2 d-block fs-6 text-dark">
+                                    <label class="fw-bold mb-1 d-block fs-6 text-dark" style="{{ $headingStyle }}">
                                         {{ $label }}
                                         @if($isRequired) <span class="text-danger">*</span> @endif
                                     </label> 
+                                @endif
+                                @if($subline)
+                                    <p class="text-muted small mb-2" style="{{ $sublineStyle }}">{{ $subline }}</p>
                                 @endif
                                 <div class="d-flex flex-column gap-2">
                                     @foreach($props['options'] ?? [] as $opt)
@@ -457,10 +496,13 @@
                             {{-- 6. IMAGE CHOICE --}}
                             @elseif(in_array($type, ['image_choice', 'single_image_choice', 'multiple_image_choice']))
                                 @if($label) 
-                                    <label class="fw-bold mb-2 d-block fs-6 text-dark">
+                                    <label class="fw-bold mb-1 d-block fs-6 text-dark" style="{{ $headingStyle }}">
                                         {{ $label }}
                                         @if($isRequired) <span class="text-danger">*</span> @endif
                                     </label> 
+                                @endif
+                                @if($subline)
+                                    <p class="text-muted small mb-2" style="{{ $sublineStyle }}">{{ $subline }}</p>
                                 @endif
                                 <div class="row g-3">
                                     @foreach($props['options'] ?? [] as $opt)
@@ -480,10 +522,13 @@
                             {{-- 7. COUNTRY SELECTOR --}}
                             @elseif($type === 'country')
                                 @if($label) 
-                                    <label class="fw-bold mb-2 d-block fs-6 text-dark">
+                                    <label class="fw-bold mb-1 d-block fs-6 text-dark" style="{{ $headingStyle }}">
                                         {{ $label }}
                                         @if($isRequired) <span class="text-danger">*</span> @endif
                                     </label> 
+                                @endif
+                                @if($subline)
+                                    <p class="text-muted small mb-2" style="{{ $sublineStyle }}">{{ $subline }}</p>
                                 @endif
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text bg-light">🌍</span>
@@ -498,10 +543,13 @@
                             {{-- 8. DROPDOWN --}}
                             @elseif(in_array($type, ['dropdown', 'autocomplete']))
                                 @if($label) 
-                                    <label class="fw-bold mb-2 d-block fs-6 text-dark">
+                                    <label class="fw-bold mb-1 d-block fs-6 text-dark" style="{{ $headingStyle }}">
                                         {{ $label }}
                                         @if($isRequired) <span class="text-danger">*</span> @endif
                                     </label> 
+                                @endif
+                                @if($subline)
+                                    <p class="text-muted small mb-2" style="{{ $sublineStyle }}">{{ $subline }}</p>
                                 @endif
                                 <select class="form-select form-select-lg rounded-3 bg-light" id="input_el_{{ $element->id }}" onchange="userAnswers[{{ $element->id }}] = this.value; clearError({{ $element->id }});">
                                     <option value="">اختر من القائمة...</option>

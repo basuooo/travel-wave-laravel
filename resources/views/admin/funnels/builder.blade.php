@@ -12,7 +12,7 @@
 
     <!-- Bootstrap 5 & Google Fonts -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;600;700&family=Montserrat:wght@400;600;700&family=Almarai:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <!-- SortableJS for Drag & Drop -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
@@ -210,6 +210,29 @@
             box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15);
         }
 
+        /* Inline editable text on canvas (Double Click / Direct edit) */
+        .canvas-inline-editable {
+            outline: none;
+            border-radius: 6px;
+            padding: 2px 6px;
+            transition: all 0.15s ease;
+            cursor: text;
+            display: inline-block;
+            min-width: 40px;
+            border: 1px solid transparent;
+        }
+        .canvas-inline-editable:hover {
+            border: 1px dashed #93c5fd;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .canvas-inline-editable:focus,
+        .canvas-inline-editable.active-editing {
+            border: 2px dashed #2563eb !important;
+            background: #ffffff !important;
+            color: #0f172a !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+        }
+
         .canvas-element-toolbar {
             position: absolute;
             top: -14px;
@@ -316,6 +339,25 @@
         .nav-pills-custom .nav-link.active {
             background-color: var(--fb-accent);
             color: #fff;
+        }
+
+        /* Sub-Tabs within Element Inspector (Content / Design) */
+        .nav-tabs-element {
+            border-bottom: 1px solid var(--fb-border);
+        }
+        .nav-tabs-element .nav-link {
+            color: #94a3b8;
+            font-weight: 700;
+            font-size: 13px;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 8px 16px;
+            background: transparent;
+        }
+        .nav-tabs-element .nav-link.active {
+            color: #60a5fa;
+            border-bottom: 2px solid var(--fb-accent);
+            background: transparent;
         }
 
         /* Timer Flip Box */
@@ -532,12 +574,13 @@
 
     <!-- RIGHT PANEL: Inspector -->
     <aside class="fb-inspector p-3">
+        <!-- TOP LEVEL TABS (WHEN NO ELEMENT SELECTED) -->
         <ul class="nav nav-pills nav-pills-custom nav-justified mb-3" id="inspector_tabs" role="tablist">
             <li class="nav-item">
                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab_props" id="tab_btn_props">⚙️ الخصائص</button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab_design" id="tab_btn_design">🎨 التصميم</button>
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab_design" id="tab_btn_design">🎨 التصميم العام</button>
             </li>
             <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab_results" id="tab_btn_results">🏆 النتائج</button>
@@ -549,12 +592,12 @@
 
         <div class="tab-content" id="inspector_tab_content">
             
-            <!-- TAB 1: Properties -->
+            <!-- TAB 1: Properties / Element Inspector -->
             <div class="tab-pane fade show active" id="tab_props">
                 <div id="inspector_element_panel">
                     <div class="text-center text-muted py-5" id="inspector_empty_state">
                         <iconify-icon icon="solar:cursor-bold-duotone" width="48" class="opacity-50 mb-2"></iconify-icon>
-                        <p class="small" id="txt_inspector_empty">انقر على أي عنصر داخل الشاشة لتعديل خصائصه.</p>
+                        <p class="small" id="txt_inspector_empty">انقر على أي عنصر داخل الشاشة أو انقر نقراً مزدوجاً (Double Click) لتعديل نصوصه وتصميمه مباشرة.</p>
                     </div>
                 </div>
             </div>
@@ -590,6 +633,9 @@
                         <option value="Tajawal, sans-serif">Tajawal (عربي أنيق)</option>
                         <option value="Cairo, sans-serif">Cairo (عصري)</option>
                         <option value="Inter, sans-serif">Inter (English Standard)</option>
+                        <option value="Poppins, sans-serif">Poppins</option>
+                        <option value="Montserrat, sans-serif">Montserrat</option>
+                        <option value="Almarai, sans-serif">Almarai (المراعي)</option>
                         <option value="System">System Default</option>
                     </select>
                 </div>
@@ -683,10 +729,10 @@
             palette_title: '🧩 مكتبة العناصر',
             search_placeholder: '🔍 بحث عن عنصر...',
             tab_props: '⚙️ الخصائص',
-            tab_design: '🎨 التصميم',
+            tab_design: '🎨 التصميم العام',
             tab_results: '🏆 النتائج',
             tab_integrations: '🔌 الربط',
-            inspector_empty: 'انقر على أي عنصر داخل الشاشة لتعديل خصائصه.',
+            inspector_empty: 'انقر على أي عنصر داخل الشاشة أو انقر نقراً مزدوجاً (Double Click) لتعديل نصوصه وتصميمه مباشرة.',
             step_empty_title: 'هذه الخطوة فارغة',
             step_empty_sub: 'اسحب أي عنصر من القائمة على اليمين أو انقر عليه لإضافته هنا فوراً.',
             design_header: '🎨 المظهر ونظام التقييم',
@@ -735,6 +781,29 @@
             media_modal_lbl: 'إدخال رابط صورة مخصص (Direct Image URL)',
             media_modal_apply: 'تطبيق الرابط',
             media_modal_presets: 'أو اختر من المعرض المقترح:',
+            tab_content: 'المحتوى (Content)',
+            tab_element_design: 'التصميم (Design)',
+            heading_text_lbl: 'نص العنوان / السؤال (Heading Text)',
+            subline_text_lbl: 'الوصف الفرعي (Subline Text)',
+            variables_btn: '{ } المتغيرات',
+            visibility_rules: 'قواعد الظهور والتحكم (Visibility Rules)',
+            always_hide_lbl: 'إخفاء دائم عن المشاركين (Always hide for participants)',
+            customize_element_only: 'تخصيص هذا العنصر فقط (Customize this element only)',
+            heading_font_group: 'خط العنوان (Heading Font)',
+            subline_font_group: 'خط الوصف الفرعي (Subline Font)',
+            font_lbl: 'الخط (Font)',
+            size_lbl: 'الحجم (Size)',
+            bold_lbl: 'عريض (Bold)',
+            italic_lbl: 'مائل (Italic)',
+            color_align_group: 'اللون والمحاذاة (Color & Alignment)',
+            text_color_lbl: 'لون الخط (Text Color)',
+            subline_color_lbl: 'لون الوصف الفرعي (Subline Color)',
+            bg_color_lbl: 'لون خلفية العنصر (Card Background)',
+            align_lbl: 'المحاذاة (Align)',
+            align_center: 'وسط (Center)',
+            align_right: 'يمين (Right)',
+            align_left: 'يسار (Left)',
+            custom_design_badge: '🎨 تخصيص التصميم'
         },
         en: {
             switch_to: 'العربية 🇸🇦',
@@ -753,10 +822,10 @@
             palette_title: '🧩 Element Palette',
             search_placeholder: '🔍 Search elements...',
             tab_props: '⚙️ Properties',
-            tab_design: '🎨 Design',
+            tab_design: '🎨 Global Design',
             tab_results: '🏆 Outcomes',
             tab_integrations: '🔌 Connect',
-            inspector_empty: 'Click on any canvas element to inspect and edit its properties.',
+            inspector_empty: 'Click on any canvas element or double-click text to edit content and styling directly.',
             step_empty_title: 'This step is empty',
             step_empty_sub: 'Drag any element from the palette on the left or click to add it here.',
             design_header: '🎨 Appearance & Scoring Mode',
@@ -805,6 +874,29 @@
             media_modal_lbl: 'Direct Image URL',
             media_modal_apply: 'Apply URL',
             media_modal_presets: 'Or choose from presets gallery:',
+            tab_content: 'Content',
+            tab_element_design: 'Design',
+            heading_text_lbl: 'Heading Text',
+            subline_text_lbl: 'Subline Text',
+            variables_btn: '{ } Variables',
+            visibility_rules: 'Visibility Rules & Controls',
+            always_hide_lbl: 'Always hide for participants',
+            customize_element_only: 'Customize this element only',
+            heading_font_group: 'Heading Font',
+            subline_font_group: 'Subline Font',
+            font_lbl: 'Font',
+            size_lbl: 'Size',
+            bold_lbl: 'Bold',
+            italic_lbl: 'Italic',
+            color_align_group: 'Color & Alignment',
+            text_color_lbl: 'Text Color',
+            subline_color_lbl: 'Subline Color',
+            bg_color_lbl: 'Card Background Color',
+            align_lbl: 'Align',
+            align_center: 'Center',
+            align_right: 'Right',
+            align_left: 'Left',
+            custom_design_badge: '🎨 Custom Design'
         }
     };
 
@@ -900,22 +992,53 @@
         }
     ];
 
+    const AVAILABLE_FONTS = [
+        { name: 'Tajawal', val: "'Tajawal', sans-serif" },
+        { name: 'Cairo', val: "'Cairo', sans-serif" },
+        { name: 'Inter', val: "'Inter', sans-serif" },
+        { name: 'Poppins', val: "'Poppins', sans-serif" },
+        { name: 'Montserrat', val: "'Montserrat', sans-serif" },
+        { name: 'Almarai', val: "'Almarai', sans-serif" },
+        { name: 'System Default', val: 'system-ui, -apple-system, sans-serif' },
+    ];
+
+    const AVAILABLE_SIZES = ['12px', '14px', '16px', '18px', '20px', '22px', '24px', '28px', '30px', '32px', '36px', '40px', '48px'];
+
     const funnelData = @json($funnel);
     if (!funnelData.steps) funnelData.steps = [];
     if (!funnelData.results) funnelData.results = [];
     if (!funnelData.design_settings) funnelData.design_settings = { primary_color: '#2563eb', scoring_enabled: true };
 
-    // Normalize elements is_required
+    // Normalize elements
     funnelData.steps.forEach(step => {
         (step.elements || []).forEach(el => {
             if (el.is_required === undefined) {
                 el.is_required = el.properties?.is_required || false;
+            }
+            if (!el.properties) el.properties = {};
+            if (!el.properties.design) {
+                el.properties.design = {
+                    custom_enabled: false,
+                    heading_font: "'Tajawal', sans-serif",
+                    heading_size: '24px',
+                    heading_bold: true,
+                    heading_italic: false,
+                    subline_font: "'Tajawal', sans-serif",
+                    subline_size: '15px',
+                    subline_bold: false,
+                    subline_italic: false,
+                    text_color: '#0f172a',
+                    subline_color: '#64748b',
+                    bg_color: '',
+                    align: 'start'
+                };
             }
         });
     });
 
     let activeStepIndex = 0;
     let selectedElementIndex = null;
+    let currentElementActiveSubTab = 'content'; // 'content' or 'design'
     let currentEditingOptionIdx = null;
 
     // COUNTRY GROUP PRESETS DICTIONARY (FOR TOGGLING)
@@ -1218,6 +1341,22 @@
                     is_required: false,
                     question_key: `q_${Math.random().toString(36).substr(2, 6)}`,
                     properties: {
+                        subline: currentLang === 'ar' ? 'اختر الإجابة المناسبة للمتابعة' : 'Select an option to proceed',
+                        design: {
+                            custom_enabled: false,
+                            heading_font: "'Tajawal', sans-serif",
+                            heading_size: '22px',
+                            heading_bold: true,
+                            heading_italic: false,
+                            subline_font: "'Tajawal', sans-serif",
+                            subline_size: '14px',
+                            subline_bold: false,
+                            subline_italic: false,
+                            text_color: '#0f172a',
+                            subline_color: '#64748b',
+                            bg_color: '',
+                            align: 'start'
+                        },
                         options: [
                             { label: currentLang === 'ar' ? 'الخيار الأول' : 'Option 1', value: 'Option 1', score: 10, image_url: '' },
                             { label: currentLang === 'ar' ? 'الخيار الثاني' : 'Option 2', value: 'Option 2', score: 20, image_url: '' },
@@ -1246,7 +1385,44 @@
         }
     }
 
-    // ── 2. CANVAS RENDERING ──────────────────────────────────────────────────
+    // ── HELPER: GET ELEMENT CUSTOM STYLES ────────────────────────────────────
+    function getElementStyles(el) {
+        const d = el.properties?.design || {};
+        if (!d.custom_enabled) {
+            return {
+                headingStyle: '',
+                sublineStyle: '',
+                containerStyle: ''
+            };
+        }
+
+        const headingStyle = `
+            font-family: ${d.heading_font || 'inherit'};
+            font-size: ${d.heading_size || '22px'};
+            font-weight: ${d.heading_bold ? '800' : '400'};
+            font-style: ${d.heading_italic ? 'italic' : 'normal'};
+            color: ${d.text_color || '#0f172a'};
+            text-align: ${d.align || 'start'};
+        `;
+
+        const sublineStyle = `
+            font-family: ${d.subline_font || 'inherit'};
+            font-size: ${d.subline_size || '14px'};
+            font-weight: ${d.subline_bold ? '700' : '400'};
+            font-style: ${d.subline_italic ? 'italic' : 'normal'};
+            color: ${d.subline_color || '#64748b'};
+            text-align: ${d.align || 'start'};
+        `;
+
+        const containerStyle = `
+            text-align: ${d.align || 'start'};
+            ${d.bg_color ? `background-color: ${d.bg_color} !important;` : ''}
+        `;
+
+        return { headingStyle, sublineStyle, containerStyle };
+    }
+
+    // ── 2. CANVAS RENDERING WITH INLINE EDITING ──────────────────────────────
     function renderCanvas() {
         const canvas = document.getElementById('canvas_container');
         const currentStep = funnelData.steps[activeStepIndex];
@@ -1269,10 +1445,14 @@
                 const isSelected = eIdx === selectedElementIndex;
                 const reqStar = el.is_required ? '<span class="text-danger ms-1 fw-bold">*</span>' : '';
                 const hasScoring = funnelData.design_settings?.scoring_enabled !== false;
+                const { headingStyle, sublineStyle, containerStyle } = getElementStyles(el);
+
+                const subline = el.properties?.subline || '';
 
                 html += `
-                    <div class="canvas-element-item ${isSelected ? 'selected' : ''}" data-el-index="${eIdx}" onclick="inspectElement(${eIdx})">
+                    <div class="canvas-element-item ${isSelected ? 'selected' : ''}" data-el-index="${eIdx}" style="${containerStyle}" onclick="handleCanvasElementClick(event, ${eIdx})">
                         <div class="canvas-element-toolbar">
+                            <span onclick="event.stopPropagation(); inspectElement(${eIdx}, 'design')">${t('custom_design_badge')}</span>
                             <span>${el.element_type} ${el.is_required ? '(' + (currentLang==='ar'?'إجباري':'Required') + ')' : ''}</span>
                             <button type="button" class="btn btn-sm text-white p-0" onclick="event.stopPropagation(); duplicateElement(${eIdx})" title="Duplicate">
                                 <iconify-icon icon="solar:copy-bold" width="13"></iconify-icon>
@@ -1283,22 +1463,38 @@
                         </div>
                 `;
 
-                // 1. Heading / Text
+                // 1. Heading
                 if (el.element_type === 'heading') {
-                    html += `<h3 class="fw-bold mb-0 text-primary">${escapeHtml(el.label || (currentLang==='ar'?'عنوان توضيحي':'Heading'))}${reqStar}</h3>`;
-                } else if (el.element_type === 'text' || el.element_type === 'paragraph') {
-                    html += `<p class="text-muted mb-0 fs-6">${escapeHtml(el.label || (currentLang==='ar'?'نص فقرة توضيحية...':'Paragraph text...'))}</p>`;
+                    html += `
+                        <div class="mb-1" style="${headingStyle}">
+                            <div contenteditable="true" class="canvas-inline-editable fw-bold text-primary w-100" style="${headingStyle}" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(el.label || (currentLang==='ar'?'عنوان رئيسي جذاب':'Engaging Headline'))}</div>
+                            ${reqStar}
+                        </div>
+                        ${subline ? `<div contenteditable="true" class="canvas-inline-editable text-muted small w-100" style="${sublineStyle}" onblur="updateInlineText(${eIdx}, 'subline', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(subline)}</div>` : ''}
+                    `;
                 
-                // 2. Radio Choice
+                // 2. Paragraph / Text
+                } else if (el.element_type === 'text' || el.element_type === 'paragraph') {
+                    html += `
+                        <div contenteditable="true" class="canvas-inline-editable text-muted fs-6 w-100" style="${headingStyle}" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(el.label || (currentLang==='ar'?'اكتب نص الفقرة هنا...':'Enter paragraph text here...'))}</div>
+                    `;
+
+                // 3. Radio Choice
                 } else if (el.element_type === 'radio_choice') {
-                    html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'اختر إجابة واحدة:':'Select one option:'))}${reqStar}</label>`;
+                    html += `
+                        <div class="mb-2" style="${headingStyle}">
+                            <div contenteditable="true" class="canvas-inline-editable fw-bold text-dark w-100" style="${headingStyle}" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(el.label || (currentLang==='ar'?'اختر إجابة واحدة:':'Select one option:'))}</div>
+                            ${reqStar}
+                        </div>
+                        ${subline ? `<div contenteditable="true" class="canvas-inline-editable text-muted small mb-2 w-100" style="${sublineStyle}" onblur="updateInlineText(${eIdx}, 'subline', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(subline)}</div>` : ''}
+                    `;
                     html += '<div class="d-flex flex-column gap-2">';
-                    (el.properties?.options || []).forEach(opt => {
+                    (el.properties?.options || []).forEach((opt, oIdx) => {
                         html += `
                             <div class="p-3 border rounded-3 bg-white d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2 flex-grow-1">
                                     <iconify-icon icon="solar:record-circle-bold" class="text-primary fs-5"></iconify-icon>
-                                    <span class="fw-semibold">${escapeHtml(opt.label || opt.value || '')}</span>
+                                    <span contenteditable="true" class="canvas-inline-editable fw-semibold" onblur="updateInlineOptionText(${eIdx}, ${oIdx}, this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(opt.label || opt.value || '')}</span>
                                 </div>
                                 ${hasScoring && (opt.score || 0) > 0 ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score} ${currentLang==='ar'?'نقطة':'pts'}</span>` : ''}
                             </div>
@@ -1306,16 +1502,22 @@
                     });
                     html += '</div>';
 
-                // 3. Checkbox Choice
+                // 4. Checkbox Choice
                 } else if (el.element_type === 'checkbox_choice') {
-                    html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'حدد جميع الخيارات:':'Select all that apply:'))}${reqStar}</label>`;
+                    html += `
+                        <div class="mb-2" style="${headingStyle}">
+                            <div contenteditable="true" class="canvas-inline-editable fw-bold text-dark w-100" style="${headingStyle}" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(el.label || (currentLang==='ar'?'حدد جميع الخيارات:':'Select all that apply:'))}</div>
+                            ${reqStar}
+                        </div>
+                        ${subline ? `<div contenteditable="true" class="canvas-inline-editable text-muted small mb-2 w-100" style="${sublineStyle}" onblur="updateInlineText(${eIdx}, 'subline', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(subline)}</div>` : ''}
+                    `;
                     html += '<div class="d-flex flex-column gap-2">';
-                    (el.properties?.options || []).forEach(opt => {
+                    (el.properties?.options || []).forEach((opt, oIdx) => {
                         html += `
                             <div class="p-3 border rounded-3 bg-white d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2 flex-grow-1">
                                     <iconify-icon icon="solar:check-square-bold" class="text-primary fs-5"></iconify-icon>
-                                    <span class="fw-semibold">${escapeHtml(opt.label || opt.value || '')}</span>
+                                    <span contenteditable="true" class="canvas-inline-editable fw-semibold" onblur="updateInlineOptionText(${eIdx}, ${oIdx}, this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(opt.label || opt.value || '')}</span>
                                 </div>
                                 ${hasScoring && (opt.score || 0) > 0 ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score} ${currentLang==='ar'?'نقطة':'pts'}</span>` : ''}
                             </div>
@@ -1323,37 +1525,49 @@
                     });
                     html += '</div>';
 
-                // 4. Single / Multiple Choice
+                // 5. Single / Multiple Choice
                 } else if (el.element_type === 'single_choice' || el.element_type === 'multiple_choice' || el.element_type === 'yes_no') {
-                    html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'سؤال الاختيار:':'Select Option:'))}${reqStar}</label>`;
+                    html += `
+                        <div class="mb-2" style="${headingStyle}">
+                            <div contenteditable="true" class="canvas-inline-editable fw-bold text-dark w-100" style="${headingStyle}" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(el.label || (currentLang==='ar'?'سؤال الاختيار:':'Select Option:'))}</div>
+                            ${reqStar}
+                        </div>
+                        ${subline ? `<div contenteditable="true" class="canvas-inline-editable text-muted small mb-2 w-100" style="${sublineStyle}" onblur="updateInlineText(${eIdx}, 'subline', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(subline)}</div>` : ''}
+                    `;
                     html += '<div class="d-flex flex-column gap-2">';
-                    (el.properties?.options || []).forEach(opt => {
+                    (el.properties?.options || []).forEach((opt, oIdx) => {
                         html += `
                             <div class="p-3 border rounded-3 bg-light d-flex justify-content-between align-items-center">
-                                <span class="fw-semibold">${escapeHtml(opt.label || opt.value || '')}</span>
+                                <span contenteditable="true" class="canvas-inline-editable fw-semibold" onblur="updateInlineOptionText(${eIdx}, ${oIdx}, this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(opt.label || opt.value || '')}</span>
                                 ${hasScoring && (opt.score || 0) > 0 ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score} ${currentLang==='ar'?'نقطة':'pts'}</span>` : ''}
                             </div>
                         `;
                     });
                     html += '</div>';
 
-                // 5. Image Choice
+                // 6. Image Choice
                 } else if (['image_choice', 'single_image_choice', 'multiple_image_choice'].includes(el.element_type)) {
-                    html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'اختر بطاقة صورة:':'Select Image Card:'))}${reqStar}</label>`;
+                    html += `
+                        <div class="mb-2" style="${headingStyle}">
+                            <div contenteditable="true" class="canvas-inline-editable fw-bold text-dark w-100" style="${headingStyle}" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(el.label || (currentLang==='ar'?'اختر بطاقة صورة:':'Select Image Card:'))}</div>
+                            ${reqStar}
+                        </div>
+                        ${subline ? `<div contenteditable="true" class="canvas-inline-editable text-muted small mb-2 w-100" style="${sublineStyle}" onblur="updateInlineText(${eIdx}, 'subline', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(subline)}</div>` : ''}
+                    `;
                     html += '<div class="row g-2">';
-                    (el.properties?.options || []).forEach(opt => {
+                    (el.properties?.options || []).forEach((opt, oIdx) => {
                         html += `
                             <div class="col-6">
                                 <div class="p-3 border rounded-3 text-center bg-light">
                                     ${opt.image_url ? `<img src="${opt.image_url}" class="rounded-3 mb-2" style="max-height: 80px; width: 100%; object-fit: cover;">` : '<iconify-icon icon="solar:gallery-bold-duotone" width="36" class="text-primary mb-1"></iconify-icon>'}
-                                    <div class="fw-bold small">${escapeHtml(opt.label || '')}</div>
+                                    <div contenteditable="true" class="canvas-inline-editable fw-bold small" onblur="updateInlineOptionText(${eIdx}, ${oIdx}, this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(opt.label || '')}</div>
                                 </div>
                             </div>
                         `;
                     });
                     html += '</div>';
 
-                // 6. CUSTOMIZABLE CONTACT FORM (WITH DROPDOWN, INPUTS & VISIBILITY)
+                // 7. CUSTOMIZABLE CONTACT FORM
                 } else if (el.element_type === 'contact_form') {
                     const allFields = el.properties?.fields || [
                         { key: 'full_name', label: currentLang==='ar'?'الاسم الكريم':'Full Name', type: 'text', required: true, visible: true, placeholder: currentLang==='ar'?'أدخل اسمك الكريم':'Enter your full name' },
@@ -1363,7 +1577,11 @@
                     const fields = allFields.filter(f => f.visible !== false);
 
                     html += `
-                        <label class="fw-bold mb-2 text-primary d-block">${escapeHtml(el.label || (currentLang==='ar'?'نموذج بيانات التواصل (CRM):':'Contact Information (CRM):'))}${reqStar}</label>
+                        <div class="mb-2" style="${headingStyle}">
+                            <div contenteditable="true" class="canvas-inline-editable fw-bold text-primary w-100" style="${headingStyle}" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(el.label || (currentLang==='ar'?'نموذج بيانات التواصل (CRM):':'Contact Information (CRM):'))}</div>
+                            ${reqStar}
+                        </div>
+                        ${subline ? `<div contenteditable="true" class="canvas-inline-editable text-muted small mb-2 w-100" style="${sublineStyle}" onblur="updateInlineText(${eIdx}, 'subline', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(subline)}</div>` : ''}
                         <div class="bg-light p-3 rounded-4 border">
                     `;
                     if (fields.length === 0) {
@@ -1410,36 +1628,18 @@
                     }
                     html += `</div>`;
 
-                // 7. Phone with International Code
+                // 8. Phone
                 } else if (el.element_type === 'phone') {
                     html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'رقم الواتساب / الجوال:':'WhatsApp / Phone:'))}${reqStar}</label>
+                        <div class="mb-2" style="${headingStyle}">
+                            <div contenteditable="true" class="canvas-inline-editable fw-bold text-dark w-100" style="${headingStyle}" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(el.label || (currentLang==='ar'?'رقم الواتساب / الجوال:':'WhatsApp / Phone:'))}</div>
+                            ${reqStar}
+                        </div>
+                        ${subline ? `<div contenteditable="true" class="canvas-inline-editable text-muted small mb-2 w-100" style="${sublineStyle}" onblur="updateInlineText(${eIdx}, 'subline', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(subline)}</div>` : ''}
                         <div class="input-group input-group-lg">
                             <button class="phone-code-btn" type="button">🇸🇦 +966 ▾</button>
                             <input type="tel" class="form-control" placeholder="05XXXXXXXX" disabled>
                         </div>
-                    `;
-
-                // 8. Dedicated Contact Inputs
-                } else if (el.element_type === 'email') {
-                    html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'البريد الإلكتروني:':'Email:'))}${reqStar}</label>
-                        <div class="input-group"><span class="input-group-text bg-light">✉️</span><input type="email" class="form-control" placeholder="name@example.com" disabled></div>
-                    `;
-                } else if (el.element_type === 'address') {
-                    html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'العنوان ومقر الإقامة:':'Address:'))}${reqStar}</label>
-                        <div class="input-group"><span class="input-group-text bg-light">📍</span><input type="text" class="form-control" placeholder="City, Street" disabled></div>
-                    `;
-                } else if (el.element_type === 'website') {
-                    html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'الموقع الإلكتروني:':'Website:'))}${reqStar}</label>
-                        <div class="input-group"><span class="input-group-text bg-light">🌐</span><input type="url" class="form-control" placeholder="https://example.com" disabled></div>
-                    `;
-                } else if (el.element_type === 'country') {
-                    html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'اختر الدولة:':'Select Country:'))}${reqStar}</label>
-                        <div class="input-group"><span class="input-group-text bg-light">🌍</span><select class="form-select bg-light" disabled><option>${escapeHtml(el.properties?.options?.[0]?.label || '🇸🇦 Saudi Arabia')}</option></select></div>
                     `;
 
                 // 9. Slider
@@ -1448,7 +1648,11 @@
                     const max = el.properties?.max || 50000;
                     const unit = el.properties?.show_currency !== false ? (el.properties?.currency_code || 'SAR') : (el.properties?.custom_unit || '');
                     html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'حدد القيمة المطلوبة:':'Select Value:'))}${reqStar}</label>
+                        <div class="mb-2" style="${headingStyle}">
+                            <div contenteditable="true" class="canvas-inline-editable fw-bold text-dark w-100" style="${headingStyle}" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(el.label || (currentLang==='ar'?'حدد القيمة المطلوبة:':'Select Value:'))}</div>
+                            ${reqStar}
+                        </div>
+                        ${subline ? `<div contenteditable="true" class="canvas-inline-editable text-muted small mb-2 w-100" style="${sublineStyle}" onblur="updateInlineText(${eIdx}, 'subline', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(subline)}</div>` : ''}
                         <div class="p-3 bg-light rounded-3 border text-center">
                             <h4 class="fw-bold text-primary mb-1">${(min + max)/2} ${unit}</h4>
                             <input type="range" class="form-range" disabled>
@@ -1456,33 +1660,14 @@
                         </div>
                     `;
 
-                // 10. File Upload
-                } else if (el.element_type === 'file_upload') {
-                    html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'تحميل المستند أو المرفق:':'File Upload:'))}${reqStar}</label>
-                        <div class="p-4 border border-dashed rounded-3 text-center bg-light">
-                            <iconify-icon icon="solar:upload-track-bold-duotone" width="36" class="text-primary mb-1"></iconify-icon>
-                            <p class="mb-0 fw-bold small text-dark">${currentLang==='ar'?'انقر لاختيار ملف أو اسحبه هنا':'Click to upload file or drag and drop'}</p>
-                            <small class="text-muted">PDF, JPG, PNG up to 10MB</small>
-                        </div>
-                    `;
-
-                // 11. Date / Appointment Picker
-                } else if (['date_picker', 'date_time', 'schedule'].includes(el.element_type)) {
-                    html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'تحديد التاريخ والموعد:':'Select Date & Time:'))}${reqStar}</label>
-                        <div class="input-group mb-2"><span class="input-group-text bg-light">📅</span><input type="date" class="form-control" disabled></div>
-                        <div class="d-flex gap-2"><span class="badge bg-light text-dark border p-2">${currentLang==='ar'?'صباحاً (09:00 - 12:00)':'Morning (09:00 - 12:00)'}</span><span class="badge bg-light text-dark border p-2">${currentLang==='ar'?'مساءً (04:00 - 08:00)':'Evening (04:00 - 08:00)'}</span></div>
-                    `;
-
-                // 12. Countdown Timer (With Labels Above Digits)
+                // 10. Countdown Timer
                 } else if (el.element_type === 'timer' || el.element_type === 'page_timer') {
                     const hrs = el.properties?.duration_hours || 0;
                     const mins = el.properties?.duration_minutes || 15;
                     const secs = el.properties?.duration_seconds || 0;
                     html += `
                         <div class="p-3 bg-dark text-white rounded-4 border text-center">
-                            <span class="small text-warning fw-bold d-block mb-3">⏰ ${escapeHtml(el.label || (currentLang==='ar'?'احجز الآن! هذا العرض ساري لمدة:':'Special Offer Expires In:'))}</span>
+                            <span contenteditable="true" class="canvas-inline-editable small text-warning fw-bold d-block mb-3" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">⏰ ${escapeHtml(el.label || (currentLang==='ar'?'احجز الآن! هذا العرض ساري لمدة:':'Special Offer Expires In:'))}</span>
                             <div class="d-flex justify-content-center align-items-center gap-3">
                                 <div class="d-flex flex-column align-items-center">
                                     <span class="small text-white-50 fw-bold mb-1" style="font-size: 11px;">${t('hours')}</span>
@@ -1502,64 +1687,14 @@
                         </div>
                     `;
 
-                // 13. Rating & NPS
-                } else if (el.element_type === 'rating') {
-                    html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'التقييم:':'Rating:'))}${reqStar}</label>
-                        <div class="d-flex gap-2 text-warning fs-3">⭐⭐⭐⭐⭐</div>
-                    `;
-                } else if (el.element_type === 'nps') {
-                    html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'مقياس الرضا NPS (0-10):':'Net Promoter Score (0-10):'))}${reqStar}</label>
-                        <div class="d-flex gap-1 justify-content-between"><button class="btn btn-sm btn-outline-secondary">0</button><button class="btn btn-sm btn-outline-secondary">5</button><button class="btn btn-sm btn-primary">10</button></div>
-                    `;
-
-                // 14. Table
-                } else if (el.element_type === 'table') {
-                    html += `
-                        <label class="fw-bold mb-2 text-dark d-block">${escapeHtml(el.label || (currentLang==='ar'?'جدول مقارنة الأسعار:':'Price Comparison:'))}</label>
-                        <table class="table table-sm table-bordered bg-light mb-0 small text-center">
-                            <tr class="table-primary"><th>${currentLang==='ar'?'الباقة':'Package'}</th><th>${currentLang==='ar'?'الخدمات':'Services'}</th><th>${currentLang==='ar'?'السعر':'Price'}</th></tr>
-                            <tr><td>${currentLang==='ar'?'الأساسية':'Basic'}</td><td>${currentLang==='ar'?'طلب التأشيرة والموعد':'Visa application & booking'}</td><td>250 SAR</td></tr>
-                        </table>
-                    `;
-
-                // 15. Testimonials
-                } else if (el.element_type === 'testimonials') {
-                    html += `
-                        <div class="p-3 bg-light rounded-3 border text-center">
-                            <p class="fst-italic small mb-1">"${currentLang==='ar'?'خدمة استثنائية وسرعة فائقة!':'Exceptional service and quick processing!'}"</p>
-                            <strong class="text-primary small">— Fahad ⭐⭐⭐⭐⭐</strong>
-                        </div>
-                    `;
-
-                // 16. FAQs
-                } else if (el.element_type === 'faqs') {
-                    html += `
-                        <div class="p-3 bg-light rounded-3 border">
-                            <div class="fw-bold small text-primary mb-1">❓ ${currentLang==='ar'?'ما هي شروط التأشيرة؟':'What are the visa requirements?'}</div>
-                            <div class="text-muted small">${currentLang==='ar'?'جواز سفر ساري المفعول وحساب بنكي...':'Valid passport, bank statement...'}</div>
-                        </div>
-                    `;
-
-                // 17. Coupon
-                } else if (el.element_type === 'coupon_code') {
-                    html += `
-                        <div class="p-3 bg-light rounded-3 border border-dashed text-center">
-                            <h5 class="fw-bold text-danger mb-0">${currentLang==='ar'?'كود الخصم: WAVE2026 (خصم 20%)':'Promo Code: WAVE2026 (20% OFF)'}</h5>
-                        </div>
-                    `;
-
-                // 18. Textarea
-                } else if (el.element_type === 'long_answer') {
-                    html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'ملاحظات وتفاصيل:':'Additional Notes:'))}${reqStar}</label>
-                        <textarea class="form-control" rows="3" placeholder="${currentLang==='ar'?'اكتب التفاصيل هنا...':'Enter details here...'}" disabled></textarea>
-                    `;
-
+                // 11. Generic fallback
                 } else {
                     html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || (currentLang==='ar'?'حقل إدخال:':'Input field:'))}${reqStar}</label>
+                        <div class="mb-2" style="${headingStyle}">
+                            <div contenteditable="true" class="canvas-inline-editable fw-bold text-dark w-100" style="${headingStyle}" onblur="updateInlineText(${eIdx}, 'label', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(el.label || (currentLang==='ar'?'حقل إدخال:':'Input field:'))}</div>
+                            ${reqStar}
+                        </div>
+                        ${subline ? `<div contenteditable="true" class="canvas-inline-editable text-muted small mb-2 w-100" style="${sublineStyle}" onblur="updateInlineText(${eIdx}, 'subline', this.innerText)" onkeydown="handleInlineEnter(event, this)">${escapeHtml(subline)}</div>` : ''}
                         <input type="text" class="form-control" placeholder="${currentLang==='ar'?'اكتب هنا...':'Enter text...'}" disabled>
                     `;
                 }
@@ -1592,6 +1727,49 @@
                     inspectElement(evt.newIndex);
                 }
             });
+        }
+    }
+
+    // Canvas click & inline edit handler
+    function handleCanvasElementClick(e, eIdx) {
+        // If clicking an inline editable, don't prevent focus
+        inspectElement(eIdx);
+    }
+
+    function handleInlineEnter(e, el) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            el.blur();
+        }
+    }
+
+    function updateInlineText(eIdx, field, val) {
+        const currentStep = funnelData.steps[activeStepIndex];
+        if (!currentStep || !currentStep.elements[eIdx]) return;
+        const el = currentStep.elements[eIdx];
+
+        if (field === 'label') {
+            el.label = val.trim();
+        } else if (field === 'subline') {
+            if (!el.properties) el.properties = {};
+            el.properties.subline = val.trim();
+        }
+
+        // Live sync inspector textarea if open
+        if (selectedElementIndex === eIdx) {
+            const headingInput = document.getElementById('inspector_heading_text');
+            if (headingInput && field === 'label') headingInput.value = el.label;
+            const sublineInput = document.getElementById('inspector_subline_text');
+            if (sublineInput && field === 'subline') sublineInput.value = el.properties.subline || '';
+        }
+    }
+
+    function updateInlineOptionText(eIdx, oIdx, val) {
+        const currentStep = funnelData.steps[activeStepIndex];
+        if (!currentStep || !currentStep.elements[eIdx]?.properties?.options?.[oIdx]) return;
+        currentStep.elements[eIdx].properties.options[oIdx].label = val.trim();
+        if (selectedElementIndex === eIdx) {
+            inspectElement(eIdx, currentElementActiveSubTab);
         }
     }
 
@@ -1640,7 +1818,24 @@
             label: getDefaultLabelForType(type),
             is_required: false,
             question_key: `q_${Math.random().toString(36).substr(2, 6)}`,
-            properties: {}
+            properties: {
+                subline: '',
+                design: {
+                    custom_enabled: false,
+                    heading_font: "'Tajawal', sans-serif",
+                    heading_size: '22px',
+                    heading_bold: true,
+                    heading_italic: false,
+                    subline_font: "'Tajawal', sans-serif",
+                    subline_size: '14px',
+                    subline_bold: false,
+                    subline_italic: false,
+                    text_color: '#0f172a',
+                    subline_color: '#64748b',
+                    bg_color: '',
+                    align: 'start'
+                }
+            }
         };
 
         if (['single_choice', 'multiple_choice', 'radio_choice', 'checkbox_choice', 'image_choice', 'single_image_choice', 'multiple_image_choice', 'dropdown'].includes(type)) {
@@ -1655,40 +1850,31 @@
                 { label: currentLang === 'ar' ? 'لا (No)' : 'No', value: 'No', score: 0 },
             ];
         } else if (type === 'country') {
-            newElement.properties = {
-                active_presets: ['arab'],
-                options: [...COUNTRY_GROUPS.arab.countries]
-            };
+            newElement.properties.active_presets = ['arab'];
+            newElement.properties.options = [...COUNTRY_GROUPS.arab.countries];
         } else if (type === 'contact_form') {
-            newElement.properties = {
-                fields: [
-                    { key: 'full_name', label: currentLang==='ar'?'الاسم الكريم':'Full Name', type: 'text', required: true, visible: true, placeholder: currentLang==='ar'?'أدخل اسمك بالكامل':'Enter your name' },
-                    { key: 'phone', label: currentLang==='ar'?'رقم الواتساب':'WhatsApp / Phone', type: 'tel', required: true, visible: true, placeholder: '05XXXXXXXX' },
-                    { key: 'email', label: currentLang==='ar'?'البريد الإلكتروني':'Email Address', type: 'email', required: false, visible: true, placeholder: 'example@domain.com' },
-                ]
-            };
+            newElement.properties.fields = [
+                { key: 'full_name', label: currentLang==='ar'?'الاسم الكريم':'Full Name', type: 'text', required: true, visible: true, placeholder: currentLang==='ar'?'أدخل اسمك بالكامل':'Enter your name' },
+                { key: 'phone', label: currentLang==='ar'?'رقم الواتساب':'WhatsApp / Phone', type: 'tel', required: true, visible: true, placeholder: '05XXXXXXXX' },
+                { key: 'email', label: currentLang==='ar'?'البريد الإلكتروني':'Email Address', type: 'email', required: false, visible: true, placeholder: 'example@domain.com' },
+            ];
         } else if (type === 'slider' || type === 'currency') {
-            newElement.properties = {
-                min: 0,
-                max: 50000,
-                step: 1000,
-                show_currency: true,
-                currency_code: 'SAR',
-                custom_unit: currentLang === 'ar' ? 'ريال' : 'SAR'
-            };
+            newElement.properties.min = 0;
+            newElement.properties.max = 50000;
+            newElement.properties.step = 1000;
+            newElement.properties.show_currency = true;
+            newElement.properties.currency_code = 'SAR';
+            newElement.properties.custom_unit = currentLang === 'ar' ? 'ريال' : 'SAR';
         } else if (type === 'timer' || type === 'page_timer') {
-            newElement.properties = {
-                duration_hours: 0,
-                duration_minutes: 15,
-                duration_seconds: 0,
-                urgency_message: currentLang === 'ar' ? 'احجز الآن! هذا العرض ساري لمدة:' : 'Special Offer Expires In:'
-            };
+            newElement.properties.duration_hours = 0;
+            newElement.properties.duration_minutes = 15;
+            newElement.properties.duration_seconds = 0;
         }
 
         currentStep.elements.push(newElement);
         selectedElementIndex = currentStep.elements.length - 1;
         renderCanvas();
-        inspectElement(selectedElementIndex);
+        inspectElement(selectedElementIndex, 'content');
     }
 
     function getDefaultLabelForType(type) {
@@ -1713,7 +1899,7 @@
                 case 'timer': case 'page_timer': return 'احجز الآن! هذا العرض متاح لمدة:';
                 case 'rating': return 'ما هو تقييمك لمستوى الخدمة؟';
                 case 'nps': return 'ما مدى ترشيحك لنا لأصدقائك (0-10)؟';
-                case 'heading': return 'عنوان رئيسي جذاب';
+                case 'heading': return 'Welcome to involve.me';
                 case 'text': case 'paragraph': return 'اكتب هنا تفاصيل إضافية لتوضيح السؤال.';
                 case 'table': return 'جدول مقارنة الأسعار والباقات';
                 case 'testimonials': return 'آراء وتجارب العملاء السابقين';
@@ -1742,7 +1928,7 @@
                 case 'timer': case 'page_timer': return 'Special Offer Expires In:';
                 case 'rating': return 'How would you rate our service?';
                 case 'nps': return 'How likely are you to recommend us (0-10)?';
-                case 'heading': return 'Engaging Headline';
+                case 'heading': return 'Welcome to involve.me';
                 case 'text': case 'paragraph': return 'Enter additional explanation text.';
                 case 'table': return 'Price & Package Comparison Table';
                 case 'testimonials': return 'Customer Testimonials & Reviews';
@@ -1774,12 +1960,34 @@
         inspectElement(selectedElementIndex);
     }
 
-    // ── 4. INSPECTOR: PROPERTIES ─────────────────────────────────────────────
-    function inspectElement(eIdx) {
+    // ── 4. INSPECTOR: ADVANCED CONTENT & DESIGN TABS (INVOLVE.ME STYLE) ──────
+    function inspectElement(eIdx, subTab = 'content') {
         selectedElementIndex = eIdx;
+        currentElementActiveSubTab = subTab;
+
         const currentStep = funnelData.steps[activeStepIndex];
         if (!currentStep || !currentStep.elements[eIdx]) return;
         const el = currentStep.elements[eIdx];
+
+        if (!el.properties) el.properties = {};
+        if (!el.properties.design) {
+            el.properties.design = {
+                custom_enabled: false,
+                heading_font: "'Tajawal', sans-serif",
+                heading_size: '24px',
+                heading_bold: true,
+                heading_italic: false,
+                subline_font: "'Tajawal', sans-serif",
+                subline_size: '15px',
+                subline_bold: false,
+                subline_italic: false,
+                text_color: '#0f172a',
+                subline_color: '#64748b',
+                bg_color: '',
+                align: 'start'
+            };
+        }
+        const d = el.properties.design;
 
         const propsTabBtn = document.querySelector('#inspector_tabs button[data-bs-target="#tab_props"]');
         if (propsTabBtn) {
@@ -1788,277 +1996,450 @@
 
         const panel = document.getElementById('inspector_element_panel');
         let html = `
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="badge bg-primary text-uppercase">${el.element_type}</span>
-                <button type="button" class="btn btn-sm btn-outline-danger py-0" onclick="deleteElement(${eIdx})">
-                    <iconify-icon icon="solar:trash-bin-bold"></iconify-icon> ${currentLang==='ar'?'حذف':'Delete'}
-                </button>
+            <!-- Element Header with Close / Deselect Button -->
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary">
+                <h6 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+                    <span class="badge bg-primary text-uppercase">${el.element_type}</span>
+                    <span>${escapeHtml(el.label || '')}</span>
+                </h6>
+                <button type="button" class="btn btn-sm btn-link text-white-50 p-0 fs-5" onclick="deselectElement()" title="Close">✕</button>
             </div>
 
-            <!-- Required Toggle -->
-            <div class="p-2 bg-dark rounded-3 border border-secondary mb-3">
-                <div class="form-check form-switch mb-0">
-                    <input class="form-check-input" type="checkbox" id="el_required_switch" ${el.is_required ? 'checked' : ''} onchange="updateCurrentElementProp('is_required', this.checked)">
-                    <label class="form-check-label fw-bold small text-white" for="el_required_switch">
-                        ${t('required_switch_lbl')}
-                    </label>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label small text-muted">${t('label_lbl')}</label>
-                <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(el.label || '')}" oninput="updateCurrentElementProp('label', this.value)">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label small text-muted">${t('crm_key_lbl')}</label>
-                <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(el.question_key || '')}" oninput="updateCurrentElementProp('question_key', this.value)">
-            </div>
+            <!-- Involve.me Style Sub-Tabs: Content | Design -->
+            <ul class="nav nav-tabs nav-tabs-element mb-3">
+                <li class="nav-item">
+                    <button class="nav-link ${subTab === 'content' ? 'active' : ''}" type="button" onclick="inspectElement(${eIdx}, 'content')">
+                        ${t('tab_content')}
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link ${subTab === 'design' ? 'active' : ''}" type="button" onclick="inspectElement(${eIdx}, 'design')">
+                        ${t('tab_element_design')}
+                    </button>
+                </li>
+            </ul>
         `;
 
-        // 🌟 CONTACT FORM INSPECTOR (WITH SELECT / DROPDOWN OPTIONS, PRESETS & VISIBILITY)
-        if (el.element_type === 'contact_form') {
-            if (!el.properties) el.properties = {};
-            if (!el.properties.fields) el.properties.fields = [
-                { key: 'full_name', label: currentLang==='ar'?'الاسم الكريم':'Full Name', type: 'text', required: true, visible: true, placeholder: currentLang==='ar'?'أدخل اسمك بالكامل':'Enter your full name' },
-                { key: 'phone', label: currentLang==='ar'?'رقم الواتساب':'WhatsApp / Phone', type: 'tel', required: true, visible: true, placeholder: '05XXXXXXXX' },
-                { key: 'email', label: currentLang==='ar'?'البريد الإلكتروني':'Email Address', type: 'email', required: false, visible: true, placeholder: 'example@domain.com' }
-            ];
-
+        // ═════════════════════════════════════════════════════════════════════
+        // TAB 1: CONTENT (المحتوى)
+        // ═════════════════════════════════════════════════════════════════════
+        if (subTab === 'content') {
             html += `
-                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
-                    <h6 class="fw-bold small text-white mb-2">${t('presets_title')}</h6>
-                    <div class="d-flex flex-column gap-2 mb-3">
-                        <button type="button" class="btn btn-outline-info btn-sm text-start" onclick="applyContactFormPreset('visa')">
-                            🛂 ${currentLang==='ar'?'فورم استخراج التأشيرات (الاسم، الواتساب، البريد، وجهة السفر، نوع التأشيرة)':'Visa Application Form (Name, Phone, Email, Destination, Visa Type)'}
-                        </button>
-                        <button type="button" class="btn btn-outline-info btn-sm text-start" onclick="applyContactFormPreset('flight_hotel')">
-                            ✈️ ${currentLang==='ar'?'فورم حجز الطيران والفنادق (الاسم، الواتساب، مدينة المغادرة، الوجهة، المسافرين)':'Flight & Hotel Booking (Name, Phone, From, To, Passengers)'}
-                        </button>
-                        <button type="button" class="btn btn-outline-info btn-sm text-start" onclick="applyContactFormPreset('support')">
-                            💬 ${currentLang==='ar'?'فورم خدمة العملاء والاستفسارات (الاسم، الواتساب، البريد، موضوع الرسالة)':'Customer Support & Inquiries (Name, Phone, Subject, Message)'}
-                        </button>
-                        <button type="button" class="btn btn-outline-info btn-sm text-start" onclick="applyContactFormPreset('quick')">
-                            ⚡ ${currentLang==='ar'?'نموذج تسجيل بيانات سريع (الاسم، رقم الواتساب، المدينة)':'Quick Lead Generation Form (Name, Phone, City)'}
+                <!-- Heading Text -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small text-muted mb-0 fw-bold">${t('heading_text_lbl')}</label>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 small" onclick="insertVariable('inspector_heading_text', 'first_name')">
+                            ${t('variables_btn')}
                         </button>
                     </div>
+                    <textarea class="form-control form-control-dark" id="inspector_heading_text" rows="2" placeholder="${t('heading_text_lbl')}" oninput="updateCurrentElementProp('label', this.value)">${escapeHtml(el.label || '')}</textarea>
+                </div>
 
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="fw-bold small text-white mb-0">${t('custom_fields_title')} (${el.properties.fields.length}):</h6>
-                        <button type="button" class="btn btn-primary btn-sm py-0 px-2 small" onclick="addCustomFieldToContactForm()">${t('btn_add_field')}</button>
+                <!-- Subline Text -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small text-muted mb-0 fw-bold">${t('subline_text_lbl')}</label>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 small" onclick="insertVariable('inspector_subline_text', 'first_name')">
+                            ${t('variables_btn')}
+                        </button>
                     </div>
-
-                    <div class="d-flex flex-column gap-2" id="contact_fields_list">
+                    <textarea class="form-control form-control-dark" id="inspector_subline_text" rows="2" placeholder="${t('subline_text_lbl')}" oninput="updateSublineText(this.value)">${escapeHtml(el.properties.subline || '')}</textarea>
+                </div>
             `;
 
-            el.properties.fields.forEach((f, fIdx) => {
-                const isVisible = f.visible !== false;
-                const isSelect = f.type === 'select' || f.type === 'dropdown';
-                if (isSelect && !f.options) {
-                    f.options = [{ label: currentLang==='ar'?'الخيار الأول':'Option 1', value: 'Option 1' }, { label: currentLang==='ar'?'الخيار الثاني':'Option 2', value: 'Option 2' }];
-                }
+            // Contact Form Specific Fields
+            if (el.element_type === 'contact_form') {
+                if (!el.properties.fields) el.properties.fields = [
+                    { key: 'full_name', label: currentLang==='ar'?'الاسم الكريم':'Full Name', type: 'text', required: true, visible: true, placeholder: currentLang==='ar'?'أدخل اسمك بالكامل':'Enter your full name' },
+                    { key: 'phone', label: currentLang==='ar'?'رقم الواتساب':'WhatsApp / Phone', type: 'tel', required: true, visible: true, placeholder: '05XXXXXXXX' },
+                    { key: 'email', label: currentLang==='ar'?'البريد الإلكتروني':'Email Address', type: 'email', required: false, visible: true, placeholder: 'example@domain.com' }
+                ];
 
                 html += `
-                    <div class="p-2 rounded-3 border ${isVisible ? 'bg-secondary bg-opacity-10 border-secondary' : 'bg-dark border-danger opacity-75'} mb-2">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="d-flex align-items-center gap-1 flex-grow-1 me-2">
-                                <span class="badge ${isVisible ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} small" style="font-size: 10px;">
-                                    ${isVisible ? t('visible_badge') : t('hidden_badge')}
-                                </span>
-                                <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(f.label)}" placeholder="${t('field_name_ph')}" oninput="updateContactFieldProp(${fIdx}, 'label', this.value)">
-                            </div>
-                            <button type="button" class="btn btn-sm btn-outline-danger px-2 py-0" onclick="deleteContactField(${fIdx})" title="Delete Field">✕</button>
+                    <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                        <h6 class="fw-bold small text-white mb-2">${t('presets_title')}</h6>
+                        <div class="d-flex flex-column gap-2 mb-3">
+                            <button type="button" class="btn btn-outline-info btn-sm text-start" onclick="applyContactFormPreset('visa')">
+                                🛂 ${currentLang==='ar'?'فورم استخراج التأشيرات (الاسم، الواتساب، البريد، وجهة السفر، نوع التأشيرة)':'Visa Application Form (Name, Phone, Email, Destination, Visa Type)'}
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm text-start" onclick="applyContactFormPreset('flight_hotel')">
+                                ✈️ ${currentLang==='ar'?'فورم حجز الطيران والفنادق (الاسم، الواتساب، مدينة المغادرة، الوجهة، المسافرين)':'Flight & Hotel Booking (Name, Phone, From, To, Passengers)'}
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm text-start" onclick="applyContactFormPreset('support')">
+                                💬 ${currentLang==='ar'?'فورم خدمة العملاء والاستفسارات (الاسم، الواتساب، البريد، موضوع الرسالة)':'Customer Support & Inquiries (Name, Phone, Subject, Message)'}
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm text-start" onclick="applyContactFormPreset('quick')">
+                                ⚡ ${currentLang==='ar'?'نموذج تسجيل بيانات سريع (الاسم، رقم الواتساب، المدينة)':'Quick Lead Generation Form (Name, Phone, City)'}
+                            </button>
                         </div>
-                        <div class="row g-1 mb-2">
-                            <div class="col-6">
-                                <select class="form-select form-select-sm form-select-dark" onchange="updateContactFieldProp(${fIdx}, 'type', this.value); inspectElement(${eIdx});">
-                                    <option value="text" ${f.type==='text'?'selected':''}>${t('type_text')}</option>
-                                    <option value="tel" ${f.type==='tel'?'selected':''}>${t('type_phone')}</option>
-                                    <option value="email" ${f.type==='email'?'selected':''}>${t('type_email')}</option>
-                                    <option value="select" ${isSelect?'selected':''}>${t('type_dropdown')}</option>
-                                    <option value="date" ${f.type==='date'?'selected':''}>${t('type_date')}</option>
-                                    <option value="textarea" ${f.type==='textarea'?'selected':''}>${t('type_textarea')}</option>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold small text-white mb-0">${t('custom_fields_title')} (${el.properties.fields.length}):</h6>
+                            <button type="button" class="btn btn-primary btn-sm py-0 px-2 small" onclick="addCustomFieldToContactForm()">${t('btn_add_field')}</button>
+                        </div>
+
+                        <div class="d-flex flex-column gap-2" id="contact_fields_list">
+                `;
+
+                el.properties.fields.forEach((f, fIdx) => {
+                    const isVisible = f.visible !== false;
+                    const isSelect = f.type === 'select' || f.type === 'dropdown';
+                    if (isSelect && !f.options) {
+                        f.options = [{ label: currentLang==='ar'?'الخيار الأول':'Option 1', value: 'Option 1' }, { label: currentLang==='ar'?'الخيار الثاني':'Option 2', value: 'Option 2' }];
+                    }
+
+                    html += `
+                        <div class="p-2 rounded-3 border ${isVisible ? 'bg-secondary bg-opacity-10 border-secondary' : 'bg-dark border-danger opacity-75'} mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-1 flex-grow-1 me-2">
+                                    <span class="badge ${isVisible ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} small" style="font-size: 10px;">
+                                        ${isVisible ? t('visible_badge') : t('hidden_badge')}
+                                    </span>
+                                    <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(f.label)}" placeholder="${t('field_name_ph')}" oninput="updateContactFieldProp(${fIdx}, 'label', this.value)">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger px-2 py-0" onclick="deleteContactField(${fIdx})" title="Delete Field">✕</button>
+                            </div>
+                            <div class="row g-1 mb-2">
+                                <div class="col-6">
+                                    <select class="form-select form-select-sm form-select-dark" onchange="updateContactFieldProp(${fIdx}, 'type', this.value); inspectElement(${eIdx});">
+                                        <option value="text" ${f.type==='text'?'selected':''}>${t('type_text')}</option>
+                                        <option value="tel" ${f.type==='tel'?'selected':''}>${t('type_phone')}</option>
+                                        <option value="email" ${f.type==='email'?'selected':''}>${t('type_email')}</option>
+                                        <option value="select" ${isSelect?'selected':''}>${t('type_dropdown')}</option>
+                                        <option value="date" ${f.type==='date'?'selected':''}>${t('type_date')}</option>
+                                        <option value="textarea" ${f.type==='textarea'?'selected':''}>${t('type_textarea')}</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(f.placeholder||'')}" placeholder="${isSelect?(currentLang==='ar'?'نص الاختيار الافتراضي':'Default placeholder'):(currentLang==='ar'?'النص التوضيحي':'Placeholder')}" oninput="updateContactFieldProp(${fIdx}, 'placeholder', this.value)">
+                                </div>
+                            </div>
+
+                            ${isSelect ? `
+                                <div class="p-2 bg-dark rounded-2 border border-secondary mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="small fw-bold text-info">${t('dropdown_opts_title')}</span>
+                                        <button type="button" class="btn btn-sm btn-outline-info py-0 px-2 small" onclick="addOptionToContactSelectField(${fIdx})">${t('btn_add_opt')}</button>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        ${(f.options || []).map((opt, oIdx) => `
+                                            <div class="d-flex gap-1">
+                                                <input type="text" class="form-control form-control-sm form-control-dark" placeholder="${t('opt_text_ph')}" value="${escapeHtml(opt.label || opt.value || '')}" oninput="updateContactSelectOption(${fIdx}, ${oIdx}, this.value)">
+                                                <button type="button" class="btn btn-sm btn-outline-danger px-2 py-0" onclick="deleteContactSelectOption(${fIdx}, ${oIdx})">✕</button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <div class="d-flex justify-content-between align-items-center pt-1 border-top border-secondary">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="cf_vis_${fIdx}" ${isVisible?'checked':''} onchange="updateContactFieldProp(${fIdx}, 'visible', this.checked); inspectElement(${eIdx});">
+                                    <label class="form-check-label small ${isVisible?'text-white':'text-danger'}" for="cf_vis_${fIdx}">
+                                        ${isVisible ? t('show_in_form') : t('hide_from_form')}
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="cf_req_${fIdx}" ${f.required?'checked':''} onchange="updateContactFieldProp(${fIdx}, 'required', this.checked)">
+                                    <label class="form-check-label text-muted small" for="cf_req_${fIdx}">${t('required_badge')}</label>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            }
+
+            // Slider & Currency
+            if (el.element_type === 'slider' || el.element_type === 'currency') {
+                html += `
+                    <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                        <h6 class="fw-bold small text-white mb-2">🎚️ ${currentLang==='ar'?'إعدادات السلايدر والعملات':'Slider & Currency Settings'}</h6>
+                        
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="slider_currency_toggle" ${el.properties.show_currency !== false ? 'checked' : ''} onchange="updateSliderProp('show_currency', this.checked); inspectElement(${eIdx});">
+                            <label class="form-check-label small fw-bold text-white">${currentLang==='ar'?'إظهار رمز العملة':'Show Currency Symbol'}</label>
+                        </div>
+
+                        ${el.properties.show_currency !== false ? `
+                            <div class="mb-2">
+                                <label class="form-label small text-muted">${currentLang==='ar'?'العملة (Currency)':'Currency'}</label>
+                                <select class="form-select form-select-sm form-select-dark" onchange="updateSliderProp('currency_code', this.value)">
+                                    ${WORLD_CURRENCIES.map(c => `<option value="${c.code}" ${el.properties.currency_code === c.code ? 'selected' : ''}>${c.label}</option>`).join('')}
                                 </select>
                             </div>
+                        ` : `
+                            <div class="mb-2">
+                                <label class="form-label small text-muted">${currentLang==='ar'?'الوحدة المخصصة (Custom Unit)':'Custom Unit'}</label>
+                                <input type="text" class="form-control form-control-sm form-control-dark" placeholder="Days, Passengers, KM..." value="${escapeHtml(el.properties.custom_unit || '')}" oninput="updateSliderProp('custom_unit', this.value)">
+                            </div>
+                        `}
+
+                        <div class="row g-2 mb-2">
                             <div class="col-6">
-                                <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(f.placeholder||'')}" placeholder="${isSelect?(currentLang==='ar'?'نص الاختيار الافتراضي':'Default placeholder'):(currentLang==='ar'?'النص التوضيحي':'Placeholder')}" oninput="updateContactFieldProp(${fIdx}, 'placeholder', this.value)">
+                                <label class="form-label small text-muted">${currentLang==='ar'?'الحد الأدنى (Min)':'Min Value'}</label>
+                                <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.min || 0}" oninput="updateSliderProp('min', parseInt(this.value)||0)">
                             </div>
-                        </div>
-
-                        ${isSelect ? `
-                            <div class="p-2 bg-dark rounded-2 border border-secondary mb-2">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="small fw-bold text-info">${t('dropdown_opts_title')}</span>
-                                    <button type="button" class="btn btn-sm btn-outline-info py-0 px-2 small" onclick="addOptionToContactSelectField(${fIdx})">${t('btn_add_opt')}</button>
-                                </div>
-                                <div class="d-flex flex-column gap-1">
-                                    ${(f.options || []).map((opt, oIdx) => `
-                                        <div class="d-flex gap-1">
-                                            <input type="text" class="form-control form-control-sm form-control-dark" placeholder="${t('opt_text_ph')}" value="${escapeHtml(opt.label || opt.value || '')}" oninput="updateContactSelectOption(${fIdx}, ${oIdx}, this.value)">
-                                            <button type="button" class="btn btn-sm btn-outline-danger px-2 py-0" onclick="deleteContactSelectOption(${fIdx}, ${oIdx})">✕</button>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        <div class="d-flex justify-content-between align-items-center pt-1 border-top border-secondary">
-                            <div class="form-check form-switch mb-0">
-                                <input class="form-check-input" type="checkbox" id="cf_vis_${fIdx}" ${isVisible?'checked':''} onchange="updateContactFieldProp(${fIdx}, 'visible', this.checked); inspectElement(${eIdx});">
-                                <label class="form-check-label small ${isVisible?'text-white':'text-danger'}" for="cf_vis_${fIdx}">
-                                    ${isVisible ? t('show_in_form') : t('hide_from_form')}
-                                </label>
-                            </div>
-                            <div class="form-check form-switch mb-0">
-                                <input class="form-check-input" type="checkbox" id="cf_req_${fIdx}" ${f.required?'checked':''} onchange="updateContactFieldProp(${fIdx}, 'required', this.checked)">
-                                <label class="form-check-label text-muted small" for="cf_req_${fIdx}">${t('required_badge')}</label>
+                            <div class="col-6">
+                                <label class="form-label small text-muted">${currentLang==='ar'?'الحد الأقصى (Max)':'Max Value'}</label>
+                                <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.max || 50000}" oninput="updateSliderProp('max', parseInt(this.value)||50000)">
                             </div>
                         </div>
                     </div>
                 `;
-            });
+            }
 
-            html += `</div></div>`;
-        }
+            // Countdown Timer Duration
+            if (el.element_type === 'timer' || el.element_type === 'page_timer') {
+                html += `
+                    <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                        <h6 class="fw-bold small text-white mb-3">${t('timer_header')}</h6>
+                        <div class="row g-2 mb-2">
+                            <div class="col-4 text-center">
+                                <label class="form-label small text-info fw-bold mb-1 d-block">${t('hours')}</label>
+                                <input type="number" class="form-control form-control-sm form-control-dark text-center fw-bold fs-6" value="${el.properties.duration_hours || 0}" min="0" max="99" oninput="updateTimerProp('duration_hours', parseInt(this.value)||0)">
+                            </div>
+                            <div class="col-4 text-center">
+                                <label class="form-label small text-info fw-bold mb-1 d-block">${t('minutes')}</label>
+                                <input type="number" class="form-control form-control-sm form-control-dark text-center fw-bold fs-6" value="${el.properties.duration_minutes || 15}" min="0" max="59" oninput="updateTimerProp('duration_minutes', parseInt(this.value)||0)">
+                            </div>
+                            <div class="col-4 text-center">
+                                <label class="form-label small text-info fw-bold mb-1 d-block">${t('seconds')}</label>
+                                <input type="number" class="form-control form-control-sm form-control-dark text-center fw-bold fs-6" value="${el.properties.duration_seconds || 0}" min="0" max="59" oninput="updateTimerProp('duration_seconds', parseInt(this.value)||0)">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
 
-        // SLIDER INSPECTOR
-        if (el.element_type === 'slider' || el.element_type === 'currency') {
-            if (!el.properties) el.properties = {};
+            // Country Presets Toggle
+            if (el.element_type === 'country') {
+                if (!el.properties.active_presets) el.properties.active_presets = ['arab'];
+                const activePresets = el.properties.active_presets;
+
+                html += `
+                    <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                        <label class="form-label small text-white fw-bold mb-2">${t('country_presets_lbl')}</label>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button type="button" class="country-preset-btn ${activePresets.includes('arab') ? 'active' : ''}" onclick="toggleCountryGroup('arab')">
+                                ${currentLang==='ar'?COUNTRY_GROUPS.arab.label_ar:COUNTRY_GROUPS.arab.label_en} ${activePresets.includes('arab') ? '✓' : '+'}
+                            </button>
+                            <button type="button" class="country-preset-btn ${activePresets.includes('eu') ? 'active' : ''}" onclick="toggleCountryGroup('eu')">
+                                ${currentLang==='ar'?COUNTRY_GROUPS.eu.label_ar:COUNTRY_GROUPS.eu.label_en} ${activePresets.includes('eu') ? '✓' : '+'}
+                            </button>
+                            <button type="button" class="country-preset-btn ${activePresets.includes('asia') ? 'active' : ''}" onclick="toggleCountryGroup('asia')">
+                                ${currentLang==='ar'?COUNTRY_GROUPS.asia.label_ar:COUNTRY_GROUPS.asia.label_en} ${activePresets.includes('asia') ? '✓' : '+'}
+                            </button>
+                            <button type="button" class="country-preset-btn ${activePresets.includes('americas') ? 'active' : ''}" onclick="toggleCountryGroup('americas')">
+                                ${currentLang==='ar'?COUNTRY_GROUPS.americas.label_ar:COUNTRY_GROUPS.americas.label_en} ${activePresets.includes('americas') ? '✓' : '+'}
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mb-1" style="font-size: 11px;">
+                            ${t('total_active_countries')} <strong>${(el.properties.options || []).length} ${currentLang==='ar'?'دولة':'countries'}</strong>
+                        </small>
+                    </div>
+                `;
+            }
+
+            // Element Choices / Options
+            if (el.properties?.options && el.element_type !== 'contact_form') {
+                const hasScoring = funnelData.design_settings?.scoring_enabled !== false;
+                html += `
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label small text-muted mb-0">${currentLang==='ar'?'خيارات السؤال':'Question Options'} (${el.properties.options.length})</label>
+                            <button type="button" class="btn btn-sm btn-primary py-0 px-2 small" onclick="addOptionToCurrentElement()">${t('btn_add_opt')}</button>
+                        </div>
+                        <div class="d-flex flex-column gap-2" style="max-height: 300px; overflow-y: auto;">
+                `;
+
+                el.properties.options.forEach((opt, oIdx) => {
+                    html += `
+                        <div class="p-2 bg-dark rounded-3 border border-secondary">
+                            <div class="d-flex gap-1 mb-1">
+                                <input type="text" class="form-control form-control-sm form-control-dark" placeholder="${t('opt_text_ph')}" value="${escapeHtml(opt.label || '')}" oninput="updateOptionProp(${oIdx}, 'label', this.value)">
+                                <button type="button" class="btn btn-sm btn-outline-danger px-2" onclick="deleteOptionFromCurrentElement(${oIdx})">✕</button>
+                            </div>
+                            
+                            ${['image_choice', 'single_image_choice', 'multiple_image_choice'].includes(el.element_type) ? `
+                                <div class="mb-1">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control form-control-sm form-control-dark" placeholder="${currentLang==='ar'?'رابط الصورة (Image URL)':'Image URL'}" value="${escapeHtml(opt.image_url || '')}" oninput="updateOptionProp(${oIdx}, 'image_url', this.value)">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="openMediaPickerForOption(${oIdx})">🖼️</button>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            ${hasScoring ? `
+                                <div class="d-flex gap-2 align-items-center">
+                                    <span class="small text-muted">${currentLang==='ar'?'النقاط (Score):':'Score (pts):'}</span>
+                                    <input type="number" class="form-control form-control-sm form-control-dark" style="width: 80px;" value="${opt.score || 0}" oninput="updateOptionProp(${oIdx}, 'score', parseInt(this.value)||0)">
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            }
+
+            // Visibility & Required Rules (Collapsible Section)
             html += `
                 <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
-                    <h6 class="fw-bold small text-white mb-2">🎚️ ${currentLang==='ar'?'إعدادات السلايدر والعملات':'Slider & Currency Settings'}</h6>
+                    <h6 class="fw-bold small text-white mb-2">${t('visibility_rules')}</h6>
                     
                     <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" id="slider_currency_toggle" ${el.properties.show_currency !== false ? 'checked' : ''} onchange="updateSliderProp('show_currency', this.checked); inspectElement(${eIdx});">
-                        <label class="form-check-label small fw-bold text-white">${currentLang==='ar'?'إظهار رمز العملة':'Show Currency Symbol'}</label>
+                        <input class="form-check-input" type="checkbox" id="el_required_switch" ${el.is_required ? 'checked' : ''} onchange="updateCurrentElementProp('is_required', this.checked)">
+                        <label class="form-check-label small text-white" for="el_required_switch">
+                            ${t('required_switch_lbl')}
+                        </label>
                     </div>
 
-                    ${el.properties.show_currency !== false ? `
-                        <div class="mb-2">
-                            <label class="form-label small text-muted">${currentLang==='ar'?'العملة (Currency)':'Currency'}</label>
-                            <select class="form-select form-select-sm form-select-dark" onchange="updateSliderProp('currency_code', this.value)">
-                                ${WORLD_CURRENCIES.map(c => `<option value="${c.code}" ${el.properties.currency_code === c.code ? 'selected' : ''}>${c.label}</option>`).join('')}
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="el_always_hide_switch" ${el.properties.always_hide ? 'checked' : ''} onchange="updateElementDesignProp('always_hide', this.checked)">
+                        <label class="form-check-label small text-white" for="el_always_hide_switch">
+                            ${t('always_hide_lbl')}
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="form-label small text-muted mb-1">${t('crm_key_lbl')}</label>
+                        <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(el.question_key || '')}" oninput="updateCurrentElementProp('question_key', this.value)">
+                    </div>
+                </div>
+            `;
+        }
+
+        // ═════════════════════════════════════════════════════════════════════
+        // TAB 2: DESIGN (التصميم) — INVOLVE.ME ADVANCED TYPOGRAPHY & COLORS
+        // ═════════════════════════════════════════════════════════════════════
+        else if (subTab === 'design') {
+            html += `
+                <!-- Customize this element only Toggle -->
+                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="el_custom_design_toggle" ${d.custom_enabled ? 'checked' : ''} onchange="updateElementDesignProp('custom_enabled', this.checked); inspectElement(${eIdx}, 'design');">
+                        <label class="form-check-label fw-bold small text-white" for="el_custom_design_toggle">
+                            ${t('customize_element_only')}
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 1. HEADING FONT -->
+                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                    <h6 class="fw-bold small text-white mb-2 d-flex align-items-center gap-2">
+                        <iconify-icon icon="solar:text-bold" class="text-primary"></iconify-icon>
+                        <span>${t('heading_font_group')}</span>
+                    </h6>
+
+                    <div class="mb-2">
+                        <label class="form-label small text-muted mb-1">${t('font_lbl')}</label>
+                        <select class="form-select form-select-sm form-select-dark" onchange="updateElementDesignProp('heading_font', this.value)">
+                            ${AVAILABLE_FONTS.map(f => `<option value="${f.val}" ${d.heading_font === f.val ? 'selected' : ''}>${f.name}</option>`).join('')}
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="form-label small text-muted mb-1">${t('size_lbl')}</label>
+                            <select class="form-select form-select-sm form-select-dark" onchange="updateElementDesignProp('heading_size', this.value)">
+                                ${AVAILABLE_SIZES.map(s => `<option value="${s}" ${d.heading_size === s ? 'selected' : ''}>${s}</option>`).join('')}
                             </select>
                         </div>
-                    ` : `
-                        <div class="mb-2">
-                            <label class="form-label small text-muted">${currentLang==='ar'?'الوحدة المخصصة (Custom Unit)':'Custom Unit'}</label>
-                            <input type="text" class="form-control form-control-sm form-control-dark" placeholder="Days, Passengers, KM..." value="${escapeHtml(el.properties.custom_unit || '')}" oninput="updateSliderProp('custom_unit', this.value)">
+                        <div class="col-6 d-flex align-items-end">
+                            <div class="form-check form-switch mb-1">
+                                <input class="form-check-input" type="checkbox" id="el_h_bold" ${d.heading_bold ? 'checked' : ''} onchange="updateElementDesignProp('heading_bold', this.checked)">
+                                <label class="form-check-label small text-white" for="el_h_bold">${t('bold_lbl')}</label>
+                            </div>
                         </div>
-                    `}
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="el_h_italic" ${d.heading_italic ? 'checked' : ''} onchange="updateElementDesignProp('heading_italic', this.checked)">
+                        <label class="form-check-label small text-white" for="el_h_italic">${t('italic_lbl')}</label>
+                    </div>
+                </div>
+
+                <!-- 2. SUBLINE FONT -->
+                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                    <h6 class="fw-bold small text-white mb-2 d-flex align-items-center gap-2">
+                        <iconify-icon icon="solar:notes-bold" class="text-info"></iconify-icon>
+                        <span>${t('subline_font_group')}</span>
+                    </h6>
+
+                    <div class="mb-2">
+                        <label class="form-label small text-muted mb-1">${t('font_lbl')}</label>
+                        <select class="form-select form-select-sm form-select-dark" onchange="updateElementDesignProp('subline_font', this.value)">
+                            ${AVAILABLE_FONTS.map(f => `<option value="${f.val}" ${d.subline_font === f.val ? 'selected' : ''}>${f.name}</option>`).join('')}
+                        </select>
+                    </div>
 
                     <div class="row g-2 mb-2">
                         <div class="col-6">
-                            <label class="form-label small text-muted">${currentLang==='ar'?'الحد الأدنى (Min)':'Min Value'}</label>
-                            <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.min || 0}" oninput="updateSliderProp('min', parseInt(this.value)||0)">
+                            <label class="form-label small text-muted mb-1">${t('size_lbl')}</label>
+                            <select class="form-select form-select-sm form-select-dark" onchange="updateElementDesignProp('subline_size', this.value)">
+                                ${AVAILABLE_SIZES.map(s => `<option value="${s}" ${d.subline_size === s ? 'selected' : ''}>${s}</option>`).join('')}
+                            </select>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small text-muted">${currentLang==='ar'?'الحد الأقصى (Max)':'Max Value'}</label>
-                            <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.max || 50000}" oninput="updateSliderProp('max', parseInt(this.value)||50000)">
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // TIMER INSPECTOR (HOURS, MINUTES, SECONDS)
-        if (el.element_type === 'timer' || el.element_type === 'page_timer') {
-            if (!el.properties) el.properties = {};
-            html += `
-                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
-                    <h6 class="fw-bold small text-white mb-3">${t('timer_header')}</h6>
-                    <div class="row g-2 mb-2">
-                        <div class="col-4 text-center">
-                            <label class="form-label small text-info fw-bold mb-1 d-block">${t('hours')}</label>
-                            <input type="number" class="form-control form-control-sm form-control-dark text-center fw-bold fs-6" value="${el.properties.duration_hours || 0}" min="0" max="99" oninput="updateTimerProp('duration_hours', parseInt(this.value)||0)">
-                        </div>
-                        <div class="col-4 text-center">
-                            <label class="form-label small text-info fw-bold mb-1 d-block">${t('minutes')}</label>
-                            <input type="number" class="form-control form-control-sm form-control-dark text-center fw-bold fs-6" value="${el.properties.duration_minutes || 15}" min="0" max="59" oninput="updateTimerProp('duration_minutes', parseInt(this.value)||0)">
-                        </div>
-                        <div class="col-4 text-center">
-                            <label class="form-label small text-info fw-bold mb-1 d-block">${t('seconds')}</label>
-                            <input type="number" class="form-control form-control-sm form-control-dark text-center fw-bold fs-6" value="${el.properties.duration_seconds || 0}" min="0" max="59" oninput="updateTimerProp('duration_seconds', parseInt(this.value)||0)">
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // 🌟 COUNTRY INSPECTOR (TOGGLEABLE ACTIVE PRESETS)
-        if (el.element_type === 'country') {
-            if (!el.properties) el.properties = {};
-            if (!el.properties.active_presets) el.properties.active_presets = ['arab'];
-            const activePresets = el.properties.active_presets;
-
-            html += `
-                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
-                    <label class="form-label small text-white fw-bold mb-2">${t('country_presets_lbl')}</label>
-                    <div class="d-flex flex-wrap gap-2 mb-3">
-                        <button type="button" class="country-preset-btn ${activePresets.includes('arab') ? 'active' : ''}" onclick="toggleCountryGroup('arab')">
-                            ${currentLang==='ar'?COUNTRY_GROUPS.arab.label_ar:COUNTRY_GROUPS.arab.label_en} ${activePresets.includes('arab') ? '✓' : '+'}
-                        </button>
-                        <button type="button" class="country-preset-btn ${activePresets.includes('eu') ? 'active' : ''}" onclick="toggleCountryGroup('eu')">
-                            ${currentLang==='ar'?COUNTRY_GROUPS.eu.label_ar:COUNTRY_GROUPS.eu.label_en} ${activePresets.includes('eu') ? '✓' : '+'}
-                        </button>
-                        <button type="button" class="country-preset-btn ${activePresets.includes('asia') ? 'active' : ''}" onclick="toggleCountryGroup('asia')">
-                            ${currentLang==='ar'?COUNTRY_GROUPS.asia.label_ar:COUNTRY_GROUPS.asia.label_en} ${activePresets.includes('asia') ? '✓' : '+'}
-                        </button>
-                        <button type="button" class="country-preset-btn ${activePresets.includes('americas') ? 'active' : ''}" onclick="toggleCountryGroup('americas')">
-                            ${currentLang==='ar'?COUNTRY_GROUPS.americas.label_ar:COUNTRY_GROUPS.americas.label_en} ${activePresets.includes('americas') ? '✓' : '+'}
-                        </button>
-                    </div>
-                    <small class="text-muted d-block mb-1" style="font-size: 11px;">
-                        ${t('total_active_countries')} <strong>${(el.properties.options || []).length} ${currentLang==='ar'?'دولة':'countries'}</strong>
-                    </small>
-                </div>
-            `;
-        }
-
-        // OPTIONS INSPECTOR (FOR OTHER ELEMENTS)
-        if (el.properties?.options && el.element_type !== 'contact_form') {
-            const hasScoring = funnelData.design_settings?.scoring_enabled !== false;
-            html += `
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <label class="form-label small text-muted mb-0">${currentLang==='ar'?'خيارات السؤال':'Question Options'} (${el.properties.options.length})</label>
-                        <button type="button" class="btn btn-sm btn-primary py-0 px-2 small" onclick="addOptionToCurrentElement()">${t('btn_add_opt')}</button>
-                    </div>
-                    <div class="d-flex flex-column gap-2" style="max-height: 300px; overflow-y: auto;">
-            `;
-
-            el.properties.options.forEach((opt, oIdx) => {
-                html += `
-                    <div class="p-2 bg-dark rounded-3 border border-secondary">
-                        <div class="d-flex gap-1 mb-1">
-                            <input type="text" class="form-control form-control-sm form-control-dark" placeholder="${t('opt_text_ph')}" value="${escapeHtml(opt.label || '')}" oninput="updateOptionProp(${oIdx}, 'label', this.value)">
-                            <button type="button" class="btn btn-sm btn-outline-danger px-2" onclick="deleteOptionFromCurrentElement(${oIdx})">✕</button>
-                        </div>
-                        
-                        ${['image_choice', 'single_image_choice', 'multiple_image_choice'].includes(el.element_type) ? `
-                            <div class="mb-1">
-                                <div class="input-group input-group-sm">
-                                    <input type="text" class="form-control form-control-sm form-control-dark" placeholder="${currentLang==='ar'?'رابط الصورة (Image URL)':'Image URL'}" value="${escapeHtml(opt.image_url || '')}" oninput="updateOptionProp(${oIdx}, 'image_url', this.value)">
-                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="openMediaPickerForOption(${oIdx})">🖼️</button>
-                                </div>
+                        <div class="col-6 d-flex align-items-end">
+                            <div class="form-check form-switch mb-1">
+                                <input class="form-check-input" type="checkbox" id="el_s_bold" ${d.subline_bold ? 'checked' : ''} onchange="updateElementDesignProp('subline_bold', this.checked)">
+                                <label class="form-check-label small text-white" for="el_s_bold">${t('bold_lbl')}</label>
                             </div>
-                        ` : ''}
-
-                        ${hasScoring ? `
-                            <div class="d-flex gap-2 align-items-center">
-                                <span class="small text-muted">${currentLang==='ar'?'النقاط (Score):':'Score (pts):'}</span>
-                                <input type="number" class="form-control form-control-sm form-control-dark" style="width: 80px;" value="${opt.score || 0}" oninput="updateOptionProp(${oIdx}, 'score', parseInt(this.value)||0)">
-                            </div>
-                        ` : ''}
+                        </div>
                     </div>
-                `;
-            });
 
-            html += `</div></div>`;
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="el_s_italic" ${d.subline_italic ? 'checked' : ''} onchange="updateElementDesignProp('subline_italic', this.checked)">
+                        <label class="form-check-label small text-white" for="el_s_italic">${t('italic_lbl')}</label>
+                    </div>
+                </div>
+
+                <!-- 3. COLOR & ALIGNMENT -->
+                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                    <h6 class="fw-bold small text-white mb-2 d-flex align-items-center gap-2">
+                        <iconify-icon icon="solar:pallete-2-bold" class="text-warning"></iconify-icon>
+                        <span>${t('color_align_group')}</span>
+                    </h6>
+
+                    <div class="mb-2">
+                        <label class="form-label small text-muted mb-1">${t('text_color_lbl')}</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="color" class="form-control form-control-color border-0 p-0" value="${d.text_color || '#0f172a'}" onchange="updateElementDesignProp('text_color', this.value); document.getElementById('el_txt_color_val').value=this.value;">
+                            <input type="text" class="form-control form-control-sm form-control-dark" id="el_txt_color_val" value="${d.text_color || '#0f172a'}" onchange="updateElementDesignProp('text_color', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small text-muted mb-1">${t('subline_color_lbl')}</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="color" class="form-control form-control-color border-0 p-0" value="${d.subline_color || '#64748b'}" onchange="updateElementDesignProp('subline_color', this.value); document.getElementById('el_sub_color_val').value=this.value;">
+                            <input type="text" class="form-control form-control-sm form-control-dark" id="el_sub_color_val" value="${d.subline_color || '#64748b'}" onchange="updateElementDesignProp('subline_color', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small text-muted mb-1">${t('align_lbl')}</label>
+                        <select class="form-select form-select-sm form-select-dark" onchange="updateElementDesignProp('align', this.value)">
+                            <option value="start" ${d.align === 'start' ? 'selected' : ''}>${currentLang==='ar'?t('align_right'):t('align_left')}</option>
+                            <option value="center" ${d.align === 'center' ? 'selected' : ''}>${t('align_center')}</option>
+                            <option value="end" ${d.align === 'end' ? 'selected' : ''}>${currentLang==='ar'?t('align_left'):t('align_right')}</option>
+                        </select>
+                    </div>
+                </div>
+            `;
         }
 
         panel.innerHTML = html;
         renderCanvas();
+    }
+
+    function deselectElement() {
+        selectedElementIndex = null;
+        renderCanvas();
+        inspectStepProperties();
     }
 
     function inspectStepProperties() {
@@ -2113,6 +2494,41 @@
             currentStep.elements[selectedElementIndex].properties[key] = val;
             renderCanvas();
         }
+    }
+
+    function updateSublineText(val) {
+        const currentStep = funnelData.steps[activeStepIndex];
+        if (currentStep && currentStep.elements[selectedElementIndex]) {
+            if (!currentStep.elements[selectedElementIndex].properties) currentStep.elements[selectedElementIndex].properties = {};
+            currentStep.elements[selectedElementIndex].properties.subline = val;
+            renderCanvas();
+        }
+    }
+
+    function updateElementDesignProp(key, val) {
+        const currentStep = funnelData.steps[activeStepIndex];
+        if (currentStep && currentStep.elements[selectedElementIndex]) {
+            if (!currentStep.elements[selectedElementIndex].properties) currentStep.elements[selectedElementIndex].properties = {};
+            if (!currentStep.elements[selectedElementIndex].properties.design) currentStep.elements[selectedElementIndex].properties.design = {};
+            currentStep.elements[selectedElementIndex].properties.design[key] = val;
+            if (key !== 'custom_enabled') {
+                currentStep.elements[selectedElementIndex].properties.design.custom_enabled = true;
+            }
+            renderCanvas();
+        }
+    }
+
+    function insertVariable(inputId, varKey) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const varText = `@{{${varKey}}}`;
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const val = input.value;
+        input.value = val.substring(0, start) + varText + val.substring(end);
+        input.focus();
+        input.setSelectionRange(start + varText.length, start + varText.length);
+        input.dispatchEvent(new Event('input'));
     }
 
     function updateSliderProp(key, val) {
@@ -2215,7 +2631,7 @@
             ];
         }
 
-        inspectElement(selectedElementIndex);
+        inspectElement(selectedElementIndex, currentElementActiveSubTab);
     }
 
     function addCustomFieldToContactForm() {
@@ -2234,7 +2650,7 @@
             placeholder: ''
         });
 
-        inspectElement(selectedElementIndex);
+        inspectElement(selectedElementIndex, currentElementActiveSubTab);
     }
 
     function updateContactFieldProp(fIdx, key, val) {
@@ -2251,7 +2667,7 @@
         const field = currentStep.elements[selectedElementIndex].properties.fields[fIdx];
         if (!field.options) field.options = [];
         field.options.push({ label: `${currentLang==='ar'?'خيار':'Option'} ${field.options.length + 1}`, value: `Option ${field.options.length + 1}` });
-        inspectElement(selectedElementIndex);
+        inspectElement(selectedElementIndex, currentElementActiveSubTab);
     }
 
     function updateContactSelectOption(fIdx, oIdx, val) {
@@ -2267,7 +2683,7 @@
         const currentStep = funnelData.steps[activeStepIndex];
         if (currentStep && currentStep.elements[selectedElementIndex]?.properties?.fields?.[fIdx]?.options) {
             currentStep.elements[selectedElementIndex].properties.fields[fIdx].options.splice(oIdx, 1);
-            inspectElement(selectedElementIndex);
+            inspectElement(selectedElementIndex, currentElementActiveSubTab);
         }
     }
 
@@ -2275,11 +2691,11 @@
         const currentStep = funnelData.steps[activeStepIndex];
         if (currentStep && currentStep.elements[selectedElementIndex]?.properties?.fields) {
             currentStep.elements[selectedElementIndex].properties.fields.splice(fIdx, 1);
-            inspectElement(selectedElementIndex);
+            inspectElement(selectedElementIndex, currentElementActiveSubTab);
         }
     }
 
-    // ── 🌟 TOGGLE COUNTRY GROUPS (ACTIVE / INACTIVE PRESETS) ──
+    // ── TOGGLE COUNTRY GROUPS ──
     function toggleCountryGroup(groupId) {
         const currentStep = funnelData.steps[activeStepIndex];
         if (!currentStep || !currentStep.elements[selectedElementIndex]) return;
@@ -2294,12 +2710,10 @@
 
         const pIndex = el.properties.active_presets.indexOf(groupId);
         if (pIndex > -1) {
-            // Already active -> REMOVE
             el.properties.active_presets.splice(pIndex, 1);
             const groupCountryValues = group.countries.map(c => c.value);
             el.properties.options = el.properties.options.filter(c => !groupCountryValues.includes(c.value));
         } else {
-            // Not active -> ADD
             el.properties.active_presets.push(groupId);
             const existingValues = el.properties.options.map(c => c.value);
             group.countries.forEach(c => {
@@ -2309,7 +2723,7 @@
             });
         }
 
-        inspectElement(selectedElementIndex);
+        inspectElement(selectedElementIndex, currentElementActiveSubTab);
     }
 
     function addOptionToCurrentElement() {
@@ -2326,7 +2740,7 @@
             image_url: ''
         });
 
-        inspectElement(selectedElementIndex);
+        inspectElement(selectedElementIndex, currentElementActiveSubTab);
     }
 
     function updateOptionProp(oIdx, key, val) {
@@ -2341,7 +2755,7 @@
         const currentStep = funnelData.steps[activeStepIndex];
         if (currentStep && currentStep.elements[selectedElementIndex]?.properties?.options) {
             currentStep.elements[selectedElementIndex].properties.options.splice(oIdx, 1);
-            inspectElement(selectedElementIndex);
+            inspectElement(selectedElementIndex, currentElementActiveSubTab);
         }
     }
 
@@ -2355,7 +2769,7 @@
     function selectModalImage(url) {
         if (currentEditingOptionIdx !== null) {
             updateOptionProp(currentEditingOptionIdx, 'image_url', url);
-            inspectElement(selectedElementIndex);
+            inspectElement(selectedElementIndex, currentElementActiveSubTab);
         }
         bootstrap.Modal.getInstance(document.getElementById('mediaPickerModal'))?.hide();
     }
@@ -2371,7 +2785,7 @@
         if (!funnelData.design_settings) funnelData.design_settings = {};
         funnelData.design_settings.scoring_enabled = enabled;
         renderCanvas();
-        if (selectedElementIndex !== null) inspectElement(selectedElementIndex);
+        if (selectedElementIndex !== null) inspectElement(selectedElementIndex, currentElementActiveSubTab);
     }
 
     // ── 5. RESULTS MANAGEMENT ────────────────────────────────────────────────
