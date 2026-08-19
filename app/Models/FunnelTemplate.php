@@ -15,6 +15,7 @@ class FunnelTemplate extends Model
         'category',
         'description',
         'thumbnail',
+        'thumbnail_url',
         'schema_data',
         'is_active',
         'sort_order',

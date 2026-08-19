@@ -81,14 +81,22 @@ class InteractiveFunnelsModuleTest extends TestCase
         ]);
     }
 
-    public function test_funnel_template_seeder_creates_8_production_templates()
+    public function test_funnel_template_seeder_creates_12_production_templates()
     {
         $this->seed(FunnelTemplateSeeder::class);
 
-        $this->assertDatabaseCount('funnel_templates', 8);
+        $this->assertDatabaseCount('funnel_templates', 12);
         $this->assertDatabaseHas('funnel_templates', [
             'slug' => 'schengen-visa-eligibility',
             'category' => 'Travel',
+        ]);
+        $this->assertDatabaseHas('funnel_templates', [
+            'slug' => 'real-estate-property-finder',
+            'category' => 'Real Estate',
+        ]);
+        $this->assertDatabaseHas('funnel_templates', [
+            'slug' => 'business-setup-company-formation',
+            'category' => 'B2B Services',
         ]);
     }
 

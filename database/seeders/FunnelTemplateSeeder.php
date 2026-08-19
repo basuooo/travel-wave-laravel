@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\FunnelTemplate;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class FunnelTemplateSeeder extends Seeder
 {
@@ -13,36 +12,23 @@ class FunnelTemplateSeeder extends Seeder
         $templates = [
             // ── 1. Schengen Visa Eligibility ──────────────────────────────────────
             [
-                'name' => 'Schengen Visa Eligibility',
+                'name' => 'Schengen Visa Eligibility (فحص أهلية الشنغن)',
                 'slug' => 'schengen-visa-eligibility',
                 'category' => 'Travel',
                 'description' => 'فحص أهلية متقدم للحصول على تأشيرة الشنغن الأوروبية مع احتساب دقيق لنسبة القبول وربط واتساب فوري.',
-                'thumbnail' => '/assets/images/templates/schengen.jpg',
+                'thumbnail_url' => '/assets/images/templates/schengen.jpg',
                 'sort_order' => 1,
                 'schema_data' => [
-                    'design_settings' => [
-                        'primary_color' => '#1e40af',
-                        'font_family' => 'Tajawal, sans-serif',
-                        'button_style' => 'rounded-lg',
-                    ],
-                    'crm_settings' => [
-                        'enabled' => true,
-                    ],
+                    'design_settings' => ['primary_color' => '#1e40af', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
+                    'crm_settings' => ['enabled' => true],
                     'steps' => [
                         [
                             'title' => 'اختبار الجاهزية للتأشيرة الشنغن',
                             'subtitle' => 'اكتشف نسبة قبول طلبك قبل التقديم خلال دقيقتين بدقة عالية',
                             'step_type' => 'welcome',
                             'elements' => [
-                                [
-                                    'element_type' => 'heading',
-                                    'label' => 'هل أنت جاهز للحصول على تأشيرة الشنغن؟',
-                                    'properties' => ['font_size' => '2xl'],
-                                ],
-                                [
-                                    'element_type' => 'text',
-                                    'label' => 'أجب على الأسئلة التالية لنحدد لك السفارة الأنسب ونسبة قبول ملفك وتجهيز الموعد المناسب.',
-                                ],
+                                ['element_type' => 'heading', 'label' => 'هل أنت جاهز للحصول على تأشيرة الشنغن؟', 'properties' => ['font_size' => '2xl']],
+                                ['element_type' => 'text', 'label' => 'أجب على الأسئلة التالية لنحدد لك السفارة الأنسب ونسبة قبول ملفك وتجهيز الموعد المناسب.'],
                             ],
                         ],
                         [
@@ -178,91 +164,89 @@ class FunnelTemplateSeeder extends Seeder
                 ],
             ],
 
-            // ── 2. Visa Qualification Quiz ─────────────────────────────────────────
+            // ── 2. Real Estate Property Finder ────────────────────────────────────
             [
-                'name' => 'Visa Qualification Quiz',
-                'slug' => 'visa-qualification-quiz',
-                'category' => 'Qualification',
-                'description' => 'اختبار تأهيل شامل لتأشيرات السفر حول العالم (أمريكا 🇺🇸، بريطانيا 🇬🇧، كندا 🇨🇦، الشنغن 🇪🇺).',
-                'thumbnail' => '/assets/images/templates/visa-qual.jpg',
+                'name' => 'Real Estate Property Finder (مستكشف العقارات والاستثمار)',
+                'slug' => 'real-estate-property-finder',
+                'category' => 'Real Estate',
+                'description' => 'فانل تأهيل المشترين والمستثمرين العقاريين وتحديد نوع العقار والميزانية وخيارات التمويل.',
+                'thumbnail_url' => '/assets/images/templates/real-estate.jpg',
                 'sort_order' => 2,
                 'schema_data' => [
-                    'design_settings' => [
-                        'primary_color' => '#0d9488',
-                        'font_family' => 'Tajawal, sans-serif',
-                        'button_style' => 'rounded-lg',
-                    ],
+                    'design_settings' => ['primary_color' => '#0f766e', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
                     'crm_settings' => ['enabled' => true],
                     'steps' => [
                         [
-                            'title' => 'اختبار التأهيل الشامل للتأشيرات الدولية',
-                            'subtitle' => 'حدد وجهتك المطلوبة واعرف شروطها وفرصتك الفعلية خلال دقيقة واحدة',
+                            'title' => 'ابحث عن عقارك المثالي أو استثمارك القادم',
+                            'subtitle' => 'حدد مواصفات وميزانية العقار المناسب وسنرشح لك أفضل المشاريع المتاحة فوراً',
                             'step_type' => 'welcome',
                             'elements' => [
-                                ['element_type' => 'heading', 'label' => 'إلى أين تخطط للسفر في رحلتك القادمة؟ ✈️'],
-                                ['element_type' => 'text', 'label' => 'فريق Travel Wave يساعدك في معرفة متطلبات كل سفارة وحجز أسرع المواعيد المتاحة.'],
+                                ['element_type' => 'heading', 'label' => 'عقارك القادم يبدأ من هنا 🏡'],
+                                ['element_type' => 'text', 'label' => 'أجب على 3 أسئلة سريعة لاستلام كتالوج العقارات والأسعار وخطة السداد.'],
                             ],
                         ],
                         [
-                            'title' => 'الوجهة المستهدفة',
-                            'subtitle' => 'اختر الدولة التي ترغب في استخراج تأشيرتها',
+                            'title' => 'الهدف ونوع العقار',
+                            'subtitle' => 'الغرض من الشراء ونوع الوحدة',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'ما هي التأشيرة التي ترغب بالتقديم عليها؟',
-                                    'question_key' => 'target_destination',
+                                    'label' => 'ما هو نوع العقار والغرض من الشراء؟',
+                                    'question_key' => 'property_type',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '🇪🇺 دول الشنغن الأوروبية (فرنسا، إيطاليا، إسبانيا، ألمانيا...)', 'value' => 'Schengen', 'score' => 25],
-                                            ['label' => '🇬🇧 بريطانيا (تأشيرة سياحية / تصريح ETA الإلكتروني)', 'value' => 'UK', 'score' => 25],
-                                            ['label' => '🇺🇸 الولايات المتحدة الأمريكية (تأشيرة B1/B2 لمذة 5-10 سنوات)', 'value' => 'USA', 'score' => 20],
-                                            ['label' => '🇨🇦 كندا أو 🇦🇺 أستراليا', 'value' => 'Canada_Australia', 'score' => 20],
+                                            ['label' => '🏠 فيلا سكنية فاخرة للسكن العائلي', 'value' => 'Residential Villa', 'score' => 30],
+                                            ['label' => '🏢 شقة سكنية للتمليك أو الاستثمار', 'value' => 'Apartment', 'score' => 20],
+                                            ['label' => '📈 عقار تجاري / مكاتب بعائد إيجاري استثماري', 'value' => 'Commercial Investment', 'score' => 30],
+                                            ['label' => '🏖️ شاليه / عقار ساحلي لقضاء العطلات', 'value' => 'Holiday Chalet', 'score' => 20],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'صلاحية جواز السفر',
-                            'subtitle' => 'الشرط الأساسي لجميع السفارات',
+                            'title' => 'الميزانية وطريقة الدفع',
+                            'subtitle' => 'القدرة الشرائية وخيارات التقسيط',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'هل جواز سفرك ساري المفعول لأكثر من 6 أشهر؟',
-                                    'question_key' => 'passport_validity',
+                                    'label' => 'ما هي الميزانية التقديرية وطريقة السداد؟',
+                                    'question_key' => 'budget_payment',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'نعم، صالح لأكثر من 6 أشهر ويوجد صفحات فارغة', 'value' => 'Valid > 6m', 'score' => 25],
-                                            ['label' => 'ينتهي قريباً (أقل من 6 أشهر - أحتاج تجديده)', 'value' => 'Expiring Soon', 'score' => 10],
-                                            ['label' => 'لا أملك جواز سفر حالياً (سأقوم بإصداره)', 'value' => 'No Passport', 'score' => 0],
+                                            ['label' => 'دفع كاش بالكامل (خصم فوري خاص)', 'value' => 'Full Cash', 'score' => 30],
+                                            ['label' => 'أقساط ميسرة مع المطور (دفعة أولى حتى 20%)', 'value' => 'Developer Installments', 'score' => 25],
+                                            ['label' => 'تمويل عقاري بنكي عن طريق جهة العمل', 'value' => 'Bank Mortgage', 'score' => 20],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'سجل الرفض السابق',
-                            'subtitle' => 'الشفافية في الملف لضمان المعالجة القانونية الصحيحة',
+                            'title' => 'المدينة والموقع المفضل',
+                            'subtitle' => 'المنطقة الجغرافية المستهدفة',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'هل سبق أن رُفض لك طلب تأشيرة من قبل في أي سفارة؟',
-                                    'question_key' => 'previous_refusal',
+                                    'label' => 'أين تفضل أن يكون موقع العقار؟',
+                                    'question_key' => 'target_city',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'لا، لم أتعرض لأي رفض تأشيرة سابقاً', 'value' => 'No Refusal', 'score' => 25],
-                                            ['label' => 'نعم، رُفض طلب سابق وأريد إعادة التقديم بشكل سليم', 'value' => 'Refused Before', 'score' => 10],
+                                            ['label' => '📍 الرياض (شمال أو شرق الرياض)', 'value' => 'Riyadh', 'score' => 25],
+                                            ['label' => '📍 جدة أو المنطقة الشرقية', 'value' => 'Jeddah / Eastern', 'score' => 20],
+                                            ['label' => '📍 دبي / الإمارات (عقارات التملك الحر)', 'value' => 'Dubai UAE', 'score' => 25],
+                                            ['label' => '📍 القاهرة / الساحل الشمالي / التجمع', 'value' => 'Cairo / North Coast', 'score' => 20],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'سجل بياناتك للتواصل المباشر',
-                            'subtitle' => 'سيقوم مستشار التأشيرات المتخصص بالوجهة بمراجعة ملفك',
+                            'title' => 'سجل بياناتك لاستلام كتالوج المشاريع والأسعار',
+                            'subtitle' => 'سيتواصل معك المستشار العقاري بملفات PDF والأسعار الحصرية',
                             'step_type' => 'lead_form',
                             'elements' => [
                                 [
@@ -270,9 +254,8 @@ class FunnelTemplateSeeder extends Seeder
                                     'label' => 'بيانات الاتصال',
                                     'properties' => [
                                         'fields' => [
-                                            ['name' => 'full_name', 'label' => 'الاسم بالكامل', 'type' => 'text', 'required' => true],
+                                            ['name' => 'full_name', 'label' => 'الاسم الكريم', 'type' => 'text', 'required' => true],
                                             ['name' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'phone', 'required' => true],
-                                            ['name' => 'email', 'label' => 'البريد الإلكتروني', 'type' => 'email', 'required' => false],
                                         ],
                                     ],
                                 ],
@@ -281,120 +264,108 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                     'results' => [
                         [
-                            'title' => '🎯 مؤهل للتقديم الفوري وحجز الموعد',
-                            'description' => 'بياناتك الأولية ممتازة ومطابقة لمعايير السفارة المطلوبة. مستشارك جاهز لحجز أسرع موعد وتجهيز الأبلكيشن.',
-                            'min_score' => 70,
+                            'title' => '✨ تم تجهيز قائمة العقارات المطابقة لميزانيتك!',
+                            'description' => 'لدينا مشاريع ممتازة بمواقع استراتيجية وأسعار حصرية مطابقة لاختياراتك. مستشارك العقاري جاهز لإرسال التفاصيل.',
+                            'min_score' => 0,
                             'max_score' => 100,
-                            'cta_label' => 'ابدأ التقديم الآن عبر الواتساب',
+                            'cta_label' => 'تحدث مع المستشار العقاري واستلم الكتالوج 📱',
                             'cta_type' => 'whatsapp',
                             'cta_whatsapp_number' => '966500000000',
                             'sort_order' => 1,
-                        ],
-                        [
-                            'title' => '📋 ملفك يحتاج استشارة لتجاوز النواقص أو الرفض السابق',
-                            'description' => 'يمكن التقديم بنجاح بعد معالجة سبب الرفض السابق وتحديث الأوراق اللازمة لضمان قبول الطلب.',
-                            'min_score' => 0,
-                            'max_score' => 69,
-                            'cta_label' => 'تحدث مع خبير معالجة الرفض السابق',
-                            'cta_type' => 'whatsapp',
-                            'cta_whatsapp_number' => '966500000000',
-                            'sort_order' => 2,
                         ],
                     ],
                 ],
             ],
 
-            // ── 3. Which Visa Is Right For You? ────────────────────────────────────
+            // ── 3. Study Abroad & University Matcher ──────────────────────────────
             [
-                'name' => 'Which Visa Is Right For You?',
-                'slug' => 'which-visa-is-right-for-you',
-                'category' => 'Recommendation',
-                'description' => 'مساعد تفاعلي ذكي يرشح لك الوجهة والتأشيرة الأسهل والأسرع بناءً على ظروفك وميزانيتك.',
-                'thumbnail' => '/assets/images/templates/rec.jpg',
+                'name' => 'Study Abroad & University Matcher (القبول الجامعي والدراسة بالخارج)',
+                'slug' => 'study-abroad-university-matcher',
+                'category' => 'Education',
+                'description' => 'فانل تأهيل الطلاب الراغبين بالدراسة في بريطانيا، كندا، أمريكا، وأوروبا وتحديد التخصص والمنحة.',
+                'thumbnail_url' => '/assets/images/templates/education.jpg',
                 'sort_order' => 3,
                 'schema_data' => [
-                    'design_settings' => [
-                        'primary_color' => '#7c3aed',
-                        'font_family' => 'Tajawal, sans-serif',
-                        'button_style' => 'rounded-lg',
-                    ],
+                    'design_settings' => ['primary_color' => '#8b5cf6', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
                     'crm_settings' => ['enabled' => true],
                     'steps' => [
                         [
-                            'title' => 'مساعد اختيار التأشيرة الأنسب لك',
-                            'subtitle' => 'محتار أين تسافر أو أي تأشيرة أسهل لك؟ أجب على 3 أسئلة وسنرشح لك أفضل خيار',
+                            'title' => 'مستشارك للقبول الجامعي والدراسة بالخارج',
+                            'subtitle' => 'احصل على قبول جامعي معتمد في أفضل جامعات بريطانيا، كندا، أمريكا، وماليزيا',
                             'step_type' => 'welcome',
                             'elements' => [
-                                ['element_type' => 'heading', 'label' => 'اعرف التأشيرة التي تناسبك دون تعقيد 🎯'],
+                                ['element_type' => 'heading', 'label' => 'ابدأ مستقبلك الأكاديمي العالمي 🎓'],
                             ],
                         ],
                         [
-                            'title' => 'الهدف الأساسي من الرحلة',
-                            'subtitle' => 'ما نوع السفر المفضل لديك؟',
+                            'title' => 'المرحلة والتخصص الدراسي',
+                            'subtitle' => 'المستوى الأكاديمي المطلوب',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'ما هو نوع الرحلة التي تخطط لها؟',
-                                    'question_key' => 'trip_purpose',
+                                    'label' => 'ما هي المرحلة الدراسية والتخصص المرغوب؟',
+                                    'question_key' => 'study_level',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '🏖️ سياحة واستجمام وتسوق عائلي', 'value' => 'Tourism', 'score' => 25],
-                                            ['label' => '💼 رحلة عمل / حضور مؤتمرات وتجارة', 'value' => 'Business', 'score' => 25],
-                                            ['label' => '🎓 دراسة لغة / تدريب قصير أو علاج', 'value' => 'Study_Medical', 'score' => 20],
+                                            ['label' => 'بكالوريوس (هندسة / طب / إدارة وأعمال / تقنية)', 'value' => 'Bachelors', 'score' => 25],
+                                            ['label' => 'ماجستير أو دكتوراه (دراسات عليا وبحوث)', 'value' => 'Postgraduate', 'score' => 30],
+                                            ['label' => 'دراسة لغة إنجليزية مكثفة في معهد معتمد', 'value' => 'English Course', 'score' => 20],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'شروط الحساب والأوراق',
-                            'subtitle' => 'مستوى سهولة الإجراءات التي تفضلها',
+                            'title' => 'البلد المستهدف للدراسة',
+                            'subtitle' => 'الوجهة الدراسية المفضلة',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'هل تفضل دولة بتأشيرة إلكترونية سريعة وبدون متطلبات بنكية صعبة؟',
-                                    'question_key' => 'visa_difficulty',
+                                    'label' => 'أين تفضل أن تدرس؟',
+                                    'question_key' => 'study_country',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'نعم، أريد تأشيرة إلكترونية سريعة ومضمونة (مثل بريطانيا ETA أو أذربيجان وجورجيا)', 'value' => 'Easy eVisa', 'score' => 30],
-                                            ['label' => 'لا مانع من تقديم كشف حساب وحجز موعد سفارة للشنغن أو أمريكا', 'value' => 'Embassy Visa', 'score' => 20],
+                                            ['label' => '🇬🇧 بريطانيا (جامعات مرموقة وسرعة التخرج)', 'value' => 'UK', 'score' => 25],
+                                            ['label' => '🇨🇦 كندا (فرص عمل وإقامة بعد التخرج)', 'value' => 'Canada', 'score' => 25],
+                                            ['label' => '🇺🇸 أمريكا أو 🇦🇺 أستراليا', 'value' => 'USA_Australia', 'score' => 25],
+                                            ['label' => '🇲🇾 ماليزيا أو 🇹🇷 تركيا (تكلفة دراسية مناسبة جداً)', 'value' => 'Malaysia_Turkey', 'score' => 20],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'الموعد المخطط للسفر',
-                            'subtitle' => 'الوقت المتاح لاستخراج التأشيرة',
+                            'title' => 'مستوى اللغة الإنجليزية',
+                            'subtitle' => 'هل لديك اختبار آيلتس أو توفل؟',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'متى موعد سفرك المتوقع؟',
-                                    'question_key' => 'travel_time',
+                                    'label' => 'ما هو مستواك في اللغة الإنجليزية حالياً؟',
+                                    'question_key' => 'english_level',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'عاجل (خلال أسبوع إلى 10 أيام)', 'value' => 'Urgent', 'score' => 25],
-                                            ['label' => 'خلال شهر إلى 3 أشهر (وقت كافٍ ومثالي)', 'value' => '1-3 Months', 'score' => 25],
-                                            ['label' => 'تخطيط للمستقبل (بعد 3 أشهر)', 'value' => 'Future', 'score' => 15],
+                                            ['label' => 'معي شهادة IELTS أو TOEFL جاهزة', 'value' => 'IELTS Ready', 'score' => 30],
+                                            ['label' => 'مستواي جيد ولكن لم أختبر بعد', 'value' => 'Good No Test', 'score' => 20],
+                                            ['label' => 'مبتدئ وأريد دراسة سنة تحضيرية / كورس لغة أولاً', 'value' => 'Foundation Needed', 'score' => 15],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'سجل بياناتك لاستلام التوصية الكاملة',
-                            'subtitle' => 'سنرسل لك قائمة الدول المتاحة وأسهل سفارة لك الآن',
+                            'title' => 'سجل بياناتك لاستلام استشارة القبول الجامعي مجاناً',
+                            'subtitle' => 'سيقوم المستشار الأكاديمي بتحديد الجامعات المناسبة وشروط القبول',
                             'step_type' => 'lead_form',
                             'elements' => [
                                 [
                                     'element_type' => 'contact_form',
-                                    'label' => 'بيانات التواصل',
+                                    'label' => 'بيانات الطالب',
                                     'properties' => [
                                         'fields' => [
-                                            ['name' => 'full_name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
+                                            ['name' => 'full_name', 'label' => 'اسم الطالب', 'type' => 'text', 'required' => true],
                                             ['name' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'phone', 'required' => true],
                                         ],
                                     ],
@@ -404,113 +375,80 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                     'results' => [
                         [
-                            'title' => '🌟 ترشيحنا لك: تأشيرة إلكترونية سريعة (ETA أو آسيا)',
-                            'description' => 'بناءً على إجاباتك، ننصحك بالتقديم على تأشيرة بريطانيا الإلكترونية ETA أو وجهات جورجيا وأذربيجان لسرعة الإنجاز بدون مقابلة.',
-                            'min_score' => 60,
+                            'title' => '🎓 تهانينا! مؤهل للتقديم والحصول على قبول جامعي',
+                            'description' => 'لدينا اتفاقيات وشراكات مباشرة مع أكثر من 150 جامعة دولية لضمان قبولك واستخراج تأشيرة الطالب بسهولة.',
+                            'min_score' => 0,
                             'max_score' => 100,
-                            'cta_label' => 'تواصل معنا لإصدار التأشيرة الإلكترونية فوراً',
+                            'cta_label' => 'تواصل مع المستشار الأكاديمي الآن',
                             'cta_type' => 'whatsapp',
                             'cta_whatsapp_number' => '966500000000',
                             'sort_order' => 1,
-                        ],
-                        [
-                            'title' => '🇪🇺 ترشيحنا لك: تأشيرة الشنغن الأوروبية (فرنسا أو إيطاليا)',
-                            'description' => 'لديك الوقت الكافي والقدرة على التقديم لسفارات الشنغن السريعة، وسنقوم بحجز أقرب موعد وتجهيز حجوزاتك.',
-                            'min_score' => 0,
-                            'max_score' => 59,
-                            'cta_label' => 'استشر خبير الشنغن لتحديد السفارة الأنسب',
-                            'cta_type' => 'whatsapp',
-                            'cta_whatsapp_number' => '966500000000',
-                            'sort_order' => 2,
                         ],
                     ],
                 ],
             ],
 
-            // ── 4. Travel Destination Finder ───────────────────────────────────────
+            // ── 4. Business Setup & Company Formation ─────────────────────────────
             [
-                'name' => 'Travel Destination Finder',
-                'slug' => 'travel-destination-finder',
-                'category' => 'Travel',
-                'description' => 'مستكشف الوجهات السياحية الذكي لاقتراح أفضل برنامج سياحي وبكج متكامل حسب رغبتك وميزانيتك.',
-                'thumbnail' => '/assets/images/templates/dest.jpg',
+                'name' => 'Business Setup & Company Formation (تأسيس الشركات وحلول الأعمال)',
+                'slug' => 'business-setup-company-formation',
+                'category' => 'B2B Services',
+                'description' => 'حاسبة وفانل تأسيس الشركات وإصدار الرخص التجارية والإقامة الاستثمارية في السعودية والإمارات.',
+                'thumbnail_url' => '/assets/images/templates/business.jpg',
                 'sort_order' => 4,
                 'schema_data' => [
-                    'design_settings' => [
-                        'primary_color' => '#ea580c',
-                        'font_family' => 'Tajawal, sans-serif',
-                        'button_style' => 'rounded-lg',
-                    ],
+                    'design_settings' => ['primary_color' => '#0369a1', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
                     'crm_settings' => ['enabled' => true],
                     'steps' => [
                         [
-                            'title' => 'مستكشف الوجهات السياحية المثالية',
-                            'subtitle' => 'اختر طبيعة رحلتك وسنصمم لك البكج السياحي الأفضل بأفضل سعر',
+                            'title' => 'حاسبة تأسيس الشركات وإطلاق الأعمال',
+                            'subtitle' => 'احسب تكلفة الرخصة التجارية، فتح الحساب البنكي للشركات، والإقامة الاستثمارية',
                             'step_type' => 'welcome',
                             'elements' => [
-                                ['element_type' => 'heading', 'label' => 'أين ستقضي إجازتك القادمة؟ 🌍'],
+                                ['element_type' => 'heading', 'label' => 'أسس شركتك القانونية بأسرع وقت 💼'],
                             ],
                         ],
                         [
-                            'title' => 'طبيعة المسافرين',
-                            'subtitle' => 'مع من ستسافر في هذه الرحلة؟',
+                            'title' => 'مقر تأسيس الشركة',
+                            'subtitle' => 'أين تود تأسيس نشاطك التجاري؟',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'من هم شركاؤك في السفر؟',
-                                    'question_key' => 'travel_companions',
+                                    'label' => 'في أي دولة ترغب بتسجيل شركتك؟',
+                                    'question_key' => 'company_location',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '👨‍👩‍👧‍👦 رحلة عائلية مع أطفال', 'value' => 'Family', 'score' => 25],
-                                            ['label' => '💍 شهر عسل / زوجين (كابلز)', 'value' => 'Honeymoon', 'score' => 25],
-                                            ['label' => '🎒 مع أصدقاء أو بمفردي (شبابي)', 'value' => 'Solo_Friends', 'score' => 20],
+                                            ['label' => '🇸🇦 المملكة العربية السعودية (سجل تجاري / ترخيص استثمار أجنبي MISA)', 'value' => 'KSA', 'score' => 30],
+                                            ['label' => '🇦🇪 الإمارات (دبي / منطقة حرة Freezone وتملك 100%)', 'value' => 'UAE', 'score' => 30],
+                                            ['label' => '🇬🇧 بريطانيا أو 🇺🇸 أمريكا (شركة رقمية أونلاين وبوابة دفع دولية)', 'value' => 'UK_USA_LLC', 'score' => 25],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'الجو والطبيعة المفضلة',
-                            'subtitle' => 'نوع الأجواء التي تفضلها في رحلتك',
+                            'title' => 'نوع النشاط والخدمات المرافقة',
+                            'subtitle' => 'المتطلبات الإضافية',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'ما هي الطبيعة التي تسعى للاستمتاع بها؟',
-                                    'question_key' => 'vibe_preference',
+                                    'label' => 'ما هي الخدمات التي تحتاجها مع التأسيس؟',
+                                    'question_key' => 'additional_services',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '🏔️ جبال خضراء، بحيرات وأرياف باردة (مثل النمسا وسويسرا وجورجيا)', 'value' => 'Nature_Lakes', 'score' => 30],
-                                            ['label' => '🏖️ شواطئ استوائية، منتجعات وجزر بحرية (مثل تايلاند وبالي والمالديف)', 'value' => 'Tropical_Beaches', 'score' => 25],
-                                            ['label' => '🏛️ مدن تاريخية، تسوق، متاحف ومطاعم عالمية (مثل لندن وإيطاليا وباريس)', 'value' => 'City_Shopping', 'score' => 25],
+                                            ['label' => 'رخصة تجارية + فتح حساب بنكي تجاري + إقامات للمؤسسين', 'value' => 'Full Setup Package', 'score' => 30],
+                                            ['label' => 'رخصة تجارية وسجل تجاري فقط', 'value' => 'License Only', 'score' => 20],
+                                            ['label' => 'استشارة قانونية وضريبية قبل التأسيس', 'value' => 'Consultation', 'score' => 15],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'الميزانية التقديرية للشخص',
-                            'subtitle' => 'الميزانية التقريبية للرحلة الشاملة',
-                            'step_type' => 'question',
-                            'elements' => [
-                                [
-                                    'element_type' => 'single_choice',
-                                    'label' => 'ما هو سقف الميزانية التقديرية للشخص الواحد؟',
-                                    'question_key' => 'budget_per_person',
-                                    'properties' => [
-                                        'options' => [
-                                            ['label' => 'ميزانية اقتصادية وممتازة (حتى 3,500 ريال)', 'value' => 'Economy', 'score' => 15],
-                                            ['label' => 'ميزانية متوسطة مميزة (من 4,000 إلى 8,000 ريال)', 'value' => 'Standard', 'score' => 25],
-                                            ['label' => 'ميزانية فاخرة VIP (أكثر من 8,000 ريال)', 'value' => 'Luxury', 'score' => 35],
-                                        ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                        [
-                            'title' => 'سجل بياناتك لاستلام خطة الرحلة والأسعار',
-                            'subtitle' => 'سنرسل لك جدولاً سياحياً مقترحاً مع أسعار الطيران والفنادق',
+                            'title' => 'سجل بياناتك لاستلام عرض الأسعار الشامل',
+                            'subtitle' => 'سيتواصل معك مستشار تأسيس الأعمال بخطة التكلفة والخطوات القانونية',
                             'step_type' => 'lead_form',
                             'elements' => [
                                 [
@@ -518,8 +456,9 @@ class FunnelTemplateSeeder extends Seeder
                                     'label' => 'بيانات التواصل',
                                     'properties' => [
                                         'fields' => [
-                                            ['name' => 'full_name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
+                                            ['name' => 'full_name', 'label' => 'اسم رائد الأعمال / المستثمر', 'type' => 'text', 'required' => true],
                                             ['name' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'phone', 'required' => true],
+                                            ['name' => 'email', 'label' => 'البريد الإلكتروني للعمل', 'type' => 'email', 'required' => false],
                                         ],
                                     ],
                                 ],
@@ -528,115 +467,85 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                     'results' => [
                         [
-                            'title' => '🏔️ الوجهة المرشحة: أرياف أوروبا الساحرة (النمسا وسويسرا)',
-                            'description' => 'تم تصميم بكج عائلي سياحي متكامل يشمل الطيران، الفنادق ذات الإطلالة الساحرة، والجولات اليومية.',
-                            'min_score' => 70,
+                            'title' => '🏢 خطة تأسيس شركتك جاهزة للإطلاق!',
+                            'description' => 'فريقنا القانوني يتولى كافة الإجراءات من إصدار السجل التجاري وحتى فتح الحساب البنكي وتسليمك الرخصة.',
+                            'min_score' => 0,
                             'max_score' => 100,
-                            'cta_label' => 'تواصل لاستلام برنامج أوروبا السياحي بالأسعار',
+                            'cta_label' => 'تحدث مع مستشار الأعمال الآن عبر الواتساب',
                             'cta_type' => 'whatsapp',
                             'cta_whatsapp_number' => '966500000000',
                             'sort_order' => 1,
-                        ],
-                        [
-                            'title' => '🏖️ الوجهة المرشحة: آسيا الاستوائية أو القوقاز (جورجيا وتايلاند)',
-                            'description' => 'وجهات مثالية تناسب ميزانيتك مع خدمات راقية وسهولة دخول بدون تأشيرة معقدة.',
-                            'min_score' => 0,
-                            'max_score' => 69,
-                            'cta_label' => 'استلم عروض بكجات تايلاند وجورجيا الحصرية',
-                            'cta_type' => 'whatsapp',
-                            'cta_whatsapp_number' => '966500000000',
-                            'sort_order' => 2,
                         ],
                     ],
                 ],
             ],
 
-            // ── 5. Visa Readiness Assessment ───────────────────────────────────────
+            // ── 5. Car Financing & Buying Calculator ──────────────────────────────
             [
-                'name' => 'Visa Readiness Assessment',
-                'slug' => 'visa-readiness-assessment',
-                'category' => 'Assessment',
-                'description' => 'فحص دقيق لقائمة وثائق التأشيرة المطلوبة قبل التوجه لموعد السفارة لضمان عدم وجود أخطاء.',
-                'thumbnail' => '/assets/images/templates/readiness.jpg',
+                'name' => 'Car Financing & Buying Calculator (حاسبة تمويل وتقسيط السيارات)',
+                'slug' => 'car-financing-calculator',
+                'category' => 'Automotive',
+                'description' => 'فانل احتساب قسط السيارة الشهري والدفعة الأولى واختيار السيارة وطلب تجربة القيادة.',
+                'thumbnail_url' => '/assets/images/templates/auto.jpg',
                 'sort_order' => 5,
                 'schema_data' => [
-                    'design_settings' => [
-                        'primary_color' => '#0284c7',
-                        'font_family' => 'Tajawal, sans-serif',
-                        'button_style' => 'rounded-lg',
-                    ],
+                    'design_settings' => ['primary_color' => '#b91c1c', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
                     'crm_settings' => ['enabled' => true],
                     'steps' => [
                         [
-                            'title' => 'فحص جاهزية مستندات التأشيرة',
-                            'subtitle' => 'تأكد من اكتمال أوراقك ومطابقتها لشروط السفارة وتجنب رفض الملف أو ضياع الموعد',
+                            'title' => 'حاسبة أقساط وعروض السيارات التمويلية',
+                            'subtitle' => 'احسب قسطك الشهري التقديري بدون دفعة أولى ومع أفضل جهات التمويل',
                             'step_type' => 'welcome',
                             'elements' => [
-                                ['element_type' => 'heading', 'label' => 'راجع أوراقك خطوة بخطوة مجاناً ✅'],
+                                ['element_type' => 'heading', 'label' => 'سيارتك الجديدة بأفضل نسبة تمويل 🚗'],
                             ],
                         ],
                         [
-                            'title' => 'حجوزات الطيران والفندق',
-                            'subtitle' => 'شرط أساسي لجميع ملفات التأشيرات',
+                            'title' => 'فئة السيارة المفضلة',
+                            'subtitle' => 'نوع وحجم السيارة',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'هل تملك حجز طيران وفندق مؤكد مطابق لتواريخ الرحلة؟',
-                                    'question_key' => 'flight_hotel_status',
+                                    'label' => 'ما هي فئة السيارة التي تبحث عنها؟',
+                                    'question_key' => 'car_category',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'نعم، لدي حجوزات طيران وفنادق رسمية ومؤكدة', 'value' => 'Confirmed Bookings', 'score' => 25],
-                                            ['label' => 'لا، أحتاج حجز طيران وفندق مبدئي معتمد للسفارة', 'value' => 'Need Bookings', 'score' => 10],
+                                            ['label' => '🚙 سيارة عائلية SUV / جيب دفع رباعي', 'value' => 'SUV', 'score' => 30],
+                                            ['label' => '🚗 سيارة سيدان مريحة واقتصادية', 'value' => 'Sedan', 'score' => 20],
+                                            ['label' => '⚡ سيارة هايبرد / كهربائية ذكية موفرة للوقود', 'value' => 'Hybrid_Electric', 'score' => 25],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'التأمين الطبي الدولي للسفر',
-                            'subtitle' => 'تأمين يغطي 30,000 يورو لدول الشنغن والعالم',
+                            'title' => 'القسط الشهري المناسب',
+                            'subtitle' => 'مستوى الالتزام المالي المريح لك',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'هل أصدرت وثيقة تأمين السفر الدولي المعتمدة؟',
-                                    'question_key' => 'insurance_status',
+                                    'label' => 'ما هو متوسط القسط الشهري المناسب لراتبك؟',
+                                    'question_key' => 'monthly_installment',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'نعم، التأمين الطبي صادر ومطابق لمدة الرحلة', 'value' => 'Insurance Ready', 'score' => 25],
-                                            ['label' => 'لا، أرغب في إصدار تأمين سفر فوري معتمد', 'value' => 'Need Insurance', 'score' => 10],
+                                            ['label' => 'أقل من 1,500 ريال شهرياً', 'value' => 'Under 1500', 'score' => 15],
+                                            ['label' => 'من 1,500 إلى 2,500 ريال شهرياً', 'value' => '1500-2500', 'score' => 25],
+                                            ['label' => 'أكثر من 2,500 ريال شهرياً (فئات فاخرة VIP)', 'value' => 'Over 2500', 'score' => 35],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'خطاب العمل والترجمة الرسمية',
-                            'subtitle' => 'إثبات الراتب والوظيفة',
-                            'step_type' => 'question',
-                            'elements' => [
-                                [
-                                    'element_type' => 'single_choice',
-                                    'label' => 'هل تعريف الراتب مترجم بالإنجليزية ومختوم من جهة العمل؟',
-                                    'question_key' => 'employment_letter_status',
-                                    'properties' => [
-                                        'options' => [
-                                            ['label' => 'نعم، الخطاب بالإنجليزية ومختوم ومحدث', 'value' => 'Letter Ready', 'score' => 25],
-                                            ['label' => 'الخطاب بالعربية وأحتاج ترجمة معتمدة', 'value' => 'Need Translation', 'score' => 10],
-                                        ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                        [
-                            'title' => 'سجل بياناتك لتدقيق الملف مع المستشار',
-                            'subtitle' => 'أدخل بياناتك وسيقوم فريقنا بمراجعة الأوراق قبل موعدك مجاناً',
+                            'title' => 'أدخل بياناتك لحساب الموافقة الفورية',
+                            'subtitle' => 'سنرسل لك جدول الأقساط وقائمة السيارات المتاحة فوراً',
                             'step_type' => 'lead_form',
                             'elements' => [
                                 [
                                     'element_type' => 'contact_form',
-                                    'label' => 'بيانات التواصل',
+                                    'label' => 'بيانات العميل',
                                     'properties' => [
                                         'fields' => [
                                             ['name' => 'full_name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
@@ -649,100 +558,86 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                     'results' => [
                         [
-                            'title' => '✅ ملفك مكتمل وجاهز للموعد!',
-                            'description' => 'أوراقك الأساسية ممتازة ومطابقة للمطلوب. نوصي بطباعتها وترتيبها حسب المعايير قبل موعد السفارة.',
-                            'min_score' => 70,
+                            'title' => '🚘 عرض تمويل سيارتك جاهز للمعاينة والتجربة!',
+                            'description' => 'تم احتساب أفضل نسبة تمويل بأقل فائدة سنوية وتجهيز خيارات السيارات المتوفرة للتسليم الفوري.',
+                            'min_score' => 0,
                             'max_score' => 100,
-                            'cta_label' => 'تواصل معنا للتدقيق النهائي المجاني',
+                            'cta_label' => 'استلم جدول الأقساط واحجز تجربة القيادة',
                             'cta_type' => 'whatsapp',
                             'cta_whatsapp_number' => '966500000000',
                             'sort_order' => 1,
-                        ],
-                        [
-                            'title' => '⚠️ ينقصك بعض الوثائق الأساسية (حجوزات أو تأمين)',
-                            'description' => 'لتفادي إلغاء الموعد أو رفض الطلب، يمكننا تزويدك بحجوزات الطيران والتأمين المعتمد فوراً.',
-                            'min_score' => 0,
-                            'max_score' => 69,
-                            'cta_label' => 'اطلب إكمال حجوزاتك والتأمين الطبي الآن',
-                            'cta_type' => 'whatsapp',
-                            'cta_whatsapp_number' => '966500000000',
-                            'sort_order' => 2,
                         ],
                     ],
                 ],
             ],
 
-            // ── 6. Travel Budget Calculator ────────────────────────────────────────
+            // ── 6. Medical Tourism & Treatment Estimator ──────────────────────────
             [
-                'name' => 'Travel Budget Calculator',
-                'slug' => 'travel-budget-calculator',
-                'category' => 'Calculator',
-                'description' => 'حاسبة تقديرية لميزانية الرحلة وتكاليف التذاكر والفنادق ورسوم التأشيرات بمختلف الوجهات.',
-                'thumbnail' => '/assets/images/templates/calc.jpg',
+                'name' => 'Medical Tourism & Treatment Estimator (السياحة العلاجية والتجميلية)',
+                'slug' => 'medical-tourism-estimator',
+                'category' => 'Healthcare',
+                'description' => 'فانل تقدير تكلفة السياحة العلاجية: زراعة الشعر، علاج الأسنان، والعمليات في تركيا وأوروبا.',
+                'thumbnail_url' => '/assets/images/templates/health.jpg',
                 'sort_order' => 6,
                 'schema_data' => [
-                    'design_settings' => [
-                        'primary_color' => '#0891b2',
-                        'font_family' => 'Tajawal, sans-serif',
-                        'button_style' => 'rounded-lg',
-                    ],
+                    'design_settings' => ['primary_color' => '#059669', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
                     'crm_settings' => ['enabled' => true],
                     'steps' => [
                         [
-                            'title' => 'حاسبة ميزانية وتكاليف السفر التقديرية',
-                            'subtitle' => 'احسب تكلفة رحلتك التقديرية شاملة التأشيرة، التذاكر، والإقامة في 3 خطوات',
+                            'title' => 'حاسبة السياحة العلاجية والاستشارة الطبية',
+                            'subtitle' => 'احصل على خطة علاجية وتكلفة تقديرية شاملة الفندق والمواصلات مع أفضل المستشفيات المعتمدة',
                             'step_type' => 'welcome',
                             'elements' => [
-                                ['element_type' => 'heading', 'label' => 'خطط ميزانية سفرك بذكاء ووفر حتى 25% 💰'],
+                                ['element_type' => 'heading', 'label' => 'رعايتك الصحية بأعلى معايير الجودة 🩺'],
                             ],
                         ],
                         [
-                            'title' => 'الوجهة المرغوبة',
-                            'subtitle' => 'اختر المنطقة لحساب متوسط الأسعار',
+                            'title' => 'نوع الإجراء الطبي أو التجميلي',
+                            'subtitle' => 'اختر التخصص المطلوب',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'إلى أي منطقة ترغب بالسفر؟',
-                                    'question_key' => 'destination_region',
+                                    'label' => 'ما هو الإجراء الطبي الذي تبحث عنه؟',
+                                    'question_key' => 'treatment_type',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'دول أوروبا (شنغن أو بريطانيا)', 'value' => 'Europe', 'score' => 30],
-                                            ['label' => 'دول شرق آسيا (تايلاند، ماليزيا، إندونيسيا)', 'value' => 'East_Asia', 'score' => 20],
-                                            ['label' => 'دول القوقاز (جورجيا، أذربيجان، البوسنة)', 'value' => 'Caucasus', 'score' => 15],
-                                            ['label' => 'أمريكا أو كندا', 'value' => 'North_America', 'score' => 35],
+                                            ['label' => '💆‍♂️ زراعة الشعر بأحدث تقنيات DHI و Sapphire', 'value' => 'Hair Transplant', 'score' => 30],
+                                            ['label' => '🦷 تجميل وزراعة الأسنان وابتسامة هوليوود 3D', 'value' => 'Dental Care', 'score' => 30],
+                                            ['label' => '👁️ تصحيح النظر الليزك وجراحة العيون', 'value' => 'Eye Lasik', 'score' => 25],
+                                            ['label' => '🏥 فحوصات شاملة وعلاج متخصص في أوروبا أو تركيا', 'value' => 'Checkup / Specialized', 'score' => 25],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'مدة الإقامة وعدد الأشخاص',
-                            'subtitle' => 'عدد الأيام وعدد المسافرين',
+                            'title' => 'الموعد المفضل للسفر',
+                            'subtitle' => 'التوقيت المفضل لبدء الخطة العلاجية',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'كم عدد المسافرين ومدة الرحلة المتوقعة؟',
-                                    'question_key' => 'duration_people',
+                                    'label' => 'متى تود إجراء العملية أو الفحص؟',
+                                    'question_key' => 'preferred_date',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'شخص أو شخصين (من 7 إلى 10 أيام)', 'value' => '1-2 People / 10 Days', 'score' => 20],
-                                            ['label' => 'عائلة 3 إلى 5 أفراد (من 10 إلى 15 يوماً)', 'value' => 'Family / 10-15 Days', 'score' => 30],
-                                            ['label' => 'رحلة طويلة (أكثر من 15 يوماً)', 'value' => 'Long Trip > 15 Days', 'score' => 40],
+                                            ['label' => 'خلال هذا الشهر (حجز عاجل)', 'value' => 'This Month', 'score' => 30],
+                                            ['label' => 'خلال شهرين إلى 3 أشهر', 'value' => '1-3 Months', 'score' => 20],
+                                            ['label' => 'أريد استشارة وتقييم أولي للصور أولاً', 'value' => 'Consultation First', 'score' => 15],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'سجل بياناتك للحصول على عرض السعر المخصص',
-                            'subtitle' => 'سنرسل لك تقرير التكلفة الكاملة وعروض خصم على رسوم التأشيرة والخدمات',
+                            'title' => 'سجل بياناتك لاستلام خطة العلاج والتكلفة',
+                            'subtitle' => 'سيقوم الطبيب والمستشار الطبي بمراجعة حالتك وتقديم الخطة المجانية',
                             'step_type' => 'lead_form',
                             'elements' => [
                                 [
                                     'element_type' => 'contact_form',
-                                    'label' => 'بيانات التواصل',
+                                    'label' => 'بيانات المريض',
                                     'properties' => [
                                         'fields' => [
                                             ['name' => 'full_name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
@@ -755,11 +650,11 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                     'results' => [
                         [
-                            'title' => '📊 ميزانيتك المقدرة وخطة السفر جاهزة!',
-                            'description' => 'فريقنا أعد لك خطة ميزانية متوازنة تضمن لك أفضل أسعار الطيران والفنادق ورسوم التأشيرة مع كوبون خصم.',
+                            'title' => '🏥 تقريرك الطبي وعرض الباقة العلاجية جاهز!',
+                            'description' => 'الباقة تشمل: الإجراء الطبي، الإقامة الفندقية 5 نجوم، الاستقبال والتنقلات بسيارة خاصة، والمتابعة الطبية.',
                             'min_score' => 0,
                             'max_score' => 100,
-                            'cta_label' => 'استلم تفاصيل الميزانية وكوبون الخصم عبر الواتساب',
+                            'cta_label' => 'تحدث مع المستشار الطبي واستلم خطة العلاج 💬',
                             'cta_type' => 'whatsapp',
                             'cta_whatsapp_number' => '966500000000',
                             'sort_order' => 1,
@@ -768,77 +663,72 @@ class FunnelTemplateSeeder extends Seeder
                 ],
             ],
 
-            // ── 7. Lead Generation Quiz ────────────────────────────────────────────
+            // ── 7. Personal Loan & Finance Eligibility ────────────────────────────
             [
-                'name' => 'Lead Generation Quiz',
-                'slug' => 'lead-generation-quiz',
-                'category' => 'Lead Generation',
-                'description' => 'فانل تفاعلي سريع عالي التحويل لتوليد العملاء المهتمين بالسفر واستخراج التأشيرات.',
-                'thumbnail' => '/assets/images/templates/lead.jpg',
+                'name' => 'Personal Loan & Finance Eligibility (حاسبة التمويل الشخصي)',
+                'slug' => 'personal-loan-eligibility',
+                'category' => 'Financial Services',
+                'description' => 'فانل فحص أهلية القروض والتمويل الشخصي، حساب الالتزامات والحد الأقصى للتمويل المتاح.',
+                'thumbnail_url' => '/assets/images/templates/finance.jpg',
                 'sort_order' => 7,
                 'schema_data' => [
-                    'design_settings' => [
-                        'primary_color' => '#4f46e5',
-                        'font_family' => 'Tajawal, sans-serif',
-                        'button_style' => 'rounded-lg',
-                    ],
+                    'design_settings' => ['primary_color' => '#047857', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
                     'crm_settings' => ['enabled' => true],
                     'steps' => [
                         [
-                            'title' => 'احصل على استشارة تأشيرة مجانية وخصم 15% 🎁',
-                            'subtitle' => 'أجب على سؤالين سريعين وسيتواصل معك خبير التأشيرات فوراً مع هدية خصم خاصة',
+                            'title' => 'حاسبة التمويل والملاءة المالية',
+                            'subtitle' => 'احسب أقصى مبلغ تمويل تستحقه بأقل هامش ربح وأطول فترة سداد',
                             'step_type' => 'welcome',
                             'elements' => [
-                                ['element_type' => 'heading', 'label' => 'خطط لسفرك براحة بال مع Travel Wave ✨'],
+                                ['element_type' => 'heading', 'label' => 'تمويلك المالي بمرونة وسرعة 💳'],
                             ],
                         ],
                         [
-                            'title' => 'أكبر تحدٍ يواجهك في التأشيرة',
-                            'subtitle' => 'ما الذي تبحث عن مساعدة فيه تحديداً؟',
+                            'title' => 'الراتب الشهري الصافي',
+                            'subtitle' => 'الراتب المحول للبنك',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'ما هي العقبة الأساسية في تقديمك الحالي؟',
-                                    'question_key' => 'main_challenge',
+                                    'label' => 'ما هو متوسط راتبك الشهري؟',
+                                    'question_key' => 'salary_range',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'صعوبة العثور على موعد قريب في السفارة', 'value' => 'Appointment Booking', 'score' => 25],
-                                            ['label' => 'تجهيز الأبلكيشن والترجمة والحجوزات والتأمين', 'value' => 'Application Documents', 'score' => 25],
-                                            ['label' => 'الخوف من رفض الطلب وأريد ضمان أعلى نسبة قبول', 'value' => 'Approval Guarantee', 'score' => 25],
-                                            ['label' => 'أريد باقة سياحية متكاملة (تأشيرة + طيران وفنادق)', 'value' => 'Full Package', 'score' => 25],
+                                            ['label' => 'أكثر من 15,000 ريال شهرياً', 'value' => 'Over 15k', 'score' => 40],
+                                            ['label' => 'من 8,000 إلى 15,000 ريال شهرياً', 'value' => '8k-15k', 'score' => 30],
+                                            ['label' => 'من 4,000 إلى 8,000 ريال شهرياً', 'value' => '4k-8k', 'score' => 20],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'متى ترغب بالبدء في المعاملة؟',
-                            'subtitle' => 'سرعة الخدمة المطلوبة',
+                            'title' => 'جهة العمل والالتزامات القائمة',
+                            'subtitle' => 'قطاع العمل',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'متى تود البدء في إجراءات ملفك؟',
-                                    'question_key' => 'start_timeline',
+                                    'label' => 'ما هو قطاع عملك الحالي؟',
+                                    'question_key' => 'employer_sector',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'فوراً خلال هذا الأسبوع 🚀', 'value' => 'Immediately', 'score' => 50],
-                                            ['label' => 'خلال الأسبوعين القادمين', 'value' => 'Next 2 Weeks', 'score' => 30],
-                                            ['label' => 'استفسار وتخطيط للشهر القادم', 'value' => 'Planning', 'score' => 20],
+                                            ['label' => 'قطاع حكومي / عسكري / شبه حكومي', 'value' => 'Government', 'score' => 30],
+                                            ['label' => 'شركات القطاع الخاص الكبرى المعتمدة', 'value' => 'Corporate Private', 'score' => 25],
+                                            ['label' => 'مؤسسات وشركات خاصة متوسطة / أعمال حرة', 'value' => 'Private / Self', 'score' => 15],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'أدخل بياناتك لاستلام كود الخصم والاستشارة',
-                            'subtitle' => 'سيتواصل معك المستشار المخصص فوراً عبر الواتساب',
+                            'title' => 'سجل بياناتك لحساب الحد الأقصى للتمويل',
+                            'subtitle' => 'سنرسل لك تقرير الحسبة التقديرية بدقة',
                             'step_type' => 'lead_form',
                             'elements' => [
                                 [
                                     'element_type' => 'contact_form',
-                                    'label' => 'بيانات التواصل',
+                                    'label' => 'بيانات العميل',
                                     'properties' => [
                                         'fields' => [
                                             ['name' => 'full_name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
@@ -851,11 +741,11 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                     'results' => [
                         [
-                            'title' => '🎉 تم تفعيل كود الخصم (WAVE2026) واستشارتك جاهزة!',
-                            'description' => 'شكراً لتواصلك! مستشارك في Travel Wave بانتظارك لمساعدتك في استخراج التأشيرة بأسرع وقت.',
+                            'title' => '💰 مؤهل للحصول على تمويل فوري بأفضل نسبة!',
+                            'description' => 'بناءً على بياناتك الأولية، يمكنك الحصول على تمويل ميسر بهامش ربح تنافسي وتأجيل أول قسط.',
                             'min_score' => 0,
                             'max_score' => 100,
-                            'cta_label' => 'تحدث مع مستشارك واستفد من الخصم الآن',
+                            'cta_label' => 'تواصل مع المستشار المالي واستلم الحسبة الآن',
                             'cta_type' => 'whatsapp',
                             'cta_whatsapp_number' => '966500000000',
                             'sort_order' => 1,
@@ -864,73 +754,157 @@ class FunnelTemplateSeeder extends Seeder
                 ],
             ],
 
-            // ── 8. WhatsApp Qualification Funnel ───────────────────────────────────
+            // ── 8. Golden Visa & Immigration by Investment ────────────────────────
             [
-                'name' => 'WhatsApp Qualification Funnel',
-                'slug' => 'whatsapp-qualification-funnel',
-                'category' => 'Qualification',
-                'description' => 'فانل محادثة وتأهيل سريع ينقل العميل المؤهل مباشرة لمحادثة الواتساب المباشرة مع خدمة العملاء.',
-                'thumbnail' => '/assets/images/templates/wa-funnel.jpg',
+                'name' => 'Golden Visa & Immigration Checker (الإقامة الذهبية والهجرة الاستثمارية)',
+                'slug' => 'golden-visa-immigration-checker',
+                'category' => 'Legal & Immigration',
+                'description' => 'فحص الأهلية للحصول على الإقامة الذهبية، الجواز الثاني، وبرامج الهجرة في أوروبا والكاريبي.',
+                'thumbnail_url' => '/assets/images/templates/golden-visa.jpg',
                 'sort_order' => 8,
                 'schema_data' => [
-                    'design_settings' => [
-                        'primary_color' => '#16a34a',
-                        'font_family' => 'Tajawal, sans-serif',
-                        'button_style' => 'rounded-lg',
-                    ],
+                    'design_settings' => ['primary_color' => '#d97706', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
                     'crm_settings' => ['enabled' => true],
                     'steps' => [
                         [
-                            'title' => 'تحدث مع مستشار التأشيرات مباشرة عبر الواتساب 💬',
-                            'subtitle' => 'حدد نوع طلبك وسنوجهك فوراً للقسم المختص لحجز موعدك ومتابعة ملفك',
+                            'title' => 'فحص أهلية الإقامة الذهبية والجواز الثاني',
+                            'subtitle' => 'احصل على حرية السفر بدون تأشيرة لأكثر من 150 دولة مع عائلتك',
                             'step_type' => 'welcome',
                             'elements' => [
-                                ['element_type' => 'heading', 'label' => 'خدمة عملاء سريعة ومباشرة على مدار الساعة ⚡'],
+                                ['element_type' => 'heading', 'label' => 'جوازك الثاني وإقامتك الأوروبية الدائمة 🌐'],
                             ],
                         ],
                         [
-                            'title' => 'نوع الخدمة المطلوبة',
-                            'subtitle' => 'اختر الخدمة لتوجيهك للمختص المناسب',
+                            'title' => 'البرنامج الاستثماري المستهدف',
+                            'subtitle' => 'نوع البرنامج المفضل',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'ما هي الخدمة التي تحتاجها الآن؟',
-                                    'question_key' => 'service_type',
+                                    'label' => 'ما هو البرنامج الذي تهتم به؟',
+                                    'question_key' => 'immigration_program',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'استخراج تأشيرة سياحية أو عمل (شنغن / بريطانيا / أمريكا)', 'value' => 'Visa Service', 'score' => 25],
-                                            ['label' => 'حجز موعد سفارة عاجل ومؤكد', 'value' => 'Urgent Appointment', 'score' => 25],
-                                            ['label' => 'بكج سياحي كامل (طيران + فنادق + جولات)', 'value' => 'Tourism Package', 'score' => 25],
-                                            ['label' => 'تأمين سفر طبي دولي أو ترجمة معتمدة', 'value' => 'Insurance_Translation', 'score' => 25],
+                                            ['label' => '🇪🇸 🇬🇷 الإقامة الذهبية الأوروبية (إسبانيا، اليونان، البرتغال)', 'value' => 'European Golden Visa', 'score' => 35],
+                                            ['label' => '🌴 جوازات دول الكاريبي (سانت كيتس، دومينيكا - سفر بدون تأشيرة)', 'value' => 'Caribbean Passport', 'score' => 35],
+                                            ['label' => '🇦🇪 الإقامة الذهبية في دولة الإمارات (10 سنوات)', 'value' => 'UAE Golden Visa', 'score' => 30],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'بلد الإقامة أو السفر',
-                            'subtitle' => 'تحديد موقع التقديم',
+                            'title' => 'الملاءة الاستثمارية المخصصة',
+                            'subtitle' => 'حجم الاستثمار التقديري',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'أين تقيم حالياً؟',
-                                    'question_key' => 'current_location',
+                                    'label' => 'ما هو نطاق الاستثمار المتاح لديك؟',
+                                    'question_key' => 'investment_capacity',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => 'المملكة العربية السعودية 🇸🇦', 'value' => 'KSA', 'score' => 25],
-                                            ['label' => 'الإمارات أو دولة خليجية 🇦🇪 🇰🇼 🇶🇦', 'value' => 'GCC', 'score' => 25],
-                                            ['label' => 'جمهورية مصر العربية 🇪🇬', 'value' => 'Egypt', 'score' => 25],
-                                            ['label' => 'دولة أخرى 🌍', 'value' => 'Other', 'score' => 25],
+                                            ['label' => 'أكثر من 250,000 دولار / يورو (مؤهل لكافة البرامج العقارية)', 'value' => 'Over 250k USD', 'score' => 40],
+                                            ['label' => 'من 100,000 إلى 200,000 دولار (مؤهل لبرامج التبرع وجوازات الكاريبي)', 'value' => '100k-200k USD', 'score' => 30],
+                                            ['label' => 'أقل من 100,000 دولار (أريد استشارة خيارات الإقامة المهنية)', 'value' => 'Under 100k USD', 'score' => 15],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
                         [
-                            'title' => 'أدخل اسمك ورقم الواتساب لبدء المحادثة',
-                            'subtitle' => 'سيتم فتح تطبيق الواتساب مباشرة مع المستشار المسؤول',
+                            'title' => 'سجل بياناتك لحجز جلسة استشارة سرية مع المحامي الدولي',
+                            'subtitle' => 'سنقدم لك دليلاً كاملاً بالدول المعفاة والشروط القانونية',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'contact_form',
+                                    'label' => 'بيانات المستثمر',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'الاسم الكامل', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'رقم الواتساب المباشر', 'type' => 'phone', 'required' => true],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => '🌐 مؤهل لبرامج الإقامة الذهبية والجواز الثاني!',
+                            'description' => 'بياناتك تؤهلك للحصول على الإقامة أو الجنسية الثانية لك ولعائلتك بدون متطلبات إقامة فعلية.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'احجز استشارة الهجرة والاستثمار الآن',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
+
+            // ── 9. Fitness & Diet Custom Plan Quiz ────────────────────────────────
+            [
+                'name' => 'Fitness & Diet Custom Plan Quiz (اللياقة والبرنامج الغذائي المخصص)',
+                'slug' => 'fitness-diet-custom-plan',
+                'category' => 'Fitness & Health',
+                'description' => 'فانل تحديد النظام الغذائي والتدريبي الأنسب حسب الهدف والوزن مع تقديم كود خصم للاشتراك.',
+                'thumbnail_url' => '/assets/images/templates/fitness.jpg',
+                'sort_order' => 9,
+                'schema_data' => [
+                    'design_settings' => ['primary_color' => '#15803d', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        [
+                            'title' => 'صمم برنامجك الرياضي والغذائي المخصص',
+                            'subtitle' => 'اكتشف خطتك المثالية لإنقاص الوزن أو بناء العضلات خلال 60 ثانية فقط',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'جسمك المثالي وصحتك تبدأ اليوم 💪'],
+                            ],
+                        ],
+                        [
+                            'title' => 'الهدف البدني الأساسي',
+                            'subtitle' => 'ما الذي تسعى لتحقيقه؟',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هو هدفك الأساسي خلال الـ 90 يوماً القادمة؟',
+                                    'question_key' => 'fitness_goal',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '🔥 خسارة الدهون ونحت القوام وحرق السعرات', 'value' => 'Fat Loss', 'score' => 30],
+                                            ['label' => '🏋️ زيادة الكتلة العضلية والقوة البدنية', 'value' => 'Muscle Gain', 'score' => 30],
+                                            ['label' => '🧘 زيادة اللياقة والنشاط وتحسين نمط الحياة والصحة', 'value' => 'General Fitness', 'score' => 25],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'المكان المفضل للتمرين',
+                            'subtitle' => 'طريقة ممارسة الرياضة',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'أين تفضل ممارسة تمارينك؟',
+                                    'question_key' => 'workout_location',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => 'في الجيم / النادي الرياضي مع الأجهزة', 'value' => 'Gym', 'score' => 30],
+                                            ['label' => 'في المنزل بدون أدوات أو بأدوات بسيطة', 'value' => 'Home', 'score' => 25],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'سجل بياناتك لاستلام خطتك الغذائية وكوبون الخصم',
+                            'subtitle' => 'سنرسل لك الخطة المحسوبة وجدول التمارين فوراً',
                             'step_type' => 'lead_form',
                             'elements' => [
                                 [
@@ -948,11 +922,267 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                     'results' => [
                         [
-                            'title' => 'مستشارك بانتظارك الآن على الواتساب ✅',
-                            'description' => 'اضغط على الزر أدناه لبدء المحادثة الفورية وتلقي كافة التفاصيل والمواعيد.',
+                            'title' => '🥗 خطتك التدريبية والغذائية جاهزة مع خصم 20%!',
+                            'description' => 'تم تجهيز جدول السعرات اليومية وتوزيع المغذيات وتمارينك الأسبوعية لتحقيق هدفك بسرعة وأمان.',
                             'min_score' => 0,
                             'max_score' => 100,
-                            'cta_label' => 'ابدأ محادثة الواتساب الآن 💬',
+                            'cta_label' => 'استلم خطتك واشترك مع المدرب عبر الواتساب',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
+
+            // ── 10. Product & Gift Recommendation Quiz ────────────────────────────
+            [
+                'name' => 'Product & Gift Recommendation Quiz (مساعد اختيار الهدايا والمنتجات)',
+                'slug' => 'product-gift-recommendation-quiz',
+                'category' => 'E-commerce',
+                'description' => 'فانل ترشيح المنتجات والهدايا الذكي للمتاجر الإلكترونية لزيادة المبيعات ومتوسط قيمة الطلب.',
+                'thumbnail_url' => '/assets/images/templates/ecommerce.jpg',
+                'sort_order' => 10,
+                'schema_data' => [
+                    'design_settings' => ['primary_color' => '#db2777', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        [
+                            'title' => 'مساعد اختيار الهدية والمنتج المثالي 🎁',
+                            'subtitle' => 'محتار في اختيار الهدية المناسبة؟ أجب على سؤالين وسنرشح لك الخيار الأروع',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'ابهر من تحب بأفضل هدية 💖'],
+                            ],
+                        ],
+                        [
+                            'title' => 'المناسبة والشخص المهدي إليه',
+                            'subtitle' => 'لمن تشتري الهدية؟',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هي المناسبة ولمن الهدية؟',
+                                    'question_key' => 'gift_recipient',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '💍 ذكرى زواج / شريك الحياة', 'value' => 'Partner Anniversary', 'score' => 30],
+                                            ['label' => '🎂 عيد ميلاد صديق أو قريب', 'value' => 'Birthday', 'score' => 20],
+                                            ['label' => '🎓 مناسبة تخرج أو نجاح وترقية', 'value' => 'Graduation', 'score' => 25],
+                                            ['label' => '💼 هدية راقية لزميل عمل أو مدير', 'value' => 'Corporate Gift', 'score' => 30],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'الميزانية المخصصة للهدية',
+                            'subtitle' => 'نطاق السعر المطلوب',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هي الميزانية التي ترغب بها؟',
+                                    'question_key' => 'gift_budget',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => 'هدية مميزة واقتصادية (150 - 300 ريال)', 'value' => '150-300 SAR', 'score' => 15],
+                                            ['label' => 'هدية فاخرة ومميزة (300 - 700 ريال)', 'value' => '300-700 SAR', 'score' => 25],
+                                            ['label' => 'هدية VIP استثنائية (أكثر من 700 ريال)', 'value' => 'Over 700 SAR', 'score' => 35],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'سجل بياناتك لاستلام كود الخصم وترشيح الهدية',
+                            'subtitle' => 'مع إمكانية التغليف الفاخر وكتابة كارت الإهداء والتوصيل السريع',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'contact_form',
+                                    'label' => 'بيانات التواصل',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'phone', 'required' => true],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => '🎁 هديتك المثالية جاهزة مع تغليف مجاني وكود خصم!',
+                            'description' => 'تم اختيار أفضل تشكيلة هدايا تناسب ذوقك مع كارت إهداء مخصص وتوصيل بنفس اليوم.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'اطلب الهدية واستلم كود الخصم عبر الواتساب',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
+
+            // ── 11. US & UK Visa Readiness Assessment ─────────────────────────────
+            [
+                'name' => 'US & UK Visa Readiness (تأشيرات أمريكا وبريطانيا وكندا)',
+                'slug' => 'us-uk-visa-readiness',
+                'category' => 'Travel',
+                'description' => 'فحص الجاهزية للمقابلة الشخصية وحجز المواعيد وتعبئة استمارة DS-160 لتأشيرات أمريكا وبريطانيا.',
+                'thumbnail_url' => '/assets/images/templates/us-uk.jpg',
+                'sort_order' => 11,
+                'schema_data' => [
+                    'design_settings' => ['primary_color' => '#1e3a8a', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        [
+                            'title' => 'فحص الجاهزية لتأشيرة أمريكا وبريطانيا',
+                            'subtitle' => 'احصل على أقرب موعد مقابلة وتجهيز استمارة DS-160 بدقة تامة لتفادي الرفض',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'سافر إلى أمريكا أو بريطانيا بكل ثقة 🗽🇬🇧'],
+                            ],
+                        ],
+                        [
+                            'title' => 'الوجهة والغرض من الزيارة',
+                            'subtitle' => 'حدد نوع التأشيرة المطلوبة',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هي التأشيرة التي ترغب بالتقديم عليها؟',
+                                    'question_key' => 'visa_country_type',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '🇺🇸 تأشيرة أمريكا B1/B2 السياحية والتجارية (صالحة لـ 5 أو 10 سنوات)', 'value' => 'US B1/B2', 'score' => 30],
+                                            ['label' => '🇬🇧 تصريح بريطانيا الإلكتروني السريع ETA (خلال 24-48 ساعة)', 'value' => 'UK ETA', 'score' => 30],
+                                            ['label' => '🇨🇦 تأشيرة كندا السياحية البيومترية', 'value' => 'Canada Tourist', 'score' => 25],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'الوضع المالي وتاريخ السفر',
+                            'subtitle' => 'شروط قبول الملف',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'هل لديك دخل شهري ثابت وسفر سابق خارج دولتك؟',
+                                    'question_key' => 'us_financial_ties',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => 'نعم، موظف/صاحب عمل وسافرت لعدة دول سابقاً', 'value' => 'Strong Ties', 'score' => 35],
+                                            ['label' => 'موظف ولكن لم أسافر خارجياً بعد (أول مرة)', 'value' => 'First Travel', 'score' => 20],
+                                            ['label' => 'طالب / مكفول من أحد أفراد العائلة', 'value' => 'Sponsored', 'score' => 20],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'سجل بياناتك لحجز أسرع موعد وتعبئة الأبلكيشن',
+                            'subtitle' => 'سيتولى خبير تأشيرات أمريكا تجهيز ملفك بالكامل',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'contact_form',
+                                    'label' => 'بيانات التواصل',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'الاسم باللغة الإنجليزية كما في الجواز', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'phone', 'required' => true],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => '🗽 ملفك مؤهل للتقديم وحجز موعد السفارة فوراً!',
+                            'description' => 'فريقنا المتخصص يتولى تعبئة الأبلكيشن وسداد الرسوم وحجز أقرب موعد متاح وتدريبك على المقابلة.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'تواصل معنا الآن لبدء التقديم وحجز الموعد',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
+
+            // ── 12. Instant WhatsApp Lead Routing Funnel ───────────────────────────
+            [
+                'name' => 'Instant WhatsApp Lead Routing (فانل التوجيه الفوري للواتساب)',
+                'slug' => 'instant-whatsapp-lead-routing',
+                'category' => 'Qualification',
+                'description' => 'فانل محادثة ذكي يوجه العميل مباشرة للمستشار المسؤول عبر الواتساب في ثوانٍ معدودة.',
+                'thumbnail_url' => '/assets/images/templates/wa.jpg',
+                'sort_order' => 12,
+                'schema_data' => [
+                    'design_settings' => ['primary_color' => '#16a34a', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg'],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        [
+                            'title' => 'خدمة العملاء المباشرة عبر الواتساب ⚡',
+                            'subtitle' => 'اختر خدمتك وسنوصلك مباشرة بالمسؤول المختص لتلبية طلبك فوراً',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'مستشارك بانتظارك للإجابة على جميع استفساراتك 💬'],
+                            ],
+                        ],
+                        [
+                            'title' => 'ما هي الخدمة التي تحتاجها اليوم؟',
+                            'subtitle' => 'تحديد القسم المختص',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'اختر الخدمة المطلوبة:',
+                                    'question_key' => 'required_service',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '🛂 استخراج تأشيرة سياحية / عمل (شنغن، بريطانيا، أمريكا، آسيا)', 'value' => 'Visa Department', 'score' => 25],
+                                            ['label' => '✈️ حجز طيران وفنادق وبكجات سياحية متكاملة', 'value' => 'Tourism Department', 'score' => 25],
+                                            ['label' => '⚡ حجز موعد سفارة مستعجل وتأمين سفر طبي', 'value' => 'Appointments Department', 'score' => 25],
+                                            ['label' => '💼 خدمات تأسيس شركات واستشارات أخرى', 'value' => 'Business Department', 'score' => 25],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'أدخل اسمك ورقم هاتفك لبدء المحادثة',
+                            'subtitle' => 'سيتم فتح محادثة الواتساب فوراً مع الرسالة المجهزة',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'contact_form',
+                                    'label' => 'بيانات الاتصال',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'phone', 'required' => true],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => 'تم تعيين مستشارك الخاص بنجاح! ✅',
+                            'description' => 'اضغط على الزر أدناه لبدء المحادثة الفورية وتلقي كافة التفاصيل والمساعدة.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'ابدأ المحادثة على الواتساب الآن 💬',
                             'cta_type' => 'whatsapp',
                             'cta_whatsapp_number' => '966500000000',
                             'sort_order' => 1,
@@ -969,7 +1199,7 @@ class FunnelTemplateSeeder extends Seeder
                     'name' => $tpl['name'],
                     'category' => $tpl['category'],
                     'description' => $tpl['description'],
-                    'thumbnail_url' => $tpl['thumbnail'] ?? null,
+                    'thumbnail_url' => $tpl['thumbnail_url'] ?? null,
                     'schema_data' => $tpl['schema_data'],
                     'is_active' => true,
                     'sort_order' => $tpl['sort_order'],

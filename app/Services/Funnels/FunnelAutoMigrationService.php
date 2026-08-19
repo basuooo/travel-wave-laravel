@@ -203,10 +203,11 @@ class FunnelAutoMigrationService
 
     private static function seedTemplates(): void
     {
-        $sample = DB::table('funnel_templates')->where('slug', 'visa-qualification-quiz')->first();
+        $count = DB::table('funnel_templates')->count();
+        $sample = DB::table('funnel_templates')->where('slug', 'real-estate-property-finder')->first();
         $needsUpdate = false;
 
-        if (! $sample) {
+        if ($count < 12 || ! $sample) {
             $needsUpdate = true;
         } else {
             $decoded = is_string($sample->schema_data) ? json_decode($sample->schema_data, true) : (array) $sample->schema_data;

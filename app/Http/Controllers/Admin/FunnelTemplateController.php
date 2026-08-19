@@ -12,11 +12,17 @@ class FunnelTemplateController extends Controller
 {
     public function index(Request $request)
     {
+        try {
+            \App\Services\Funnels\FunnelAutoMigrationService::ensureTablesExist();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         if (! \Illuminate\Support\Facades\Schema::hasTable('funnel_templates')) {
             $templates = collect();
             $categories = [
-                'Lead Generation', 'Quiz', 'Qualification', 'Assessment',
-                'Calculator', 'Recommendation', 'Survey', 'Travel', 'Real Estate', 'E-commerce', 'Other'
+                'Travel', 'Real Estate', 'Education', 'B2B Services', 'Automotive',
+                'Healthcare', 'Financial Services', 'Legal & Immigration', 'Fitness & Health', 'E-commerce', 'Qualification'
             ];
             return view('admin.funnels.templates.index', compact('templates', 'categories'));
         }
@@ -37,19 +43,11 @@ class FunnelTemplateController extends Controller
 
         $templates = $query->get();
 
-        $categories = [
-            'Lead Generation',
-            'Quiz',
-            'Qualification',
-            'Assessment',
-            'Calculator',
-            'Recommendation',
-            'Survey',
-            'Travel',
-            'Real Estate',
-            'E-commerce',
-            'Other',
-        ];
+        $categories = FunnelTemplate::where('is_active', true)
+            ->whereNotNull('category')
+            ->distinct()
+            ->pluck('category')
+            ->toArray();
 
         return view('admin.funnels.templates.index', compact('templates', 'categories'));
     }
