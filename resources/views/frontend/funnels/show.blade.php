@@ -41,7 +41,7 @@
             border-radius: 24px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
             width: 100%;
-            max-width: 700px;
+            max-width: 720px;
             padding: 2.5rem;
             position: relative;
             animation: fadeIn 0.3s ease;
@@ -84,7 +84,7 @@
             opacity: 1 !important;
         }
 
-        /* Radio Choice (Distinct Radio UI) */
+        /* Radio Choice */
         .radio-option-card {
             border: 2px solid #e2e8f0;
             background: #ffffff;
@@ -133,7 +133,7 @@
             display: block;
         }
 
-        /* Checkbox Choice (Only Check Square) */
+        /* Checkbox Choice */
         .checkbox-option-card {
             border: 2px solid #e2e8f0;
             background: #ffffff;
@@ -225,7 +225,7 @@
             border-radius: 10px;
             font-size: 24px;
             font-weight: 800;
-            min-width: 48px;
+            min-width: 52px;
             text-align: center;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
@@ -276,6 +276,68 @@
             color: var(--primary-color);
         }
 
+        /* Phone Country Code Select UI */
+        .phone-code-dropdown-container {
+            position: relative;
+        }
+        .phone-code-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 8px 12px;
+            border-radius: 12px 0 0 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            white-space: nowrap;
+        }
+        [dir="rtl"] .phone-code-btn {
+            border-radius: 0 12px 12px 0;
+        }
+        .phone-code-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 1050;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 300px;
+            max-height: 280px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        [dir="rtl"] .phone-code-menu {
+            left: auto;
+            right: 0;
+        }
+        .phone-code-menu.show {
+            display: flex;
+        }
+        .phone-code-list {
+            overflow-y: auto;
+            max-height: 220px;
+        }
+        .phone-code-item {
+            padding: 9px 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #1e293b;
+            transition: background 0.15s;
+        }
+        .phone-code-item:hover {
+            background: #eff6ff;
+            color: var(--primary-color);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
@@ -315,7 +377,7 @@
                             $type = $element->element_type;
                             $props = $element->properties ?? [];
                             $label = $element->label;
-                            $isRequired = !empty($element->is_required);
+                            $isRequired = !empty($element->is_required) || !empty($props['is_required']);
                         @endphp
 
                         <div class="mb-4 element-block-wrapper" id="el_wrapper_{{ $element->id }}" data-element-id="{{ $element->id }}" data-required="{{ $isRequired ? '1' : '0' }}" data-type="{{ $type }}">
@@ -331,7 +393,7 @@
                             @elseif(in_array($type, ['text', 'paragraph']))
                                 <p class="text-muted fs-6 mb-3 leading-relaxed">{{ $label }}</p>
 
-                            {{-- 3. RADIO CHOICE (Specific Modern Radio) --}}
+                            {{-- 3. RADIO CHOICE --}}
                             @elseif($type === 'radio_choice')
                                 @if($label) 
                                     <label class="fw-bold mb-2 d-block fs-6 text-dark">
@@ -353,7 +415,7 @@
                                     @endforeach
                                 </div>
 
-                            {{-- 4. CHECKBOX CHOICE (Only Box Checked) --}}
+                            {{-- 4. CHECKBOX CHOICE --}}
                             @elseif(in_array($type, ['checkbox_choice', 'multiple_choice']))
                                 @if($label) 
                                     <label class="fw-bold mb-2 d-block fs-6 text-dark">
@@ -392,7 +454,7 @@
                                     @endforeach
                                 </div>
 
-                            {{-- 6. IMAGE CHOICE (With Image Thumbnails) --}}
+                            {{-- 6. IMAGE CHOICE --}}
                             @elseif(in_array($type, ['image_choice', 'single_image_choice', 'multiple_image_choice']))
                                 @if($label) 
                                     <label class="fw-bold mb-2 d-block fs-6 text-dark">
@@ -476,7 +538,7 @@
                                     </div>
                                 </div>
 
-                            {{-- 10. FILE UPLOAD (Clickable Drag & Drop) --}}
+                            {{-- 10. FILE UPLOAD --}}
                             @elseif($type === 'file_upload')
                                 @if($label) 
                                     <label class="fw-bold mb-2 d-block fs-6 text-dark">
@@ -491,7 +553,92 @@
                                     <input type="file" class="d-none" id="file_input_{{ $element->id }}" onchange="handleFileUpload({{ $element->id }}, this);">
                                 </div>
 
-                            {{-- 11. DEDICATED CONTACT INPUTS --}}
+                            {{-- 11. PHONE WITH INTERNATIONAL SEARCHABLE CODES --}}
+                            @elseif($type === 'phone')
+                                @if($label) 
+                                    <label class="form-label fw-bold small text-dark">
+                                        {{ $label }} 
+                                        @if($isRequired) <span class="text-danger">*</span> @endif
+                                    </label> 
+                                @endif
+                                <div class="phone-code-dropdown-container">
+                                    <div class="input-group input-group-lg">
+                                        <button class="phone-code-btn" type="button" id="phone_code_btn_{{ $element->id }}" onclick="togglePhoneCodeMenu({{ $element->id }})">
+                                            <span id="phone_flag_{{ $element->id }}">🇸🇦</span>
+                                            <span id="phone_dial_{{ $element->id }}">+966</span>
+                                            <small class="text-muted ms-1">▾</small>
+                                        </button>
+                                        <input type="tel" class="form-control" id="input_el_{{ $element->id }}" placeholder="05XXXXXXXX" onchange="userAnswers[{{ $element->id }}] = (document.getElementById('phone_dial_{{ $element->id }}').innerText + ' ' + this.value); clearError({{ $element->id }});">
+                                    </div>
+                                    <div class="phone-code-menu" id="phone_menu_{{ $element->id }}">
+                                        <div class="p-2 border-bottom">
+                                            <input type="text" class="form-control form-control-sm" placeholder="🔍 بحث بالدولة أو الكود (مثال: مصر، eg، 20)..." oninput="filterCountryCodeList({{ $element->id }}, this.value)">
+                                        </div>
+                                        <div class="phone-code-list" id="phone_list_{{ $element->id }}">
+                                            <!-- Rendered dynamically -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                            {{-- 12. DEDICATED CONTACT FORM (DYNAMIC FIELDS) --}}
+                            @elseif($type === 'contact_form')
+                                @php
+                                    $cFields = $props['fields'] ?? [
+                                        ['key' => 'full_name', 'label' => 'الاسم الكريم', 'type' => 'text', 'required' => true, 'placeholder' => 'أدخل اسمك الكريم'],
+                                        ['key' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'tel', 'required' => true, 'placeholder' => '05XXXXXXXX'],
+                                        ['key' => 'email', 'label' => 'البريد الإلكتروني', 'type' => 'email', 'required' => false, 'placeholder' => 'example@domain.com']
+                                    ];
+                                @endphp
+                                <div class="bg-light p-3 p-md-4 rounded-4 border">
+                                    <h5 class="fw-bold mb-3 text-primary d-flex align-items-center gap-2">
+                                        <iconify-icon icon="solar:user-id-bold-duotone" width="24"></iconify-icon>
+                                        <span>{{ $label ?: 'سجّل بياناتك لاستلام التقرير وخطة المتابعة' }}</span>
+                                    </h5>
+                                    <div class="d-flex flex-column gap-3">
+                                        @foreach($cFields as $f)
+                                            @php
+                                                $fKey = is_array($f) ? ($f['key'] ?? $f['name'] ?? ('f_' . $loop->index)) : 'f_' . $loop->index;
+                                                $fLabel = is_array($f) ? ($f['label'] ?? 'حقل ' . ($loop->index + 1)) : $f;
+                                                $fType = is_array($f) ? ($f['type'] ?? 'text') : 'text';
+                                                $fReq = is_array($f) ? !empty($f['required']) : false;
+                                                $fPlaceholder = is_array($f) ? ($f['placeholder'] ?? '') : '';
+                                            @endphp
+                                            <div>
+                                                <label class="form-label fw-bold small text-dark mb-1">
+                                                    {{ $fLabel }}
+                                                    @if($fReq) <span class="text-danger">*</span> @endif
+                                                </label>
+                                                
+                                                @if($fType === 'tel' || $fType === 'phone')
+                                                    <div class="phone-code-dropdown-container">
+                                                        <div class="input-group input-group-lg">
+                                                            <button class="phone-code-btn" type="button" id="cf_phone_code_btn_{{ $element->id }}" onclick="togglePhoneCodeMenu('cf_{{ $element->id }}')">
+                                                                <span id="phone_flag_cf_{{ $element->id }}">🇸🇦</span>
+                                                                <span id="phone_dial_cf_{{ $element->id }}">+966</span>
+                                                                <small class="text-muted ms-1">▾</small>
+                                                            </button>
+                                                            <input type="tel" class="form-control" id="cf_input_{{ $fKey }}" placeholder="{{ $fPlaceholder ?: '05XXXXXXXX' }}" onchange="userAnswers['{{ $fKey }}'] = (document.getElementById('phone_dial_cf_{{ $element->id }}').innerText + ' ' + this.value); clearError({{ $element->id }});">
+                                                        </div>
+                                                        <div class="phone-code-menu" id="phone_menu_cf_{{ $element->id }}">
+                                                            <div class="p-2 border-bottom">
+                                                                <input type="text" class="form-control form-control-sm" placeholder="🔍 بحث بالدولة أو الكود (eg, 20)..." oninput="filterCountryCodeList('cf_{{ $element->id }}', this.value)">
+                                                            </div>
+                                                            <div class="phone-code-list" id="phone_list_cf_{{ $element->id }}"></div>
+                                                        </div>
+                                                    </div>
+                                                @elseif($fType === 'textarea')
+                                                    <textarea class="form-control form-control-lg rounded-3" id="cf_input_{{ $fKey }}" rows="2" placeholder="{{ $fPlaceholder }}" onchange="userAnswers['{{ $fKey }}'] = this.value; clearError({{ $element->id }});"></textarea>
+                                                @elseif($fType === 'date')
+                                                    <input type="date" class="form-control form-control-lg rounded-3" id="cf_input_{{ $fKey }}" onchange="userAnswers['{{ $fKey }}'] = this.value; clearError({{ $element->id }});">
+                                                @else
+                                                    <input type="{{ $fType }}" class="form-control form-control-lg rounded-3" id="cf_input_{{ $fKey }}" placeholder="{{ $fPlaceholder }}" onchange="userAnswers['{{ $fKey }}'] = this.value; clearError({{ $element->id }});">
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                            {{-- 13. EMAIL --}}
                             @elseif($type === 'email')
                                 @if($label) <label class="form-label fw-bold small text-dark">{{ $label }} @if($isRequired) <span class="text-danger">*</span> @endif</label> @endif
                                 <div class="input-group input-group-lg">
@@ -499,13 +646,7 @@
                                     <input type="email" class="form-control" id="input_el_{{ $element->id }}" placeholder="name@example.com" onchange="userAnswers[{{ $element->id }}] = this.value; clearError({{ $element->id }});">
                                 </div>
 
-                            @elseif($type === 'phone')
-                                @if($label) <label class="form-label fw-bold small text-dark">{{ $label }} @if($isRequired) <span class="text-danger">*</span> @endif</label> @endif
-                                <div class="input-group input-group-lg">
-                                    <span class="input-group-text bg-light">📱</span>
-                                    <input type="tel" class="form-control" id="input_el_{{ $element->id }}" placeholder="05XXXXXXXX" onchange="userAnswers[{{ $element->id }}] = this.value; clearError({{ $element->id }});">
-                                </div>
-
+                            {{-- 14. ADDRESS --}}
                             @elseif($type === 'address')
                                 @if($label) <label class="form-label fw-bold small text-dark">{{ $label }} @if($isRequired) <span class="text-danger">*</span> @endif</label> @endif
                                 <div class="input-group input-group-lg">
@@ -513,6 +654,7 @@
                                     <input type="text" class="form-control" id="input_el_{{ $element->id }}" placeholder="المدينة، الحي، الشارع" onchange="userAnswers[{{ $element->id }}] = this.value; clearError({{ $element->id }});">
                                 </div>
 
+                            {{-- 15. WEBSITE --}}
                             @elseif($type === 'website')
                                 @if($label) <label class="form-label fw-bold small text-dark">{{ $label }} @if($isRequired) <span class="text-danger">*</span> @endif</label> @endif
                                 <div class="input-group input-group-lg">
@@ -520,44 +662,29 @@
                                     <input type="url" class="form-control" id="input_el_{{ $element->id }}" placeholder="https://www.example.com" onchange="userAnswers[{{ $element->id }}] = this.value; clearError({{ $element->id }});">
                                 </div>
 
-                            {{-- 12. CONTACT FORM --}}
-                            @elseif($type === 'contact_form')
-                                <div class="bg-light p-3 p-md-4 rounded-4 border">
-                                    <h5 class="fw-bold mb-3 text-primary d-flex align-items-center gap-2">
-                                        <iconify-icon icon="solar:user-id-bold-duotone" width="24"></iconify-icon>
-                                        <span>{{ $label ?: 'سجّل بياناتك لاستلام التقرير وخطة المتابعة' }}</span>
-                                    </h5>
-                                    <div class="d-flex flex-column gap-3">
-                                        <div>
-                                            <label class="form-label fw-bold small text-dark">الاسم الكريم <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control form-control-lg rounded-3" id="input_full_name" placeholder="أدخل اسمك الكريم">
-                                        </div>
-                                        <div>
-                                            <label class="form-label fw-bold small text-dark">رقم الواتساب <span class="text-danger">*</span></label>
-                                            <input type="tel" class="form-control form-control-lg rounded-3" id="input_phone" placeholder="05XXXXXXXX">
-                                        </div>
-                                        <div>
-                                            <label class="form-label fw-bold small text-dark">البريد الإلكتروني</label>
-                                            <input type="email" class="form-control form-control-lg rounded-3" id="input_email" placeholder="example@domain.com">
-                                        </div>
-                                    </div>
-                                </div>
-
-                            {{-- 13. COUNTDOWN TIMER (Live Ticking Ticker) --}}
+                            {{-- 16. COUNTDOWN TIMER (HOURS : MINUTES : SECONDS) --}}
                             @elseif(in_array($type, ['timer', 'page_timer']))
                                 @php
-                                    $durationMins = $props['duration_minutes'] ?? 15;
+                                    $hrs = $props['duration_hours'] ?? 0;
+                                    $mins = $props['duration_minutes'] ?? 15;
+                                    $secs = $props['duration_seconds'] ?? 0;
+                                    $totalSecs = ($hrs * 3600) + ($mins * 60) + $secs;
                                 @endphp
-                                <div class="p-3 bg-dark text-white rounded-4 border text-center" id="timer_box_{{ $element->id }}" data-minutes="{{ $durationMins }}">
+                                <div class="p-3 bg-dark text-white rounded-4 border text-center" id="timer_box_{{ $element->id }}" data-seconds="{{ $totalSecs }}">
                                     <span class="small text-warning fw-bold d-block mb-2">⏰ {{ $label ?: 'احجز الآن! هذا العرض ساري لمدة:' }}</span>
                                     <div class="d-flex justify-content-center align-items-center gap-2">
-                                        <div class="timer-box-digit" id="timer_min_{{ $element->id }}">{{ sprintf('%02d', $durationMins) }}</div>
+                                        <div class="timer-box-digit" id="timer_hr_{{ $element->id }}">{{ sprintf('%02d', $hrs) }}</div>
                                         <span class="fs-4 fw-bold text-warning">:</span>
-                                        <div class="timer-box-digit" id="timer_sec_{{ $element->id }}">00</div>
+                                        <div class="timer-box-digit" id="timer_min_{{ $element->id }}">{{ sprintf('%02d', $mins) }}</div>
+                                        <span class="fs-4 fw-bold text-warning">:</span>
+                                        <div class="timer-box-digit" id="timer_sec_{{ $element->id }}">{{ sprintf('%02d', $secs) }}</div>
+                                    </div>
+                                    <div class="d-flex justify-content-center gap-4 text-muted small mt-1" style="font-size: 11px;">
+                                        <span>ساعة</span><span>دقيقة</span><span>ثانية</span>
                                     </div>
                                 </div>
 
-                            {{-- 14. APPOINTMENT & DATE PICKER --}}
+                            {{-- 17. APPOINTMENT & DATE PICKER --}}
                             @elseif(in_array($type, ['date_picker', 'date_time', 'schedule']))
                                 @if($label) 
                                     <label class="fw-bold mb-2 d-block fs-6 text-dark">
@@ -575,7 +702,7 @@
                                     <button type="button" class="slot-btn" onclick="selectSlot({{ $element->id }}, 'مساءً (04:00 - 08:00)', this)">مساءً (04:00 - 08:00)</button>
                                 </div>
 
-                            {{-- 15. STAR RATING --}}
+                            {{-- 18. STAR RATING --}}
                             @elseif($type === 'rating')
                                 @if($label) 
                                     <label class="fw-bold mb-2 d-block fs-6 text-dark">
@@ -591,7 +718,7 @@
                                     </div>
                                 </div>
 
-                            {{-- 16. NPS SCORE (0-10) --}}
+                            {{-- 19. NPS SCORE --}}
                             @elseif($type === 'nps')
                                 @if($label) 
                                     <label class="fw-bold mb-2 d-block fs-6 text-dark">
@@ -611,7 +738,7 @@
                                     </div>
                                 </div>
 
-                            {{-- 17. TABLE --}}
+                            {{-- 20. TABLE --}}
                             @elseif($type === 'table')
                                 @if($label) <h5 class="fw-bold mb-2 text-dark">{{ $label }}</h5> @endif
                                 <div class="table-responsive bg-light p-2 rounded-4 border">
@@ -636,7 +763,7 @@
                                     </table>
                                 </div>
 
-                            {{-- 18. TESTIMONIALS --}}
+                            {{-- 21. TESTIMONIALS --}}
                             @elseif($type === 'testimonials')
                                 <div class="bg-light p-3 p-md-4 rounded-4 border text-center">
                                     <iconify-icon icon="solar:chat-round-quotes-bold-duotone" width="36" class="text-primary mb-2"></iconify-icon>
@@ -645,7 +772,7 @@
                                     <strong class="text-primary small">— فهد الدوسري (عميل موثق ✅)</strong>
                                 </div>
 
-                            {{-- 19. FAQS ACCORDION --}}
+                            {{-- 22. FAQS --}}
                             @elseif($type === 'faqs')
                                 @if($label) <h5 class="fw-bold mb-3 text-dark">{{ $label }}</h5> @endif
                                 <div class="accordion rounded-4 overflow-hidden border" id="faq_acc_{{ $element->id }}">
@@ -675,7 +802,7 @@
                                     </div>
                                 </div>
 
-                            {{-- 20. COUPON CODE --}}
+                            {{-- 23. COUPON CODE --}}
                             @elseif($type === 'coupon_code')
                                 <div class="p-3 bg-light rounded-4 border border-dashed text-center">
                                     <span class="badge bg-warning text-dark fw-bold mb-1">🎁 هدية حصرية لك</span>
@@ -686,7 +813,7 @@
                                     </button>
                                 </div>
 
-                            {{-- 21. TEXT INPUT / SHORT / LONG ANSWER --}}
+                            {{-- 24. SHORT / LONG TEXT --}}
                             @elseif(in_array($type, ['short_answer', 'text_input']))
                                 @if($label) 
                                     <label class="fw-bold mb-2 d-block fs-6 text-dark">
@@ -704,12 +831,6 @@
                                     </label> 
                                 @endif
                                 <textarea class="form-control form-control-lg rounded-3" id="input_el_{{ $element->id }}" rows="3" placeholder="اكتب تفاصيل إجابتك هنا..." onchange="userAnswers[{{ $element->id }}] = this.value; clearError({{ $element->id }});"></textarea>
-
-                            {{-- 22. BUTTON --}}
-                            @elseif($type === 'button')
-                                <button type="button" class="btn-primary-custom mt-2" onclick="nextStep()">
-                                    {{ $label ?: 'متابعة الخطوة التالية ➔' }}
-                                </button>
 
                             @else
                                 @if($label) 
@@ -796,9 +917,118 @@
         @endforeach
     ];
 
+    const ALL_COUNTRY_DIAL_CODES = [
+        { name_ar: 'السعودية', name_en: 'Saudi Arabia', code: 'SA', dial_code: '+966', flag: '🇸🇦' },
+        { name_ar: 'مصر', name_en: 'Egypt', code: 'EG', dial_code: '+20', flag: '🇪🇬' },
+        { name_ar: 'الإمارات', name_en: 'United Arab Emirates', code: 'AE', dial_code: '+971', flag: '🇦🇪' },
+        { name_ar: 'الكويت', name_en: 'Kuwait', code: 'KW', dial_code: '+965', flag: '🇰🇼' },
+        { name_ar: 'قطر', name_en: 'Qatar', code: 'QA', dial_code: '+974', flag: '🇶🇦' },
+        { name_ar: 'البحرين', name_en: 'Bahrain', code: 'BH', dial_code: '+973', flag: '🇧🇭' },
+        { name_ar: 'عمان', name_en: 'Oman', code: 'OM', dial_code: '+968', flag: '🇴🇲' },
+        { name_ar: 'الأردن', name_en: 'Jordan', code: 'JO', dial_code: '+962', flag: '🇯🇴' },
+        { name_ar: 'العراق', name_en: 'Iraq', code: 'IQ', dial_code: '+964', flag: '🇮🇶' },
+        { name_ar: 'المغرب', name_en: 'Morocco', code: 'MA', dial_code: '+212', flag: '🇲🇦' },
+        { name_ar: 'الجزائر', name_en: 'Algeria', code: 'DZ', dial_code: '+213', flag: '🇩🇿' },
+        { name_ar: 'تونس', name_en: 'Tunisia', code: 'TN', dial_code: '+216', flag: '🇹🇳' },
+        { name_ar: 'لبنان', name_en: 'Lebanon', code: 'LB', dial_code: '+961', flag: '🇱🇧' },
+        { name_ar: 'تركيا', name_en: 'Turkey', code: 'TR', dial_code: '+90', flag: '🇹🇷' },
+        { name_ar: 'المملكة المتحدة', name_en: 'United Kingdom', code: 'GB', dial_code: '+44', flag: '🇬🇧' },
+        { name_ar: 'الولايات المتحدة', name_en: 'United States', code: 'US', dial_code: '+1', flag: '🇺🇸' },
+        { name_ar: 'ألمانيا', name_en: 'Germany', code: 'DE', dial_code: '+49', flag: '🇩🇪' },
+        { name_ar: 'فرنسا', name_en: 'France', code: 'FR', dial_code: '+33', flag: '🇫🇷' },
+        { name_ar: 'إيطاليا', name_en: 'Italy', code: 'IT', dial_code: '+39', flag: '🇮🇹' },
+        { name_ar: 'إسبانيا', name_en: 'Spain', code: 'ES', dial_code: '+34', flag: '🇪🇸' },
+        { name_ar: 'سويسرا', name_en: 'Switzerland', code: 'CH', dial_code: '+41', flag: '🇨🇭' },
+        { name_ar: 'هولندا', name_en: 'Netherlands', code: 'NL', dial_code: '+31', flag: '🇳🇱' },
+        { name_ar: 'كندا', name_en: 'Canada', code: 'CA', dial_code: '+1', flag: '🇨🇦' },
+        { name_ar: 'أستراليا', name_en: 'Australia', code: 'AU', dial_code: '+61', flag: '🇦🇺' },
+        { name_ar: 'الصين', name_en: 'China', code: 'CN', dial_code: '+86', flag: '🇨🇳' },
+        { name_ar: 'اليابان', name_en: 'Japan', code: 'JP', dial_code: '+81', flag: '🇯🇵' },
+        { name_ar: 'ماليزيا', name_en: 'Malaysia', code: 'MY', dial_code: '+60', flag: '🇲🇾' },
+        { name_ar: 'إندونيسيا', name_en: 'Indonesia', code: 'ID', dial_code: '+62', flag: '🇮🇩' },
+        { name_ar: 'الهند', name_en: 'India', code: 'IN', dial_code: '+91', flag: '🇮🇳' },
+        { name_ar: 'روسيا', name_en: 'Russia', code: 'RU', dial_code: '+7', flag: '🇷🇺' },
+        { name_ar: 'جورجيا', name_en: 'Georgia', code: 'GE', dial_code: '+995', flag: '🇬🇪' },
+        { name_ar: 'أذربيجان', name_en: 'Azerbaijan', code: 'AZ', dial_code: '+994', flag: '🇦🇿' },
+        { name_ar: 'البوسنة', name_en: 'Bosnia', code: 'BA', dial_code: '+387', flag: '🇧🇦' },
+        { name_ar: 'تايلاند', name_en: 'Thailand', code: 'TH', dial_code: '+66', flag: '🇹🇭' },
+        { name_ar: 'الفلبين', name_en: 'Philippines', code: 'PH', dial_code: '+63', flag: '🇵🇭' },
+        { name_ar: 'جزر المالديف', name_en: 'Maldives', code: 'MV', dial_code: '+960', flag: '🇲🇻' },
+        { name_ar: 'سيريلانكا', name_en: 'Sri Lanka', code: 'LK', dial_code: '+94', flag: '🇱🇰' },
+        { name_ar: 'سنغافورة', name_en: 'Singapore', code: 'SG', dial_code: '+65', flag: '🇸🇬' },
+        { name_ar: 'كوريا الجنوبية', name_en: 'South Korea', code: 'KR', dial_code: '+82', flag: '🇰🇷' },
+        { name_ar: 'السودان', name_en: 'Sudan', code: 'SD', dial_code: '+249', flag: '🇸🇩' },
+        { name_ar: 'اليمن', name_en: 'Yemen', code: 'YE', dial_code: '+967', flag: '🇾🇪' },
+        { name_ar: 'سوريا', name_en: 'Syria', code: 'SY', dial_code: '+963', flag: '🇸🇾' },
+        { name_ar: 'فلسطين', name_en: 'Palestine', code: 'PS', dial_code: '+970', flag: '🇵🇸' },
+        { name_ar: 'ليبيا', name_en: 'Libya', code: 'LY', dial_code: '+218', flag: '🇱🇾' },
+        { name_ar: 'موريتانيا', name_en: 'Mauritania', code: 'MR', dial_code: '+222', flag: '🇲🇷' },
+        { name_ar: 'الصومال', name_en: 'Somalia', code: 'SO', dial_code: '+252', flag: '🇸🇴' },
+        { name_ar: 'جيبوتي', name_en: 'Djibouti', code: 'DJ', dial_code: '+253', flag: '🇩🇯' },
+        { name_ar: 'جزر القمر', name_en: 'Comoros', code: 'KM', dial_code: '+269', flag: '🇰🇲' }
+    ];
+
     document.addEventListener('DOMContentLoaded', () => {
         initTimers();
+        initPhoneCodeDropdowns();
     });
+
+    function initPhoneCodeDropdowns() {
+        document.querySelectorAll('.phone-code-list').forEach(listEl => {
+            const containerId = listEl.id.replace('phone_list_', '');
+            renderCountryCodeList(containerId, ALL_COUNTRY_DIAL_CODES);
+        });
+
+        // Close dropdown when clicked outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.phone-code-dropdown-container')) {
+                document.querySelectorAll('.phone-code-menu').forEach(m => m.classList.remove('show'));
+            }
+        });
+    }
+
+    function togglePhoneCodeMenu(id) {
+        const menu = document.getElementById('phone_menu_' + id);
+        if (menu) {
+            const isShown = menu.classList.contains('show');
+            document.querySelectorAll('.phone-code-menu').forEach(m => m.classList.remove('show'));
+            if (!isShown) menu.classList.add('show');
+        }
+    }
+
+    function renderCountryCodeList(id, list) {
+        const listEl = document.getElementById('phone_list_' + id);
+        if (!listEl) return;
+        let html = '';
+        list.forEach(c => {
+            html += `
+                <div class="phone-code-item" onclick="selectCountryDialCode('${id}', '${c.dial_code}', '${c.flag}')">
+                    <span>${c.flag} ${c.name_ar}</span>
+                    <span class="badge bg-light text-dark border">${c.dial_code}</span>
+                </div>
+            `;
+        });
+        listEl.innerHTML = html || '<div class="p-2 text-center text-muted small">لا توجد نتائج</div>';
+    }
+
+    function filterCountryCodeList(id, query) {
+        query = query.toLowerCase().trim();
+        const filtered = ALL_COUNTRY_DIAL_CODES.filter(c => {
+            return c.name_ar.includes(query) ||
+                   c.name_en.toLowerCase().includes(query) ||
+                   c.code.toLowerCase().includes(query) ||
+                   c.dial_code.includes(query);
+        });
+        renderCountryCodeList(id, filtered);
+    }
+
+    function selectCountryDialCode(id, dialCode, flag) {
+        const flagEl = document.getElementById('phone_flag_' + id);
+        const dialEl = document.getElementById('phone_dial_' + id);
+        if (flagEl) flagEl.innerText = flag;
+        if (dialEl) dialEl.innerText = dialCode;
+        document.getElementById('phone_menu_' + id)?.classList.remove('show');
+    }
 
     function updateProgress() {
         if (totalSteps <= 0) return;
@@ -943,21 +1173,23 @@
 
     function initTimers() {
         document.querySelectorAll('[id^="timer_box_"]').forEach(box => {
-            const mins = parseInt(box.dataset.minutes) || 15;
-            let totalSeconds = mins * 60;
+            let totalSeconds = parseInt(box.dataset.seconds) || 900;
             const elId = box.id.replace('timer_box_', '');
+            const hrEl = document.getElementById('timer_hr_' + elId);
             const minEl = document.getElementById('timer_min_' + elId);
             const secEl = document.getElementById('timer_sec_' + elId);
 
             const interval = setInterval(() => {
                 if (totalSeconds <= 0) {
                     clearInterval(interval);
-                    box.innerHTML = '<span class="text-danger fw-bold">⚠️ انتهت صلاحية هذا العرض الخاص!</span>';
+                    box.innerHTML = '<span class="text-danger fw-bold fs-5">⚠️ انتهت صلاحية هذا العرض الخاص!</span>';
                     return;
                 }
                 totalSeconds--;
-                const m = Math.floor(totalSeconds / 60);
+                const h = Math.floor(totalSeconds / 3600);
+                const m = Math.floor((totalSeconds % 3600) / 60);
                 const s = totalSeconds % 60;
+                if (hrEl) hrEl.innerText = String(h).padStart(2, '0');
                 if (minEl) minEl.innerText = String(m).padStart(2, '0');
                 if (secEl) secEl.innerText = String(s).padStart(2, '0');
             }, 1000);
@@ -973,9 +1205,9 @@
             btn.innerHTML = 'جاري الإرسال... ⏳';
         }
 
-        const fullName = document.getElementById('input_full_name')?.value || userAnswers['full_name'] || 'عميل محتمل';
-        const phone = document.getElementById('input_phone')?.value || userAnswers['phone'] || '';
-        const email = document.getElementById('input_email')?.value || userAnswers['email'] || '';
+        const fullName = document.getElementById('cf_input_full_name')?.value || userAnswers['full_name'] || 'عميل محتمل';
+        const phone = document.getElementById('cf_input_phone')?.value || userAnswers['phone'] || '';
+        const email = document.getElementById('cf_input_email')?.value || userAnswers['email'] || '';
 
         const payload = {
             answers: userAnswers,
