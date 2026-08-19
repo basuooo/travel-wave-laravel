@@ -10,6 +10,7 @@ use App\Models\FunnelElement;
 use App\Models\FunnelResult;
 use App\Models\FunnelStep;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class FunnelBuilderController extends Controller
 {
