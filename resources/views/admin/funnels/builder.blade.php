@@ -344,7 +344,7 @@
 
     <!-- Top Action Buttons -->
     <div class="d-flex align-items-center gap-2">
-        <a href="{{ route('funnels.public.show', $funnel->slug) }}" target="_blank" class="btn btn-outline-light btn-sm rounded-3 d-flex align-items-center gap-1">
+        <a href="{{ route('funnels.public.show', $funnel->slug) }}?preview=1" target="_blank" class="btn btn-outline-light btn-sm rounded-3 d-flex align-items-center gap-1">
             <iconify-icon icon="solar:eye-bold" width="16"></iconify-icon>
             <span>معاينة حية</span>
         </a>

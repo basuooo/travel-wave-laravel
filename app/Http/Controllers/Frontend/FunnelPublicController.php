@@ -21,7 +21,8 @@ class FunnelPublicController extends Controller
             ->with(['steps.elements', 'results', 'conditions'])
             ->firstOrFail();
 
-        $isPreview = $request->has('preview') && auth()->check();
+        $isAdmin = auth()->check();
+        $isPreview = $request->has('preview') || $isAdmin;
 
         if (! $funnel->isPublished() && ! $isPreview) {
             abort(404, __('admin.funnel_not_found_or_unpublished'));
