@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ Visual Funnel Builder (Involve.me Pro Suite) | {{ $funnel->name }}</title>
+    <title>⚡ Visual Funnel Builder Pro Suite | {{ $funnel->name }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Bootstrap 5 & Google Fonts -->
@@ -17,7 +17,7 @@
         :root {
             --fb-topbar-h: 62px;
             --fb-sidebar-w: 340px;
-            --fb-inspector-w: 390px;
+            --fb-inspector-w: 400px;
             --fb-bg-dark: #090d16;
             --fb-panel-bg: #101726;
             --fb-panel-card: #192237;
@@ -115,7 +115,7 @@
             overflow-y: auto;
         }
 
-        /* Accordion Categories Styling (Involve.me style) */
+        /* Accordion Categories */
         .fb-category-accordion .accordion-item {
             background: transparent;
             border: none;
@@ -144,7 +144,7 @@
             padding: 8px 2px 4px;
         }
 
-        /* Involve.me Palette Element Badges */
+        /* Palette Badges */
         .fb-element-pill {
             background: #ffffff;
             color: #1e293b;
@@ -170,17 +170,6 @@
         }
         .fb-element-pill:active {
             cursor: grabbing;
-        }
-        .fb-element-pill .badge-new {
-            position: absolute;
-            top: -6px;
-            right: -4px;
-            background: #3b82f6;
-            color: #fff;
-            font-size: 9px;
-            padding: 1px 5px;
-            border-radius: 6px;
-            font-weight: 800;
         }
 
         /* Canvas Element */
@@ -342,7 +331,7 @@
         </button>
     </div>
 
-    <!-- Top Action Buttons -->
+    <!-- Actions -->
     <div class="d-flex align-items-center gap-2">
         <button type="button" class="btn btn-outline-light btn-sm rounded-3 d-flex align-items-center gap-1" onclick="openLivePreview()">
             <iconify-icon icon="solar:eye-bold" width="16"></iconify-icon>
@@ -361,13 +350,13 @@
     </div>
 </header>
 
-<!-- MAIN WORKSPACE -->
+<!-- WORKSPACE -->
 <div class="fb-workspace">
     
-    <!-- LEFT PANEL: Steps & Involve.me Full Element Palette -->
+    <!-- LEFT PANEL: Steps & Involve.me Palette -->
     <aside class="fb-sidebar p-3">
         
-        <!-- Funnel Steps Section -->
+        <!-- Steps Header -->
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="text-uppercase text-muted fw-bold small mb-0">📌 خطوات الفانل (Steps)</h6>
             <button type="button" class="btn btn-primary btn-sm py-1 px-2 rounded-2 fw-bold" onclick="addNewStep()">
@@ -380,15 +369,15 @@
 
         <hr class="border-secondary my-3">
 
-        <!-- Involve.me Categories Palette Header & Search -->
+        <!-- Search Bar -->
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="text-uppercase text-muted fw-bold small mb-0">🧩 مكتبة العناصر (Involve.me)</h6>
+            <h6 class="text-uppercase text-muted fw-bold small mb-0">🧩 مكتبة العناصر</h6>
         </div>
         <div class="mb-3">
             <input type="text" class="form-control form-control-sm form-control-dark" id="element_search_input" placeholder="🔍 بحث عن عنصر..." oninput="filterPaletteElements(this.value)">
         </div>
 
-        <!-- ACCORDION PALETTE CATEGORIES -->
+        <!-- ACCORDION PALETTE -->
         <div class="accordion fb-category-accordion" id="palette_accordion">
             
             <!-- 1. Choices -->
@@ -404,11 +393,10 @@
                         <div class="row g-2">
                             <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="single_choice" onclick="addElementToCurrentStep('single_choice')"><iconify-icon icon="solar:document-text-bold-duotone" class="text-primary"></iconify-icon> Single Choice</div></div>
                             <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="multiple_choice" onclick="addElementToCurrentStep('multiple_choice')"><iconify-icon icon="solar:list-check-bold-duotone" class="text-primary"></iconify-icon> Multiple Choice</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="radio_choice" onclick="addElementToCurrentStep('single_choice')"><iconify-icon icon="solar:record-circle-bold-duotone" class="text-primary"></iconify-icon> Radio Choice</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="checkbox_choice" onclick="addElementToCurrentStep('multiple_choice')"><iconify-icon icon="solar:check-square-bold-duotone" class="text-primary"></iconify-icon> Checkbox Choice</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="radio_choice" onclick="addElementToCurrentStep('radio_choice')"><iconify-icon icon="solar:record-circle-bold-duotone" class="text-primary"></iconify-icon> Radio Choice</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="checkbox_choice" onclick="addElementToCurrentStep('checkbox_choice')"><iconify-icon icon="solar:check-square-bold-duotone" class="text-primary"></iconify-icon> Checkbox Choice</div></div>
                             <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="yes_no" onclick="addElementToCurrentStep('yes_no')"><iconify-icon icon="solar:shield-check-bold-duotone" class="text-primary"></iconify-icon> Yes/No</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="single_image_choice" onclick="addElementToCurrentStep('image_choice')"><iconify-icon icon="solar:gallery-bold-duotone" class="text-primary"></iconify-icon> Single Image Choice</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="multiple_image_choice" onclick="addElementToCurrentStep('image_choice')"><iconify-icon icon="solar:album-bold-duotone" class="text-primary"></iconify-icon> Multi Image Choice</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="image_choice" onclick="addElementToCurrentStep('image_choice')"><iconify-icon icon="solar:gallery-bold-duotone" class="text-primary"></iconify-icon> Image Cards</div></div>
                             <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="dropdown" onclick="addElementToCurrentStep('dropdown')"><iconify-icon icon="solar:menu-dots-square-bold-duotone" class="text-primary"></iconify-icon> Dropdown</div></div>
                         </div>
                     </div>
@@ -438,19 +426,18 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cat_collecting">
-                        <iconify-icon icon="solar:chat-round-line-bold-duotone" class="text-purple me-2" width="18"></iconify-icon>
+                        <iconify-icon icon="solar:chat-round-line-bold-duotone" class="text-info me-2" width="18"></iconify-icon>
                         <span>Collecting Data (جمع البيانات)</span>
                     </button>
                 </h2>
                 <div id="cat_collecting" class="accordion-collapse collapse">
                     <div class="accordion-body">
                         <div class="row g-2">
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="short_answer" onclick="addElementToCurrentStep('text_input')"><iconify-icon icon="solar:text-field-bold-duotone" class="text-info"></iconify-icon> Short Answer</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="long_answer" onclick="addElementToCurrentStep('text_input')"><iconify-icon icon="solar:chat-square-bold-duotone" class="text-info"></iconify-icon> Long Answer</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="short_answer" onclick="addElementToCurrentStep('short_answer')"><iconify-icon icon="solar:text-field-bold-duotone" class="text-info"></iconify-icon> Short Answer</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="long_answer" onclick="addElementToCurrentStep('long_answer')"><iconify-icon icon="solar:chat-square-bold-duotone" class="text-info"></iconify-icon> Long Answer</div></div>
                             <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="number_input" onclick="addElementToCurrentStep('number_input')"><iconify-icon icon="solar:calculator-bold-duotone" class="text-info"></iconify-icon> Number Input</div></div>
                             <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="currency" onclick="addElementToCurrentStep('currency')"><iconify-icon icon="solar:dollar-bold-duotone" class="text-info"></iconify-icon> Currency (SAR/$)</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="autocomplete" onclick="addElementToCurrentStep('dropdown')"><iconify-icon icon="solar:sort-by-alphabet-bold-duotone" class="text-info"></iconify-icon> Autocomplete</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="file_upload" onclick="addElementToCurrentStep('file_upload')"><iconify-icon icon="solar:upload-track-bold-duotone" class="text-info"></iconify-icon> File Upload</div></div>
+                            <div class="col-12"><div class="fb-element-pill" draggable="true" data-type="file_upload" onclick="addElementToCurrentStep('file_upload')"><iconify-icon icon="solar:upload-track-bold-duotone" class="text-info"></iconify-icon> File Upload (رفع ملف)</div></div>
                         </div>
                     </div>
                 </div>
@@ -483,21 +470,21 @@
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cat_time">
                         <iconify-icon icon="solar:calendar-bold-duotone" class="text-danger me-2" width="18"></iconify-icon>
-                        <span>Time & Scheduling (المواعيد والوقت)</span>
+                        <span>Time & Scheduling (المواعيد والمؤقت)</span>
                     </button>
                 </h2>
                 <div id="cat_time" class="accordion-collapse collapse">
                     <div class="accordion-body">
                         <div class="row g-2">
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="date_time" onclick="addElementToCurrentStep('date_picker')"><iconify-icon icon="solar:calendar-date-bold-duotone" class="text-danger"></iconify-icon> Date & Time</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="schedule" onclick="addElementToCurrentStep('date_picker')"><iconify-icon icon="solar:calendar-mark-bold-duotone" class="text-danger"></iconify-icon> Appointments</div></div>
-                            <div class="col-12"><div class="fb-element-pill" draggable="true" data-type="timer" onclick="addElementToCurrentStep('timer')"><iconify-icon icon="solar:clock-circle-bold-duotone" class="text-danger"></iconify-icon> Page Timer (مؤقت عد تنازلي)</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="date_picker" onclick="addElementToCurrentStep('date_picker')"><iconify-icon icon="solar:calendar-date-bold-duotone" class="text-danger"></iconify-icon> Date Picker</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="schedule" onclick="addElementToCurrentStep('schedule')"><iconify-icon icon="solar:calendar-mark-bold-duotone" class="text-danger"></iconify-icon> Appointments</div></div>
+                            <div class="col-12"><div class="fb-element-pill" draggable="true" data-type="timer" onclick="addElementToCurrentStep('timer')"><iconify-icon icon="solar:clock-circle-bold-duotone" class="text-danger"></iconify-icon> Countdown Timer (مؤقت تنازلي)</div></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 6. Static & Content Elements -->
+            <!-- 6. Static Elements -->
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cat_static">
@@ -509,90 +496,11 @@
                     <div class="accordion-body">
                         <div class="row g-2">
                             <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="heading" onclick="addElementToCurrentStep('heading')"><iconify-icon icon="solar:text-bold-duotone" class="text-warning"></iconify-icon> Heading</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="paragraph" onclick="addElementToCurrentStep('text')"><iconify-icon icon="solar:notes-bold-duotone" class="text-warning"></iconify-icon> Paragraph</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="table" onclick="addElementToCurrentStep('table')"><span class="badge-new">NEW</span><iconify-icon icon="solar:table-bold-duotone" class="text-warning"></iconify-icon> Table</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="image_text" onclick="addElementToCurrentStep('image_text')"><iconify-icon icon="solar:sidebar-minimalistic-bold-duotone" class="text-warning"></iconify-icon> Image + Text</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="stats_bar" onclick="addElementToCurrentStep('stats_bar')"><iconify-icon icon="solar:chart-bold-duotone" class="text-warning"></iconify-icon> Stats Bar</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="paragraph" onclick="addElementToCurrentStep('paragraph')"><iconify-icon icon="solar:notes-bold-duotone" class="text-warning"></iconify-icon> Paragraph</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="table" onclick="addElementToCurrentStep('table')"><iconify-icon icon="solar:table-bold-duotone" class="text-warning"></iconify-icon> Table</div></div>
                             <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="testimonials" onclick="addElementToCurrentStep('testimonials')"><iconify-icon icon="solar:chat-dots-bold-duotone" class="text-warning"></iconify-icon> Testimonials</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="faqs" onclick="addElementToCurrentStep('faqs')"><iconify-icon icon="solar:question-circle-bold-duotone" class="text-warning"></iconify-icon> FAQs Accordion</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="reviews_badge" onclick="addElementToCurrentStep('reviews_badge')"><iconify-icon icon="solar:verified-check-bold-duotone" class="text-warning"></iconify-icon> Reviews Badge</div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 7. Media -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cat_media">
-                        <iconify-icon icon="solar:video-frame-bold-duotone" class="text-danger me-2" width="18"></iconify-icon>
-                        <span>Media (الوسائط والفيديو)</span>
-                    </button>
-                </h2>
-                <div id="cat_media" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        <div class="row g-2">
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="image" onclick="addElementToCurrentStep('image')"><iconify-icon icon="solar:gallery-bold-duotone" class="text-danger"></iconify-icon> Image</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="video" onclick="addElementToCurrentStep('video')"><iconify-icon icon="solar:videocamera-record-bold-duotone" class="text-danger"></iconify-icon> Video Embed</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="google_maps" onclick="addElementToCurrentStep('google_maps')"><iconify-icon icon="solar:map-bold-duotone" class="text-danger"></iconify-icon> Google Maps</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="widget_embed" onclick="addElementToCurrentStep('widget_embed')"><iconify-icon icon="solar:code-bold-duotone" class="text-danger"></iconify-icon> Custom Embed</div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 8. Formulas & Results -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cat_formulas">
-                        <iconify-icon icon="solar:calculator-minimalistic-bold-duotone" class="text-success me-2" width="18"></iconify-icon>
-                        <span>Formulas & Results (الحاسبات والنتائج)</span>
-                    </button>
-                </h2>
-                <div id="cat_formulas" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        <div class="row g-2">
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="calculator" onclick="addElementToCurrentStep('calculator')"><iconify-icon icon="solar:calculator-bold-duotone" class="text-success"></iconify-icon> Calculator</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="score_display" onclick="addElementToCurrentStep('score_display')"><iconify-icon icon="solar:cup-bold-duotone" class="text-success"></iconify-icon> Score Display</div></div>
-                            <div class="col-12"><div class="fb-element-pill" draggable="true" data-type="answer_summary" onclick="addElementToCurrentStep('answer_summary')"><iconify-icon icon="solar:list-bold-duotone" class="text-success"></iconify-icon> Answer Summary Card</div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 9. Graphs & Visualizations -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cat_graphs">
-                        <iconify-icon icon="solar:pie-chart-2-bold-duotone" class="text-info me-2" width="18"></iconify-icon>
-                        <span>Graphs & Progress (الرسوم البيانية)</span>
-                    </button>
-                </h2>
-                <div id="cat_graphs" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        <div class="row g-2">
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="gauge" onclick="addElementToCurrentStep('gauge')"><span class="badge-new">NEW</span><iconify-icon icon="solar:speedometer-bold-duotone" class="text-info"></iconify-icon> Gauge Chart</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="progress_ring" onclick="addElementToCurrentStep('progress_ring')"><span class="badge-new">NEW</span><iconify-icon icon="solar:refresh-circle-bold-duotone" class="text-info"></iconify-icon> Progress Ring</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="progress_bar" onclick="addElementToCurrentStep('progress_bar')"><span class="badge-new">NEW</span><iconify-icon icon="solar:slider-minimalistic-horizontal-bold-duotone" class="text-info"></iconify-icon> Progress Bar</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="donut_chart" onclick="addElementToCurrentStep('donut_chart')"><span class="badge-new">NEW</span><iconify-icon icon="solar:pie-chart-bold-duotone" class="text-info"></iconify-icon> Donut Chart</div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 10. E-Commerce & Social -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cat_ecommerce">
-                        <iconify-icon icon="solar:cart-bold-duotone" class="text-success me-2" width="18"></iconify-icon>
-                        <span>E-Commerce & Social (المبيعات)</span>
-                    </button>
-                </h2>
-                <div id="cat_ecommerce" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        <div class="row g-2">
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="coupon_code" onclick="addElementToCurrentStep('coupon_code')"><iconify-icon icon="solar:ticket-bold-duotone" class="text-success"></iconify-icon> Coupon Code</div></div>
-                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="social_share" onclick="addElementToCurrentStep('social_share')"><iconify-icon icon="solar:share-bold-duotone" class="text-success"></iconify-icon> Social Share</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="faqs" onclick="addElementToCurrentStep('faqs')"><iconify-icon icon="solar:question-circle-bold-duotone" class="text-warning"></iconify-icon> FAQs</div></div>
+                            <div class="col-6"><div class="fb-element-pill" draggable="true" data-type="coupon_code" onclick="addElementToCurrentStep('coupon_code')"><iconify-icon icon="solar:ticket-bold-duotone" class="text-warning"></iconify-icon> Coupon Code</div></div>
                         </div>
                     </div>
                 </div>
@@ -608,9 +516,8 @@
         </div>
     </main>
 
-    <!-- RIGHT PANEL: Full Inspector -->
+    <!-- RIGHT PANEL: Inspector -->
     <aside class="fb-inspector p-3">
-        <!-- Navigation Tabs -->
         <ul class="nav nav-pills nav-pills-custom nav-justified mb-3" id="inspector_tabs" role="tablist">
             <li class="nav-item">
                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab_props">⚙️ الخصائص</button>
@@ -628,20 +535,33 @@
 
         <div class="tab-content" id="inspector_tab_content">
             
-            <!-- TAB 1: Element / Step Properties -->
+            <!-- TAB 1: Properties -->
             <div class="tab-pane fade show active" id="tab_props">
                 <div id="inspector_element_panel">
                     <div class="text-center text-muted py-5">
                         <iconify-icon icon="solar:cursor-bold-duotone" width="48" class="opacity-50 mb-2"></iconify-icon>
-                        <p class="small">انقر على أي عنصر داخل الشاشة لتعديل خصائصه أو إضافة خيارات ونقاط.</p>
+                        <p class="small">انقر على أي عنصر داخل الشاشة لتعديل خصائصه.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: Design & Theme Customizer -->
+            <!-- TAB 2: Design & Scoring Settings -->
             <div class="tab-pane fade" id="tab_design">
-                <h6 class="fw-bold mb-3">🎨 تخصيص المظهر والتصميم</h6>
+                <h6 class="fw-bold mb-3">🎨 المظهر ونظام التقييم</h6>
                 
+                <!-- Scoring Toggle -->
+                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                    <div class="form-check form-switch mb-1">
+                        <input class="form-check-input" type="checkbox" id="scoring_enabled_checkbox" onchange="toggleScoringMode(this.checked)" {{ ($funnel->design_settings['scoring_enabled'] ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label fw-bold small text-white" for="scoring_enabled_checkbox">
+                            تفعيل نظام الدرجات وحساب الأهلية (Quiz / Scoring)
+                        </label>
+                    </div>
+                    <small class="text-muted d-block" style="font-size: 11px;">
+                        إذا تم إيقافه، سيعمل الفانل كنموذج تجميع بيانات وليد جنريشن عادي بدون احتساب درجات أو إظهار نسبة مئوية.
+                    </small>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label small text-muted">اللون الأساسي (Primary Color)</label>
                     <div class="d-flex align-items-center gap-2">
@@ -658,35 +578,23 @@
                         <option value="System">System Default</option>
                     </select>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label small text-muted">شكل الأزرار والبطاقات</label>
-                    <select class="form-select form-select-sm form-select-dark" id="design_button_style" onchange="updateDesignSettings()">
-                        <option value="rounded-lg">Rounded Large (دائري ناعم)</option>
-                        <option value="rounded-pill">Rounded Pill (كبسولة بيضاوية)</option>
-                        <option value="rounded-none">Sharp Square (حواف حادة)</option>
-                    </select>
-                </div>
             </div>
 
-            <!-- TAB 3: Scoring & Results Builder -->
+            <!-- TAB 3: Results -->
             <div class="tab-pane fade" id="tab_results">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold mb-0">🏆 شاشات النتائج والأهلية</h6>
                     <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2" onclick="addNewResult()">➕ إضافة نتيجة</button>
                 </div>
-                <p class="text-muted small">حدد النتائج التي تظهر للعميل بناءً على مجموع نقاط إجاباته.</p>
-
                 <div id="results_list_wrapper">
                     <!-- Rendered by JS -->
                 </div>
             </div>
 
-            <!-- TAB 4: CRM & Tracking Integrations -->
+            <!-- TAB 4: Integrations -->
             <div class="tab-pane fade" id="tab_integrations">
                 <h6 class="fw-bold mb-2">⚡ مزامنة CRM و البكسلات</h6>
                 
-                <!-- CRM -->
                 <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
                     <div class="form-check form-switch mb-2">
                         <input class="form-check-input" type="checkbox" id="crm_enabled_checkbox" {{ ($funnel->crm_settings['enabled'] ?? true) ? 'checked' : '' }}>
@@ -712,24 +620,19 @@
                     </div>
                 </div>
 
-                <!-- Pixels -->
                 <div class="p-3 bg-dark rounded-3 border border-secondary">
-                    <h6 class="fw-bold small mb-2">🎯 بكسلات التتبع (Tracking Pixels)</h6>
+                    <h6 class="fw-bold small mb-2">🎯 بكسلات التتبع</h6>
                     <div class="mb-2">
                         <label class="form-label small text-muted">Meta (Facebook) Pixel ID</label>
-                        <input type="text" class="form-control form-control-sm form-control-dark" id="meta_pixel_input" value="{{ $funnel->tracking_settings['meta_pixel_id'] ?? '' }}" placeholder="e.g. 1234567890">
+                        <input type="text" class="form-control form-control-sm form-control-dark" id="meta_pixel_input" value="{{ $funnel->tracking_settings['meta_pixel_id'] ?? '' }}">
                     </div>
                     <div class="mb-2">
                         <label class="form-label small text-muted">Google Analytics (GA4) ID</label>
-                        <input type="text" class="form-control form-control-sm form-control-dark" id="ga4_input" value="{{ $funnel->tracking_settings['ga4_id'] ?? '' }}" placeholder="e.g. G-XXXXXXXXXX">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small text-muted">TikTok Pixel ID</label>
-                        <input type="text" class="form-control form-control-sm form-control-dark" id="tiktok_input" value="{{ $funnel->tracking_settings['tiktok_pixel_id'] ?? '' }}" placeholder="e.g. CXXXXXXXXXX">
+                        <input type="text" class="form-control form-control-sm form-control-dark" id="ga4_input" value="{{ $funnel->tracking_settings['ga4_id'] ?? '' }}">
                     </div>
                     <div>
-                        <label class="form-label small text-muted">Snapchat Pixel ID</label>
-                        <input type="text" class="form-control form-control-sm form-control-dark" id="snap_input" value="{{ $funnel->tracking_settings['snap_pixel_id'] ?? '' }}" placeholder="e.g. xxxxxxxx-xxxx">
+                        <label class="form-label small text-muted">TikTok Pixel ID</label>
+                        <input type="text" class="form-control form-control-sm form-control-dark" id="tiktok_input" value="{{ $funnel->tracking_settings['tiktok_pixel_id'] ?? '' }}">
                     </div>
                 </div>
             </div>
@@ -746,10 +649,28 @@
     const funnelData = @json($funnel);
     if (!funnelData.steps) funnelData.steps = [];
     if (!funnelData.results) funnelData.results = [];
-    if (!funnelData.design_settings) funnelData.design_settings = { primary_color: '#2563eb' };
+    if (!funnelData.design_settings) funnelData.design_settings = { primary_color: '#2563eb', scoring_enabled: true };
 
     let activeStepIndex = 0;
     let selectedElementIndex = null;
+
+    const WORLD_CURRENCIES = [
+        { code: 'SAR', label: '🇸🇦 SAR (ريال سعودي)' },
+        { code: 'USD', label: '🇺🇸 USD (دولار أمريكي)' },
+        { code: 'EUR', label: '🇪🇺 EUR (يورو أوروبي)' },
+        { code: 'AED', label: '🇦🇪 AED (درهم إماراتي)' },
+        { code: 'EGP', label: '🇪🇬 EGP (جنيه مصري)' },
+        { code: 'KWD', label: '🇰🇼 KWD (دينار كويتي)' },
+        { code: 'QAR', label: '🇶🇦 QAR (ريال قطري)' },
+        { code: 'BHD', label: '🇧🇭 BHD (دينار بحريني)' },
+        { code: 'OMR', label: '🇴🇲 OMR (ريال عماني)' },
+        { code: 'GBP', label: '🇬🇧 GBP (جنيه إسترليني)' },
+        { code: 'CAD', label: '🇨🇦 CAD (دولار كندي)' },
+        { code: 'AUD', label: '🇦🇺 AUD (دولار أسترالي)' },
+        { code: 'TRY', label: '🇹🇷 TRY (ليرة تركية)' },
+        { code: 'MAD', label: '🇲🇦 MAD (درهم مغربي)' },
+        { code: 'JOD', label: '🇯🇴 JOD (دينار أردني)' },
+    ];
 
     document.addEventListener('DOMContentLoaded', () => {
         renderStepsList();
@@ -758,7 +679,6 @@
         setupDragAndDrop();
     });
 
-    // Filter Palette Elements by search keyword
     function filterPaletteElements(query) {
         query = query.toLowerCase().trim();
         document.querySelectorAll('.fb-element-pill').forEach(pill => {
@@ -826,6 +746,7 @@
                 {
                     element_type: 'single_choice',
                     label: 'السؤال المطروح؟',
+                    is_required: false,
                     question_key: `q_${Math.random().toString(36).substr(2, 6)}`,
                     properties: {
                         options: [
@@ -877,10 +798,12 @@
         if (currentStep.elements && currentStep.elements.length > 0) {
             currentStep.elements.forEach((el, eIdx) => {
                 const isSelected = eIdx === selectedElementIndex;
+                const reqStar = el.is_required ? '<span class="text-danger ms-1">*</span>' : '';
+
                 html += `
                     <div class="canvas-element-item ${isSelected ? 'selected' : ''}" data-el-index="${eIdx}" onclick="inspectElement(${eIdx})">
                         <div class="canvas-element-toolbar">
-                            <span>${el.element_type}</span>
+                            <span>${el.element_type} ${el.is_required ? '(إجباري)' : ''}</span>
                             <button type="button" class="btn btn-sm text-white p-0" onclick="event.stopPropagation(); duplicateElement(${eIdx})" title="تكرار">
                                 <iconify-icon icon="solar:copy-bold" width="13"></iconify-icon>
                             </button>
@@ -890,103 +813,217 @@
                         </div>
                 `;
 
-                // Render based on Involve.me types
+                // 1. Heading / Text
                 if (el.element_type === 'heading') {
-                    html += `<h3 class="fw-bold mb-0 text-primary">${escapeHtml(el.label || 'عنوان توضيحي')}</h3>`;
+                    html += `<h3 class="fw-bold mb-0 text-primary">${escapeHtml(el.label || 'عنوان توضيحي')}${reqStar}</h3>`;
                 } else if (el.element_type === 'text' || el.element_type === 'paragraph') {
                     html += `<p class="text-muted mb-0 fs-6">${escapeHtml(el.label || 'نص فقرة توضيحية...')}</p>`;
+                
+                // 2. Radio Choice (Standard modern Radio)
+                } else if (el.element_type === 'radio_choice') {
+                    html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'اختر إجابة واحدة:')}${reqStar}</label>`;
+                    html += '<div class="d-flex flex-column gap-2">';
+                    (el.properties?.options || []).forEach(opt => {
+                        html += `
+                            <div class="p-3 border rounded-3 bg-white d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <iconify-icon icon="solar:record-circle-bold" class="text-primary fs-5"></iconify-icon>
+                                    <span class="fw-semibold">${escapeHtml(opt.label || opt.value || '')}</span>
+                                </div>
+                                ${funnelData.design_settings?.scoring_enabled !== false ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score || 0} نقطة</span>` : ''}
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+
+                // 3. Single / Multiple Choice
                 } else if (el.element_type === 'single_choice' || el.element_type === 'multiple_choice' || el.element_type === 'yes_no') {
-                    html += `<label class="fw-bold mb-2 d-block">${escapeHtml(el.label || 'سؤال الاختيار:')}</label>`;
+                    html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'سؤال الاختيار:')}${reqStar}</label>`;
                     html += '<div class="d-flex flex-column gap-2">';
                     (el.properties?.options || []).forEach(opt => {
                         html += `
                             <div class="p-3 border rounded-3 bg-light d-flex justify-content-between align-items-center">
                                 <span class="fw-semibold">${escapeHtml(opt.label || opt.value || '')}</span>
-                                <span class="badge bg-primary-subtle text-primary small">+${opt.score || 0} نقطة</span>
+                                ${funnelData.design_settings?.scoring_enabled !== false ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score || 0} نقطة</span>` : ''}
                             </div>
                         `;
                     });
                     html += '</div>';
-                } else if (el.element_type === 'image_choice') {
-                    html += `<label class="fw-bold mb-2 d-block">${escapeHtml(el.label || 'اختر بطاقة:')}</label>`;
+
+                // 4. Checkbox Choice
+                } else if (el.element_type === 'checkbox_choice') {
+                    html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'حدد جميع الخيارات:')}${reqStar}</label>`;
+                    html += '<div class="d-flex flex-column gap-2">';
+                    (el.properties?.options || []).forEach(opt => {
+                        html += `
+                            <div class="p-3 border rounded-3 bg-white d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="checkbox" class="form-check-input me-2" checked disabled>
+                                    <span class="fw-semibold">${escapeHtml(opt.label || opt.value || '')}</span>
+                                </div>
+                                ${funnelData.design_settings?.scoring_enabled !== false ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score || 0} نقطة</span>` : ''}
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+
+                // 5. Image Choice (With image thumbnails)
+                } else if (el.element_type === 'image_choice' || el.element_type === 'single_image_choice' || el.element_type === 'multiple_image_choice') {
+                    html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'اختر بطاقة صورة:')}${reqStar}</label>`;
                     html += '<div class="row g-2">';
                     (el.properties?.options || []).forEach(opt => {
                         html += `
                             <div class="col-6">
                                 <div class="p-3 border rounded-3 text-center bg-light">
-                                    <iconify-icon icon="solar:gallery-bold-duotone" width="32" class="text-primary mb-1"></iconify-icon>
+                                    ${opt.image_url ? `<img src="${opt.image_url}" class="rounded-3 mb-2" style="max-height: 80px; width: 100%; object-fit: cover;">` : '<iconify-icon icon="solar:gallery-bold-duotone" width="36" class="text-primary mb-1"></iconify-icon>'}
                                     <div class="fw-bold small">${escapeHtml(opt.label || '')}</div>
                                 </div>
                             </div>
                         `;
                     });
                     html += '</div>';
-                } else if (el.element_type === 'dropdown') {
-                    html += `<label class="fw-bold mb-2 d-block">${escapeHtml(el.label || 'القائمة المنسدلة:')}</label>`;
-                    html += `<select class="form-select bg-light" disabled><option>${escapeHtml(el.properties?.options?.[0]?.label || 'اختر من القائمة...')}</option></select>`;
+
+                // 6. Contact Form
                 } else if (el.element_type === 'contact_form') {
                     html += `
-                        <label class="fw-bold mb-2 text-primary d-block">${escapeHtml(el.label || 'نموذج بيانات التواصل:')}</label>
+                        <label class="fw-bold mb-2 text-primary d-block">${escapeHtml(el.label || 'نموذج بيانات التواصل:')}${reqStar}</label>
                         <div class="bg-light p-3 rounded-3 border">
                             <input type="text" class="form-control mb-2" placeholder="الاسم الكريم *" disabled>
                             <input type="tel" class="form-control mb-2" placeholder="رقم الواتساب *" disabled>
                             <input type="email" class="form-control" placeholder="البريد الإلكتروني" disabled>
                         </div>
                     `;
+
+                // 7. Dedicated Contact Inputs
+                } else if (el.element_type === 'email') {
+                    html += `
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'البريد الإلكتروني:')}${reqStar}</label>
+                        <div class="input-group"><span class="input-group-text bg-light">✉️</span><input type="email" class="form-control" placeholder="name@example.com" disabled></div>
+                    `;
+                } else if (el.element_type === 'phone') {
+                    html += `
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'رقم الواتساب / الجوال:')}${reqStar}</label>
+                        <div class="input-group"><span class="input-group-text bg-light">📱</span><input type="tel" class="form-control" placeholder="05XXXXXXXX" disabled></div>
+                    `;
+                } else if (el.element_type === 'address') {
+                    html += `
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'العنوان / المدينة:')}${reqStar}</label>
+                        <div class="input-group"><span class="input-group-text bg-light">📍</span><input type="text" class="form-control" placeholder="المدينة، الحي" disabled></div>
+                    `;
+                } else if (el.element_type === 'website') {
+                    html += `
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'الموقع الإلكتروني:')}${reqStar}</label>
+                        <div class="input-group"><span class="input-group-text bg-light">🌐</span><input type="url" class="form-control" placeholder="https://example.com" disabled></div>
+                    `;
+                } else if (el.element_type === 'country') {
+                    html += `
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'اختر الدولة:')}${reqStar}</label>
+                        <select class="form-select bg-light" disabled><option>🇸🇦 المملكة العربية السعودية</option><option>🇦🇪 الإمارات العربية المتحدة</option></select>
+                    `;
+
+                // 8. Slider (Customizable Currency & Range)
                 } else if (el.element_type === 'slider' || el.element_type === 'currency') {
+                    const min = el.properties?.min || 0;
+                    const max = el.properties?.max || 50000;
+                    const unit = el.properties?.show_currency !== false ? (el.properties?.currency_code || 'SAR') : (el.properties?.custom_unit || '');
                     html += `
-                        <label class="fw-bold mb-2 d-block">${escapeHtml(el.label || 'الميزانية / القيمة:')}</label>
-                        <input type="range" class="form-range" disabled>
-                        <div class="d-flex justify-content-between text-muted small"><span>0 SAR</span><span>50,000 SAR</span></div>
-                    `;
-                } else if (el.element_type === 'rating' || el.element_type === 'nps') {
-                    html += `
-                        <label class="fw-bold mb-2 d-block">${escapeHtml(el.label || 'التقييم:')}</label>
-                        <div class="d-flex gap-2 text-warning fs-4">⭐⭐⭐⭐⭐</div>
-                    `;
-                } else if (el.element_type === 'faqs') {
-                    html += `
-                        <label class="fw-bold mb-2 text-dark d-block">${escapeHtml(el.label || 'الأسئلة الشائعة (FAQ):')}</label>
-                        <div class="p-3 bg-light rounded-3 border">
-                            <div class="fw-bold small text-primary mb-1">❓ ما هي شروط التأشيرة؟</div>
-                            <div class="text-muted small">جواز سفر ساري المفعول وحساب بنكي نشط...</div>
-                        </div>
-                    `;
-                } else if (el.element_type === 'testimonials') {
-                    html += `
-                        <label class="fw-bold mb-2 text-dark d-block">${escapeHtml(el.label || 'آراء وتقييمات العملاء:')}</label>
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'حدد القيمة المطلوبة:')}${reqStar}</label>
                         <div class="p-3 bg-light rounded-3 border text-center">
-                            <p class="fst-italic text-muted small mb-1">"خدمة استثنائية وسرعة فائقة في استخراج التأشيرة وحجز الموعد!"</p>
-                            <span class="fw-bold small text-primary">— فهد الشمري (عميل موثق ⭐⭐⭐⭐⭐)</span>
+                            <h4 class="fw-bold text-primary mb-1">${(min + max)/2} ${unit}</h4>
+                            <input type="range" class="form-range" disabled>
+                            <div class="d-flex justify-content-between text-muted small"><span>${min} ${unit}</span><span>${max} ${unit}</span></div>
                         </div>
                     `;
+
+                // 9. File Upload
+                } else if (el.element_type === 'file_upload') {
+                    html += `
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'مرفق أو ملف مطلوب:')}${reqStar}</label>
+                        <div class="p-4 border border-dashed rounded-3 text-center bg-light">
+                            <iconify-icon icon="solar:upload-track-bold-duotone" width="36" class="text-primary mb-1"></iconify-icon>
+                            <p class="mb-0 fw-bold small text-dark">انقر لاختيار ملف أو اسحبه هنا</p>
+                            <small class="text-muted">PDF, JPG, PNG حتى 10MB</small>
+                        </div>
+                    `;
+
+                // 10. Date / Appointment Picker
+                } else if (el.element_type === 'date_picker' || el.element_type === 'date_time' || el.element_type === 'schedule') {
+                    html += `
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'تحديد التاريخ والموعد:')}${reqStar}</label>
+                        <div class="input-group mb-2"><span class="input-group-text bg-light">📅</span><input type="date" class="form-control" disabled></div>
+                        <div class="d-flex gap-2"><span class="badge bg-light text-dark border p-2">صباحاً (09:00 - 12:00)</span><span class="badge bg-light text-dark border p-2">مساءً (04:00 - 08:00)</span></div>
+                    `;
+
+                // 11. Countdown Timer
+                } else if (el.element_type === 'timer' || el.element_type === 'page_timer') {
+                    const mins = el.properties?.duration_minutes || 15;
+                    html += `
+                        <div class="p-3 bg-dark text-white rounded-3 border text-center">
+                            <span class="small text-warning fw-bold d-block mb-1">⏰ ${escapeHtml(el.label || 'احجز الآن! هذا العرض ساري لمدة:')}</span>
+                            <div class="d-flex justify-content-center gap-2 fs-4 fw-bold text-danger">
+                                <span class="bg-secondary p-1 px-2 rounded">${String(mins).padStart(2, '0')}</span> : <span class="bg-secondary p-1 px-2 rounded">00</span>
+                            </div>
+                        </div>
+                    `;
+
+                // 12. Rating & NPS
+                } else if (el.element_type === 'rating') {
+                    html += `
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'التقييم:')}${reqStar}</label>
+                        <div class="d-flex gap-2 text-warning fs-3">⭐⭐⭐⭐⭐</div>
+                    `;
+                } else if (el.element_type === 'nps') {
+                    html += `
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'مقياس الرضا NPS (0-10):')}${reqStar}</label>
+                        <div class="d-flex gap-1 justify-content-between"><button class="btn btn-sm btn-outline-secondary">0</button><button class="btn btn-sm btn-outline-secondary">5</button><button class="btn btn-sm btn-primary">10</button></div>
+                    `;
+
+                // 13. Table
                 } else if (el.element_type === 'table') {
                     html += `
-                        <label class="fw-bold mb-2 text-dark d-block">${escapeHtml(el.label || 'جدول المقارنة / الأسعار:')}</label>
-                        <table class="table table-sm table-bordered bg-light mb-0 small">
-                            <tr class="table-primary"><th>الباقة</th><th>المميزات</th><th>السعر</th></tr>
-                            <tr><td>الباقة الأساسية</td><td>تأمين + موعد سفارة</td><td>250 SAR</td></tr>
-                            <tr><td>الباقة الشاملة VIP</td><td>كل الخدمات + طيران وفندق</td><td>650 SAR</td></tr>
+                        <label class="fw-bold mb-2 text-dark d-block">${escapeHtml(el.label || 'جدول مقارنة الأسعار:')}</label>
+                        <table class="table table-sm table-bordered bg-light mb-0 small text-center">
+                            <tr class="table-primary"><th>الباقة</th><th>الخدمات</th><th>السعر</th></tr>
+                            <tr><td>الأساسية</td><td>طلب التأشيرة والموعد</td><td>250 SAR</td></tr>
                         </table>
                     `;
-                } else if (el.element_type === 'gauge' || el.element_type === 'progress_ring' || el.element_type === 'score_display') {
+
+                // 14. Testimonials
+                } else if (el.element_type === 'testimonials') {
                     html += `
-                        <div class="text-center py-3 bg-light rounded-3 border">
-                            <iconify-icon icon="solar:speedometer-bold-duotone" class="text-success" width="48"></iconify-icon>
-                            <h5 class="fw-bold text-success mb-0">مؤهل بنسبة 85%</h5>
-                            <small class="text-muted">مؤشر احتساب الأهلية الذكي</small>
+                        <div class="p-3 bg-light rounded-3 border text-center">
+                            <p class="fst-italic small mb-1">"خدمة استثنائية وسرعة فائقة!"</p>
+                            <strong class="text-primary small">— فهد الشمري ⭐⭐⭐⭐⭐</strong>
                         </div>
                     `;
+
+                // 15. FAQs
+                } else if (el.element_type === 'faqs') {
+                    html += `
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="fw-bold small text-primary mb-1">❓ ما هي شروط التأشيرة؟</div>
+                            <div class="text-muted small">جواز سفر ساري المفعول وحساب بنكي...</div>
+                        </div>
+                    `;
+
+                // 16. Coupon
                 } else if (el.element_type === 'coupon_code') {
                     html += `
-                        <div class="p-3 bg-light rounded-3 border text-center border-dashed">
-                            <span class="text-muted small">كوبون خصم حصري:</span>
-                            <div class="h4 fw-bold text-danger mb-0 mt-1">WAVE2026 (خصم 20%)</div>
+                        <div class="p-3 bg-light rounded-3 border border-dashed text-center">
+                            <h5 class="fw-bold text-danger mb-0">كود الخصم: WAVE2026 (خصم 20%)</h5>
                         </div>
                     `;
+
+                // 17. Textarea
+                } else if (el.element_type === 'long_answer') {
+                    html += `
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'ملاحظات وتفاصيل:')}${reqStar}</label>
+                        <textarea class="form-control" rows="3" placeholder="اكتب التفاصيل هنا..." disabled></textarea>
+                    `;
+
                 } else {
                     html += `
-                        <label class="fw-bold mb-2 d-block">${escapeHtml(el.label || 'الحقل المطلوب:')}</label>
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'حقل إدخال:')}${reqStar}</label>
                         <input type="text" class="form-control" placeholder="اكتب هنا..." disabled>
                     `;
                 }
@@ -998,7 +1035,7 @@
                 <div class="alert alert-light border border-dashed text-center py-5 text-muted rounded-4 my-3">
                     <iconify-icon icon="solar:add-circle-bold-duotone" width="44" class="text-primary opacity-50 mb-2"></iconify-icon>
                     <p class="mb-0 fw-bold">هذه الخطوة فارغة</p>
-                    <small>اسحب أي عنصر من مكتبة Involve.me على اليمين أو انقر عليه لإضافته هنا فوراً.</small>
+                    <small>اسحب أي عنصر من القائمة على اليمين أو انقر عليه لإضافته هنا فوراً.</small>
                 </div>
             `;
         }
@@ -1006,7 +1043,6 @@
         html += '</div>';
         canvas.innerHTML = html;
 
-        // Enable Canvas Element Reordering via SortableJS
         const elementsWrapper = document.getElementById('canvas_elements_wrapper');
         if (elementsWrapper && currentStep.elements.length > 0) {
             new Sortable(elementsWrapper, {
@@ -1065,24 +1101,45 @@
 
         let newElement = {
             element_type: type,
-            label: getDefaultLabelForInvolveType(type),
+            label: getDefaultLabelForType(type),
+            is_required: false,
             question_key: `q_${Math.random().toString(36).substr(2, 6)}`,
             properties: {}
         };
 
-        if (type === 'single_choice' || type === 'multiple_choice' || type === 'image_choice' || type === 'dropdown') {
+        if (['single_choice', 'multiple_choice', 'radio_choice', 'checkbox_choice', 'image_choice', 'dropdown'].includes(type)) {
             newElement.properties.options = [
-                { label: 'الخيار الأول', value: 'Option 1', score: 10 },
-                { label: 'الخيار الثاني', value: 'Option 2', score: 20 },
-                { label: 'الخيار الثالث', value: 'Option 3', score: 30 },
+                { label: 'الخيار الأول', value: 'Option 1', score: 10, image_url: '' },
+                { label: 'الخيار الثاني', value: 'Option 2', score: 20, image_url: '' },
+                { label: 'الخيار الثالث', value: 'Option 3', score: 30, image_url: '' },
             ];
         } else if (type === 'yes_no') {
             newElement.properties.options = [
                 { label: 'نعم (Yes)', value: 'Yes', score: 20 },
                 { label: 'لا (No)', value: 'No', score: 0 },
             ];
-        } else if (type === 'contact_form') {
-            newElement.properties.fields = ['full_name', 'phone', 'email'];
+        } else if (type === 'country') {
+            newElement.properties.options = [
+                { label: '🇸🇦 المملكة العربية السعودية', value: 'Saudi Arabia' },
+                { label: '🇦🇪 الإمارات العربية المتحدة', value: 'UAE' },
+                { label: '🇪🇬 جمهورية مصر العربية', value: 'Egypt' },
+                { label: '🇰🇼 دولة الكويت', value: 'Kuwait' },
+                { label: '🇶🇦 دولة قطر', value: 'Qatar' },
+            ];
+        } else if (type === 'slider' || type === 'currency') {
+            newElement.properties = {
+                min: 0,
+                max: 50000,
+                step: 1000,
+                show_currency: true,
+                currency_code: 'SAR',
+                custom_unit: 'ريال'
+            };
+        } else if (type === 'timer') {
+            newElement.properties = {
+                duration_minutes: 15,
+                urgency_message: 'احجز الآن! هذا العرض ساري لمدة:'
+            };
         }
 
         currentStep.elements.push(newElement);
@@ -1091,24 +1148,27 @@
         inspectElement(selectedElementIndex);
     }
 
-    function getDefaultLabelForInvolveType(type) {
+    function getDefaultLabelForType(type) {
         switch(type) {
             case 'single_choice': return 'ما هو اختيارك المفضل؟';
-            case 'multiple_choice': return 'اختر جميع الخيارات المناسبة:';
+            case 'radio_choice': return 'اختر إجابة واحدة:';
+            case 'multiple_choice': case 'checkbox_choice': return 'اختر جميع الخيارات المناسبة:';
             case 'yes_no': return 'هل ينطبق عليك هذا الشرط؟';
             case 'image_choice': return 'اختر البطاقة الأنسب لك:';
-            case 'dropdown': return 'اختر الدولة / المدينة:';
+            case 'dropdown': return 'اختر من القائمة المنسدلة:';
             case 'contact_form': return 'بيانات التواصل لاستلام التقرير:';
-            case 'heading': return 'عنوان رئيسي جذاب';
-            case 'text': case 'paragraph': return 'اكتب هنا تفاصيل إضافية لتوضيح السؤال.';
-            case 'slider': case 'currency': return 'حدد الميزانية التقديرية (بالريال):';
-            case 'rating': case 'nps': return 'ما هو تقييمك لمستوى الخدمة؟';
+            case 'email': return 'البريد الإلكتروني:';
+            case 'phone': return 'رقم الواتساب / الجوال:';
+            case 'address': return 'العنوان ومقر الإقامة:';
+            case 'country': return 'الدولة / الجنسية:';
+            case 'website': return 'الموقع الإلكتروني:';
+            case 'file_upload': return 'تحميل المستند أو المرفق:';
+            case 'slider': case 'currency': return 'حدد الميزانية التقديرية:';
             case 'date_picker': return 'تاريخ السفر أو الموعد المرغوب:';
-            case 'faqs': return 'الأسئلة الشائعة وتفاصيل الخدمة';
-            case 'testimonials': return 'آراء وتجارب العملاء السابقين';
-            case 'table': return 'جدول مقارنة الباقات والأسعار';
-            case 'coupon_code': return 'كود خصم فوري مخصص لك';
-            case 'score_display': return 'نتيجة التقييم والأهلية';
+            case 'schedule': return 'حجز وجدولة الموعد:';
+            case 'timer': return 'احجز الآن! هذا العرض متاح لمدة:';
+            case 'rating': return 'ما هو تقييمك لمستوى الخدمة؟';
+            case 'nps': return 'ما مدى ترشيحك لنا لأصدقائك (0-10)؟';
             default: return 'سؤال جديد';
         }
     }
@@ -1151,8 +1211,18 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <span class="badge bg-primary text-uppercase">${el.element_type}</span>
                 <button type="button" class="btn btn-sm btn-outline-danger py-0" onclick="deleteElement(${eIdx})">
-                    <iconify-icon icon="solar:trash-bin-bold"></iconify-icon> حذف العنصر
+                    <iconify-icon icon="solar:trash-bin-bold"></iconify-icon> حذف
                 </button>
+            </div>
+
+            <!-- Required Toggle -->
+            <div class="p-2 bg-dark rounded-3 border border-secondary mb-3">
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="el_required_switch" ${el.is_required ? 'checked' : ''} onchange="updateCurrentElementProp('is_required', this.checked)">
+                    <label class="form-check-label fw-bold small text-white" for="el_required_switch">
+                        إجباري (Required) - لا يمكن تخطي السؤال بدونه
+                    </label>
+                </div>
             </div>
 
             <div class="mb-3">
@@ -1166,11 +1236,79 @@
             </div>
         `;
 
-        if (el.properties?.options) {
+        // SLIDER INSPECTOR
+        if (el.element_type === 'slider' || el.element_type === 'currency') {
+            if (!el.properties) el.properties = {};
+            html += `
+                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                    <h6 class="fw-bold small text-white mb-2">🎚️ إعدادات السلايدر والعملات</h6>
+                    
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="slider_currency_toggle" ${el.properties.show_currency !== false ? 'checked' : ''} onchange="updateSliderProp('show_currency', this.checked); inspectElement(${eIdx});">
+                        <label class="form-check-label small fw-bold text-white">إظهار رمز العملة</label>
+                    </div>
+
+                    ${el.properties.show_currency !== false ? `
+                        <div class="mb-2">
+                            <label class="form-label small text-muted">العملة (Currency)</label>
+                            <select class="form-select form-select-sm form-select-dark" onchange="updateSliderProp('currency_code', this.value)">
+                                ${WORLD_CURRENCIES.map(c => `<option value="${c.code}" ${el.properties.currency_code === c.code ? 'selected' : ''}>${c.label}</option>`).join('')}
+                            </select>
+                        </div>
+                    ` : `
+                        <div class="mb-2">
+                            <label class="form-label small text-muted">الوحدة المخصصة (Custom Unit)</label>
+                            <input type="text" class="form-control form-control-sm form-control-dark" placeholder="مثال: أيام، أشخاص، كم" value="${escapeHtml(el.properties.custom_unit || '')}" oninput="updateSliderProp('custom_unit', this.value)">
+                        </div>
+                    `}
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="form-label small text-muted">الحد الأدنى (Min)</label>
+                            <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.min || 0}" oninput="updateSliderProp('min', parseInt(this.value)||0)">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-muted">الحد الأقصى (Max)</label>
+                            <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.max || 50000}" oninput="updateSliderProp('max', parseInt(this.value)||50000)">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // TIMER INSPECTOR
+        if (el.element_type === 'timer') {
+            if (!el.properties) el.properties = {};
+            html += `
+                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                    <h6 class="fw-bold small text-white mb-2">⏰ إعدادات المؤقت التنازلي</h6>
+                    <div class="mb-2">
+                        <label class="form-label small text-muted">مدة المؤقت بالدقائق (Duration)</label>
+                        <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.duration_minutes || 15}" oninput="updateTimerProp('duration_minutes', parseInt(this.value)||15)">
+                    </div>
+                </div>
+            `;
+        }
+
+        // COUNTRY INSPECTOR
+        if (el.element_type === 'country') {
             html += `
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <label class="form-label small text-muted mb-0">خيارات السؤال والنقاط (Options & Scores)</label>
+                        <label class="form-label small text-muted mb-0">قائمة الدول</label>
+                        <button type="button" class="btn btn-sm btn-outline-info py-0 px-2 small" onclick="loadArabCountries()">🌍 الدول العربية</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // OPTIONS INSPECTOR (Choices / Radios / Images / Dropdowns / Country)
+        if (el.properties?.options) {
+            const hasScoring = funnelData.design_settings?.scoring_enabled !== false;
+            html += `
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label small text-muted mb-0">خيارات السؤال</label>
                         <button type="button" class="btn btn-sm btn-primary py-0 px-2 small" onclick="addOptionToCurrentElement()">➕ خيار</button>
                     </div>
                     <div class="d-flex flex-column gap-2">
@@ -1183,10 +1321,19 @@
                             <input type="text" class="form-control form-control-sm form-control-dark" placeholder="نص الخيار" value="${escapeHtml(opt.label || '')}" oninput="updateOptionProp(${oIdx}, 'label', this.value)">
                             <button type="button" class="btn btn-sm btn-outline-danger px-2" onclick="deleteOptionFromCurrentElement(${oIdx})">✕</button>
                         </div>
-                        <div class="d-flex gap-2 align-items-center">
-                            <span class="small text-muted">النقاط:</span>
-                            <input type="number" class="form-control form-control-sm form-control-dark" style="width: 80px;" value="${opt.score || 0}" oninput="updateOptionProp(${oIdx}, 'score', parseInt(this.value)||0)">
-                        </div>
+                        
+                        ${['image_choice', 'single_image_choice', 'multiple_image_choice'].includes(el.element_type) ? `
+                            <div class="mb-1">
+                                <input type="text" class="form-control form-control-sm form-control-dark" placeholder="رابط الصورة (Image URL)" value="${escapeHtml(opt.image_url || '')}" oninput="updateOptionProp(${oIdx}, 'image_url', this.value)">
+                            </div>
+                        ` : ''}
+
+                        ${hasScoring ? `
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="small text-muted">النقاط (Score):</span>
+                                <input type="number" class="form-control form-control-sm form-control-dark" style="width: 80px;" value="${opt.score || 0}" oninput="updateOptionProp(${oIdx}, 'score', parseInt(this.value)||0)">
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             });
@@ -1250,6 +1397,42 @@
         }
     }
 
+    function updateSliderProp(key, val) {
+        const currentStep = funnelData.steps[activeStepIndex];
+        if (currentStep && currentStep.elements[selectedElementIndex]) {
+            if (!currentStep.elements[selectedElementIndex].properties) currentStep.elements[selectedElementIndex].properties = {};
+            currentStep.elements[selectedElementIndex].properties[key] = val;
+            renderCanvas();
+        }
+    }
+
+    function updateTimerProp(key, val) {
+        const currentStep = funnelData.steps[activeStepIndex];
+        if (currentStep && currentStep.elements[selectedElementIndex]) {
+            if (!currentStep.elements[selectedElementIndex].properties) currentStep.elements[selectedElementIndex].properties = {};
+            currentStep.elements[selectedElementIndex].properties[key] = val;
+            renderCanvas();
+        }
+    }
+
+    function loadArabCountries() {
+        const currentStep = funnelData.steps[activeStepIndex];
+        if (!currentStep || !currentStep.elements[selectedElementIndex]) return;
+        currentStep.elements[selectedElementIndex].properties.options = [
+            { label: '🇸🇦 المملكة العربية السعودية', value: 'Saudi Arabia' },
+            { label: '🇦🇪 الإمارات العربية المتحدة', value: 'UAE' },
+            { label: '🇪🇬 جمهورية مصر العربية', value: 'Egypt' },
+            { label: '🇰🇼 دولة الكويت', value: 'Kuwait' },
+            { label: '🇶🇦 دولة قطر', value: 'Qatar' },
+            { label: '🇧🇭 مملكة البحرين', value: 'Bahrain' },
+            { label: '🇴🇲 سلطنة عمان', value: 'Oman' },
+            { label: '🇯🇴 المملكة الأردنية الهاشمية', value: 'Jordan' },
+            { label: '🇲🇦 المملكة المغربية', value: 'Morocco' },
+            { label: '🌍 دولة أخرى', value: 'Other' },
+        ];
+        inspectElement(selectedElementIndex);
+    }
+
     function addOptionToCurrentElement() {
         const currentStep = funnelData.steps[activeStepIndex];
         if (!currentStep || !currentStep.elements[selectedElementIndex]) return;
@@ -1260,7 +1443,8 @@
         el.properties.options.push({
             label: `خيار ${el.properties.options.length + 1}`,
             value: `Option ${el.properties.options.length + 1}`,
-            score: 10
+            score: 10,
+            image_url: ''
         });
 
         inspectElement(selectedElementIndex);
@@ -1280,6 +1464,13 @@
             currentStep.elements[selectedElementIndex].properties.options.splice(oIdx, 1);
             inspectElement(selectedElementIndex);
         }
+    }
+
+    function toggleScoringMode(enabled) {
+        if (!funnelData.design_settings) funnelData.design_settings = {};
+        funnelData.design_settings.scoring_enabled = enabled;
+        renderCanvas();
+        if (selectedElementIndex !== null) inspectElement(selectedElementIndex);
     }
 
     // ── 5. RESULTS MANAGEMENT ────────────────────────────────────────────────
@@ -1327,7 +1518,7 @@
         if (!funnelData.results) funnelData.results = [];
         funnelData.results.push({
             title: 'نتيجة جديدة 🎉',
-            description: 'وصف نتيجة التقييم والأهلية المقترحة للعميل.',
+            description: 'وصف نتيجة التقييم وخطة المتابعة للعميل.',
             min_score: 50,
             max_score: 100,
             cta_type: 'whatsapp',
@@ -1348,12 +1539,12 @@
     function updateDesignSettings() {
         const color = document.getElementById('design_primary_color').value;
         const font = document.getElementById('design_font_family').value;
-        const btnStyle = document.getElementById('design_button_style').value;
+        const scoring = document.getElementById('scoring_enabled_checkbox').checked;
 
         funnelData.design_settings = {
             primary_color: color,
             font_family: font,
-            button_style: btnStyle
+            scoring_enabled: scoring,
         };
         document.documentElement.style.setProperty('--fb-primary', color);
     }
@@ -1399,7 +1590,6 @@
                 meta_pixel_id: document.getElementById('meta_pixel_input').value,
                 ga4_id: document.getElementById('ga4_input').value,
                 tiktok_pixel_id: document.getElementById('tiktok_input').value,
-                snap_pixel_id: document.getElementById('snap_input').value,
             },
             steps: funnelData.steps,
             results: funnelData.results,
