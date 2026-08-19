@@ -24,6 +24,11 @@ class FunnelPublicController extends Controller
         $isAdmin = auth()->check();
         $isPreview = $request->has('preview') || $isAdmin;
 
+        if ($funnel->steps->isEmpty() && $funnel->template_id && $funnel->template) {
+            app(\App\Http\Controllers\Admin\FunnelController::class)->importSchemaToFunnel($funnel, $funnel->template->schema_data ?? []);
+            $funnel->load(['steps.elements', 'results', 'conditions']);
+        }
+
         if (! $funnel->isPublished() && ! $isPreview) {
             abort(404, __('admin.funnel_not_found_or_unpublished'));
         }

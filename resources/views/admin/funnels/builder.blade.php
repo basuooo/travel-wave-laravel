@@ -344,10 +344,10 @@
 
     <!-- Top Action Buttons -->
     <div class="d-flex align-items-center gap-2">
-        <a href="{{ route('funnels.public.show', $funnel->slug) }}?preview=1" target="_blank" class="btn btn-outline-light btn-sm rounded-3 d-flex align-items-center gap-1">
+        <button type="button" class="btn btn-outline-light btn-sm rounded-3 d-flex align-items-center gap-1" onclick="openLivePreview()">
             <iconify-icon icon="solar:eye-bold" width="16"></iconify-icon>
-            <span>معاينة حية</span>
-        </a>
+            <span>معاينة حية 👁️</span>
+        </button>
         <button type="button" class="btn btn-primary btn-sm fw-bold px-4 rounded-3 d-flex align-items-center gap-1" id="btn_save_funnel" onclick="saveFunnel()">
             <iconify-icon icon="solar:diskette-bold" width="18"></iconify-icon>
             <span>حفظ التعديلات 💾</span>
@@ -1374,10 +1374,17 @@
         }
     }
 
-    function saveFunnel() {
+    function openLivePreview() {
+        showToast('جاري حفظ التعديلات وفتح المعاينة الحية... ⏳');
+        saveFunnel(true);
+    }
+
+    function saveFunnel(openAfterSave = false) {
         const saveBtn = document.getElementById('btn_save_funnel');
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = 'جاري الحفظ... ⏳';
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = 'جاري الحفظ... ⏳';
+        }
 
         const payload = {
             name: funnelData.name,
@@ -1409,17 +1416,24 @@
         })
         .then(res => res.json())
         .then(data => {
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<span>حفظ التعديلات 💾</span>';
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<span>حفظ التعديلات 💾</span>';
+            }
             if (data.success) {
                 showToast('💾 تم حفظ الفانل بنجاح!');
+                if (openAfterSave) {
+                    window.open(`{{ route('funnels.public.show', $funnel->slug) }}?preview=1&t=` + Date.now(), '_blank');
+                }
             } else {
                 alert('حدث خطأ أثناء الحفظ: ' + (data.message || 'Error'));
             }
         })
         .catch(err => {
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<span>حفظ التعديلات 💾</span>';
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<span>حفظ التعديلات 💾</span>';
+            }
             alert('تعذر الحفظ: ' + err.message);
         });
     }
