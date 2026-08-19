@@ -1,20 +1,24 @@
 @extends('layouts.admin')
 
-@section('title', __('admin.templates_library'))
+@php
+    $isAr = app()->getLocale() === 'ar';
+@endphp
+
+@section('title', $isAr ? 'مكتبة القوالب الجاهزة' : 'Funnel Templates Library')
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
-            <h1 class="h3 fw-bold mb-1">🎨 {{ __('admin.templates_library') }}</h1>
-            <p class="text-muted mb-0">اختر من مكتبة القوالب الاحترافية الجاهزة وعاينها مباشرة قبل الاستخدام</p>
+            <h1 class="h3 fw-bold mb-1">🎨 {{ $isAr ? 'مكتبة القوالب الجاهزة' : 'Funnel Templates Library' }}</h1>
+            <p class="text-muted mb-0">{{ $isAr ? 'اختر من مكتبة القوالب الاحترافية الجاهزة وعاينها مباشرة قبل الاستخدام' : 'Choose from high-converting ready-to-use funnel templates and preview them live' }}</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.funnels.dashboard') }}" class="btn btn-outline-secondary rounded-3">
-                ← لوحة الفانلات
+            <a href="{{ route('admin.funnels.index') }}" class="btn btn-outline-secondary rounded-3">
+                {{ $isAr ? '← قائمة الفانلات' : '← Funnels List' }}
             </a>
             <a href="{{ route('admin.funnels.create') }}" class="btn btn-primary rounded-3 fw-bold">
-                ➕ إنشاء فانل من الصفر
+                ➕ {{ $isAr ? 'إنشاء فانل من الصفر' : 'Create from Scratch' }}
             </a>
         </div>
     </div>
@@ -22,7 +26,7 @@
     <!-- Category Filter Pills -->
     <div class="d-flex flex-wrap gap-2 mb-4">
         <a href="{{ route('admin.funnels.templates.index') }}" class="btn btn-sm rounded-pill px-3 {{ !request('category') ? 'btn-primary' : 'btn-outline-secondary' }}">
-            جميع القوالب (All)
+            {{ $isAr ? 'جميع القوالب (All)' : 'All Templates' }}
         </a>
         @foreach($categories as $cat)
             <a href="{{ route('admin.funnels.templates.index', ['category' => $cat]) }}" class="btn btn-sm rounded-pill px-3 {{ request('category') === $cat ? 'btn-primary' : 'btn-outline-secondary' }}">
@@ -52,7 +56,7 @@
                             <!-- Preview Button -->
                             <a href="{{ route('admin.funnels.templates.preview', $template) }}" class="btn btn-outline-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-3">
                                 <iconify-icon icon="solar:eye-bold" width="18"></iconify-icon>
-                                <span>معاينة تفاعلية (Preview)</span>
+                                <span>{{ $isAr ? 'معاينة تفاعلية (Preview)' : 'Live Preview' }}</span>
                             </a>
 
                             <!-- Use Template Form -->
@@ -60,7 +64,7 @@
                                 @csrf
                                 <button type="submit" class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2 rounded-3">
                                     <iconify-icon icon="solar:play-circle-bold" width="18"></iconify-icon>
-                                    <span>استخدام القالب 🚀</span>
+                                    <span>{{ $isAr ? 'استخدام القالب 🚀' : 'Use Template 🚀' }}</span>
                                 </button>
                             </form>
                         </div>
@@ -70,7 +74,7 @@
         @empty
             <div class="col-12 text-center py-5 text-muted">
                 <iconify-icon icon="solar:folder-open-line-duotone" width="64" class="text-muted mb-2"></iconify-icon>
-                <p>لم يتم العثور على قوالب في هذا التصنيف.</p>
+                <p>{{ $isAr ? 'لم يتم العثور على قوالب في هذا التصنيف.' : 'No templates found in this category.' }}</p>
             </div>
         @endforelse
     </div>
