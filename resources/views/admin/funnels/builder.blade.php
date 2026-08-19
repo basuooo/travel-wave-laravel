@@ -17,7 +17,7 @@
         :root {
             --fb-topbar-h: 62px;
             --fb-sidebar-w: 340px;
-            --fb-inspector-w: 400px;
+            --fb-inspector-w: 420px;
             --fb-bg-dark: #090d16;
             --fb-panel-bg: #101726;
             --fb-panel-card: #192237;
@@ -279,6 +279,18 @@
             color: #fff;
         }
 
+        /* Timer Flip Box */
+        .timer-box-digit {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 22px;
+            font-weight: 800;
+            min-width: 44px;
+            text-align: center;
+        }
+
         #fb_toast {
             position: fixed;
             bottom: 24px;
@@ -299,6 +311,40 @@
 
 <!-- TOAST -->
 <div id="fb_toast">💾 تم حفظ التعديلات بنجاح!</div>
+
+<!-- MEDIA PICKER MODAL -->
+<div class="modal fade" id="mediaPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold">🖼️ اختيار صورة من مكتبة الموقع</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label small text-muted">إدخال رابط صورة مخصص (Direct Image URL)</label>
+                    <div class="input-group">
+                        <input type="url" class="form-control form-control-dark" id="modal_custom_img_url" placeholder="https://example.com/image.jpg">
+                        <button type="button" class="btn btn-primary" onclick="applyCustomImageUrl()">تطبيق الرابط</button>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold small text-muted mb-2">أو اختر من المعرض المقترح:</h6>
+                <div class="row g-2" id="modal_presets_container" style="max-height: 280px; overflow-y: auto;">
+                    <!-- Preset sample images -->
+                    <div class="col-3"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300" class="img-thumbnail bg-dark border-secondary cursor-pointer" onclick="selectModalImage(this.src)"></div>
+                    <div class="col-3"><img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300" class="img-thumbnail bg-dark border-secondary cursor-pointer" onclick="selectModalImage(this.src)"></div>
+                    <div class="col-3"><img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=300" class="img-thumbnail bg-dark border-secondary cursor-pointer" onclick="selectModalImage(this.src)"></div>
+                    <div class="col-3"><img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=300" class="img-thumbnail bg-dark border-secondary cursor-pointer" onclick="selectModalImage(this.src)"></div>
+                    <div class="col-3"><img src="https://images.unsplash.com/photo-1533105079780-92b9be482077?w=300" class="img-thumbnail bg-dark border-secondary cursor-pointer" onclick="selectModalImage(this.src)"></div>
+                    <div class="col-3"><img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=300" class="img-thumbnail bg-dark border-secondary cursor-pointer" onclick="selectModalImage(this.src)"></div>
+                    <div class="col-3"><img src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=300" class="img-thumbnail bg-dark border-secondary cursor-pointer" onclick="selectModalImage(this.src)"></div>
+                    <div class="col-3"><img src="https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=300" class="img-thumbnail bg-dark border-secondary cursor-pointer" onclick="selectModalImage(this.src)"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- TOPBAR -->
 <header class="fb-topbar">
@@ -651,8 +697,18 @@
     if (!funnelData.results) funnelData.results = [];
     if (!funnelData.design_settings) funnelData.design_settings = { primary_color: '#2563eb', scoring_enabled: true };
 
+    // Normalize elements is_required
+    funnelData.steps.forEach(step => {
+        (step.elements || []).forEach(el => {
+            if (el.is_required === undefined) {
+                el.is_required = el.properties?.is_required || false;
+            }
+        });
+    });
+
     let activeStepIndex = 0;
     let selectedElementIndex = null;
+    let currentEditingOptionIdx = null;
 
     const WORLD_CURRENCIES = [
         { code: 'SAR', label: '🇸🇦 SAR (ريال سعودي)' },
@@ -750,8 +806,8 @@
                     question_key: `q_${Math.random().toString(36).substr(2, 6)}`,
                     properties: {
                         options: [
-                            { label: 'الخيار الأول', value: 'Option 1', score: 10 },
-                            { label: 'الخيار الثاني', value: 'Option 2', score: 20 },
+                            { label: 'الخيار الأول', value: 'Option 1', score: 10, image_url: '' },
+                            { label: 'الخيار الثاني', value: 'Option 2', score: 20, image_url: '' },
                         ]
                     }
                 }
@@ -798,7 +854,8 @@
         if (currentStep.elements && currentStep.elements.length > 0) {
             currentStep.elements.forEach((el, eIdx) => {
                 const isSelected = eIdx === selectedElementIndex;
-                const reqStar = el.is_required ? '<span class="text-danger ms-1">*</span>' : '';
+                const reqStar = el.is_required ? '<span class="text-danger ms-1 fw-bold">*</span>' : '';
+                const hasScoring = funnelData.design_settings?.scoring_enabled !== false;
 
                 html += `
                     <div class="canvas-element-item ${isSelected ? 'selected' : ''}" data-el-index="${eIdx}" onclick="inspectElement(${eIdx})">
@@ -830,27 +887,13 @@
                                     <iconify-icon icon="solar:record-circle-bold" class="text-primary fs-5"></iconify-icon>
                                     <span class="fw-semibold">${escapeHtml(opt.label || opt.value || '')}</span>
                                 </div>
-                                ${funnelData.design_settings?.scoring_enabled !== false ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score || 0} نقطة</span>` : ''}
+                                ${hasScoring && (opt.score || 0) > 0 ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score} نقطة</span>` : ''}
                             </div>
                         `;
                     });
                     html += '</div>';
 
-                // 3. Single / Multiple Choice
-                } else if (el.element_type === 'single_choice' || el.element_type === 'multiple_choice' || el.element_type === 'yes_no') {
-                    html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'سؤال الاختيار:')}${reqStar}</label>`;
-                    html += '<div class="d-flex flex-column gap-2">';
-                    (el.properties?.options || []).forEach(opt => {
-                        html += `
-                            <div class="p-3 border rounded-3 bg-light d-flex justify-content-between align-items-center">
-                                <span class="fw-semibold">${escapeHtml(opt.label || opt.value || '')}</span>
-                                ${funnelData.design_settings?.scoring_enabled !== false ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score || 0} نقطة</span>` : ''}
-                            </div>
-                        `;
-                    });
-                    html += '</div>';
-
-                // 4. Checkbox Choice
+                // 3. Checkbox Choice
                 } else if (el.element_type === 'checkbox_choice') {
                     html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'حدد جميع الخيارات:')}${reqStar}</label>`;
                     html += '<div class="d-flex flex-column gap-2">';
@@ -858,17 +901,31 @@
                         html += `
                             <div class="p-3 border rounded-3 bg-white d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center gap-2">
-                                    <input type="checkbox" class="form-check-input me-2" checked disabled>
+                                    <iconify-icon icon="solar:check-square-bold" class="text-primary fs-5"></iconify-icon>
                                     <span class="fw-semibold">${escapeHtml(opt.label || opt.value || '')}</span>
                                 </div>
-                                ${funnelData.design_settings?.scoring_enabled !== false ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score || 0} نقطة</span>` : ''}
+                                ${hasScoring && (opt.score || 0) > 0 ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score} نقطة</span>` : ''}
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+
+                // 4. Single / Multiple Choice
+                } else if (el.element_type === 'single_choice' || el.element_type === 'multiple_choice' || el.element_type === 'yes_no') {
+                    html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'سؤال الاختيار:')}${reqStar}</label>`;
+                    html += '<div class="d-flex flex-column gap-2">';
+                    (el.properties?.options || []).forEach(opt => {
+                        html += `
+                            <div class="p-3 border rounded-3 bg-light d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold">${escapeHtml(opt.label || opt.value || '')}</span>
+                                ${hasScoring && (opt.score || 0) > 0 ? `<span class="badge bg-primary-subtle text-primary small">+${opt.score} نقطة</span>` : ''}
                             </div>
                         `;
                     });
                     html += '</div>';
 
                 // 5. Image Choice (With image thumbnails)
-                } else if (el.element_type === 'image_choice' || el.element_type === 'single_image_choice' || el.element_type === 'multiple_image_choice') {
+                } else if (['image_choice', 'single_image_choice', 'multiple_image_choice'].includes(el.element_type)) {
                     html += `<label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'اختر بطاقة صورة:')}${reqStar}</label>`;
                     html += '<div class="row g-2">';
                     (el.properties?.options || []).forEach(opt => {
@@ -886,7 +943,7 @@
                 // 6. Contact Form
                 } else if (el.element_type === 'contact_form') {
                     html += `
-                        <label class="fw-bold mb-2 text-primary d-block">${escapeHtml(el.label || 'نموذج بيانات التواصل:')}${reqStar}</label>
+                        <label class="fw-bold mb-2 text-primary d-block">${escapeHtml(el.label || 'نموذج بيانات التواصل (CRM):')}${reqStar}</label>
                         <div class="bg-light p-3 rounded-3 border">
                             <input type="text" class="form-control mb-2" placeholder="الاسم الكريم *" disabled>
                             <input type="tel" class="form-control mb-2" placeholder="رقم الواتساب *" disabled>
@@ -907,7 +964,7 @@
                     `;
                 } else if (el.element_type === 'address') {
                     html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'العنوان / المدينة:')}${reqStar}</label>
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'العنوان ومقر الإقامة:')}${reqStar}</label>
                         <div class="input-group"><span class="input-group-text bg-light">📍</span><input type="text" class="form-control" placeholder="المدينة، الحي" disabled></div>
                     `;
                 } else if (el.element_type === 'website') {
@@ -918,7 +975,7 @@
                 } else if (el.element_type === 'country') {
                     html += `
                         <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'اختر الدولة:')}${reqStar}</label>
-                        <select class="form-select bg-light" disabled><option>🇸🇦 المملكة العربية السعودية</option><option>🇦🇪 الإمارات العربية المتحدة</option></select>
+                        <div class="input-group"><span class="input-group-text bg-light">🌍</span><select class="form-select bg-light" disabled><option>${escapeHtml(el.properties?.options?.[0]?.label || '🇸🇦 المملكة العربية السعودية')}</option></select></div>
                     `;
 
                 // 8. Slider (Customizable Currency & Range)
@@ -938,7 +995,7 @@
                 // 9. File Upload
                 } else if (el.element_type === 'file_upload') {
                     html += `
-                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'مرفق أو ملف مطلوب:')}${reqStar}</label>
+                        <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'تحميل المستند أو المرفق:')}${reqStar}</label>
                         <div class="p-4 border border-dashed rounded-3 text-center bg-light">
                             <iconify-icon icon="solar:upload-track-bold-duotone" width="36" class="text-primary mb-1"></iconify-icon>
                             <p class="mb-0 fw-bold small text-dark">انقر لاختيار ملف أو اسحبه هنا</p>
@@ -947,7 +1004,7 @@
                     `;
 
                 // 10. Date / Appointment Picker
-                } else if (el.element_type === 'date_picker' || el.element_type === 'date_time' || el.element_type === 'schedule') {
+                } else if (['date_picker', 'date_time', 'schedule'].includes(el.element_type)) {
                     html += `
                         <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'تحديد التاريخ والموعد:')}${reqStar}</label>
                         <div class="input-group mb-2"><span class="input-group-text bg-light">📅</span><input type="date" class="form-control" disabled></div>
@@ -960,8 +1017,10 @@
                     html += `
                         <div class="p-3 bg-dark text-white rounded-3 border text-center">
                             <span class="small text-warning fw-bold d-block mb-1">⏰ ${escapeHtml(el.label || 'احجز الآن! هذا العرض ساري لمدة:')}</span>
-                            <div class="d-flex justify-content-center gap-2 fs-4 fw-bold text-danger">
-                                <span class="bg-secondary p-1 px-2 rounded">${String(mins).padStart(2, '0')}</span> : <span class="bg-secondary p-1 px-2 rounded">00</span>
+                            <div class="d-flex justify-content-center align-items-center gap-2">
+                                <div class="timer-box-digit">${String(mins).padStart(2, '0')}</div>
+                                <span class="fs-4 fw-bold text-warning">:</span>
+                                <div class="timer-box-digit">00</div>
                             </div>
                         </div>
                     `;
@@ -1107,7 +1166,7 @@
             properties: {}
         };
 
-        if (['single_choice', 'multiple_choice', 'radio_choice', 'checkbox_choice', 'image_choice', 'dropdown'].includes(type)) {
+        if (['single_choice', 'multiple_choice', 'radio_choice', 'checkbox_choice', 'image_choice', 'single_image_choice', 'multiple_image_choice', 'dropdown'].includes(type)) {
             newElement.properties.options = [
                 { label: 'الخيار الأول', value: 'Option 1', score: 10, image_url: '' },
                 { label: 'الخيار الثاني', value: 'Option 2', score: 20, image_url: '' },
@@ -1135,7 +1194,7 @@
                 currency_code: 'SAR',
                 custom_unit: 'ريال'
             };
-        } else if (type === 'timer') {
+        } else if (type === 'timer' || type === 'page_timer') {
             newElement.properties = {
                 duration_minutes: 15,
                 urgency_message: 'احجز الآن! هذا العرض ساري لمدة:'
@@ -1154,7 +1213,7 @@
             case 'radio_choice': return 'اختر إجابة واحدة:';
             case 'multiple_choice': case 'checkbox_choice': return 'اختر جميع الخيارات المناسبة:';
             case 'yes_no': return 'هل ينطبق عليك هذا الشرط؟';
-            case 'image_choice': return 'اختر البطاقة الأنسب لك:';
+            case 'image_choice': case 'single_image_choice': case 'multiple_image_choice': return 'اختر البطاقة الأنسب لك:';
             case 'dropdown': return 'اختر من القائمة المنسدلة:';
             case 'contact_form': return 'بيانات التواصل لاستلام التقرير:';
             case 'email': return 'البريد الإلكتروني:';
@@ -1164,11 +1223,17 @@
             case 'website': return 'الموقع الإلكتروني:';
             case 'file_upload': return 'تحميل المستند أو المرفق:';
             case 'slider': case 'currency': return 'حدد الميزانية التقديرية:';
-            case 'date_picker': return 'تاريخ السفر أو الموعد المرغوب:';
+            case 'date_picker': case 'date_time': return 'تاريخ السفر أو الموعد المرغوب:';
             case 'schedule': return 'حجز وجدولة الموعد:';
-            case 'timer': return 'احجز الآن! هذا العرض متاح لمدة:';
+            case 'timer': case 'page_timer': return 'احجز الآن! هذا العرض متاح لمدة:';
             case 'rating': return 'ما هو تقييمك لمستوى الخدمة؟';
             case 'nps': return 'ما مدى ترشيحك لنا لأصدقائك (0-10)؟';
+            case 'heading': return 'عنوان رئيسي جذاب';
+            case 'text': case 'paragraph': return 'اكتب هنا تفاصيل إضافية لتوضيح السؤال.';
+            case 'table': return 'جدول مقارنة الأسعار والباقات';
+            case 'testimonials': return 'آراء وتجارب العملاء السابقين';
+            case 'faqs': return 'الأسئلة الشائعة وتفاصيل الخدمة';
+            case 'coupon_code': return 'كود خصم فوري مخصص لك';
             default: return 'سؤال جديد';
         }
     }
@@ -1277,7 +1342,7 @@
         }
 
         // TIMER INSPECTOR
-        if (el.element_type === 'timer') {
+        if (el.element_type === 'timer' || el.element_type === 'page_timer') {
             if (!el.properties) el.properties = {};
             html += `
                 <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
@@ -1324,7 +1389,10 @@
                         
                         ${['image_choice', 'single_image_choice', 'multiple_image_choice'].includes(el.element_type) ? `
                             <div class="mb-1">
-                                <input type="text" class="form-control form-control-sm form-control-dark" placeholder="رابط الصورة (Image URL)" value="${escapeHtml(opt.image_url || '')}" oninput="updateOptionProp(${oIdx}, 'image_url', this.value)">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control form-control-sm form-control-dark" placeholder="رابط الصورة (Image URL)" value="${escapeHtml(opt.image_url || '')}" oninput="updateOptionProp(${oIdx}, 'image_url', this.value)">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="openMediaPickerForOption(${oIdx})">🖼️ اختيار</button>
+                                </div>
                             </div>
                         ` : ''}
 
@@ -1393,6 +1461,8 @@
         const currentStep = funnelData.steps[activeStepIndex];
         if (currentStep && currentStep.elements[selectedElementIndex]) {
             currentStep.elements[selectedElementIndex][key] = val;
+            if (!currentStep.elements[selectedElementIndex].properties) currentStep.elements[selectedElementIndex].properties = {};
+            currentStep.elements[selectedElementIndex].properties[key] = val;
             renderCanvas();
         }
     }
@@ -1463,6 +1533,28 @@
         if (currentStep && currentStep.elements[selectedElementIndex]?.properties?.options) {
             currentStep.elements[selectedElementIndex].properties.options.splice(oIdx, 1);
             inspectElement(selectedElementIndex);
+        }
+    }
+
+    // Media Picker Modal for Options
+    function openMediaPickerForOption(oIdx) {
+        currentEditingOptionIdx = oIdx;
+        const modal = new bootstrap.Modal(document.getElementById('mediaPickerModal'));
+        modal.show();
+    }
+
+    function selectModalImage(url) {
+        if (currentEditingOptionIdx !== null) {
+            updateOptionProp(currentEditingOptionIdx, 'image_url', url);
+            inspectElement(selectedElementIndex);
+        }
+        bootstrap.Modal.getInstance(document.getElementById('mediaPickerModal'))?.hide();
+    }
+
+    function applyCustomImageUrl() {
+        const url = document.getElementById('modal_custom_img_url').value;
+        if (url) {
+            selectModalImage(url);
         }
     }
 

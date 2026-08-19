@@ -72,6 +72,11 @@ class FunnelBuilderController extends Controller
 
                     foreach ($stepData['elements'] as $eIndex => $elData) {
                         $elId = $elData['id'] ?? null;
+                        $props = $elData['properties'] ?? [];
+                        if (isset($elData['is_required'])) {
+                            $props['is_required'] = (bool) $elData['is_required'];
+                        }
+
                         $element = FunnelElement::updateOrCreate(
                             ['id' => $elId, 'step_id' => $step->id],
                             [
@@ -79,7 +84,7 @@ class FunnelBuilderController extends Controller
                                 'element_type' => $elData['element_type'] ?? 'text',
                                 'label' => $elData['label'] ?? null,
                                 'question_key' => $elData['question_key'] ?? ('q_' . Str::random(6)),
-                                'properties' => $elData['properties'] ?? [],
+                                'properties' => $props,
                                 'sort_order' => $eIndex + 1,
                             ]
                         );
