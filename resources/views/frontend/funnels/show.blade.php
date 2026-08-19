@@ -580,7 +580,7 @@
                                     </div>
                                 </div>
 
-                            {{-- 12. DEDICATED CONTACT FORM (DYNAMIC FIELDS) --}}
+                            {{-- 12. DEDICATED CONTACT FORM (DYNAMIC FIELDS INCLUDING DROPDOWNS) --}}
                             @elseif($type === 'contact_form')
                                 @php
                                     $cFields = $props['fields'] ?? [
@@ -602,6 +602,7 @@
                                                 $fType = is_array($f) ? ($f['type'] ?? 'text') : 'text';
                                                 $fReq = is_array($f) ? !empty($f['required']) : false;
                                                 $fPlaceholder = is_array($f) ? ($f['placeholder'] ?? '') : '';
+                                                $fOptions = is_array($f) ? ($f['options'] ?? []) : [];
                                             @endphp
                                             <div>
                                                 <label class="form-label fw-bold small text-dark mb-1">
@@ -626,6 +627,13 @@
                                                             <div class="phone-code-list" id="phone_list_cf_{{ $element->id }}"></div>
                                                         </div>
                                                     </div>
+                                                @elseif($fType === 'select' || $fType === 'dropdown')
+                                                    <select class="form-select form-select-lg rounded-3" id="cf_input_{{ $fKey }}" onchange="userAnswers['{{ $fKey }}'] = this.value; clearError({{ $element->id }});">
+                                                        <option value="">{{ $fPlaceholder ?: 'اختر من القائمة...' }}</option>
+                                                        @foreach($fOptions as $o)
+                                                            <option value="{{ $o['value'] ?? $o['label'] }}">{{ $o['label'] ?? $o['value'] }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 @elseif($fType === 'textarea')
                                                     <textarea class="form-control form-control-lg rounded-3" id="cf_input_{{ $fKey }}" rows="2" placeholder="{{ $fPlaceholder }}" onchange="userAnswers['{{ $fKey }}'] = this.value; clearError({{ $element->id }});"></textarea>
                                                 @elseif($fType === 'date')
@@ -662,7 +670,7 @@
                                     <input type="url" class="form-control" id="input_el_{{ $element->id }}" placeholder="https://www.example.com" onchange="userAnswers[{{ $element->id }}] = this.value; clearError({{ $element->id }});">
                                 </div>
 
-                            {{-- 16. COUNTDOWN TIMER (HOURS : MINUTES : SECONDS) --}}
+                            {{-- 16. COUNTDOWN TIMER (WITH LABELS ABOVE DIGITS) --}}
                             @elseif(in_array($type, ['timer', 'page_timer']))
                                 @php
                                     $hrs = $props['duration_hours'] ?? 0;
@@ -670,17 +678,23 @@
                                     $secs = $props['duration_seconds'] ?? 0;
                                     $totalSecs = ($hrs * 3600) + ($mins * 60) + $secs;
                                 @endphp
-                                <div class="p-3 bg-dark text-white rounded-4 border text-center" id="timer_box_{{ $element->id }}" data-seconds="{{ $totalSecs }}">
-                                    <span class="small text-warning fw-bold d-block mb-2">⏰ {{ $label ?: 'احجز الآن! هذا العرض ساري لمدة:' }}</span>
-                                    <div class="d-flex justify-content-center align-items-center gap-2">
-                                        <div class="timer-box-digit" id="timer_hr_{{ $element->id }}">{{ sprintf('%02d', $hrs) }}</div>
-                                        <span class="fs-4 fw-bold text-warning">:</span>
-                                        <div class="timer-box-digit" id="timer_min_{{ $element->id }}">{{ sprintf('%02d', $mins) }}</div>
-                                        <span class="fs-4 fw-bold text-warning">:</span>
-                                        <div class="timer-box-digit" id="timer_sec_{{ $element->id }}">{{ sprintf('%02d', $secs) }}</div>
-                                    </div>
-                                    <div class="d-flex justify-content-center gap-4 text-muted small mt-1" style="font-size: 11px;">
-                                        <span>ساعة</span><span>دقيقة</span><span>ثانية</span>
+                                <div class="p-4 bg-dark text-white rounded-4 border text-center" id="timer_box_{{ $element->id }}" data-seconds="{{ $totalSecs }}">
+                                    <span class="small text-warning fw-bold d-block mb-3">⏰ {{ $label ?: 'احجز الآن! هذا العرض ساري لمدة:' }}</span>
+                                    <div class="d-flex justify-content-center align-items-center gap-3">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <span class="small text-white-50 fw-bold mb-1" style="font-size: 12px;">الساعات (Hours)</span>
+                                            <div class="timer-box-digit" id="timer_hr_{{ $element->id }}">{{ sprintf('%02d', $hrs) }}</div>
+                                        </div>
+                                        <span class="fs-3 fw-bold text-warning mt-3">:</span>
+                                        <div class="d-flex flex-column align-items-center">
+                                            <span class="small text-white-50 fw-bold mb-1" style="font-size: 12px;">الدقائق (Minutes)</span>
+                                            <div class="timer-box-digit" id="timer_min_{{ $element->id }}">{{ sprintf('%02d', $mins) }}</div>
+                                        </div>
+                                        <span class="fs-3 fw-bold text-warning mt-3">:</span>
+                                        <div class="d-flex flex-column align-items-center">
+                                            <span class="small text-white-50 fw-bold mb-1" style="font-size: 12px;">الثواني (Seconds)</span>
+                                            <div class="timer-box-digit" id="timer_sec_{{ $element->id }}">{{ sprintf('%02d', $secs) }}</div>
+                                        </div>
                                     </div>
                                 </div>
 

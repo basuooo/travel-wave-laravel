@@ -443,14 +443,24 @@
 
             // Contact Form
             } else if (el.element_type === 'contact_form') {
-                html += `
-                    <div class="bg-light p-3 rounded-4 border">
-                        <h6 class="fw-bold text-primary mb-2">بيانات التواصل:</h6>
-                        <input type="text" class="form-control mb-2" placeholder="الاسم الكريم">
-                        <input type="tel" class="form-control mb-2" placeholder="رقم الواتساب">
-                        <input type="email" class="form-control" placeholder="البريد الإلكتروني">
-                    </div>
-                `;
+                const fields = el.properties?.fields || [
+                    { label: 'الاسم الكريم', type: 'text', placeholder: 'الاسم' },
+                    { label: 'رقم الواتساب', type: 'tel', placeholder: '05XXXXXXXX' },
+                    { label: 'البريد الإلكتروني', type: 'email', placeholder: 'example@domain.com' }
+                ];
+                html += `<div class="bg-light p-3 rounded-4 border"><h6 class="fw-bold text-primary mb-3">${escapeHtml(el.label || 'بيانات التواصل:')}</h6><div class="d-flex flex-column gap-2">`;
+                fields.forEach(f => {
+                    if (f.type === 'select' || f.type === 'dropdown') {
+                        html += `<div><label class="form-label small fw-bold mb-1">${escapeHtml(f.label)}</label><select class="form-select"><option value="">${escapeHtml(f.placeholder || 'اختر...')}</option>${(f.options || []).map(o => `<option>${escapeHtml(o.label || o.value)}</option>`).join('')}</select></div>`;
+                    } else if (f.type === 'tel' || f.type === 'phone') {
+                        html += `<div><label class="form-label small fw-bold mb-1">${escapeHtml(f.label)}</label><div class="input-group"><button class="btn btn-outline-secondary" type="button">🇸🇦 +966 ▾</button><input type="tel" class="form-control" placeholder="${escapeHtml(f.placeholder || '05XXXXXXXX')}"></div></div>`;
+                    } else if (f.type === 'textarea') {
+                        html += `<div><label class="form-label small fw-bold mb-1">${escapeHtml(f.label)}</label><textarea class="form-control" rows="2" placeholder="${escapeHtml(f.placeholder || '')}"></textarea></div>`;
+                    } else {
+                        html += `<div><label class="form-label small fw-bold mb-1">${escapeHtml(f.label)}</label><input type="${f.type || 'text'}" class="form-control" placeholder="${escapeHtml(f.placeholder || '')}"></div>`;
+                    }
+                });
+                html += `</div></div>`;
 
             // Dedicated Contact Inputs
             } else if (el.element_type === 'email') {
@@ -474,14 +484,27 @@
 
             // Timer
             } else if (el.element_type === 'timer' || el.element_type === 'page_timer') {
+                const hrs = el.properties?.duration_hours || 0;
                 const mins = el.properties?.duration_minutes || 15;
+                const secs = el.properties?.duration_seconds || 0;
                 html += `
-                    <div class="p-3 bg-dark text-white rounded-3 border text-center">
-                        <span class="small text-warning fw-bold d-block mb-1">⏰ ${escapeHtml(el.label || 'احجز الآن! هذا العرض ساري لمدة:')}</span>
-                        <div class="d-flex justify-content-center align-items-center gap-2">
-                            <div class="timer-box-digit">${String(mins).padStart(2, '0')}</div>
-                            <span class="fs-4 fw-bold text-warning">:</span>
-                            <div class="timer-box-digit">00</div>
+                    <div class="p-3 bg-dark text-white rounded-4 border text-center">
+                        <span class="small text-warning fw-bold d-block mb-3">⏰ ${escapeHtml(el.label || 'احجز الآن! هذا العرض ساري لمدة:')}</span>
+                        <div class="d-flex justify-content-center align-items-center gap-3">
+                            <div class="d-flex flex-column align-items-center">
+                                <span class="small text-white-50 fw-bold mb-1" style="font-size: 11px;">الساعات (Hours)</span>
+                                <div class="timer-box-digit">${String(hrs).padStart(2, '0')}</div>
+                            </div>
+                            <span class="fs-3 fw-bold text-warning mt-3">:</span>
+                            <div class="d-flex flex-column align-items-center">
+                                <span class="small text-white-50 fw-bold mb-1" style="font-size: 11px;">الدقائق (Minutes)</span>
+                                <div class="timer-box-digit">${String(mins).padStart(2, '0')}</div>
+                            </div>
+                            <span class="fs-3 fw-bold text-warning mt-3">:</span>
+                            <div class="d-flex flex-column align-items-center">
+                                <span class="small text-white-50 fw-bold mb-1" style="font-size: 11px;">الثواني (Seconds)</span>
+                                <div class="timer-box-digit">${String(secs).padStart(2, '0')}</div>
+                            </div>
                         </div>
                     </div>
                 `;

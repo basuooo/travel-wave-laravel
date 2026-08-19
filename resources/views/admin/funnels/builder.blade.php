@@ -17,7 +17,7 @@
         :root {
             --fb-topbar-h: 62px;
             --fb-sidebar-w: 340px;
-            --fb-inspector-w: 430px;
+            --fb-inspector-w: 440px;
             --fb-bg-dark: #090d16;
             --fb-panel-bg: #101726;
             --fb-panel-card: #192237;
@@ -283,18 +283,15 @@
         .timer-box-digit {
             background: #1e293b;
             color: #f8fafc;
-            padding: 6px 12px;
-            border-radius: 8px;
+            padding: 8px 14px;
+            border-radius: 10px;
             font-size: 22px;
             font-weight: 800;
-            min-width: 44px;
+            min-width: 52px;
             text-align: center;
         }
 
         /* Phone Country Code Select UI */
-        .phone-code-dropdown-container {
-            position: relative;
-        }
         .phone-code-btn {
             display: flex;
             align-items: center;
@@ -312,45 +309,31 @@
         [dir="rtl"] .phone-code-btn {
             border-radius: 0 8px 8px 0;
         }
-        .phone-code-menu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            z-index: 1050;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 280px;
-            max-height: 250px;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        [dir="rtl"] .phone-code-menu {
-            left: auto;
-            right: 0;
-        }
-        .phone-code-menu.show {
-            display: flex;
-        }
-        .phone-code-list {
-            overflow-y: auto;
-            max-height: 190px;
-        }
-        .phone-code-item {
-            padding: 7px 12px;
+
+        /* Country Group Preset Active Pill */
+        .country-preset-btn {
+            transition: all 0.2s;
+            border: 1px solid var(--fb-border);
+            background: #151f33;
+            color: #cbd5e1;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: space-between;
-            font-size: 13px;
-            color: #1e293b;
-            transition: background 0.15s;
+            gap: 4px;
         }
-        .phone-code-item:hover {
-            background: #eff6ff;
-            color: var(--fb-accent);
+        .country-preset-btn:hover {
+            border-color: var(--fb-accent);
+            color: #fff;
+        }
+        .country-preset-btn.active {
+            background: var(--fb-accent);
+            border-color: var(--fb-accent);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
         }
 
         #fb_toast {
@@ -771,57 +754,86 @@
     let selectedElementIndex = null;
     let currentEditingOptionIdx = null;
 
-    // GLOBAL DIAL CODES WITH SEARCH & FLAGS
-    const ALL_COUNTRY_DIAL_CODES = [
-        { name_ar: 'السعودية', name_en: 'Saudi Arabia', code: 'SA', dial_code: '+966', flag: '🇸🇦' },
-        { name_ar: 'مصر', name_en: 'Egypt', code: 'EG', dial_code: '+20', flag: '🇪🇬' },
-        { name_ar: 'الإمارات', name_en: 'United Arab Emirates', code: 'AE', dial_code: '+971', flag: '🇦🇪' },
-        { name_ar: 'الكويت', name_en: 'Kuwait', code: 'KW', dial_code: '+965', flag: '🇰🇼' },
-        { name_ar: 'قطر', name_en: 'Qatar', code: 'QA', dial_code: '+974', flag: '🇶🇦' },
-        { name_ar: 'البحرين', name_en: 'Bahrain', code: 'BH', dial_code: '+973', flag: '🇧🇭' },
-        { name_ar: 'عمان', name_en: 'Oman', code: 'OM', dial_code: '+968', flag: '🇴🇲' },
-        { name_ar: 'الأردن', name_en: 'Jordan', code: 'JO', dial_code: '+962', flag: '🇯🇴' },
-        { name_ar: 'العراق', name_en: 'Iraq', code: 'IQ', dial_code: '+964', flag: '🇮🇶' },
-        { name_ar: 'المغرب', name_en: 'Morocco', code: 'MA', dial_code: '+212', flag: '🇲🇦' },
-        { name_ar: 'الجزائر', name_en: 'Algeria', code: 'DZ', dial_code: '+213', flag: '🇩🇿' },
-        { name_ar: 'تونس', name_en: 'Tunisia', code: 'TN', dial_code: '+216', flag: '🇹🇳' },
-        { name_ar: 'لبنان', name_en: 'Lebanon', code: 'LB', dial_code: '+961', flag: '🇱🇧' },
-        { name_ar: 'تركيا', name_en: 'Turkey', code: 'TR', dial_code: '+90', flag: '🇹🇷' },
-        { name_ar: 'المملكة المتحدة', name_en: 'United Kingdom', code: 'GB', dial_code: '+44', flag: '🇬🇧' },
-        { name_ar: 'الولايات المتحدة', name_en: 'United States', code: 'US', dial_code: '+1', flag: '🇺🇸' },
-        { name_ar: 'ألمانيا', name_en: 'Germany', code: 'DE', dial_code: '+49', flag: '🇩🇪' },
-        { name_ar: 'فرنسا', name_en: 'France', code: 'FR', dial_code: '+33', flag: '🇫🇷' },
-        { name_ar: 'إيطاليا', name_en: 'Italy', code: 'IT', dial_code: '+39', flag: '🇮🇹' },
-        { name_ar: 'إسبانيا', name_en: 'Spain', code: 'ES', dial_code: '+34', flag: '🇪🇸' },
-        { name_ar: 'سويسرا', name_en: 'Switzerland', code: 'CH', dial_code: '+41', flag: '🇨🇭' },
-        { name_ar: 'هولندا', name_en: 'Netherlands', code: 'NL', dial_code: '+31', flag: '🇳🇱' },
-        { name_ar: 'كندا', name_en: 'Canada', code: 'CA', dial_code: '+1', flag: '🇨🇦' },
-        { name_ar: 'أستراليا', name_en: 'Australia', code: 'AU', dial_code: '+61', flag: '🇦🇺' },
-        { name_ar: 'الصين', name_en: 'China', code: 'CN', dial_code: '+86', flag: '🇨🇳' },
-        { name_ar: 'اليابان', name_en: 'Japan', code: 'JP', dial_code: '+81', flag: '🇯🇵' },
-        { name_ar: 'ماليزيا', name_en: 'Malaysia', code: 'MY', dial_code: '+60', flag: '🇲🇾' },
-        { name_ar: 'إندونيسيا', name_en: 'Indonesia', code: 'ID', dial_code: '+62', flag: '🇮🇩' },
-        { name_ar: 'الهند', name_en: 'India', code: 'IN', dial_code: '+91', flag: '🇮🇳' },
-        { name_ar: 'روسيا', name_en: 'Russia', code: 'RU', dial_code: '+7', flag: '🇷🇺' },
-        { name_ar: 'جورجيا', name_en: 'Georgia', code: 'GE', dial_code: '+995', flag: '🇬🇪' },
-        { name_ar: 'أذربيجان', name_en: 'Azerbaijan', code: 'AZ', dial_code: '+994', flag: '🇦🇿' },
-        { name_ar: 'البوسنة', name_en: 'Bosnia', code: 'BA', dial_code: '+387', flag: '🇧🇦' },
-        { name_ar: 'تايلاند', name_en: 'Thailand', code: 'TH', dial_code: '+66', flag: '🇹🇭' },
-        { name_ar: 'الفلبين', name_en: 'Philippines', code: 'PH', dial_code: '+63', flag: '🇵🇭' },
-        { name_ar: 'جزر المالديف', name_en: 'Maldives', code: 'MV', dial_code: '+960', flag: '🇲🇻' },
-        { name_ar: 'سيريلانكا', name_en: 'Sri Lanka', code: 'LK', dial_code: '+94', flag: '🇱🇰' },
-        { name_ar: 'سنغافورة', name_en: 'Singapore', code: 'SG', dial_code: '+65', flag: '🇸🇬' },
-        { name_ar: 'كوريا الجنوبية', name_en: 'South Korea', code: 'KR', dial_code: '+82', flag: '🇰🇷' },
-        { name_ar: 'السودان', name_en: 'Sudan', code: 'SD', dial_code: '+249', flag: '🇸🇩' },
-        { name_ar: 'اليمن', name_en: 'Yemen', code: 'YE', dial_code: '+967', flag: '🇾🇪' },
-        { name_ar: 'سوريا', name_en: 'Syria', code: 'SY', dial_code: '+963', flag: '🇸🇾' },
-        { name_ar: 'فلسطين', name_en: 'Palestine', code: 'PS', dial_code: '+970', flag: '🇵🇸' },
-        { name_ar: 'ليبيا', name_en: 'Libya', code: 'LY', dial_code: '+218', flag: '🇱🇾' },
-        { name_ar: 'موريتانيا', name_en: 'Mauritania', code: 'MR', dial_code: '+222', flag: '🇲🇷' },
-        { name_ar: 'الصومال', name_en: 'Somalia', code: 'SO', dial_code: '+252', flag: '🇸🇴' },
-        { name_ar: 'جيبوتي', name_en: 'Djibouti', code: 'DJ', dial_code: '+253', flag: '🇩🇯' },
-        { name_ar: 'جزر القمر', name_en: 'Comoros', code: 'KM', dial_code: '+269', flag: '🇰🇲' }
-    ];
+    // COUNTRY GROUP PRESETS DICTIONARY (FOR TOGGLING)
+    const COUNTRY_GROUPS = {
+        arab: {
+            id: 'arab',
+            label: '🌍 الدول العربية',
+            countries: [
+                { label: '🇸🇦 المملكة العربية السعودية', value: 'Saudi Arabia' },
+                { label: '🇦🇪 الإمارات العربية المتحدة', value: 'UAE' },
+                { label: '🇪🇬 جمهورية مصر العربية', value: 'Egypt' },
+                { label: '🇰🇼 دولة الكويت', value: 'Kuwait' },
+                { label: '🇶🇦 دولة قطر', value: 'Qatar' },
+                { label: '🇧🇭 مملكة البحرين', value: 'Bahrain' },
+                { label: '🇴🇲 سلطنة عمان', value: 'Oman' },
+                { label: '🇯🇴 المملكة الأردنية الهاشمية', value: 'Jordan' },
+                { label: '🇮🇶 جمهورية العراق', value: 'Iraq' },
+                { label: '🇲🇦 المملكة المغربية', value: 'Morocco' },
+                { label: '🇩🇿 الجمهورية الجزائرية', value: 'Algeria' },
+                { label: '🇹🇳 الجمهورية التونسية', value: 'Tunisia' },
+                { label: '🇱🇧 الجمهورية اللبنانية', value: 'Lebanon' },
+                { label: '🇸🇩 جمهورية السودان', value: 'Sudan' },
+                { label: '🇾🇪 الجمهورية اليمنية', value: 'Yemen' },
+                { label: '🇵🇸 دولة فلسطين', value: 'Palestine' },
+                { label: '🇱🇾 دولة ليبيا', value: 'Libya' },
+            ]
+        },
+        eu: {
+            id: 'eu',
+            label: '🇪🇺 الاتحاد الأوروبي (شنغن)',
+            countries: [
+                { label: '🇩🇪 ألمانيا (Germany)', value: 'Germany' },
+                { label: '🇫🇷 فرنسا (France)', value: 'France' },
+                { label: '🇮🇹 إيطاليا (Italy)', value: 'Italy' },
+                { label: '🇪🇸 إسبانيا (Spain)', value: 'Spain' },
+                { label: '🇨🇭 سويسرا (Switzerland)', value: 'Switzerland' },
+                { label: '🇳🇱 هولندا (Netherlands)', value: 'Netherlands' },
+                { label: '🇦🇹 النمسا (Austria)', value: 'Austria' },
+                { label: '🇵🇹 البرتغال (Portugal)', value: 'Portugal' },
+                { label: '🇬🇷 اليونان (Greece)', value: 'Greece' },
+                { label: '🇸🇪 السويد (Sweden)', value: 'Sweden' },
+                { label: '🇧🇪 بلجيكا (Belgium)', value: 'Belgium' },
+                { label: '🇵🇱 بولندا (Poland)', value: 'Poland' },
+                { label: '🇳🇴 النرويج (Norway)', value: 'Norway' },
+                { label: '🇩🇰 الدنمارك (Denmark)', value: 'Denmark' },
+                { label: '🇫🇮 فنلندا (Finland)', value: 'Finland' },
+                { label: '🇨🇿 التشيك (Czech Republic)', value: 'Czech Republic' },
+                { label: '🇭🇺 المجر (Hungary)', value: 'Hungary' },
+            ]
+        },
+        asia: {
+            id: 'asia',
+            label: '🌏 دول آسيا',
+            countries: [
+                { label: '🇲🇾 ماليزيا (Malaysia)', value: 'Malaysia' },
+                { label: '🇹🇭 تايلاند (Thailand)', value: 'Thailand' },
+                { label: '🇮🇩 إندونيسيا (Indonesia)', value: 'Indonesia' },
+                { label: '🇸🇬 سنغافورة (Singapore)', value: 'Singapore' },
+                { label: '🇯🇵 اليابان (Japan)', value: 'Japan' },
+                { label: '🇰🇷 كوريا الجنوبية (South Korea)', value: 'South Korea' },
+                { label: '🇨🇳 الصين (China)', value: 'China' },
+                { label: '🇹🇷 تركيا (Turkey)', value: 'Turkey' },
+                { label: '🇬🇪 جورجيا (Georgia)', value: 'Georgia' },
+                { label: '🇦🇿 أذربيجان (Azerbaijan)', value: 'Azerbaijan' },
+                { label: '🇲🇻 جزر المالديف (Maldives)', value: 'Maldives' },
+                { label: '🇵🇭 الفلبين (Philippines)', value: 'Philippines' },
+                { label: '🇻🇳 فيتنام (Vietnam)', value: 'Vietnam' },
+                { label: '🇮🇳 الهند (India)', value: 'India' },
+            ]
+        },
+        americas: {
+            id: 'americas',
+            label: '🌎 دول أمريكا وكندا',
+            countries: [
+                { label: '🇺🇸 الولايات المتحدة الأمريكية (USA)', value: 'USA' },
+                { label: '🇨🇦 كندا (Canada)', value: 'Canada' },
+                { label: '🇬🇧 المملكة المتحدة (بريطانيا)', value: 'United Kingdom' },
+                { label: '🇦🇺 أستراليا (Australia)', value: 'Australia' },
+                { label: '🇧🇷 البرازيل (Brazil)', value: 'Brazil' },
+            ]
+        }
+    };
 
     const WORLD_CURRENCIES = [
         { code: 'SAR', label: '🇸🇦 SAR (ريال سعودي)' },
@@ -1053,7 +1065,7 @@
                     });
                     html += '</div>';
 
-                // 6. CUSTOMIZABLE CONTACT FORM
+                // 6. CUSTOMIZABLE CONTACT FORM (WITH DROPDOWN & INPUTS)
                 } else if (el.element_type === 'contact_form') {
                     const fields = el.properties?.fields || [
                         { key: 'full_name', label: 'الاسم الكريم', type: 'text', required: true, placeholder: 'أدخل اسمك الكريم' },
@@ -1067,7 +1079,7 @@
                     `;
                     fields.forEach(f => {
                         const fReq = f.required ? '<span class="text-danger">*</span>' : '';
-                        if (f.type === 'tel') {
+                        if (f.type === 'tel' || f.type === 'phone') {
                             html += `
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(f.label)} ${fReq}</label>
@@ -1075,6 +1087,16 @@
                                         <button class="phone-code-btn" type="button">🇸🇦 +966 ▾</button>
                                         <input type="tel" class="form-control" placeholder="${escapeHtml(f.placeholder || 'رقم الجوال')}" disabled>
                                     </div>
+                                </div>
+                            `;
+                        } else if (f.type === 'select' || f.type === 'dropdown') {
+                            html += `
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(f.label)} ${fReq}</label>
+                                    <select class="form-select" disabled>
+                                        <option value="">${escapeHtml(f.placeholder || 'اختر من القائمة المنسدلة...')}</option>
+                                        ${(f.options || []).map(o => `<option>${escapeHtml(o.label || o.value)}</option>`).join('')}
+                                    </select>
                                 </div>
                             `;
                         } else if (f.type === 'textarea') {
@@ -1095,7 +1117,7 @@
                     });
                     html += `</div>`;
 
-                // 7. Phone with International Code & Search
+                // 7. Phone with International Code
                 } else if (el.element_type === 'phone') {
                     html += `
                         <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'رقم الواتساب / الجوال:')}${reqStar}</label>
@@ -1105,7 +1127,7 @@
                         </div>
                     `;
 
-                // 8. Other Dedicated Contact Inputs
+                // 8. Dedicated Contact Inputs
                 } else if (el.element_type === 'email') {
                     html += `
                         <label class="fw-bold mb-2 d-block text-dark">${escapeHtml(el.label || 'البريد الإلكتروني:')}${reqStar}</label>
@@ -1160,23 +1182,29 @@
                         <div class="d-flex gap-2"><span class="badge bg-light text-dark border p-2">صباحاً (09:00 - 12:00)</span><span class="badge bg-light text-dark border p-2">مساءً (04:00 - 08:00)</span></div>
                     `;
 
-                // 12. Countdown Timer (Hours : Minutes : Seconds)
+                // 12. Countdown Timer (With Labels Above Digits)
                 } else if (el.element_type === 'timer' || el.element_type === 'page_timer') {
                     const hrs = el.properties?.duration_hours || 0;
                     const mins = el.properties?.duration_minutes || 15;
                     const secs = el.properties?.duration_seconds || 0;
                     html += `
                         <div class="p-3 bg-dark text-white rounded-4 border text-center">
-                            <span class="small text-warning fw-bold d-block mb-2">⏰ ${escapeHtml(el.label || 'احجز الآن! هذا العرض ساري لمدة:')}</span>
-                            <div class="d-flex justify-content-center align-items-center gap-2">
-                                <div class="timer-box-digit">${String(hrs).padStart(2, '0')}</div>
-                                <span class="fs-4 fw-bold text-warning">:</span>
-                                <div class="timer-box-digit">${String(mins).padStart(2, '0')}</div>
-                                <span class="fs-4 fw-bold text-warning">:</span>
-                                <div class="timer-box-digit">${String(secs).padStart(2, '0')}</div>
-                            </div>
-                            <div class="d-flex justify-content-center gap-4 text-muted small mt-1" style="font-size: 11px;">
-                                <span>ساعة</span><span>دقيقة</span><span>ثانية</span>
+                            <span class="small text-warning fw-bold d-block mb-3">⏰ ${escapeHtml(el.label || 'احجز الآن! هذا العرض ساري لمدة:')}</span>
+                            <div class="d-flex justify-content-center align-items-center gap-3">
+                                <div class="d-flex flex-column align-items-center">
+                                    <span class="small text-white-50 fw-bold mb-1" style="font-size: 11px;">الساعات (Hours)</span>
+                                    <div class="timer-box-digit">${String(hrs).padStart(2, '0')}</div>
+                                </div>
+                                <span class="fs-3 fw-bold text-warning mt-3">:</span>
+                                <div class="d-flex flex-column align-items-center">
+                                    <span class="small text-white-50 fw-bold mb-1" style="font-size: 11px;">الدقائق (Minutes)</span>
+                                    <div class="timer-box-digit">${String(mins).padStart(2, '0')}</div>
+                                </div>
+                                <span class="fs-3 fw-bold text-warning mt-3">:</span>
+                                <div class="d-flex flex-column align-items-center">
+                                    <span class="small text-white-50 fw-bold mb-1" style="font-size: 11px;">الثواني (Seconds)</span>
+                                    <div class="timer-box-digit">${String(secs).padStart(2, '0')}</div>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1334,13 +1362,10 @@
                 { label: 'لا (No)', value: 'No', score: 0 },
             ];
         } else if (type === 'country') {
-            newElement.properties.options = [
-                { label: '🇸🇦 المملكة العربية السعودية', value: 'Saudi Arabia' },
-                { label: '🇦🇪 الإمارات العربية المتحدة', value: 'UAE' },
-                { label: '🇪🇬 جمهورية مصر العربية', value: 'Egypt' },
-                { label: '🇰🇼 دولة الكويت', value: 'Kuwait' },
-                { label: '🇶🇦 دولة قطر', value: 'Qatar' },
-            ];
+            newElement.properties = {
+                active_presets: ['arab'],
+                options: [...COUNTRY_GROUPS.arab.countries]
+            };
         } else if (type === 'contact_form') {
             newElement.properties = {
                 fields: [
@@ -1467,7 +1492,7 @@
             </div>
         `;
 
-        // 🌟 CONTACT FORM INSPECTOR (FULL CUSTOMIZATION & PRESETS)
+        // 🌟 CONTACT FORM INSPECTOR (WITH SELECT / DROPDOWN OPTIONS & PRESETS)
         if (el.element_type === 'contact_form') {
             if (!el.properties) el.properties = {};
             if (!el.properties.fields) el.properties.fields = [
@@ -1503,26 +1528,50 @@
             `;
 
             el.properties.fields.forEach((f, fIdx) => {
+                const isSelect = f.type === 'select' || f.type === 'dropdown';
+                if (isSelect && !f.options) {
+                    f.options = [{ label: 'الخيار الأول', value: 'Option 1' }, { label: 'الخيار الثاني', value: 'Option 2' }];
+                }
+
                 html += `
-                    <div class="p-2 bg-secondary bg-opacity-10 rounded-3 border border-secondary">
+                    <div class="p-2 bg-secondary bg-opacity-10 rounded-3 border border-secondary mb-2">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <input type="text" class="form-control form-control-sm form-control-dark me-1" value="${escapeHtml(f.label)}" placeholder="اسم الحقل" oninput="updateContactFieldProp(${fIdx}, 'label', this.value)">
                             <button type="button" class="btn btn-sm btn-outline-danger px-2 py-0" onclick="deleteContactField(${fIdx})">✕</button>
                         </div>
-                        <div class="row g-1 mb-1">
+                        <div class="row g-1 mb-2">
                             <div class="col-6">
-                                <select class="form-select form-select-sm form-select-dark" onchange="updateContactFieldProp(${fIdx}, 'type', this.value)">
+                                <select class="form-select form-select-sm form-select-dark" onchange="updateContactFieldProp(${fIdx}, 'type', this.value); inspectElement(${eIdx});">
                                     <option value="text" ${f.type==='text'?'selected':''}>نص عادي (Text)</option>
                                     <option value="tel" ${f.type==='tel'?'selected':''}>واتساب / هاتف (Phone)</option>
                                     <option value="email" ${f.type==='email'?'selected':''}>بريد (Email)</option>
+                                    <option value="select" ${isSelect?'selected':''}>قائمة منسدلة (Dropdown)</option>
                                     <option value="date" ${f.type==='date'?'selected':''}>تاريخ (Date)</option>
                                     <option value="textarea" ${f.type==='textarea'?'selected':''}>نص كبير (Textarea)</option>
                                 </select>
                             </div>
                             <div class="col-6">
-                                <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(f.placeholder||'')}" placeholder="النص التوضيحي Placeholder" oninput="updateContactFieldProp(${fIdx}, 'placeholder', this.value)">
+                                <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(f.placeholder||'')}" placeholder="${isSelect?'نص الاختيار الافتراضي':'النص التوضيحي'}" oninput="updateContactFieldProp(${fIdx}, 'placeholder', this.value)">
                             </div>
                         </div>
+
+                        ${isSelect ? `
+                            <div class="p-2 bg-dark rounded-2 border border-secondary mb-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="small fw-bold text-info">خيارات القائمة المنسدلة:</span>
+                                    <button type="button" class="btn btn-sm btn-outline-info py-0 px-2 small" onclick="addOptionToContactSelectField(${fIdx})">➕ خيار</button>
+                                </div>
+                                <div class="d-flex flex-column gap-1">
+                                    ${(f.options || []).map((opt, oIdx) => `
+                                        <div class="d-flex gap-1">
+                                            <input type="text" class="form-control form-control-sm form-control-dark" placeholder="نص الخيار" value="${escapeHtml(opt.label || opt.value || '')}" oninput="updateContactSelectOption(${fIdx}, ${oIdx}, this.value)">
+                                            <button type="button" class="btn btn-sm btn-outline-danger px-2 py-0" onclick="deleteContactSelectOption(${fIdx}, ${oIdx})">✕</button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
                         <div class="form-check form-switch mb-0">
                             <input class="form-check-input" type="checkbox" id="cf_req_${fIdx}" ${f.required?'checked':''} onchange="updateContactFieldProp(${fIdx}, 'required', this.checked)">
                             <label class="form-check-label text-muted small" for="cf_req_${fIdx}">حقل إجباري (Required)</label>
@@ -1579,18 +1628,18 @@
             if (!el.properties) el.properties = {};
             html += `
                 <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
-                    <h6 class="fw-bold small text-white mb-2">⏰ إعدادات المؤقت التنازلي (ساعات : دقائق : ثواني)</h6>
+                    <h6 class="fw-bold small text-white mb-2">⏰ إعدادات المؤقت التنازلي</h6>
                     <div class="row g-2 mb-2">
                         <div class="col-4">
-                            <label class="form-label small text-muted">الساعات</label>
+                            <label class="form-label small text-muted">الساعات (Hours)</label>
                             <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.duration_hours || 0}" min="0" max="99" oninput="updateTimerProp('duration_hours', parseInt(this.value)||0)">
                         </div>
                         <div class="col-4">
-                            <label class="form-label small text-muted">الدقائق</label>
+                            <label class="form-label small text-muted">الدقائق (Minutes)</label>
                             <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.duration_minutes || 15}" min="0" max="59" oninput="updateTimerProp('duration_minutes', parseInt(this.value)||0)">
                         </div>
                         <div class="col-4">
-                            <label class="form-label small text-muted">الثواني</label>
+                            <label class="form-label small text-muted">الثواني (Seconds)</label>
                             <input type="number" class="form-control form-control-sm form-control-dark" value="${el.properties.duration_seconds || 0}" min="0" max="59" oninput="updateTimerProp('duration_seconds', parseInt(this.value)||0)">
                         </div>
                     </div>
@@ -1598,31 +1647,46 @@
             `;
         }
 
-        // COUNTRY INSPECTOR (ARAB, EU, ASIA, WORLD)
+        // 🌟 COUNTRY INSPECTOR (TOGGLEABLE ACTIVE PRESETS)
         if (el.element_type === 'country') {
+            if (!el.properties) el.properties = {};
+            if (!el.properties.active_presets) el.properties.active_presets = ['arab'];
+            const activePresets = el.properties.active_presets;
+
             html += `
                 <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
-                    <label class="form-label small text-white fw-bold mb-2">تحميل قوائم الدول الجاهزة:</label>
-                    <div class="d-flex flex-wrap gap-1 mb-2">
-                        <button type="button" class="btn btn-sm btn-outline-info flex-fill" onclick="loadCountryPreset('arab')">🌍 الدول العربية</button>
-                        <button type="button" class="btn btn-sm btn-outline-warning flex-fill" onclick="loadCountryPreset('eu')">🇪🇺 دول أوروبا (شنغن)</button>
-                        <button type="button" class="btn btn-sm btn-outline-success flex-fill" onclick="loadCountryPreset('asia')">🌏 دول آسيا</button>
-                        <button type="button" class="btn btn-sm btn-outline-light flex-fill" onclick="loadCountryPreset('world')">🌐 دول العالم</button>
+                    <label class="form-label small text-white fw-bold mb-2">تحديد مجموعات الدول (تفعيل/إلغاء بالنقر):</label>
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button type="button" class="country-preset-btn ${activePresets.includes('arab') ? 'active' : ''}" onclick="toggleCountryGroup('arab')">
+                            ${COUNTRY_GROUPS.arab.label} ${activePresets.includes('arab') ? '✓' : '+'}
+                        </button>
+                        <button type="button" class="country-preset-btn ${activePresets.includes('eu') ? 'active' : ''}" onclick="toggleCountryGroup('eu')">
+                            ${COUNTRY_GROUPS.eu.label} ${activePresets.includes('eu') ? '✓' : '+'}
+                        </button>
+                        <button type="button" class="country-preset-btn ${activePresets.includes('asia') ? 'active' : ''}" onclick="toggleCountryGroup('asia')">
+                            ${COUNTRY_GROUPS.asia.label} ${activePresets.includes('asia') ? '✓' : '+'}
+                        </button>
+                        <button type="button" class="country-preset-btn ${activePresets.includes('americas') ? 'active' : ''}" onclick="toggleCountryGroup('americas')">
+                            ${COUNTRY_GROUPS.americas.label} ${activePresets.includes('americas') ? '✓' : '+'}
+                        </button>
                     </div>
+                    <small class="text-muted d-block mb-1" style="font-size: 11px;">
+                        إجمالي الدول المفعلة حالياً: <strong>${(el.properties.options || []).length} دولة</strong>
+                    </small>
                 </div>
             `;
         }
 
-        // OPTIONS INSPECTOR
+        // OPTIONS INSPECTOR (FOR OTHER ELEMENTS)
         if (el.properties?.options && el.element_type !== 'contact_form') {
             const hasScoring = funnelData.design_settings?.scoring_enabled !== false;
             html += `
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <label class="form-label small text-muted mb-0">خيارات السؤال</label>
+                        <label class="form-label small text-muted mb-0">خيارات السؤال (${el.properties.options.length})</label>
                         <button type="button" class="btn btn-sm btn-primary py-0 px-2 small" onclick="addOptionToCurrentElement()">➕ خيار</button>
                     </div>
-                    <div class="d-flex flex-column gap-2">
+                    <div class="d-flex flex-column gap-2" style="max-height: 300px; overflow-y: auto;">
             `;
 
             el.properties.options.forEach((opt, oIdx) => {
@@ -1742,8 +1806,34 @@
                 { key: 'full_name', label: 'الاسم الكريم بالكامل', type: 'text', required: true, placeholder: 'أدخل الاسم كما في الجواز' },
                 { key: 'phone', label: 'رقم الواتساب', type: 'tel', required: true, placeholder: '05XXXXXXXX' },
                 { key: 'email', label: 'البريد الإلكتروني', type: 'email', required: false, placeholder: 'name@example.com' },
-                { key: 'destination', label: 'وجهة السفر / الدولة', type: 'text', required: true, placeholder: 'مثال: بريطانيا، شنغن، أمريكا' },
-                { key: 'visa_type', label: 'نوع التأشيرة', type: 'text', required: false, placeholder: 'سياحية / تجارية / دراسية' },
+                { 
+                    key: 'destination', 
+                    label: 'وجهة السفر / الدولة', 
+                    type: 'select', 
+                    required: true, 
+                    placeholder: 'اختر وجهة السفر...',
+                    options: [
+                        { label: '🇪🇺 دول الشنغن (أوروبا)', value: 'Schengen' },
+                        { label: '🇬🇧 بريطانيا (UK)', value: 'UK' },
+                        { label: '🇺🇸 الولايات المتحدة (USA)', value: 'USA' },
+                        { label: '🇨🇦 كندا (Canada)', value: 'Canada' },
+                        { label: '🇯🇵 اليابان (Japan)', value: 'Japan' },
+                        { label: '🇹🇷 تركيا (Turkey)', value: 'Turkey' }
+                    ]
+                },
+                { 
+                    key: 'visa_type', 
+                    label: 'نوع التأشيرة', 
+                    type: 'select', 
+                    required: true, 
+                    placeholder: 'اختر نوع التأشيرة...',
+                    options: [
+                        { label: 'سياحية (Tourist)', value: 'Tourist' },
+                        { label: 'تجارة وأعمال (Business)', value: 'Business' },
+                        { label: 'علاجية (Medical)', value: 'Medical' },
+                        { label: 'دراسية (Student)', value: 'Student' }
+                    ]
+                },
                 { key: 'travel_date', label: 'تاريخ السفر المتوقع', type: 'date', required: false, placeholder: '' }
             ];
         } else if (preset === 'flight_hotel') {
@@ -1761,7 +1851,19 @@
                 { key: 'full_name', label: 'الاسم الكريم', type: 'text', required: true, placeholder: 'أدخل اسمك' },
                 { key: 'phone', label: 'رقم الواتساب / الجوال', type: 'tel', required: true, placeholder: '05XXXXXXXX' },
                 { key: 'email', label: 'البريد الإلكتروني', type: 'email', required: false, placeholder: 'name@example.com' },
-                { key: 'subject', label: 'موضوع الاستفسار', type: 'text', required: true, placeholder: 'عن ماذا تود الاستفسار؟' },
+                { 
+                    key: 'subject', 
+                    label: 'موضوع الاستفسار', 
+                    type: 'select', 
+                    required: true, 
+                    placeholder: 'اختر موضوع الاستفسار...',
+                    options: [
+                        { label: 'استفسار عن تأشيرات السفر', value: 'Visa' },
+                        { label: 'حجوزات الطيران والفنادق', value: 'Bookings' },
+                        { label: 'متابعة طلب سابق', value: 'Status' },
+                        { label: 'شكوى أو اقتراح', value: 'Feedback' }
+                    ]
+                },
                 { key: 'message', label: 'تفاصيل الرسالة', type: 'textarea', required: true, placeholder: 'اكتب استفسارك بالتفصيل...' }
             ];
         } else if (preset === 'quick') {
@@ -1801,6 +1903,32 @@
         }
     }
 
+    function addOptionToContactSelectField(fIdx) {
+        const currentStep = funnelData.steps[activeStepIndex];
+        if (!currentStep || !currentStep.elements[selectedElementIndex]?.properties?.fields?.[fIdx]) return;
+        const field = currentStep.elements[selectedElementIndex].properties.fields[fIdx];
+        if (!field.options) field.options = [];
+        field.options.push({ label: `خيار ${field.options.length + 1}`, value: `Option ${field.options.length + 1}` });
+        inspectElement(selectedElementIndex);
+    }
+
+    function updateContactSelectOption(fIdx, oIdx, val) {
+        const currentStep = funnelData.steps[activeStepIndex];
+        if (currentStep && currentStep.elements[selectedElementIndex]?.properties?.fields?.[fIdx]?.options?.[oIdx]) {
+            currentStep.elements[selectedElementIndex].properties.fields[fIdx].options[oIdx].label = val;
+            currentStep.elements[selectedElementIndex].properties.fields[fIdx].options[oIdx].value = val;
+            renderCanvas();
+        }
+    }
+
+    function deleteContactSelectOption(fIdx, oIdx) {
+        const currentStep = funnelData.steps[activeStepIndex];
+        if (currentStep && currentStep.elements[selectedElementIndex]?.properties?.fields?.[fIdx]?.options) {
+            currentStep.elements[selectedElementIndex].properties.fields[fIdx].options.splice(oIdx, 1);
+            inspectElement(selectedElementIndex);
+        }
+    }
+
     function deleteContactField(fIdx) {
         const currentStep = funnelData.steps[activeStepIndex];
         if (currentStep && currentStep.elements[selectedElementIndex]?.properties?.fields) {
@@ -1809,79 +1937,36 @@
         }
     }
 
-    // ── COUNTRY PRESETS (ARAB, EU, ASIA, WORLD) ──
-    function loadCountryPreset(type) {
+    // ── 🌟 TOGGLE COUNTRY GROUPS (ACTIVE / INACTIVE PRESETS) ──
+    function toggleCountryGroup(groupId) {
         const currentStep = funnelData.steps[activeStepIndex];
         if (!currentStep || !currentStep.elements[selectedElementIndex]) return;
-        
-        let countries = [];
-        if (type === 'arab') {
-            countries = [
-                { label: '🇸🇦 المملكة العربية السعودية', value: 'Saudi Arabia' },
-                { label: '🇦🇪 الإمارات العربية المتحدة', value: 'UAE' },
-                { label: '🇪🇬 جمهورية مصر العربية', value: 'Egypt' },
-                { label: '🇰🇼 دولة الكويت', value: 'Kuwait' },
-                { label: '🇶🇦 دولة قطر', value: 'Qatar' },
-                { label: '🇧🇭 مملكة البحرين', value: 'Bahrain' },
-                { label: '🇴🇲 سلطنة عمان', value: 'Oman' },
-                { label: '🇯🇴 المملكة الأردنية الهاشمية', value: 'Jordan' },
-                { label: '🇮🇶 جمهورية العراق', value: 'Iraq' },
-                { label: '🇲🇦 المملكة المغربية', value: 'Morocco' },
-                { label: '🇩🇿 الجمهورية الجزائرية', value: 'Algeria' },
-                { label: '🇹🇳 الجمهورية التونسية', value: 'Tunisia' },
-                { label: '🇱🇧 الجمهورية اللبنانية', value: 'Lebanon' },
-                { label: '🌍 دولة أخرى', value: 'Other' },
-            ];
-        } else if (type === 'eu') {
-            countries = [
-                { label: '🇩🇪 ألمانيا (Germany)', value: 'Germany' },
-                { label: '🇫🇷 فرنسا (France)', value: 'France' },
-                { label: '🇮🇹 إيطاليا (Italy)', value: 'Italy' },
-                { label: '🇪🇸 إسبانيا (Spain)', value: 'Spain' },
-                { label: '🇨🇭 سويسرا (Switzerland)', value: 'Switzerland' },
-                { label: '🇳🇱 هولندا (Netherlands)', value: 'Netherlands' },
-                { label: '🇦🇹 النمسا (Austria)', value: 'Austria' },
-                { label: '🇵🇹 البرتغال (Portugal)', value: 'Portugal' },
-                { label: '🇬🇷 اليونان (Greece)', value: 'Greece' },
-                { label: '🇸🇪 السويد (Sweden)', value: 'Sweden' },
-                { label: '🇧🇪 بلجيكا (Belgium)', value: 'Belgium' },
-                { label: '🇵🇱 بولندا (Poland)', value: 'Poland' },
-                { label: '🇪🇺 دول الشنغن الأخرى', value: 'Other EU' },
-            ];
-        } else if (type === 'asia') {
-            countries = [
-                { label: '🇲🇾 ماليزيا (Malaysia)', value: 'Malaysia' },
-                { label: '🇹🇭 تايلاند (Thailand)', value: 'Thailand' },
-                { label: '🇮🇩 إندونيسيا (Indonesia)', value: 'Indonesia' },
-                { label: '🇸🇬 سنغافورة (Singapore)', value: 'Singapore' },
-                { label: '🇯🇵 اليابان (Japan)', value: 'Japan' },
-                { label: '🇰🇷 كوريا الجنوبية (South Korea)', value: 'South Korea' },
-                { label: '🇨🇳 الصين (China)', value: 'China' },
-                { label: '🇹🇷 تركيا (Turkey)', value: 'Turkey' },
-                { label: '🇬🇪 جورجيا (Georgia)', value: 'Georgia' },
-                { label: '🇦🇿 أذربيجان (Azerbaijan)', value: 'Azerbaijan' },
-                { label: '🇲🇻 جزر المالديف (Maldives)', value: 'Maldives' },
-                { label: '🇵🇭 الفلبين (Philippines)', value: 'Philippines' },
-                { label: '🇮🇳 الهند (India)', value: 'India' },
-            ];
+        const el = currentStep.elements[selectedElementIndex];
+
+        if (!el.properties) el.properties = {};
+        if (!el.properties.active_presets) el.properties.active_presets = [];
+        if (!el.properties.options) el.properties.options = [];
+
+        const group = COUNTRY_GROUPS[groupId];
+        if (!group) return;
+
+        const pIndex = el.properties.active_presets.indexOf(groupId);
+        if (pIndex > -1) {
+            // Already active -> REMOVE
+            el.properties.active_presets.splice(pIndex, 1);
+            const groupCountryValues = group.countries.map(c => c.value);
+            el.properties.options = el.properties.options.filter(c => !groupCountryValues.includes(c.value));
         } else {
-            countries = [
-                { label: '🇸🇦 المملكة العربية السعودية', value: 'Saudi Arabia' },
-                { label: '🇦🇪 الإمارات العربية المتحدة', value: 'UAE' },
-                { label: '🇪🇬 جمهورية مصر العربية', value: 'Egypt' },
-                { label: '🇬🇧 المملكة المتحدة (بريطانيا)', value: 'United Kingdom' },
-                { label: '🇺🇸 الولايات المتحدة الأمريكية', value: 'USA' },
-                { label: '🇨🇦 كندا (Canada)', value: 'Canada' },
-                { label: '🇦🇺 أستراليا (Australia)', value: 'Australia' },
-                { label: '🇩🇪 ألمانيا (Germany)', value: 'Germany' },
-                { label: '🇫🇷 فرنسا (France)', value: 'France' },
-                { label: '🇹🇷 تركيا (Turkey)', value: 'Turkey' },
-                { label: '🇲🇾 ماليزيا (Malaysia)', value: 'Malaysia' },
-                { label: '🌐 جميع دول العالم الأخرى', value: 'Other' },
-            ];
+            // Not active -> ADD
+            el.properties.active_presets.push(groupId);
+            const existingValues = el.properties.options.map(c => c.value);
+            group.countries.forEach(c => {
+                if (!existingValues.includes(c.value)) {
+                    el.properties.options.push(c);
+                }
+            });
         }
 
-        currentStep.elements[selectedElementIndex].properties.options = countries;
         inspectElement(selectedElementIndex);
     }
 
