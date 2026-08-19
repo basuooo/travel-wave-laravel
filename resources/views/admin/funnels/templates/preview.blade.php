@@ -198,7 +198,7 @@
             <div>
                 <span class="badge bg-primary me-2">{{ $template->category }}</span>
                 <strong class="text-white fs-6">{{ $template->name }}</strong>
-                <span class="text-muted ms-2 small d-none d-md-inline">(معاينة تفاعلية حية)</span>
+                <span class="text-muted ms-2 small d-none d-md-inline">({{ count($steps) }} خطوات تفاعلية)</span>
             </div>
         </div>
 
@@ -262,7 +262,7 @@
                             @if(($element['element_type'] ?? '') === 'heading')
                                 <h4 class="fw-bold text-primary mb-3">{{ $element['label'] ?? '' }}</h4>
                             @elseif(($element['element_type'] ?? '') === 'text')
-                                <p class="text-muted mb-3">{{ $element['label'] ?? '' }}</p>
+                                <p class="text-muted mb-3 fs-6">{{ $element['label'] ?? '' }}</p>
                             @elseif(($element['element_type'] ?? '') === 'single_choice')
                                 <div class="d-flex flex-column gap-2">
                                     @foreach($element['properties']['options'] ?? [] as $opt)
@@ -273,7 +273,7 @@
                                     @endforeach
                                 </div>
                             @elseif(($element['element_type'] ?? '') === 'contact_form')
-                                <div class="bg-light p-3 rounded-4 mb-3">
+                                <div class="bg-light p-3 rounded-4 mb-3 border">
                                     <div class="mb-3">
                                         <label class="form-label fw-bold small">الاسم بالكامل <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control rounded-3" placeholder="مثال: أحمد محمد" value="أحمد محمد">
@@ -291,16 +291,30 @@
                         </div>
                     @endforeach
 
-                    <!-- Next / Start / Submit Button -->
+                    <!-- Navigation Action Buttons -->
                     @if($sIndex === 0)
-                        <button type="button" class="btn-action-primary mt-2" onclick="nextStep({{ $sIndex }})">
-                            <span>ابدأ التقييم الآن</span>
+                        <button type="button" class="btn-action-primary mt-3" onclick="nextStep({{ $sIndex }})">
+                            <span>ابدأ التقييم الآن ➔</span>
                             <iconify-icon icon="solar:alt-arrow-left-bold" width="20"></iconify-icon>
                         </button>
-                    @elseif($sIndex === count($steps) - 1)
-                        <button type="button" class="btn-action-primary mt-2" onclick="finishFunnel()">
-                            <span>عرض النتيجة والتقرير ✨</span>
-                        </button>
+                    @elseif($sIndex === count($steps) - 1 || ($step['step_type'] ?? '') === 'lead_form')
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-2 border-top">
+                            <button type="button" class="btn btn-link text-muted text-decoration-none fw-semibold" onclick="prevStep({{ $sIndex }})">
+                                ← السابق
+                            </button>
+                            <button type="button" class="btn-action-primary w-auto px-5" onclick="finishFunnel()">
+                                <span>عرض النتيجة والتقرير ✨</span>
+                            </button>
+                        </div>
+                    @else
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-2 border-top">
+                            <button type="button" class="btn btn-link text-muted text-decoration-none fw-semibold" onclick="prevStep({{ $sIndex }})">
+                                ← السابق
+                            </button>
+                            <button type="button" class="btn-action-primary w-auto px-4" onclick="nextStep({{ $sIndex }})">
+                                التالي ➔
+                            </button>
+                        </div>
                     @endif
                 </div>
             @endforeach
@@ -310,8 +324,8 @@
                 <div class="mb-3">
                     <iconify-icon icon="solar:verified-check-bold-duotone" width="80" class="text-success"></iconify-icon>
                 </div>
-                <h3 class="fw-bold mb-2 text-dark" id="res_title">🎉 مؤهل بقوة للتأشيرة</h3>
-                <p class="text-muted fs-6 mb-4 px-3" id="res_desc">نتيجتك ممتازة! فرصتك في الحصول على تأشيرة الشنغن مرتفعة جداً بناءً على إجاباتك.</p>
+                <h3 class="fw-bold mb-2 text-dark" id="res_title">🎉 مؤهل بنجاح</h3>
+                <p class="text-muted fs-6 mb-4 px-3" id="res_desc">نتيجتك ممتازة! تفاصيل ملفك مطابقة للمعايير المطلوبة بناءً على إجاباتك.</p>
 
                 <div class="p-3 bg-light rounded-4 mb-4 d-inline-block px-5 border">
                     <span class="text-muted small fw-bold">النتيجة الإجمالية المحسوبة</span>
@@ -319,9 +333,9 @@
                 </div>
 
                 <div class="mt-2">
-                    <a href="javascript:void(0)" class="btn-wa-action" onclick="alert('في الفانل الفعلي يتم نقلك مباشرة لمحادثة الواتساب مع المستشار!')">
+                    <a href="javascript:void(0)" class="btn-wa-action" onclick="alert('في الفانل المنشور الفعلي، ينقلك هذا الزر مباشرة لمحادثة الواتساب مع المستشار المسؤول!')">
                         <iconify-icon icon="logos:whatsapp-icon" width="24"></iconify-icon>
-                        <span id="res_cta_text">تواصل معنا الآن لبدء ملفك</span>
+                        <span id="res_cta_text">تواصل معنا الآن عبر الواتساب</span>
                     </a>
                 </div>
             </div>
@@ -376,6 +390,15 @@
                 updateProgress(nextIdx);
             } else {
                 finishFunnel();
+            }
+        }
+
+        function prevStep(currentIdx) {
+            if (currentIdx > 0) {
+                document.getElementById('step_view_' + currentIdx).classList.add('d-none');
+                const prevIdx = currentIdx - 1;
+                document.getElementById('step_view_' + prevIdx).classList.remove('d-none');
+                updateProgress(prevIdx);
             }
         }
 

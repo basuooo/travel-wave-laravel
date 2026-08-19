@@ -78,6 +78,11 @@ class FunnelTemplateController extends Controller
             'seo_settings' => $template->schema_data['seo_settings'] ?? [],
         ]);
 
+        if (empty($template->schema_data['steps']) || count($template->schema_data['steps'] ?? []) < 2) {
+            (new \Database\Seeders\FunnelTemplateSeeder())->run();
+            $template->refresh();
+        }
+
         $funnelController->importSchemaToFunnel($funnel, $template->schema_data ?? []);
 
         return redirect()->route('admin.funnels.builder', $funnel)
@@ -91,6 +96,16 @@ class FunnelTemplateController extends Controller
             $schema = json_decode($schema, true);
         }
         $schema = is_array($schema) ? $schema : [];
+
+        if (empty($schema['steps']) || count($schema['steps']) < 2) {
+            (new \Database\Seeders\FunnelTemplateSeeder())->run();
+            $template->refresh();
+            $schema = $template->schema_data;
+            if (is_string($schema)) {
+                $schema = json_decode($schema, true);
+            }
+            $schema = is_array($schema) ? $schema : [];
+        }
 
         return view('admin.funnels.templates.preview', compact('template', 'schema'));
     }
