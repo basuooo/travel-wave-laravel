@@ -387,6 +387,7 @@
 
                             $headingStyle = '';
                             $sublineStyle = '';
+                            $optCardStyle = '';
                             $containerStyle = '';
 
                             if ($hasCustomDesign) {
@@ -402,6 +403,15 @@
                                     . 'font-style: ' . (!empty($design['subline_italic']) ? 'italic' : 'normal') . ';'
                                     . 'color: ' . ($design['subline_color'] ?? '#64748b') . ';'
                                     . 'text-align: ' . ($design['align'] ?? 'inherit') . ';';
+                                $optCardStyle = 'font-family: ' . ($design['options_font'] ?? 'inherit') . ';'
+                                    . 'font-size: ' . ($design['options_size'] ?? 'inherit') . ';'
+                                    . 'font-weight: ' . (!empty($design['options_bold']) ? '700' : 'normal') . ';'
+                                    . 'font-style: ' . (!empty($design['options_italic']) ? 'italic' : 'normal') . ';'
+                                    . 'color: ' . ($design['options_text_color'] ?? 'inherit') . ';'
+                                    . 'background-color: ' . ($design['options_bg_color'] ?? '#ffffff') . ';'
+                                    . 'border: 1.5px solid ' . ($design['options_border_color'] ?? '#e2e8f0') . ';'
+                                    . 'border-radius: ' . ($design['options_border_radius'] ?? '14px') . ';'
+                                    . 'text-align: ' . ($design['options_align'] ?? 'inherit') . ';';
                                 $containerStyle = 'text-align: ' . ($design['align'] ?? 'inherit') . ';'
                                     . (!empty($design['bg_color']) ? 'background-color: ' . $design['bg_color'] . ';' : '');
                             }
@@ -436,7 +446,7 @@
                                 @endif
                                 <div class="d-flex flex-column gap-2">
                                     @foreach($props['options'] ?? [] as $opt)
-                                        <div class="radio-option-card" onclick="selectRadioOption({{ $element->id }}, '{{ addslashes($opt['value'] ?? $opt['label']) }}', {{ $opt['score'] ?? 0 }}, this)">
+                                        <div class="radio-option-card" style="{{ $optCardStyle }}" onclick="selectRadioOption({{ $element->id }}, '{{ addslashes($opt['value'] ?? $opt['label']) }}', {{ $opt['score'] ?? 0 }}, this)">
                                             <div class="d-flex align-items-center gap-3">
                                                 <div class="radio-circle-indicator"></div>
                                                 <span>{{ $opt['label'] ?? $opt['value'] }}</span>
@@ -461,7 +471,7 @@
                                 @endif
                                 <div class="d-flex flex-column gap-2">
                                     @foreach($props['options'] ?? [] as $opt)
-                                        <div class="checkbox-option-card" onclick="toggleCheckboxOption({{ $element->id }}, '{{ addslashes($opt['value'] ?? $opt['label']) }}', {{ $opt['score'] ?? 0 }}, this)">
+                                        <div class="checkbox-option-card" style="{{ $optCardStyle }}" onclick="toggleCheckboxOption({{ $element->id }}, '{{ addslashes($opt['value'] ?? $opt['label']) }}', {{ $opt['score'] ?? 0 }}, this)">
                                             <div class="d-flex align-items-center gap-3">
                                                 <div class="checkbox-square-indicator"><iconify-icon icon="solar:check-bold" width="12"></iconify-icon></div>
                                                 <span>{{ $opt['label'] ?? $opt['value'] }}</span>
@@ -486,7 +496,7 @@
                                 @endif
                                 <div class="d-flex flex-column gap-2">
                                     @foreach($props['options'] ?? [] as $opt)
-                                        <div class="option-btn" onclick="selectOption({{ $element->id }}, '{{ addslashes($opt['value'] ?? $opt['label']) }}', {{ $opt['score'] ?? 0 }}, this)">
+                                        <div class="option-btn" style="{{ $optCardStyle }}" onclick="selectOption({{ $element->id }}, '{{ addslashes($opt['value'] ?? $opt['label']) }}', {{ $opt['score'] ?? 0 }}, this)">
                                             <span>{{ $opt['label'] ?? $opt['value'] }}</span>
                                             <iconify-icon icon="solar:alt-arrow-left-bold" class="text-muted"></iconify-icon>
                                         </div>
