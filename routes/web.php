@@ -589,6 +589,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // ⚡ Interactive Funnels Module Routes
         Route::get('/funnels/dashboard', [FunnelDashboardController::class, 'index'])->name('funnels.dashboard');
         Route::get('/funnels/templates', [FunnelTemplateController::class, 'index'])->name('funnels.templates.index');
+        Route::get('/funnels/templates/{template}/preview', [FunnelTemplateController::class, 'preview'])->name('funnels.templates.preview');
         Route::post('/funnels/templates/{template}/use', [FunnelTemplateController::class, 'useTemplate'])->name('funnels.templates.use');
         Route::get('/funnels/responses', [FunnelResponseController::class, 'index'])->name('funnels.responses.index');
         Route::get('/funnels/responses/{response}', [FunnelResponseController::class, 'show'])->name('funnels.responses.show');

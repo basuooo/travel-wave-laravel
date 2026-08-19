@@ -46,6 +46,13 @@ class AppServiceProvider extends ServiceProvider
 
         $this->ensureSchemaOnly();
 
+        // ⚡ Interactive Funnels — auto-create tables on first access (no artisan migrate needed)
+        try {
+            \App\Services\Funnels\FunnelAutoMigrationService::ensureTablesExist();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         view()->composer('*', function ($view) {
             $payload = [
                 'siteSettings' => null,

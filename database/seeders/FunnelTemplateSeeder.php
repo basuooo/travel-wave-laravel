@@ -295,7 +295,7 @@ class FunnelTemplateSeeder extends Seeder
                     'name' => $tpl['name'],
                     'category' => $tpl['category'],
                     'description' => $tpl['description'],
-                    'thumbnail' => $tpl['thumbnail'],
+                    'thumbnail_url' => $tpl['thumbnail'] ?? null,
                     'schema_data' => json_encode($tpl['schema_data']),
                     'is_active' => true,
                     'sort_order' => $tpl['sort_order'],

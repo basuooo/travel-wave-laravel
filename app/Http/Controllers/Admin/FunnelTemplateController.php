@@ -85,4 +85,15 @@ class FunnelTemplateController extends Controller
         return redirect()->route('admin.funnels.builder', $funnel)
             ->with('success', __('admin.template_used_successfully'));
     }
+
+    public function preview(FunnelTemplate $template)
+    {
+        $schema = $template->schema_data;
+        if (is_string($schema)) {
+            $schema = json_decode($schema, true);
+        }
+        $schema = is_array($schema) ? $schema : [];
+
+        return view('admin.funnels.templates.preview', compact('template', 'schema'));
+    }
 }

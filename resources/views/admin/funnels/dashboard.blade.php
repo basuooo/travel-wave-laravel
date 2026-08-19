@@ -20,20 +20,6 @@
         </div>
     </div>
 
-    @if(!empty($needsMigration))
-        <div class="alert alert-warning border-warning shadow-sm rounded-4 p-4 mb-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="fw-bold mb-1">⚠️ تنبيه: جداول الفانلات التفاعلية محتاجة تشغيل الـ Migrations</h5>
-                    <p class="mb-0">يرجى الضغط على زر التحديث لتشغيل الـ Migrations وإنشاء الجداول على السيرفر فوراً.</p>
-                </div>
-                <a href="/migrate-db" target="_blank" class="btn btn-warning fw-bold px-4">
-                    🚀 تشغيل Migrations السيرفر الان
-                </a>
-            </div>
-        </div>
-    @endif
-
     <!-- Stats Cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">

@@ -75,12 +75,22 @@
 
             <!-- Template Select (Hidden unless template option selected) -->
             <div class="mb-3 d-none" id="template_select_wrapper">
-                <label class="form-label fw-bold">Select Template Preset</label>
-                <select name="template_id" class="form-select form-select-lg">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label fw-bold mb-0">Select Template Preset</label>
+                    <a href="{{ route('admin.funnels.templates.index') }}" target="_blank" class="text-primary small text-decoration-none fw-semibold">
+                        🎨 تصفح مكتبة القوالب مع المعاينة الحية ↗
+                    </a>
+                </div>
+                <select name="template_id" id="template_select_dropdown" class="form-select form-select-lg">
                     @foreach($templates as $tpl)
-                        <option value="{{ $tpl->id }}">{{ $tpl->name }} ({{ $tpl->category }})</option>
+                        <option value="{{ $tpl->id }}" data-preview-url="{{ route('admin.funnels.templates.preview', $tpl) }}">{{ $tpl->name }} ({{ $tpl->category }})</option>
                     @endforeach
                 </select>
+                <div class="mt-2 text-end">
+                    <a href="#" id="btn_preview_selected_template" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        👁️ معاينة القالب المختار في نافذة جديدة
+                    </a>
+                </div>
             </div>
 
             <!-- Duplicate Select (Hidden unless duplicate option selected) -->
@@ -117,6 +127,23 @@ document.addEventListener('DOMContentLoaded', function() {
     slugInput.addEventListener('input', function() {
         slugInput.dataset.edited = 'true';
     });
+
+    const templateDropdown = document.getElementById('template_select_dropdown');
+    const previewBtn = document.getElementById('btn_preview_selected_template');
+
+    function updateTemplatePreviewBtn() {
+        if (templateDropdown && previewBtn) {
+            const selectedOpt = templateDropdown.options[templateDropdown.selectedIndex];
+            if (selectedOpt) {
+                previewBtn.href = selectedOpt.getAttribute('data-preview-url') || '#';
+            }
+        }
+    }
+
+    if (templateDropdown) {
+        templateDropdown.addEventListener('change', updateTemplatePreviewBtn);
+        updateTemplatePreviewBtn();
+    }
 
     document.querySelectorAll('input[name="creation_type"]').forEach(radio => {
         radio.addEventListener('change', function() {

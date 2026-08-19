@@ -13,11 +13,6 @@ class FunnelController extends Controller
 {
     public function index(Request $request)
     {
-        if (! \Illuminate\Support\Facades\Schema::hasTable('funnels')) {
-            $funnels = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
-            return view('admin.funnels.index', compact('funnels'));
-        }
-
         $query = Funnel::query()->with('template')->latest();
 
         if ($request->filled('status')) {

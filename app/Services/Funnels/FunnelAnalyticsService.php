@@ -5,7 +5,6 @@ namespace App\Services\Funnels;
 use App\Models\Funnel;
 use App\Models\FunnelResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class FunnelAnalyticsService
 {
@@ -14,19 +13,6 @@ class FunnelAnalyticsService
      */
     public function getMetrics(?Funnel $funnel = null): array
     {
-        if (! Schema::hasTable('funnel_responses')) {
-            return [
-                'total_visitors' => 0,
-                'total_starts' => 0,
-                'total_completions' => 0,
-                'total_leads' => 0,
-                'qualified_leads' => 0,
-                'conversion_rate' => 0,
-                'qualification_rate' => 0,
-                'average_score' => 0,
-            ];
-        }
-
         $query = FunnelResponse::query();
         if ($funnel) {
             $query->where('funnel_id', $funnel->id);

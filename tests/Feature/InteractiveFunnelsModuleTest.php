@@ -92,6 +92,42 @@ class InteractiveFunnelsModuleTest extends TestCase
         ]);
     }
 
+    public function test_template_preview_page_renders_live_simulator()
+    {
+        $this->seed(FunnelTemplateSeeder::class);
+        $template = FunnelTemplate::where('slug', 'schengen-visa-eligibility')->firstOrFail();
+
+        if (! Schema::hasTable('roles')) {
+            Schema::create('roles', function ($table) {
+                $table->id();
+                $table->string('name');
+                $table->string('slug')->unique();
+                $table->timestamps();
+            });
+            Schema::create('role_user', function ($table) {
+                $table->id();
+                $table->unsignedBigInteger('role_id');
+                $table->unsignedBigInteger('user_id');
+                $table->timestamps();
+            });
+        }
+
+        $superRole = \App\Models\Role::firstOrCreate(['slug' => 'super-admin'], ['name' => 'Super Admin']);
+        $admin = User::create([
+            'name' => 'Preview Admin',
+            'email' => 'previewadmin@example.com',
+            'password' => bcrypt('password'),
+            'is_admin' => true,
+            'is_active' => true,
+        ]);
+        $admin->roles()->attach($superRole);
+
+        $response = $this->actingAs($admin)->get(route('admin.funnels.templates.preview', $template));
+        $response->assertStatus(200);
+        $response->assertSee('معاينة قالب: Schengen Visa Eligibility');
+        $response->assertSee('استخدام هذا القالب');
+    }
+
     public function test_funnel_creation_publishing_and_public_rendering()
     {
         $this->seed(FunnelTemplateSeeder::class);
