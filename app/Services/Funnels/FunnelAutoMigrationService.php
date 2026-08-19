@@ -203,10 +203,9 @@ class FunnelAutoMigrationService
 
     private static function seedTemplates(): void
     {
-        if (DB::table('funnel_templates')->exists()) {
-            return; // already seeded
+        // Run seeder if empty or if templates have fewer than 8 entries
+        if (! DB::table('funnel_templates')->where('slug', 'whatsapp-qualification-funnel')->exists()) {
+            (new \Database\Seeders\FunnelTemplateSeeder())->run();
         }
-
-        (new \Database\Seeders\FunnelTemplateSeeder())->run();
     }
 }
