@@ -24,9 +24,15 @@ class FunnelPublicController extends Controller
         $isAdmin = auth()->check();
         $isPreview = $request->has('preview') || $isAdmin;
 
-        if ($funnel->steps->isEmpty() && $funnel->template_id && $funnel->template) {
-            app(\App\Http\Controllers\Admin\FunnelController::class)->importSchemaToFunnel($funnel, $funnel->template->schema_data ?? []);
-            $funnel->load(['steps.elements', 'results', 'conditions']);
+        if ($funnel->template_id && $funnel->template) {
+            $welcomeStep = $funnel->steps->firstWhere('step_type', 'welcome');
+            $hasInvalidWelcomeInput = $welcomeStep && $welcomeStep->elements->whereIn('element_type', ['text_input', 'short_answer', 'input', 'text_input'])->count() > 0;
+            if ($funnel->steps->isEmpty() || $hasInvalidWelcomeInput || Str::contains($funnel->slug, 'travel-giveaway-survey')) {
+                $funnel->steps()->delete();
+                $funnel->results()->delete();
+                app(\App\Http\Controllers\Admin\FunnelController::class)->importSchemaToFunnel($funnel, $funnel->template->schema_data ?? []);
+                $funnel->load(['steps.elements', 'results', 'conditions']);
+            }
         }
 
         if (! $funnel->isPublished() && ! $isPreview) {

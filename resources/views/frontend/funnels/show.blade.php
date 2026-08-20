@@ -991,20 +991,34 @@
 
             <!-- RESULT / SUCCESS CONTAINER -->
             <div class="funnel-step-view d-none text-center py-4" id="result_container">
-                <div class="mb-3">
-                    <iconify-icon icon="solar:verified-check-bold-duotone" width="80" class="text-success"></iconify-icon>
+                <div class="mb-3 d-flex justify-content-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: #dcfce7; color: #16a34a;">
+                        <iconify-icon icon="solar:verified-check-bold" width="54"></iconify-icon>
+                    </div>
                 </div>
-                <h2 class="fw-bold mb-2 text-dark" id="res_title">🎉 تم استلام طلبك بنجاح</h2>
-                <p class="text-muted fs-6 mb-4 px-3" id="res_desc">شكراً لتواصلك معنا! سيقوم فريق المستشارين بمراجعة بياناتك والتواصل معك فوراً.</p>
+                <h2 class="fw-bold mb-2 text-dark" id="res_title">🎉 {{ app()->getLocale() === 'ar' ? 'تم تسجيلك في مسابقة السفر بنجاح!' : 'You\'re Entered into the Travel Giveaway!' }}</h2>
+                <p class="text-muted fs-6 mb-4 px-3" id="res_desc" style="max-width: 540px; margin: 0 auto;">{{ app()->getLocale() === 'ar' ? 'شكراً لإكمال الاستبيان! سيتم التواصل مع الفائزين بالسحب عبر الواتساب والبريد الإلكتروني.' : 'Thank you for completing the survey! Winners will be announced via WhatsApp & Email.' }}</p>
 
                 @if($scoringEnabled)
-                    <div class="p-3 bg-light rounded-4 mb-4 border d-inline-block px-5" id="res_score_wrapper">
-                        <span class="text-muted small fw-bold">النتيجة الإجمالية المحسوبة</span>
-                        <div class="h2 fw-bold text-primary mb-0 mt-1" id="res_score_value">0%</div>
+                    <div class="p-3 bg-light rounded-4 mb-4 border d-none px-5" id="res_score_wrapper">
+                        <span class="text-muted small fw-bold">{{ app()->getLocale() === 'ar' ? 'النتيجة الإجمالية المحسوبة' : 'Total Score' }}</span>
+                        <div class="h2 fw-bold text-primary mb-0 mt-1" id="res_score_value">0</div>
                     </div>
                 @endif
 
-                <div id="res_cta_wrapper" class="mt-2"></div>
+                <!-- Dynamic Selected Preferences Summary Container -->
+                <div id="res_summary_wrapper" class="my-4 px-3 text-start d-none" style="max-width: 540px; margin: 0 auto;">
+                    <div class="bg-light rounded-4 p-3 border">
+                        <h6 class="fw-bold text-dark mb-2">📋 {{ app()->getLocale() === 'ar' ? 'تفضيلات السفر المسجلة لرحلتك:' : 'Your Travel Preferences:' }}</h6>
+                        <ul class="list-unstyled mb-0 small text-muted">
+                            <li class="mb-1 d-none" id="sum_item_dest">🏝️ <strong>{{ app()->getLocale() === 'ar' ? 'الوجهة المفضلة:' : 'Destination:' }}</strong> <span id="sum_val_dest" class="text-dark fw-bold"></span></li>
+                            <li class="mb-1 d-none" id="sum_item_freq">✈️ <strong>{{ app()->getLocale() === 'ar' ? 'معدل السفر:' : 'Frequency:' }}</strong> <span id="sum_val_freq" class="text-dark fw-bold"></span></li>
+                            <li class="mb-1 d-none" id="sum_item_act">🍹 <strong>{{ app()->getLocale() === 'ar' ? 'النشاط المفضّل:' : 'Favorite Activity:' }}</strong> <span id="sum_val_act" class="text-dark fw-bold"></span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="res_cta_wrapper" class="mt-3"></div>
             </div>
         </div>
     @else
@@ -1351,23 +1365,47 @@
             document.getElementById('funnel_progress_bar').style.width = '100%';
 
             const res = data.result || {};
-            document.getElementById('res_title').innerText = res.title || (isScoringActive ? '🎉 تم التقييم بنجاح' : '🎉 تم استلام طلبك بنجاح');
-            document.getElementById('res_desc').innerText = res.description || 'تم استلام بياناتك وسيتم التواصل معك بالتقرير وخطة المتابعة فوراً.';
+            document.getElementById('res_title').innerText = res.title || (isScoringActive ? '🎉 تم التقييم بنجاح' : '🎉 تم تسجيلك في سحب مسابقة السفر بنجاح!');
+            document.getElementById('res_desc').innerText = res.description || 'شكراً لإكمال الاستبيان! سيتم التواصل مع الفائزين بالسحب عبر الواتساب والبريد الإلكتروني.';
 
-            if (isScoringActive && document.getElementById('res_score_value')) {
-                document.getElementById('res_score_value').innerText = (data.score ?? accumulatedScore) + ' نقطة';
+            if (isScoringActive && (data.score > 0) && document.getElementById('res_score_value')) {
+                document.getElementById('res_score_value').innerText = data.score + ' نقطة';
+                document.getElementById('res_score_wrapper').classList.remove('d-none');
+            }
+
+            // Populate selected preferences summary
+            const destVal = userAnswers['destination'] || userAnswers['travel_destination'] || '';
+            const freqVal = userAnswers['travel_frequency'] || '';
+            const actVal = userAnswers['favorite_activity'] || userAnswers['travel_activity'] || '';
+
+            let hasPref = false;
+            if (destVal) {
+                document.getElementById('sum_val_dest').innerText = destVal;
+                document.getElementById('sum_item_dest').classList.remove('d-none');
+                hasPref = true;
+            }
+            if (freqVal) {
+                document.getElementById('sum_val_freq').innerText = freqVal;
+                document.getElementById('sum_item_freq').classList.remove('d-none');
+                hasPref = true;
+            }
+            if (actVal) {
+                document.getElementById('sum_val_act').innerText = actVal;
+                document.getElementById('sum_item_act').classList.remove('d-none');
+                hasPref = true;
+            }
+            if (hasPref) {
+                document.getElementById('res_summary_wrapper').classList.remove('d-none');
             }
 
             const ctaWrapper = document.getElementById('res_cta_wrapper');
-            if (res.cta_type === 'whatsapp' || res.cta_whatsapp_number) {
-                const waNum = res.cta_whatsapp_number || '966500000000';
-                ctaWrapper.innerHTML = `
-                    <a href="https://wa.me/${waNum}?text=مرحباً، أتممت تسجيل بياناتي في Travel Wave وأرغب في المتابعة." target="_blank" class="btn-whatsapp-custom">
-                        <iconify-icon icon="logos:whatsapp-icon" width="24"></iconify-icon>
-                        <span>${res.cta_label || 'تواصل معنا عبر الواتساب'}</span>
-                    </a>
-                `;
-            }
+            const shareMsg = encodeURIComponent('شاركت في مسابقة سحب رحلة سياحية مجانية لشخصين 🌴✈️! سجل ادخل السحب الآن: ' + window.location.href);
+            ctaWrapper.innerHTML = `
+                <a href="https://wa.me/?text=${shareMsg}" target="_blank" class="btn-whatsapp-custom">
+                    <iconify-icon icon="logos:whatsapp-icon" width="24"></iconify-icon>
+                    <span>${res.cta_label || 'شارك على الواتساب لزيادة فرص الفوز 💬'}</span>
+                </a>
+            `;
 
             document.getElementById('result_container').classList.remove('d-none');
         })

@@ -1744,6 +1744,7 @@ class FunnelTemplateSeeder extends Seeder
                         'primary_color' => '#0284c7',
                         'font_family' => 'Tajawal, sans-serif',
                         'button_style' => 'rounded-lg',
+                        'scoring_enabled' => false,
                         'thank_you_page' => [
                             'enabled' => true,
                             'title' => 'You\'re Entered into the Travel Giveaway! 🎉✈️ / تم تسجيلك في سحب مسابقة السفر بنجاح!',
@@ -1755,18 +1756,19 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                     'crm_settings' => ['enabled' => true],
                     'steps' => [
-                        // Step 1: Welcome & Cover Image
+                        // Step 1: Welcome Hero
                         [
                             'title' => 'Win a Dream Vacation for Two! 🌴☀️',
                             'subtitle' => 'Answer 3 quick questions about your travel preferences to enter our exclusive free travel giveaway competition.',
                             'step_type' => 'welcome',
                             'elements' => [
-                                ['element_type' => 'heading', 'label' => 'Win a Dream Vacation for Two! 🌴☀️', 'properties' => ['font_size' => '2xl', 'subline' => 'GIVEAWAY & TRAVEL SURVEY ✈️🎁']],
+                                ['element_type' => 'heading', 'label' => 'Win a Dream Vacation for Two! 🌴☀️', 'properties' => ['font_size' => '2xl', 'subline' => 'TRAVEL GIVEAWAY ✈️🎁']],
                                 ['element_type' => 'text', 'label' => 'Answer 3 quick questions about your travel preferences to enter our exclusive free travel giveaway competition.'],
+                                ['element_type' => 'text', 'label' => '⏱️ It takes less than 1 minute.'],
                                 ['element_type' => 'image', 'label' => 'Tropical Resort Giveaway Preview', 'properties' => ['url' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80']],
                             ],
                         ],
-                        // Step 2: Question 1 (Favorite Destination - Image Choice)
+                        // Step 2: Question 1 (Dream Vacation Destination)
                         [
                             'title' => 'Dream Vacation Destination',
                             'subtitle' => 'Select the type of holiday you enjoy the most.',
@@ -1775,13 +1777,14 @@ class FunnelTemplateSeeder extends Seeder
                                 [
                                     'element_type' => 'image_choice',
                                     'label' => 'Where is your dream vacation destination? / ما هي وجهة سفر الأحلام المفضلة لديك؟',
-                                    'question_key' => 'travel_destination',
+                                    'question_key' => 'destination',
+                                    'is_required' => true,
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '🏝️ Tropical Beaches & Islands', 'value' => 'Tropical Islands', 'image_url' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80', 'score' => 30],
-                                            ['label' => '🏛️ Historic European Cities', 'value' => 'European Cities', 'image_url' => 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&auto=format&fit=crop&q=80', 'score' => 25],
-                                            ['label' => '⛰️ Nature & Mountain Adventures', 'value' => 'Mountain Nature', 'image_url' => 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&auto=format&fit=crop&q=80', 'score' => 25],
-                                            ['label' => '🛍️ Luxury Shopping & Skyscraper Resorts', 'value' => 'Luxury Shopping', 'image_url' => 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&auto=format&fit=crop&q=80', 'score' => 20],
+                                            ['label' => '🏝️ Tropical Beaches & Islands', 'value' => 'Tropical Beaches & Islands (Maldives, Bali)', 'image_url' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80'],
+                                            ['label' => '🏛️ Historic European Cities', 'value' => 'Historic European Cities (Rome, Paris)', 'image_url' => 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&auto=format&fit=crop&q=80'],
+                                            ['label' => '⛰️ Nature & Mountain Adventures', 'value' => 'Nature & Mountain Adventures (Swiss Alps, Georgia)', 'image_url' => 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&auto=format&fit=crop&q=80'],
+                                            ['label' => '🛍️ Luxury Shopping & Skyscraper Resorts', 'value' => 'Luxury Shopping & Resorts (Dubai)', 'image_url' => 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&auto=format&fit=crop&q=80'],
                                         ],
                                     ],
                                 ],
@@ -1797,18 +1800,19 @@ class FunnelTemplateSeeder extends Seeder
                                     'element_type' => 'single_choice',
                                     'label' => 'How often do you travel for holidays per year? / كم مرة تسافر للسياحة والاستجمام سنوياً؟',
                                     'question_key' => 'travel_frequency',
+                                    'is_required' => true,
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '✈️ 1 to 2 Times a Year', 'value' => '1-2 Times', 'score' => 20],
-                                            ['label' => '🌍 3 to 4 Times a Year', 'value' => '3-4 Times', 'score' => 25],
-                                            ['label' => '💼 Frequent Traveler (5+ Times)', 'value' => '5+ Times', 'score' => 30],
-                                            ['label' => '🏖️ Looking for My First Trip This Year', 'value' => 'First Trip', 'score' => 15],
+                                            ['label' => '✈️ 1 to 2 Times a Year', 'value' => '1 to 2 Times a Year'],
+                                            ['label' => '🌍 3 to 4 Times a Year', 'value' => '3 to 4 Times a Year'],
+                                            ['label' => '💼 Frequent Traveler (5+ Times)', 'value' => 'Frequent Traveler (5+ Times)'],
+                                            ['label' => '🏖️ Looking for My First Trip This Year', 'value' => 'Looking for My First Trip This Year'],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
-                        // Step 4: Question 3 (Vacation Activity - Image Choice)
+                        // Step 4: Question 3 (Favorite Vacation Activity)
                         [
                             'title' => 'Favorite Vacation Activity',
                             'subtitle' => 'Help us customize your prize package.',
@@ -1817,19 +1821,20 @@ class FunnelTemplateSeeder extends Seeder
                                 [
                                     'element_type' => 'image_choice',
                                     'label' => 'What is your favorite activity during a vacation? / ما هو النشاط المفضّل لديك خلال العطلة؟',
-                                    'question_key' => 'travel_activity',
+                                    'question_key' => 'favorite_activity',
+                                    'is_required' => true,
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '🍹 Relaxing on the Beach & Spa', 'value' => 'Beach & Spa', 'image_url' => 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&auto=format&fit=crop&q=80', 'score' => 25],
-                                            ['label' => '📸 Sightseeing & Cultural Exploration', 'value' => 'Sightseeing', 'image_url' => 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=600&auto=format&fit=crop&q=80', 'score' => 25],
-                                            ['label' => '🧗 Outdoor Sports & Hiking Adventures', 'value' => 'Hiking Adventures', 'image_url' => 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=600&auto=format&fit=crop&q=80', 'score' => 25],
-                                            ['label' => '🍽️ Fine Dining & Culinary Tasting', 'value' => 'Fine Dining', 'image_url' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80', 'score' => 25],
+                                            ['label' => '🍹 Relaxing on the Beach & Spa', 'value' => 'Relaxing on the Beach & Spa', 'image_url' => 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&auto=format&fit=crop&q=80'],
+                                            ['label' => '📸 Sightseeing & Cultural Exploration', 'value' => 'Sightseeing & Cultural Exploration', 'image_url' => 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=600&auto=format&fit=crop&q=80'],
+                                            ['label' => '🧗 Outdoor Sports & Hiking Adventures', 'value' => 'Outdoor Sports & Hiking Adventures', 'image_url' => 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=600&auto=format&fit=crop&q=80'],
+                                            ['label' => '🍽️ Fine Dining & Culinary Tasting', 'value' => 'Fine Dining & Culinary Tasting', 'image_url' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80'],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
-                        // Step 5: Lead Form
+                        // Step 5: Contact Lead Form
                         [
                             'title' => 'Where should we notify you if you win? 🏆',
                             'subtitle' => 'Enter your contact details to complete your giveaway registration.',
@@ -1841,7 +1846,7 @@ class FunnelTemplateSeeder extends Seeder
                                     'properties' => [
                                         'fields' => [
                                             ['name' => 'full_name', 'label' => 'Full Name / الاسم الكامل', 'type' => 'text', 'required' => true],
-                                            ['name' => 'phone', 'label' => 'Phone / WhatsApp Number', 'type' => 'phone', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'Phone / WhatsApp Number / رقم الواتساب', 'type' => 'phone', 'required' => true],
                                             ['name' => 'email', 'label' => 'Email Address / البريد الإلكتروني', 'type' => 'email', 'required' => true],
                                         ],
                                     ],
