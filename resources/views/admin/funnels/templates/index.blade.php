@@ -38,12 +38,15 @@
     <!-- Templates Grid -->
     <div class="row g-4">
         @forelse($templates as $template)
+            @php
+                $themeColor = $template->schema_data['design_settings']['primary_color'] ?? '#2563eb';
+            @endphp
             <div class="col-md-4 col-lg-3">
                 <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden d-flex flex-column transition-hover">
                     <!-- Template Card Top Cover -->
-                    <div class="bg-primary-subtle text-primary p-4 text-center position-relative">
-                        <iconify-icon icon="solar:magic-stick-3-bold-duotone" width="56"></iconify-icon>
-                        <span class="badge bg-primary position-absolute top-0 end-0 m-3">{{ $template->category }}</span>
+                    <div class="p-4 text-center position-relative text-white" style="background: linear-gradient(135deg, {{ $themeColor }}, #0f172a);">
+                        <iconify-icon icon="solar:magic-stick-3-bold-duotone" width="56" class="opacity-75"></iconify-icon>
+                        <span class="badge bg-white text-dark position-absolute top-0 end-0 m-3 shadow-sm" style="font-size: 11px;">{{ $template->category }}</span>
                     </div>
 
                     <div class="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">

@@ -1190,6 +1190,434 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                 ],
             ],
+
+            // ── 13. Cruises & Luxury Resorts Booking ────────────────────────────────
+            [
+                'name' => 'Cruises & Luxury Resorts (رحلات الكروز والفنادق الفاخرة)',
+                'slug' => 'cruises-luxury-resorts-booking',
+                'category' => 'Travel',
+                'description' => 'قالب فخم لحجز الكروز والمصايف والمنتجعات مع اختيار الفئات والخدمات البحرية المميزة.',
+                'thumbnail_url' => '/assets/images/templates/cruises.jpg',
+                'sort_order' => 13,
+                'schema_data' => [
+                    'design_settings' => ['primary_color' => '#0284c7', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-xl', 'thank_you_page' => ['enabled' => true, 'title' => 'شكرًا لك! تم استلام طلب حجز الكروز والمنتجع 🛥️', 'subtitle' => 'يتواصل معك مستشار السفر البحري عبر الواتساب فوراً لمشاركتك كتالوج الأسعار والعروض الحصرية.', 'button_text' => 'متابعة المحادثة على الواتساب 💬', 'button_action' => 'whatsapp', 'button_whatsapp' => '966500000000']],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        [
+                            'title' => 'رحلات الكروز والفنادق الفاخرة autour العالم 🛥️',
+                            'subtitle' => 'اكتشف أفضل الرحلات البحرية والمنتجعات العالمية مع عروض خاصة',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'حجز رحلات الكروز والمنتجعات الملكية 🛥️✨', 'properties' => ['font_size' => '2xl']],
+                                ['element_type' => 'text', 'label' => 'أجب على الأسئلة التالية لنحدد لك أفضل مسارات البحر والكبائن الفاخرة والعروض المتاحة.'],
+                            ],
+                        ],
+                        [
+                            'title' => 'الوجهة والمسار البحري المفضّل',
+                            'subtitle' => 'اختر المنطقة البحرية أو السياحية التي ترغب بزيارتها',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هي الوجهة المفضل لرحلتك القادمة؟',
+                                    'question_key' => 'cruise_destination',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '🌊 جزر الكاريبي والمالديف', 'value' => 'Caribbean & Maldives', 'score' => 25],
+                                            ['label' => '🇪🇺 البحر الأبيض المتوسط وشواطئ أوروبا', 'value' => 'Mediterranean Europe', 'score' => 25],
+                                            ['label' => '🇸🇦 البحر الأحمر والخليج العربي', 'value' => 'Red Sea & GCC', 'score' => 20],
+                                            ['label' => '🌏 شرق آسيا واليابان', 'value' => 'East Asia', 'score' => 20],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'فئة الكبينة والإقامة',
+                            'subtitle' => 'تحديد مستوى الراحة والخدمة المطلوبة',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هي فئة الكبينة أو الجناح المفضّل لديك؟',
+                                    'question_key' => 'cabin_category',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '👑 جناح ملوكي ببلكونة خاصة (Royal Suite with Balcony)', 'value' => 'Royal Suite', 'score' => 30],
+                                            ['label' => '🌅 كبينة إطلالة مباشرة على البحر (Ocean View Balcony)', 'value' => 'Ocean View', 'score' => 25],
+                                            ['label' => '👨‍👩‍👧‍👦 جناح عائلي متصل (Connecting Family Suite)', 'value' => 'Family Suite', 'score' => 20],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'بيانات التواصل للحجز المباشر 📱',
+                            'subtitle' => 'أدخل بياناتك لتصلك أسعار وتوافر الكبائن المتاحة فوراً',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'form_fields',
+                                    'label' => 'معلومات المسافر الرئيسي',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'الاسم الكامل', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'phone', 'required' => true],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => 'تم استلام طلب حجز الكروز والمنتجع بنجاح! 🛥️',
+                            'description' => 'يقوم مستشار السفر البحري بالتواصل معك عبر الواتساب لتزويدك بكتالوج الأسعار والخصومات.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'تواصل معنا على الواتساب 💬',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
+
+            // ── 14. Private Jet Charter & VIP Flight Booking ──────────────────────
+            [
+                'name' => 'Private Jet Charter (حجز الطيران الخاص والرحلات الملكية)',
+                'slug' => 'private-jet-vip-charter',
+                'category' => 'Travel',
+                'description' => 'قالب ملكي فاخر باللون الذهبي والأسود لطلب واستئجار الطائرات الخاصة والرحلات VIP.',
+                'thumbnail_url' => '/assets/images/templates/privatejet.jpg',
+                'sort_order' => 14,
+                'schema_data' => [
+                    'design_settings' => ['primary_color' => '#d97706', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-md', 'thank_you_page' => ['enabled' => true, 'title' => 'تم تسجيل طلب الطيران الخاص بنجاح! 👑', 'subtitle' => 'يتواصل معك مدير قسم الطيران الخاص مباشرة لتجهيز مسار الطائرة وتفاصيل الإقلاع.', 'button_text' => 'التواصل المباشر مع مدير الرحلة 💬', 'button_action' => 'whatsapp', 'button_whatsapp' => '966500000000']],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        [
+                            'title' => 'خدمة استئجار الطائرات الخاصة VIP ✈️👑',
+                            'subtitle' => 'رحلات جوية مخصصة بأعلى معايير الخصوصية والأمان وحرية التوقيت',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'حجز الطيران الخاص والرحلات الملكية 👑✈️', 'properties' => ['font_size' => '2xl']],
+                                ['element_type' => 'text', 'label' => 'حدد خط سير الرحلة وعدد المسافرين لنقدم لك أفضل أسطول طائرات متاح بالأسعار والخدمات.'],
+                            ],
+                        ],
+                        [
+                            'title' => 'مسار وقار الرحلة الجوية',
+                            'subtitle' => 'اختر خط السير المطلوب للطائرة الخاصة',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هو نوع ومسار الرحلة الجوية؟',
+                                    'question_key' => 'flight_route_type',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '✈️ رحلة ذهاب فقط (One-Way Charter)', 'value' => 'One Way', 'score' => 20],
+                                            ['label' => '🔄 رحلة ذهاب وعودة (Round-Trip Charter)', 'value' => 'Round Trip', 'score' => 25],
+                                            ['label' => '🌍 وجهات ومحطات متعددة (Multi-Leg Charter)', 'value' => 'Multi-Leg', 'score' => 30],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'عدد المسافرين وحجم الطائرة',
+                            'subtitle' => 'تحديد سعة الطائرة المطلوبة للرحلة',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هي السعة وحجم الطائرة المناسب لرحلتك؟',
+                                    'question_key' => 'jet_capacity',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '🛩️ طائرة خفيفة (Light Jet - حتى 6 ركاب)', 'value' => 'Light Jet', 'score' => 20],
+                                            ['label' => '✈️ طائرة متوسطة (Midsize Jet - حتى 9 ركاب)', 'value' => 'Midsize Jet', 'score' => 25],
+                                            ['label' => '👑 طائرة ثقيلة فاخرة (Heavy Jet - حتى 14 راكب)', 'value' => 'Heavy Jet', 'score' => 30],
+                                            ['label' => '🏛️ طائرة رئاسية فارهة (VIP Airliner - كبار الشخصيات)', 'value' => 'VIP Airliner', 'score' => 35],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'بيانات حجز الطيران الخاص 📱',
+                            'subtitle' => 'أدخل بياناتك لتصلك الخيارات الفنية والتوافر المباشر',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'form_fields',
+                                    'label' => 'بيانات راكب الطيران الخاص',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'اسم صاحب الطلب / الكفيل', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'رقم الاتصال / الواتساب المباشر', 'type' => 'phone', 'required' => true],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => 'تم استلام طلب حجز الطائرة الخاصة بنجاح 👑',
+                            'description' => 'يتواصل معك مدير قسم الطيران المباشر فوراً لتأكيد التوافر وتفاصيل الإقلاع.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'التواصل المباشر عبر الواتساب 💬',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
+
+            // ── 15. Web & App Project Calculator ──────────────────────────────────
+            [
+                'name' => 'Web & App Project Cost Estimator (حاسبة تكلفة المواقع والتطبيقات)',
+                'slug' => 'web-app-project-calculator',
+                'category' => 'B2B Services',
+                'description' => 'قالب تقني بنفسجي وأزرق متطور لاحتساب تكلفة ومواصفات التطبيقات والمواقع والأنظمة.',
+                'thumbnail_url' => '/assets/images/templates/webapp.jpg',
+                'sort_order' => 15,
+                'schema_data' => [
+                    'design_settings' => ['primary_color' => '#7c3aed', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg', 'thank_you_page' => ['enabled' => true, 'title' => 'تم احتساب تقدير مشروعك البرمجي بنجاح! 🚀', 'subtitle' => 'فريق المهندسين يقوم بمراجعة المتطلبات وإرسال العرض الفني والمالي التفصيلي عبر الواتساب.', 'button_text' => 'استلام العرض الفني على الواتساب 💬', 'button_action' => 'whatsapp', 'button_whatsapp' => '966500000000']],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        [
+                            'title' => 'حاسبة مشروع التطبيق أو المنصة البرمجية 💻',
+                            'subtitle' => 'احصل على تقدير تكلفة وخطة تنفيذ مشروعك خلال 60 ثانية',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'حاسبة تكلفة المواقع والتطبيقات والأنظمة 💻⚡', 'properties' => ['font_size' => '2xl']],
+                                ['element_type' => 'text', 'label' => 'حدد نوع التطبيق والخدمات المطلوبة لنرسل لك التقدير الفني والزمني والمالي.'],
+                            ],
+                        ],
+                        [
+                            'title' => 'نوع النظام البرمجي المطلوبة',
+                            'subtitle' => 'حدد طبيعة المنصة أو الخدمة التقنية',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هو نوع المنصة أو المشروع المطلوب تنفيذه؟',
+                                    'question_key' => 'project_type',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '📱 تطبيق جوال متكامل (iOS & Android App)', 'value' => 'Mobile App', 'score' => 30],
+                                            ['label' => '🛒 متجر إلكتروني احترافي مع بوابات الدفع (E-Commerce Store)', 'value' => 'E-Commerce', 'score' => 25],
+                                            ['label' => '⚙️ نظام إدارة وحلول ساس (SaaS Platform / Custom ERP)', 'value' => 'Custom System', 'score' => 35],
+                                            ['label' => '🌐 موقع تعريفي احترافي للشركة (Corporate Website)', 'value' => 'Website', 'score' => 15],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'الميزات والمواصفات الأساسية',
+                            'subtitle' => 'حدد الميزات والربط التقني المطلوب',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هي أهم الميزات والأنظمة المطلوب دمجها؟',
+                                    'question_key' => 'required_features',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '💳 بوابات الدفع وشحن واستخراج الفواتير', 'value' => 'Payments & Invoicing', 'score' => 20],
+                                            ['label' => '🤖 الذكاء الاصطناعي وربط الواتساب الآلي (AI & WhatsApp Auto)', 'value' => 'AI & Automation', 'score' => 25],
+                                            ['label' => '🌐 لوحة تحكم متعددة اللغات والصلاحيات', 'value' => 'Multilingual & Roles', 'score' => 20],
+                                            ['label' => '✨ جميع ما سبق باحترافية عالية', 'value' => 'Full Enterprise Suite', 'score' => 30],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'بيانات التواصل واستلام الدراسة الفنية 📱',
+                            'subtitle' => 'أدخل بياناتك لتصلك دراسة التكلفة والعرض الفني المباشر',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'form_fields',
+                                    'label' => 'معلومات صاحب المشروع',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'phone', 'required' => true],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => 'تم إرسال متطلبات المشروع للمهندسين المختصين 🚀',
+                            'description' => 'يتواصل معك المهندس المختص لتزويدك بدراسة النطاق والعرض المالي والزمني.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'متابعة العرض الفني عبر الواتساب 💬',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
+
+            // ── 16. Legal Advisory & Law Firm Qualifier ────────────────────────────
+            [
+                'name' => 'Legal Advisory & Law Firm (استشارات المحاماة والدعم القانوني)',
+                'slug' => 'legal-law-advisory-qualifier',
+                'category' => 'Legal & Immigration',
+                'description' => 'قالب رسمي بلون كحلي وذهبي مخصص لمكاتب المحاماة والاستشارات القانونية.',
+                'thumbnail_url' => '/assets/images/templates/legal.jpg',
+                'sort_order' => 16,
+                'schema_data' => [
+                    'design_settings' => ['primary_color' => '#1e3a8a', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-md', 'thank_you_page' => ['enabled' => true, 'title' => 'تم حجز موعد الاستشارة القانونية بنجاح ⚖️', 'subtitle' => 'تم توجيه طلبك للمستشار القانوني المختص وسيتم التواصل معك مباشرة لترتيب الجلسة.', 'button_text' => 'التواصل الفوري مع المستشار 💬', 'button_action' => 'whatsapp', 'button_whatsapp' => '966500000000']],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        [
+                            'title' => 'استشارة قانونية وتطوير الأعمال ⚖️',
+                            'subtitle' => 'حجز جلسة استشارة مع مستشار قانوني معتمد',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'طلب استشارة قانونية ودعم أعمال ⚖️', 'properties' => ['font_size' => '2xl']],
+                                ['element_type' => 'text', 'label' => 'حدد نوع القضية أو الاستشارة المطلوبة لنحدد لك المستشار القانوني المتخصص.'],
+                            ],
+                        ],
+                        [
+                            'title' => 'نوع الاستشارة القانونية',
+                            'subtitle' => 'تحديد مجال الاستفسار أو القضية',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هو مجال الاستشارة القانونية المطلوبة؟',
+                                    'question_key' => 'legal_topic',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '🏢 قضايا وتأسيس العقود والشركات (Corporate Law)', 'value' => 'Corporate', 'score' => 25],
+                                            ['label' => '⚖️ النزاعات والقضايا التجارية والمالية (Commercial Disputes)', 'value' => 'Commercial', 'score' => 25],
+                                            ['label' => '🌍 الاستثمار الأجنبي والملكية الفكرية (Foreign Investment)', 'value' => 'Investment', 'score' => 20],
+                                            ['label' => '📝 صياغة وتوثيق الاتفاقيات والعقود (Contracts Review)', 'value' => 'Contracts', 'score' => 20],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'بيانات التواصل وحجز الجلسة 📱',
+                            'subtitle' => 'أدخل بياناتك لترتيب موعد الاستشارة',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'form_fields',
+                                    'label' => 'معلومات العميل',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'الاسم الكريم', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'رقم الواتساب / الاتصال', 'type' => 'phone', 'required' => true],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => 'تم تسجيل طلب الاستشارة القانونية بنجاح ⚖️',
+                            'description' => 'يتواصل معك المكتب القانوني لترتيب الجلسة والمواعيد المتاحة.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'التواصل الفوري على الواتساب 💬',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
+
+            // ── 17. VIP Spa & Wellness Reservation ────────────────────────────────
+            [
+                'name' => 'VIP Spa & Wellness Center (مراكز السبا والاسترخاء والعناية)',
+                'slug' => 'vip-spa-wellness-reservation',
+                'category' => 'Healthcare',
+                'description' => 'قالب رقيق وناعم بلون وردي مخصص لمراكز التجميل والسبا والعناية بالبشرة.',
+                'thumbnail_url' => '/assets/images/templates/spa.jpg',
+                'sort_order' => 17,
+                'schema_data' => [
+                    'design_settings' => ['primary_color' => '#db2777', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-full', 'thank_you_page' => ['enabled' => true, 'title' => 'تم استلام طلب حجز جلسة السبا بنجاح! 🌸✨', 'subtitle' => 'يتواصل معك موظف الاستقبال فوراً لتأكيد التوقيت المناسب وتجهيز الجلسة.', 'button_text' => 'تأكيد الحجز المباشر على الواتساب 💬', 'button_action' => 'whatsapp', 'button_whatsapp' => '966500000000']],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        [
+                            'title' => 'جلسة الاسترخاء والعناية بالبشرة والسبا الفاخر 💆✨',
+                            'subtitle' => 'احجزي وقتك الخاص للاسترخاء والعناية المتكاملة مع أفضل الخبيرات',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'حجز جلسة سبا واسترخاء فاخرة 🌸💆', 'properties' => ['font_size' => '2xl']],
+                                ['element_type' => 'text', 'label' => 'حددي نوع الجلسة والخدمات المفضلة لنجهز لك موعد الجلسة المثالي.'],
+                            ],
+                        ],
+                        [
+                            'title' => 'نوع الجلسة والخدمة المطلوبة',
+                            'subtitle' => 'اختاري نوع المساج أو العناية بالبشرة',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هي الخدمة أو الجلسة التي ترغبين بحجزها؟',
+                                    'question_key' => 'spa_service',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '💆 مساج واسترخاء ملكي بالزيوت العطرية (Royal Aromatherapy)', 'value' => 'Aromatherapy Massage', 'score' => 25],
+                                            ['label' => '✨ جلسة عناية وتنظيف عميق للبشرة (Deep Hydramedi Facial)', 'value' => 'Facial Care', 'score' => 25],
+                                            ['label' => '🛁 حمام مغربي ملكي مع المساج (Royal Moroccan Bath)', 'value' => 'Moroccan Bath', 'score' => 30],
+                                            ['label' => '👰 بكج العروسة والاسترخاء الشامل (VIP Bridal Spa Package)', 'value' => 'Bridal Package', 'score' => 35],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'بيانات الحجز وتأكيد الموعد 📱',
+                            'subtitle' => 'أدخلي بياناتك لتأكيد حجز الجلسة',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'form_fields',
+                                    'label' => 'معلومات الحجز',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'الاسم', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'رقم الواتساب للتأكيد', 'type' => 'phone', 'required' => true],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => 'تم استلام طلب حجز الجلسة بنجاح 🌸✨',
+                            'description' => 'نتطلع لاستقبالك! يتواصل معك موظف الاستقبال لتأكيد الموعد وتأكيد التفاصيل.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'تأكيد الحجز المباشر على الواتساب 💬',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         foreach ($templates as $tpl) {

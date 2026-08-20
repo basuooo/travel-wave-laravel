@@ -27,6 +27,14 @@ class FunnelTemplateController extends Controller
             return view('admin.funnels.templates.index', compact('templates', 'categories'));
         }
 
+        if (FunnelTemplate::count() < 17) {
+            try {
+                (new \Database\Seeders\FunnelTemplateSeeder())->run();
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
         $query = FunnelTemplate::where('is_active', true)->orderBy('sort_order');
 
         if ($request->filled('category')) {
