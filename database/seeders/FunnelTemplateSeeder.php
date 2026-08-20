@@ -1730,6 +1730,139 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                 ],
             ],
+
+            // ── 19. Exact Involve.me Travel Giveaway Survey Template Replica ────────
+            [
+                'name' => 'Travel Giveaway Survey (مسابقة واستبيان السفر والرحلات المجانية 🌴✈️)',
+                'slug' => 'travel-giveaway-survey',
+                'category' => 'Travel',
+                'description' => 'نسخة طبق الأصل 100% من قالب involve.me الأصلي Travel Giveaway Survey لجمع بيانات العملاء وإتاحة دخول السحب على رحلات سياحية مجانية.',
+                'thumbnail_url' => 'https://involveme-vapor-production-storage.s3-accelerate.amazonaws.com/template-assets/industries/travel-giveaway-survey.png',
+                'sort_order' => 19,
+                'schema_data' => [
+                    'design_settings' => [
+                        'primary_color' => '#0284c7',
+                        'font_family' => 'Tajawal, sans-serif',
+                        'button_style' => 'rounded-lg',
+                        'thank_you_page' => [
+                            'enabled' => true,
+                            'title' => 'You\'re Entered into the Travel Giveaway! 🎉✈️ / تم تسجيلك في سحب مسابقة السفر بنجاح!',
+                            'subtitle' => 'Thank you for completing the survey! Winners will be announced via WhatsApp & Email.',
+                            'button_text' => 'Share on WhatsApp & Get Extra Entries 💬 / شارك على الواتساب لزيادة فرص الفوز',
+                            'button_action' => 'whatsapp',
+                            'button_url' => 'https://travel-wave.com',
+                        ],
+                    ],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        // Step 1: Welcome & Cover Image
+                        [
+                            'title' => 'Win a Dream Vacation for Two! 🌴☀️',
+                            'subtitle' => 'Answer 3 quick questions about your travel preferences to enter our exclusive free travel giveaway competition.',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'Win a Dream Vacation for Two! 🌴☀️', 'properties' => ['font_size' => '2xl', 'subline' => 'GIVEAWAY & TRAVEL SURVEY ✈️🎁']],
+                                ['element_type' => 'text', 'label' => 'Answer 3 quick questions about your travel preferences to enter our exclusive free travel giveaway competition.'],
+                                ['element_type' => 'image', 'label' => 'Tropical Resort Giveaway Preview', 'properties' => ['url' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80']],
+                            ],
+                        ],
+                        // Step 2: Question 1 (Favorite Destination)
+                        [
+                            'title' => 'Dream Vacation Destination',
+                            'subtitle' => 'Select the type of holiday you enjoy the most.',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'Where is your dream vacation destination? / ما هي وجهة سفر الأحلام المفضلة لديك؟',
+                                    'question_key' => 'travel_destination',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '🏝️ Tropical Beaches & Islands (Maldives, Bali)', 'value' => 'Tropical Islands', 'score' => 30],
+                                            ['label' => '🏛️ Historic European Cities (Rome, Paris)', 'value' => 'European Cities', 'score' => 25],
+                                            ['label' => '⛰️ Nature & Mountain Adventures (Swiss Alps, Georgia)', 'value' => 'Mountain Nature', 'score' => 25],
+                                            ['label' => '🛍️ Luxury Shopping & Skyscraper Resorts (Dubai)', 'value' => 'Luxury Shopping', 'score' => 20],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        // Step 3: Question 2 (Travel Frequency)
+                        [
+                            'title' => 'Travel Frequency',
+                            'subtitle' => 'How often do you travel for holidays per year?',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'How often do you travel for holidays per year? / كم مرة تسافر للسياحة والاستجمام سنوياً؟',
+                                    'question_key' => 'travel_frequency',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '✈️ 1 to 2 Times a Year', 'value' => '1-2 Times', 'score' => 20],
+                                            ['label' => '🌍 3 to 4 Times a Year', 'value' => '3-4 Times', 'score' => 25],
+                                            ['label' => '💼 Frequent Traveler (5+ Times)', 'value' => '5+ Times', 'score' => 30],
+                                            ['label' => '🏖️ Looking for My First Trip This Year', 'value' => 'First Trip', 'score' => 15],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        // Step 4: Question 3 (Vacation Activity)
+                        [
+                            'title' => 'Favorite Vacation Activity',
+                            'subtitle' => 'Help us customize your prize package.',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'What is your favorite activity during a vacation? / ما هو النشاط المفضّل لديك خلال العطلة؟',
+                                    'question_key' => 'travel_activity',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '🍹 Relaxing on the Beach & Spa', 'value' => 'Beach & Spa', 'score' => 25],
+                                            ['label' => '📸 Sightseeing & Cultural Exploration', 'value' => 'Sightseeing', 'score' => 25],
+                                            ['label' => '🧗 Outdoor Sports & Hiking Adventures', 'value' => 'Hiking Adventures', 'score' => 25],
+                                            ['label' => '🍽️ Fine Dining & Culinary Tasting', 'value' => 'Fine Dining', 'score' => 25],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        // Step 5: Lead Form
+                        [
+                            'title' => 'Where should we notify you if you win? 🏆',
+                            'subtitle' => 'Enter your contact details to complete your giveaway registration.',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'form_fields',
+                                    'label' => 'Giveaway Entry Details',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'Full Name / الاسم الكامل', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'Phone / WhatsApp Number', 'type' => 'phone', 'required' => true],
+                                            ['name' => 'email', 'label' => 'Email Address / البريد الإلكتروني', 'type' => 'email', 'required' => true],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => 'You\'re Entered into the Travel Giveaway! 🎉✈️',
+                            'description' => 'Thank you for completing the survey! Winners will be announced via WhatsApp & Email.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'Share on WhatsApp & Get Extra Entries 💬',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         foreach ($templates as $tpl) {
