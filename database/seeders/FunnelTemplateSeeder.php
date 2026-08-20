@@ -1618,6 +1618,101 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                 ],
             ],
+
+            // ── 18. B2B Lead Magnet Template ──────────────────────────────────────
+            [
+                'name' => 'B2B Lead Magnet (مغناطيس جذب عملاء الشركات والدليل المجاني)',
+                'slug' => 'b2b-lead-magnet',
+                'category' => 'B2B Services',
+                'description' => 'قالب محاكٍ لقالب involve.me الشهير لجذب واستقطاب عملاء الشركات B2B عبر كتاب/دليل مجاني واحتساب مؤهلات العملاء.',
+                'thumbnail_url' => '/assets/images/templates/b2b-lead-magnet.png',
+                'sort_order' => 18,
+                'schema_data' => [
+                    'design_settings' => ['primary_color' => '#2563eb', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg', 'thank_you_page' => ['enabled' => true, 'title' => 'تم تجهيز دليلك التجاري المجاني بنجاح! 📚🎉', 'subtitle' => 'شكراً لاهتمامك! تم إرسال الدليل بصيغة PDF على بريدك الإلكتروني والواتساب، ويمكنك تحميله المباشر فوراً.', 'button_text' => 'تحميل الدليل المجاني الآن 📥', 'button_action' => 'url', 'button_url' => 'https://travel-wave.com']],
+                    'crm_settings' => ['enabled' => true],
+                    'steps' => [
+                        [
+                            'title' => 'دليل تنمية ومبيعات الشركات B2B المجاني 📚⚡',
+                            'subtitle' => 'احصل على النسخة المجانية من دليل استراتيجيات جذب العملاء وإغلاق الصفقات',
+                            'step_type' => 'welcome',
+                            'elements' => [
+                                ['element_type' => 'heading', 'label' => 'دليل نمو ومبيعات الشركات B2B المجاني 📚⚡', 'properties' => ['font_size' => '2xl']],
+                                ['element_type' => 'text', 'label' => 'أدخل إجاباتك السريعة لتتلقى الدليل المخصص والحلول المناسبة لحجم شركتك.'],
+                            ],
+                        ],
+                        [
+                            'title' => 'المسمى الوظيفي وحجم الشركة',
+                            'subtitle' => 'حدد دورك ودور شركتك في السوق',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هو مسمى عملك وحجم شركتك الحالي؟',
+                                    'question_key' => 'b2b_role',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '🏢 صاحب عمل / رئيس تنفيذي (CEO / Founder / Owner)', 'value' => 'CEO / Founder', 'score' => 30],
+                                            ['label' => '🎯 مدير مبيعات أو تسويق (Sales / Marketing Director)', 'value' => 'Sales Director', 'score' => 25],
+                                            ['label' => '💼 مستشار أو خبير مستقل (Independent Consultant)', 'value' => 'Consultant', 'score' => 20],
+                                            ['label' => '🚀 فريق عمل مشروع ناشئ (Startup Team)', 'value' => 'Startup Team', 'score' => 15],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'هدف النمو الرئيسي لشركتك',
+                            'subtitle' => 'حدد الأولوية الأساسية للشركة في الوقت الحالي',
+                            'step_type' => 'question',
+                            'elements' => [
+                                [
+                                    'element_type' => 'single_choice',
+                                    'label' => 'ما هو هدف النمو الرئيسي لشركتك هذا الربع؟',
+                                    'question_key' => 'b2b_goal',
+                                    'properties' => [
+                                        'options' => [
+                                            ['label' => '📈 جذب عملاء محتملين مؤهلين بجودة عالية (Qualified B2B Leads)', 'value' => 'Qualified Leads', 'score' => 25],
+                                            ['label' => '⚡ أتمتة نظام المبيعات والمتابعة التلقائية (Sales Automation)', 'value' => 'Sales Automation', 'score' => 25],
+                                            ['label' => '💰 زيادة نسبة إغلاق الصفقات والإيرادات (Close Rate & Revenue)', 'value' => 'Higher Revenue', 'score' => 30],
+                                            ['label' => '🌐 التوسع والدخول في أسواق جديدة (International Expansion)', 'value' => 'Expansion', 'score' => 20],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'title' => 'أين نرسل لك الدليل المجاني؟ 📩',
+                            'subtitle' => 'أدخل بياناتك وسيتم إرسال الدليل فوراً',
+                            'step_type' => 'lead_form',
+                            'elements' => [
+                                [
+                                    'element_type' => 'form_fields',
+                                    'label' => 'معلومات استلام الدليل',
+                                    'properties' => [
+                                        'fields' => [
+                                            ['name' => 'full_name', 'label' => 'الاسم الكامل', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'phone', 'required' => true],
+                                            ['name' => 'email', 'label' => 'بريد العمل الإلكتروني', 'type' => 'email', 'required' => false],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'results' => [
+                        [
+                            'title' => 'تم تجهيز دليلك التجاري المجاني بنجاح! 📚🎉',
+                            'description' => 'يمكنك تحميل الدليل المباشر بصيغة PDF فوراً أو استلامه على الواتساب.',
+                            'min_score' => 0,
+                            'max_score' => 100,
+                            'cta_label' => 'تحميل الدليل المجاني الآن 📥',
+                            'cta_type' => 'whatsapp',
+                            'cta_whatsapp_number' => '966500000000',
+                            'sort_order' => 1,
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         foreach ($templates as $tpl) {

@@ -27,7 +27,7 @@ class FunnelTemplateController extends Controller
             return view('admin.funnels.templates.index', compact('templates', 'categories'));
         }
 
-        if (FunnelTemplate::count() < 17) {
+        if (FunnelTemplate::count() < 18) {
             try {
                 (new \Database\Seeders\FunnelTemplateSeeder())->run();
             } catch (\Throwable $e) {
