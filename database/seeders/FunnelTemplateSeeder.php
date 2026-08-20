@@ -1766,22 +1766,22 @@ class FunnelTemplateSeeder extends Seeder
                                 ['element_type' => 'image', 'label' => 'Tropical Resort Giveaway Preview', 'properties' => ['url' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80']],
                             ],
                         ],
-                        // Step 2: Question 1 (Favorite Destination)
+                        // Step 2: Question 1 (Favorite Destination - Image Choice)
                         [
                             'title' => 'Dream Vacation Destination',
                             'subtitle' => 'Select the type of holiday you enjoy the most.',
                             'step_type' => 'question',
                             'elements' => [
                                 [
-                                    'element_type' => 'single_choice',
+                                    'element_type' => 'image_choice',
                                     'label' => 'Where is your dream vacation destination? / ما هي وجهة سفر الأحلام المفضلة لديك؟',
                                     'question_key' => 'travel_destination',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '🏝️ Tropical Beaches & Islands (Maldives, Bali)', 'value' => 'Tropical Islands', 'score' => 30],
-                                            ['label' => '🏛️ Historic European Cities (Rome, Paris)', 'value' => 'European Cities', 'score' => 25],
-                                            ['label' => '⛰️ Nature & Mountain Adventures (Swiss Alps, Georgia)', 'value' => 'Mountain Nature', 'score' => 25],
-                                            ['label' => '🛍️ Luxury Shopping & Skyscraper Resorts (Dubai)', 'value' => 'Luxury Shopping', 'score' => 20],
+                                            ['label' => '🏝️ Tropical Beaches & Islands', 'value' => 'Tropical Islands', 'image_url' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop&q=80', 'score' => 30],
+                                            ['label' => '🏛️ Historic European Cities', 'value' => 'European Cities', 'image_url' => 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&auto=format&fit=crop&q=80', 'score' => 25],
+                                            ['label' => '⛰️ Nature & Mountain Adventures', 'value' => 'Mountain Nature', 'image_url' => 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&auto=format&fit=crop&q=80', 'score' => 25],
+                                            ['label' => '🛍️ Luxury Shopping & Skyscraper Resorts', 'value' => 'Luxury Shopping', 'image_url' => 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&auto=format&fit=crop&q=80', 'score' => 20],
                                         ],
                                     ],
                                 ],
@@ -1808,22 +1808,22 @@ class FunnelTemplateSeeder extends Seeder
                                 ],
                             ],
                         ],
-                        // Step 4: Question 3 (Vacation Activity)
+                        // Step 4: Question 3 (Vacation Activity - Image Choice)
                         [
                             'title' => 'Favorite Vacation Activity',
                             'subtitle' => 'Help us customize your prize package.',
                             'step_type' => 'question',
                             'elements' => [
                                 [
-                                    'element_type' => 'single_choice',
+                                    'element_type' => 'image_choice',
                                     'label' => 'What is your favorite activity during a vacation? / ما هو النشاط المفضّل لديك خلال العطلة؟',
                                     'question_key' => 'travel_activity',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '🍹 Relaxing on the Beach & Spa', 'value' => 'Beach & Spa', 'score' => 25],
-                                            ['label' => '📸 Sightseeing & Cultural Exploration', 'value' => 'Sightseeing', 'score' => 25],
-                                            ['label' => '🧗 Outdoor Sports & Hiking Adventures', 'value' => 'Hiking Adventures', 'score' => 25],
-                                            ['label' => '🍽️ Fine Dining & Culinary Tasting', 'value' => 'Fine Dining', 'score' => 25],
+                                            ['label' => '🍹 Relaxing on the Beach & Spa', 'value' => 'Beach & Spa', 'image_url' => 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&auto=format&fit=crop&q=80', 'score' => 25],
+                                            ['label' => '📸 Sightseeing & Cultural Exploration', 'value' => 'Sightseeing', 'image_url' => 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=600&auto=format&fit=crop&q=80', 'score' => 25],
+                                            ['label' => '🧗 Outdoor Sports & Hiking Adventures', 'value' => 'Hiking Adventures', 'image_url' => 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=600&auto=format&fit=crop&q=80', 'score' => 25],
+                                            ['label' => '🍽️ Fine Dining & Culinary Tasting', 'value' => 'Fine Dining', 'image_url' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80', 'score' => 25],
                                         ],
                                     ],
                                 ],

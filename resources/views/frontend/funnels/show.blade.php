@@ -524,13 +524,15 @@
                                 <div class="row g-3">
                                     @foreach($props['options'] ?? [] as $opt)
                                         <div class="col-6">
-                                            <div class="option-btn text-center flex-column p-3 h-100" onclick="selectOption({{ $element->id }}, '{{ addslashes($opt['value'] ?? $opt['label']) }}', {{ $opt['score'] ?? 0 }}, this)">
+                                            <div class="option-btn text-center flex-column p-2 h-100 shadow-sm border rounded-4 overflow-hidden position-relative transition-hover" onclick="selectOption({{ $element->id }}, '{{ addslashes($opt['value'] ?? $opt['label']) }}', {{ $opt['score'] ?? 0 }}, this)">
                                                 @if(!empty($opt['image_url']))
-                                                    <img src="{{ $opt['image_url'] }}" class="rounded-3 mb-2" style="max-height: 90px; width: 100%; object-fit: cover;" alt="{{ $opt['label'] ?? '' }}">
+                                                    <img src="{{ $opt['image_url'] }}" class="rounded-3 mb-2 w-100" style="height: 140px; object-fit: cover;" alt="{{ $opt['label'] ?? '' }}">
                                                 @else
-                                                    <iconify-icon icon="solar:gallery-bold-duotone" width="40" class="text-primary mb-2"></iconify-icon>
+                                                    <div class="bg-light rounded-3 p-4 mb-2">
+                                                        <iconify-icon icon="solar:gallery-bold-duotone" width="48" class="text-primary"></iconify-icon>
+                                                    </div>
                                                 @endif
-                                                <span class="fw-bold small">{{ $opt['label'] ?? $opt['value'] }}</span>
+                                                <span class="fw-bold small text-dark d-block px-1 pb-1" style="font-size: 13px;">{{ $opt['label'] ?? $opt['value'] }}</span>
                                             </div>
                                         </div>
                                     @endforeach
