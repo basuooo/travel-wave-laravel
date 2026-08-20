@@ -1377,6 +1377,7 @@
 </script>
 
 {!! $dispatcherJs ?? '' !!}
+{!! $bodyScripts ?? '' !!}
 
 </body>
 </html>

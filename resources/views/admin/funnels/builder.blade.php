@@ -848,19 +848,94 @@
                     </div>
                 </div>
 
+                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                    <h6 class="fw-bold small mb-3 text-white d-flex align-items-center gap-1" id="txt_tracking_header">
+                        <iconify-icon icon="solar:chart-2-bold" class="text-primary"></iconify-icon>
+                        <span>🎯 بكسلات التتبع والـ Analytics</span>
+                    </h6>
+                    
+                    <!-- Meta Pixel -->
+                    <div class="mb-3">
+                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                            <iconify-icon icon="logos:facebook" width="14"></iconify-icon>
+                            <span>Meta (Facebook) Pixel</span>
+                        </label>
+                        <input type="text" class="form-control form-control-sm form-control-dark" id="meta_pixel_input" placeholder="Pixel ID (e.g. 1234567890)" value="{{ $funnel->tracking_settings['meta_pixel_id'] ?? '' }}">
+                    </div>
+
+                    <!-- Google Analytics -->
+                    <div class="mb-3">
+                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                            <iconify-icon icon="logos:google-analytics" width="14"></iconify-icon>
+                            <span>Google Analytics (GA4)</span>
+                        </label>
+                        <input type="text" class="form-control form-control-sm form-control-dark" id="ga4_input" placeholder="G-XXXXXXXXXX" value="{{ $funnel->tracking_settings['ga4_id'] ?? '' }}">
+                    </div>
+
+                    <!-- Google Tag Manager -->
+                    <div class="mb-3">
+                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                            <iconify-icon icon="logos:google-tag-manager" width="14"></iconify-icon>
+                            <span>Google Tag Manager (GTM)</span>
+                        </label>
+                        <input type="text" class="form-control form-control-sm form-control-dark" id="gtm_input" placeholder="GTM-XXXXXXX" value="{{ $funnel->tracking_settings['gtm_id'] ?? '' }}">
+                    </div>
+
+                    <!-- LinkedIn Insight Tag -->
+                    <div class="mb-3">
+                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                            <iconify-icon icon="logos:linkedin-icon" width="14"></iconify-icon>
+                            <span>LinkedIn Insight Tag ID</span>
+                        </label>
+                        <input type="text" class="form-control form-control-sm form-control-dark" id="linkedin_input" placeholder="Partner Tag ID" value="{{ $funnel->tracking_settings['linkedin_tag_id'] ?? '' }}">
+                    </div>
+
+                    <!-- TikTok Pixel -->
+                    <div class="mb-3">
+                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                            <iconify-icon icon="logos:tiktok-icon" width="14"></iconify-icon>
+                            <span>TikTok Pixel</span>
+                        </label>
+                        <input type="text" class="form-control form-control-sm form-control-dark" id="tiktok_input" placeholder="Pixel ID" value="{{ $funnel->tracking_settings['tiktok_pixel_id'] ?? '' }}">
+                    </div>
+
+                    <!-- Snapchat Pixel -->
+                    <div class="mb-3">
+                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                            <iconify-icon icon="logos:snapchat" width="14"></iconify-icon>
+                            <span>Snapchat Pixel</span>
+                        </label>
+                        <input type="text" class="form-control form-control-sm form-control-dark" id="snap_input" placeholder="Snapchat Pixel ID" value="{{ $funnel->tracking_settings['snap_pixel_id'] ?? '' }}">
+                    </div>
+                </div>
+
+                <!-- CUSTOM SCRIPTS / CODE SECTION (خانة كاستم لإضافة الأكواد) -->
                 <div class="p-3 bg-dark rounded-3 border border-secondary">
-                    <h6 class="fw-bold small mb-2" id="txt_tracking_header">🎯 بكسلات التتبع</h6>
-                    <div class="mb-2">
-                        <label class="form-label small text-muted">Meta (Facebook) Pixel ID</label>
-                        <input type="text" class="form-control form-control-sm form-control-dark" id="meta_pixel_input" value="{{ $funnel->tracking_settings['meta_pixel_id'] ?? '' }}">
+                    <h6 class="fw-bold small mb-3 text-white d-flex align-items-center gap-1">
+                        <iconify-icon icon="solar:code-square-bold" class="text-warning"></iconify-icon>
+                        <span>⚡ أكواد كاستم مخصصة (Custom Scripts & HTML)</span>
+                    </h6>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted d-flex align-items-center justify-content-between">
+                            <span>كود كاستم في الهيدر (Header Scripts - &lt;head&gt;)</span>
+                            <span class="badge bg-primary-subtle text-primary" style="font-size: 10px;">&lt;head&gt;</span>
+                        </label>
+                        <textarea class="form-control form-control-sm form-control-dark font-monospace" id="custom_head_script_input" rows="4" style="font-size: 11px;" placeholder="<script>
+  // Paste custom header code or tracking scripts here
+</script>">{{ $funnel->tracking_settings['custom_head_script'] ?? '' }}</textarea>
+                        <small class="text-muted" style="font-size: 11px;">يتم تضمين هذا الكود مباشرة داخل عنصر &lt;head&gt; بالفانل.</small>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label small text-muted">Google Analytics (GA4) ID</label>
-                        <input type="text" class="form-control form-control-sm form-control-dark" id="ga4_input" value="{{ $funnel->tracking_settings['ga4_id'] ?? '' }}">
-                    </div>
+
                     <div>
-                        <label class="form-label small text-muted">TikTok Pixel ID</label>
-                        <input type="text" class="form-control form-control-sm form-control-dark" id="tiktok_input" value="{{ $funnel->tracking_settings['tiktok_pixel_id'] ?? '' }}">
+                        <label class="form-label small text-muted d-flex align-items-center justify-content-between">
+                            <span>كود كاستم في الفوتر (Footer / Body Scripts)</span>
+                            <span class="badge bg-success-subtle text-success" style="font-size: 10px;">&lt;/body&gt;</span>
+                        </label>
+                        <textarea class="form-control form-control-sm form-control-dark font-monospace" id="custom_body_script_input" rows="4" style="font-size: 11px;" placeholder="<script>
+  // Paste custom body or footer scripts here
+</script>">{{ $funnel->tracking_settings['custom_body_script'] ?? '' }}</textarea>
+                        <small class="text-muted" style="font-size: 11px;">يتم تضمين هذا الكود مباشرة قبل إغلاق عنصر &lt;/body&gt; بالفانل.</small>
                     </div>
                 </div>
             </div>
@@ -3309,9 +3384,14 @@
                 service_type_id: document.getElementById('crm_service_type_select').value,
             },
             tracking_settings: {
-                meta_pixel_id: document.getElementById('meta_pixel_input').value,
-                ga4_id: document.getElementById('ga4_input').value,
-                tiktok_pixel_id: document.getElementById('tiktok_input').value,
+                meta_pixel_id: document.getElementById('meta_pixel_input')?.value || '',
+                ga4_id: document.getElementById('ga4_input')?.value || '',
+                gtm_id: document.getElementById('gtm_input')?.value || '',
+                linkedin_tag_id: document.getElementById('linkedin_input')?.value || '',
+                tiktok_pixel_id: document.getElementById('tiktok_input')?.value || '',
+                snap_pixel_id: document.getElementById('snap_input')?.value || '',
+                custom_head_script: document.getElementById('custom_head_script_input')?.value || '',
+                custom_body_script: document.getElementById('custom_body_script_input')?.value || '',
             },
             steps: funnelData.steps,
             results: funnelData.results,

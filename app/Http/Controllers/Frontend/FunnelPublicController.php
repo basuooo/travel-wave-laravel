@@ -34,9 +34,10 @@ class FunnelPublicController extends Controller
         }
 
         $headerScripts = $trackingService->getHeaderScripts($funnel);
+        $bodyScripts = $trackingService->getBodyScripts($funnel);
         $dispatcherJs = $trackingService->getEventDispatcherJs();
 
-        return view('frontend.funnels.show', compact('funnel', 'headerScripts', 'dispatcherJs', 'isPreview'));
+        return view('frontend.funnels.show', compact('funnel', 'headerScripts', 'bodyScripts', 'dispatcherJs', 'isPreview'));
     }
 
     public function submit(string $slug, Request $request, FunnelExecutionEngine $engine, FunnelCrmSyncService $crmService)
