@@ -692,6 +692,10 @@
 
     <!-- Actions -->
     <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-outline-light btn-sm rounded-3 d-flex align-items-center gap-1" onclick="openGeneralSettingsTab()">
+            <iconify-icon icon="solar:settings-bold" width="16"></iconify-icon>
+            <span>⚙️ الإعدادات العامة</span>
+        </button>
         <button type="button" class="btn btn-outline-light btn-sm rounded-3 d-flex align-items-center gap-1" onclick="openLivePreview()">
             <iconify-icon icon="solar:eye-bold" width="16"></iconify-icon>
             <span id="txt_btn_preview">معاينة حية 👁️</span>
@@ -762,7 +766,10 @@
                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab_props" id="tab_btn_props">⚙️ الخصائص</button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab_design" id="tab_btn_design">🎨 التصميم العام</button>
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab_general" id="tab_btn_general">⚙️ الإعدادات</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab_design" id="tab_btn_design">🎨 التصميم</button>
             </li>
             <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab_results" id="tab_btn_results">🏆 النتائج</button>
@@ -781,6 +788,94 @@
                         <iconify-icon icon="solar:cursor-bold-duotone" width="48" class="opacity-50 mb-2"></iconify-icon>
                         <p class="small" id="txt_inspector_empty">انقر على أي عنصر داخل الشاشة أو انقر نقراً مزدوجاً (Double Click) لتعديل نصوصه وتصميمه مباشرة.</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: General Settings (Match involve.me General Settings UI) -->
+            <div class="tab-pane fade" id="tab_general">
+                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom border-secondary">
+                        <div class="rounded-circle bg-primary-subtle text-primary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                            <iconify-icon icon="solar:settings-minimalistic-bold" width="22"></iconify-icon>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-white" id="txt_general_header">⚙️ General Settings (الإعدادات العامة)</h6>
+                            <small class="text-muted" style="font-size: 11px;">إعداد تفاصيل الفانل، وتغيير الاسم والرابط واللغة.</small>
+                        </div>
+                    </div>
+
+                    <!-- 1. Funnel Name -->
+                    <div class="mb-3">
+                        <label class="form-label small text-white fw-bold">اسم الفانل (Funnel Name)</label>
+                        <input type="text" class="form-control form-control-dark fw-bold" id="general_funnel_name" value="{{ $funnel->name }}" placeholder="Enter funnel name" oninput="updateFunnelName(this.value)">
+                        <small class="text-muted" style="font-size: 11px;">اسم الفانل الأساسي باللوحة وعند المشاركة.</small>
+                    </div>
+
+                    <!-- 2. Funnel Domain -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small text-white fw-bold mb-0">نطاق الفانل (Funnel Domain)</label>
+                            <span class="badge bg-primary-subtle text-primary" style="font-size: 10px;">Primary Domain</span>
+                        </div>
+                        <select class="form-select form-select-dark" id="general_funnel_domain">
+                            <option value="travel-wave" selected>{{ parse_url(config('app.url'), PHP_URL_HOST) ?? 'travel-wave.com' }} (الموقع الرئيسي)</option>
+                            <option value="custom">نطاق مخصص (Custom Domain)</option>
+                        </select>
+                    </div>
+
+                    <!-- 3. Funnel URL / Slug -->
+                    <div class="mb-3">
+                        <label class="form-label small text-white fw-bold">رابط الفانل الفريد (Funnel URL Slug)</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-secondary-subtle text-dark font-monospace fw-bold" style="font-size: 11px;">/funnels/</span>
+                            <input type="text" class="form-control form-control-dark font-monospace fw-bold" id="general_funnel_slug" value="{{ $funnel->slug }}" placeholder="my-funnel-slug" oninput="updateFunnelSlug(this.value)">
+                        </div>
+                        <small class="text-muted" style="font-size: 11px;">الرابط الحالي: <span id="txt_slug_preview" class="text-primary font-monospace">{{ url('/funnels/' . $funnel->slug) }}</span></small>
+                    </div>
+
+                    <!-- 4. Default Language -->
+                    <div class="mb-3">
+                        <label class="form-label small text-white fw-bold">اللغة الافتراضية (Default Language)</label>
+                        <select class="form-select form-select-dark" id="general_funnel_lang" onchange="updateDefaultLanguage(this.value)">
+                            <option value="ar" {{ ($funnel->design_settings['default_language'] ?? 'ar') === 'ar' ? 'selected' : '' }}>العربية (Arabic 🇸🇦)</option>
+                            <option value="en" {{ ($funnel->design_settings['default_language'] ?? 'ar') === 'en' ? 'selected' : '' }}>English (الإنجليزية 🇬🇧)</option>
+                        </select>
+                        <small class="text-muted" style="font-size: 11px;">اللغة الأساسية للواجهة عند فتح الرابط.</small>
+                    </div>
+
+                    <!-- 5. SEO Settings -->
+                    <div class="mb-3 pt-2 border-top border-secondary">
+                        <h6 class="fw-bold small text-white mb-2">🔍 إعدادات محركات البحث (SEO Settings)</h6>
+                        
+                        <div class="mb-2">
+                            <label class="form-label small text-muted">عنوان SEO (Meta Title)</label>
+                            <input type="text" class="form-control form-control-sm form-control-dark" id="general_seo_title" value="{{ $funnel->seo_settings['meta_title'] ?? $funnel->name }}" placeholder="Meta Title">
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small text-muted">وصف SEO (Meta Description)</label>
+                            <textarea class="form-control form-control-sm form-control-dark" id="general_seo_desc" rows="2" placeholder="Meta Description">{{ $funnel->seo_settings['meta_description'] ?? '' }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- 6. Watermark Option -->
+                    <div class="p-3 bg-dark-subtle rounded-3 border border-secondary mb-3">
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input" type="checkbox" id="general_remove_watermark" {{ ($funnel->design_settings['remove_watermark'] ?? false) ? 'checked' : '' }}>
+                            <label class="form-check-label fw-bold small text-white" for="general_remove_watermark">
+                                إخفاء العلامة المائية (Remove Watermark)
+                            </label>
+                        </div>
+                        <small class="text-muted d-block" style="font-size: 11px;">
+                            إلغاء شريط "Made with Travel Wave" من أسفل الفانل.
+                        </small>
+                    </div>
+
+                    <!-- Update Settings Button -->
+                    <button type="button" class="btn btn-primary fw-bold w-100 py-2 rounded-3 mt-2 d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="saveFunnel()">
+                        <iconify-icon icon="solar:diskette-bold" width="18"></iconify-icon>
+                        <span>حفظ وتحديث الإعدادات (Update Settings)</span>
+                    </button>
                 </div>
             </div>
 
@@ -3377,6 +3472,36 @@
         }
     }
 
+    function openGeneralSettingsTab() {
+        const tabBtn = document.getElementById('tab_btn_general');
+        if (tabBtn) {
+            const bsTab = new bootstrap.Tab(tabBtn);
+            bsTab.show();
+        }
+    }
+
+    function updateFunnelName(val) {
+        if (val && val.trim()) {
+            funnelData.name = val.trim();
+        }
+    }
+
+    function updateFunnelSlug(val) {
+        if (val) {
+            const sanitized = val.toLowerCase().replace(/[^a-z0-9\-_]/g, '');
+            funnelData.slug = sanitized;
+            const prevEl = document.getElementById('txt_slug_preview');
+            if (prevEl) {
+                prevEl.innerText = `{{ url('/funnels') }}/${sanitized}`;
+            }
+        }
+    }
+
+    function updateDefaultLanguage(lang) {
+        if (!funnelData.design_settings) funnelData.design_settings = {};
+        funnelData.design_settings.default_language = lang;
+    }
+
     function openLivePreview() {
         showToast(currentLang === 'ar' ? 'جاري حفظ التعديلات وفتح المعاينة الحية... ⏳' : 'Saving and launching live preview... ⏳');
         saveFunnel(true);
@@ -3389,10 +3514,23 @@
             saveBtn.innerHTML = `<span>${t('saving')}</span>`;
         }
 
+        const nameVal = document.getElementById('general_funnel_name')?.value || funnelData.name;
+        const slugVal = document.getElementById('general_funnel_slug')?.value || funnelData.slug;
+        funnelData.name = nameVal;
+        funnelData.slug = slugVal;
+
+        if (!funnelData.design_settings) funnelData.design_settings = {};
+        funnelData.design_settings.default_language = document.getElementById('general_funnel_lang')?.value || 'ar';
+        funnelData.design_settings.remove_watermark = document.getElementById('general_remove_watermark')?.checked || false;
+
         const payload = {
-            name: funnelData.name,
-            slug: funnelData.slug,
+            name: nameVal,
+            slug: slugVal,
             design_settings: funnelData.design_settings,
+            seo_settings: {
+                meta_title: document.getElementById('general_seo_title')?.value || nameVal,
+                meta_description: document.getElementById('general_seo_desc')?.value || '',
+            },
             crm_settings: {
                 enabled: document.getElementById('crm_enabled_checkbox').checked,
                 source_id: document.getElementById('crm_source_select').value,
