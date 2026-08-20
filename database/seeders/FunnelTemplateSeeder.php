@@ -1619,80 +1619,97 @@ class FunnelTemplateSeeder extends Seeder
                 ],
             ],
 
-            // ── 18. B2B Lead Magnet Template ──────────────────────────────────────
+            // ── 18. Exact Involve.me B2B Lead Magnet Template Replica ──────────────
             [
-                'name' => 'B2B Lead Magnet (مغناطيس جذب عملاء الشركات والدليل المجاني)',
+                'name' => 'B2B Lead Magnet (نسخة involve.me الأصلية الدليل والمغناطيس)',
                 'slug' => 'b2b-lead-magnet',
                 'category' => 'B2B Services',
-                'description' => 'قالب محاكٍ لقالب involve.me الشهير لجذب واستقطاب عملاء الشركات B2B عبر كتاب/دليل مجاني واحتساب مؤهلات العملاء.',
-                'thumbnail_url' => '/assets/images/templates/b2b-lead-magnet.png',
+                'description' => 'نسخة طبق الأصل 100% من قالب involve.me الأصلي B2B Lead Magnet لجذب واستقطاب عملاء الشركات عبر كتاب/دليل مجاني واحتساب مؤهلات العملاء.',
+                'thumbnail_url' => 'https://involveme-vapor-production-storage.s3-accelerate.amazonaws.com/template-assets/departments/b2b-lead-magnet.png',
                 'sort_order' => 18,
                 'schema_data' => [
-                    'design_settings' => ['primary_color' => '#2563eb', 'font_family' => 'Tajawal, sans-serif', 'button_style' => 'rounded-lg', 'thank_you_page' => ['enabled' => true, 'title' => 'تم تجهيز دليلك التجاري المجاني بنجاح! 📚🎉', 'subtitle' => 'شكراً لاهتمامك! تم إرسال الدليل بصيغة PDF على بريدك الإلكتروني والواتساب، ويمكنك تحميله المباشر فوراً.', 'button_text' => 'تحميل الدليل المجاني الآن 📥', 'button_action' => 'url', 'button_url' => 'https://travel-wave.com']],
+                    'design_settings' => [
+                        'primary_color' => '#2563eb',
+                        'font_family' => 'Tajawal, sans-serif',
+                        'button_style' => 'rounded-lg',
+                        'thank_you_page' => [
+                            'enabled' => true,
+                            'title' => 'Your B2B Lead Magnet is Ready! 📚🎉 / تم تجهيز دليلك التجاري المجاني!',
+                            'subtitle' => 'We\'ve sent a copy to your email and WhatsApp. You can also download it directly below.',
+                            'button_text' => 'Download Free PDF Playbook 📥 / تحميل الدليل المجاني الآن',
+                            'button_action' => 'url',
+                            'button_url' => 'https://travel-wave.com',
+                        ],
+                    ],
                     'crm_settings' => ['enabled' => true],
                     'steps' => [
+                        // Step 1: Welcome & Cover Image
                         [
-                            'title' => 'دليل تنمية ومبيعات الشركات B2B المجاني 📚⚡',
-                            'subtitle' => 'احصل على النسخة المجانية من دليل استراتيجيات جذب العملاء وإغلاق الصفقات',
+                            'title' => 'B2B Lead Magnet Playbook 📚',
+                            'subtitle' => 'The Ultimate Guide to Generating High-Quality B2B Leads & Closing Deals Faster',
                             'step_type' => 'welcome',
                             'elements' => [
-                                ['element_type' => 'heading', 'label' => 'دليل نمو ومبيعات الشركات B2B المجاني 📚⚡', 'properties' => ['font_size' => '2xl']],
-                                ['element_type' => 'text', 'label' => 'أدخل إجاباتك السريعة لتتلقى الدليل المخصص والحلول المناسبة لحجم شركتك.'],
+                                ['element_type' => 'heading', 'label' => 'The Ultimate B2B Lead Generation Playbook 📘⚡', 'properties' => ['font_size' => '2xl', 'subline' => 'FREE EBOOK & B2B BLUEPRINT 📥']],
+                                ['element_type' => 'text', 'label' => 'Learn how to attract qualified decision-makers, automate sales follow-ups, and scale your pipeline with proven strategies.'],
+                                ['element_type' => 'image', 'label' => 'Lead Magnet Playbook Preview', 'properties' => ['url' => 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=800&auto=format&fit=crop&q=80']],
                             ],
                         ],
+                        // Step 2: Question 1 (Primary Goal)
                         [
-                            'title' => 'المسمى الوظيفي وحجم الشركة',
-                            'subtitle' => 'حدد دورك ودور شركتك في السوق',
+                            'title' => 'Primary Business Goal',
+                            'subtitle' => 'What is your primary growth goal for your business this quarter?',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'ما هو مسمى عملك وحجم شركتك الحالي؟',
-                                    'question_key' => 'b2b_role',
+                                    'label' => 'What is your primary growth goal for your company this quarter? / ما هو هدف النمو الرئيسي لشركتك؟',
+                                    'question_key' => 'b2b_primary_goal',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '🏢 صاحب عمل / رئيس تنفيذي (CEO / Founder / Owner)', 'value' => 'CEO / Founder', 'score' => 30],
-                                            ['label' => '🎯 مدير مبيعات أو تسويق (Sales / Marketing Director)', 'value' => 'Sales Director', 'score' => 25],
-                                            ['label' => '💼 مستشار أو خبير مستقل (Independent Consultant)', 'value' => 'Consultant', 'score' => 20],
-                                            ['label' => '🚀 فريق عمل مشروع ناشئ (Startup Team)', 'value' => 'Startup Team', 'score' => 15],
+                                            ['label' => '📈 Generating More Qualified B2B Leads', 'value' => 'Qualified Leads', 'score' => 30],
+                                            ['label' => '⚡ Automating Sales & Lead Follow-ups', 'value' => 'Sales Automation', 'score' => 25],
+                                            ['label' => '💰 Increasing Close Rates & Revenue', 'value' => 'Higher Revenue', 'score' => 30],
+                                            ['label' => '🌐 Expanding into New Markets', 'value' => 'Expansion', 'score' => 20],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
+                        // Step 3: Question 2 (Team Size & Role)
                         [
-                            'title' => 'هدف النمو الرئيسي لشركتك',
-                            'subtitle' => 'حدد الأولوية الأساسية للشركة في الوقت الحالي',
+                            'title' => 'Team Size & Role',
+                            'subtitle' => 'Help us tailor the blueprint to your company size & role.',
                             'step_type' => 'question',
                             'elements' => [
                                 [
                                     'element_type' => 'single_choice',
-                                    'label' => 'ما هو هدف النمو الرئيسي لشركتك هذا الربع؟',
-                                    'question_key' => 'b2b_goal',
+                                    'label' => 'What is your role & current company size? / ما هو مسمى عملك وحجم شركتك الحالي؟',
+                                    'question_key' => 'b2b_role_size',
                                     'properties' => [
                                         'options' => [
-                                            ['label' => '📈 جذب عملاء محتملين مؤهلين بجودة عالية (Qualified B2B Leads)', 'value' => 'Qualified Leads', 'score' => 25],
-                                            ['label' => '⚡ أتمتة نظام المبيعات والمتابعة التلقائية (Sales Automation)', 'value' => 'Sales Automation', 'score' => 25],
-                                            ['label' => '💰 زيادة نسبة إغلاق الصفقات والإيرادات (Close Rate & Revenue)', 'value' => 'Higher Revenue', 'score' => 30],
-                                            ['label' => '🌐 التوسع والدخول في أسواق جديدة (International Expansion)', 'value' => 'Expansion', 'score' => 20],
+                                            ['label' => '🏢 CEO / Founder / Business Owner', 'value' => 'CEO / Founder', 'score' => 30],
+                                            ['label' => '🎯 Sales / Marketing Director', 'value' => 'Sales Director', 'score' => 25],
+                                            ['label' => '💼 Independent Consultant / Agency', 'value' => 'Consultant', 'score' => 20],
+                                            ['label' => '🚀 Startup Team Member', 'value' => 'Startup Team', 'score' => 15],
                                         ],
                                     ],
                                 ],
                             ],
                         ],
+                        // Step 4: Lead Form
                         [
-                            'title' => 'أين نرسل لك الدليل المجاني؟ 📩',
-                            'subtitle' => 'أدخل بياناتك وسيتم إرسال الدليل فوراً',
+                            'title' => 'Where should we send your free copy?',
+                            'subtitle' => 'Enter your contact details to download the PDF playbook instantly.',
                             'step_type' => 'lead_form',
                             'elements' => [
                                 [
                                     'element_type' => 'form_fields',
-                                    'label' => 'معلومات استلام الدليل',
+                                    'label' => 'Contact Information',
                                     'properties' => [
                                         'fields' => [
-                                            ['name' => 'full_name', 'label' => 'الاسم الكامل', 'type' => 'text', 'required' => true],
-                                            ['name' => 'phone', 'label' => 'رقم الواتساب', 'type' => 'phone', 'required' => true],
-                                            ['name' => 'email', 'label' => 'بريد العمل الإلكتروني', 'type' => 'email', 'required' => false],
+                                            ['name' => 'full_name', 'label' => 'Full Name / الاسم الكامل', 'type' => 'text', 'required' => true],
+                                            ['name' => 'phone', 'label' => 'Phone / WhatsApp Number', 'type' => 'phone', 'required' => true],
+                                            ['name' => 'email', 'label' => 'Work Email Address', 'type' => 'email', 'required' => true],
                                         ],
                                     ],
                                 ],
@@ -1701,13 +1718,13 @@ class FunnelTemplateSeeder extends Seeder
                     ],
                     'results' => [
                         [
-                            'title' => 'تم تجهيز دليلك التجاري المجاني بنجاح! 📚🎉',
-                            'description' => 'يمكنك تحميل الدليل المباشر بصيغة PDF فوراً أو استلامه على الواتساب.',
+                            'title' => 'Your B2B Lead Magnet is Ready! 📚🎉',
+                            'description' => 'Download your free PDF Playbook below or check your WhatsApp for the direct download link.',
                             'min_score' => 0,
                             'max_score' => 100,
-                            'cta_label' => 'تحميل الدليل المجاني الآن 📥',
-                            'cta_type' => 'whatsapp',
-                            'cta_whatsapp_number' => '966500000000',
+                            'cta_label' => 'Download Free PDF Playbook 📥',
+                            'cta_type' => 'url',
+                            'cta_url' => 'https://travel-wave.com',
                             'sort_order' => 1,
                         ],
                     ],

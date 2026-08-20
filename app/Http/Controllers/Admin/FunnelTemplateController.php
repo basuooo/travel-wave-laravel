@@ -27,12 +27,10 @@ class FunnelTemplateController extends Controller
             return view('admin.funnels.templates.index', compact('templates', 'categories'));
         }
 
-        if (FunnelTemplate::count() < 18 || ! FunnelTemplate::where('slug', 'b2b-lead-magnet')->exists()) {
-            try {
-                (new \Database\Seeders\FunnelTemplateSeeder())->run();
-            } catch (\Throwable $e) {
-                report($e);
-            }
+        try {
+            (new \Database\Seeders\FunnelTemplateSeeder())->run();
+        } catch (\Throwable $e) {
+            report($e);
         }
 
         $query = FunnelTemplate::where('is_active', true)->withCount('funnels');
