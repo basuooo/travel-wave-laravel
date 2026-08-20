@@ -130,6 +130,21 @@
             border-left: none;
             border-right: 1px solid var(--fb-border);
         }
+        .fb-inspector label,
+        .fb-inspector .form-label {
+            color: #f8fafc !important;
+            font-weight: 600 !important;
+        }
+        .form-control-dark,
+        .form-select-dark {
+            background-color: #090d16 !important;
+            border-color: #22304d !important;
+            color: #ffffff !important;
+        }
+        .form-control-dark::placeholder {
+            color: #94a3b8 !important;
+            opacity: 0.85 !important;
+        }
 
         /* Accordion Categories */
         .fb-category-accordion .accordion-item {
@@ -856,7 +871,7 @@
                     
                     <!-- Meta Pixel -->
                     <div class="mb-3">
-                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                        <label class="form-label small text-white fw-semibold d-flex align-items-center gap-1">
                             <iconify-icon icon="logos:facebook" width="14"></iconify-icon>
                             <span>Meta (Facebook) Pixel</span>
                         </label>
@@ -865,7 +880,7 @@
 
                     <!-- Google Analytics -->
                     <div class="mb-3">
-                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                        <label class="form-label small text-white fw-semibold d-flex align-items-center gap-1">
                             <iconify-icon icon="logos:google-analytics" width="14"></iconify-icon>
                             <span>Google Analytics (GA4)</span>
                         </label>
@@ -874,7 +889,7 @@
 
                     <!-- Google Tag Manager -->
                     <div class="mb-3">
-                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                        <label class="form-label small text-white fw-semibold d-flex align-items-center gap-1">
                             <iconify-icon icon="logos:google-tag-manager" width="14"></iconify-icon>
                             <span>Google Tag Manager (GTM)</span>
                         </label>
@@ -883,7 +898,7 @@
 
                     <!-- LinkedIn Insight Tag -->
                     <div class="mb-3">
-                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                        <label class="form-label small text-white fw-semibold d-flex align-items-center gap-1">
                             <iconify-icon icon="logos:linkedin-icon" width="14"></iconify-icon>
                             <span>LinkedIn Insight Tag ID</span>
                         </label>
@@ -892,7 +907,7 @@
 
                     <!-- TikTok Pixel -->
                     <div class="mb-3">
-                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                        <label class="form-label small text-white fw-semibold d-flex align-items-center gap-1">
                             <iconify-icon icon="logos:tiktok-icon" width="14"></iconify-icon>
                             <span>TikTok Pixel</span>
                         </label>
@@ -901,7 +916,7 @@
 
                     <!-- Snapchat Pixel -->
                     <div class="mb-3">
-                        <label class="form-label small text-muted d-flex align-items-center gap-1">
+                        <label class="form-label small text-white fw-semibold d-flex align-items-center gap-1">
                             <iconify-icon icon="logos:snapchat" width="14"></iconify-icon>
                             <span>Snapchat Pixel</span>
                         </label>
@@ -917,7 +932,7 @@
                     </h6>
 
                     <div class="mb-3">
-                        <label class="form-label small text-muted d-flex align-items-center justify-content-between">
+                        <label class="form-label small text-white fw-semibold d-flex align-items-center justify-content-between">
                             <span>كود كاستم في الهيدر (Header Scripts - &lt;head&gt;)</span>
                             <span class="badge bg-primary-subtle text-primary" style="font-size: 10px;">&lt;head&gt;</span>
                         </label>
@@ -928,7 +943,7 @@
                     </div>
 
                     <div>
-                        <label class="form-label small text-muted d-flex align-items-center justify-content-between">
+                        <label class="form-label small text-white fw-semibold d-flex align-items-center justify-content-between">
                             <span>كود كاستم في الفوتر (Footer / Body Scripts)</span>
                             <span class="badge bg-success-subtle text-success" style="font-size: 10px;">&lt;/body&gt;</span>
                         </label>
