@@ -27,7 +27,7 @@ class FunnelTemplateController extends Controller
             return view('admin.funnels.templates.index', compact('templates', 'categories'));
         }
 
-        if (FunnelTemplate::count() < 18) {
+        if (FunnelTemplate::count() < 18 || ! FunnelTemplate::where('slug', 'b2b-lead-magnet')->exists()) {
             try {
                 (new \Database\Seeders\FunnelTemplateSeeder())->run();
             } catch (\Throwable $e) {
@@ -35,7 +35,7 @@ class FunnelTemplateController extends Controller
             }
         }
 
-        $query = FunnelTemplate::where('is_active', true)->orderBy('sort_order');
+        $query = FunnelTemplate::where('is_active', true)->withCount('funnels');
 
         if ($request->filled('category')) {
             $query->where('category', $request->category);
@@ -49,6 +49,18 @@ class FunnelTemplateController extends Controller
             });
         }
 
+        // Sorting Filter Options
+        $sortBy = $request->input('sort', 'default');
+        if ($sortBy === 'latest') {
+            $query->orderByDesc('created_at')->orderByDesc('id');
+        } elseif ($sortBy === 'most_used') {
+            $query->orderByDesc('funnels_count')->orderBy('sort_order');
+        } elseif ($sortBy === 'name') {
+            $query->orderBy('name');
+        } else {
+            $query->orderBy('sort_order')->orderByDesc('id');
+        }
+
         $templates = $query->get();
 
         $categories = FunnelTemplate::where('is_active', true)
@@ -57,7 +69,7 @@ class FunnelTemplateController extends Controller
             ->pluck('category')
             ->toArray();
 
-        return view('admin.funnels.templates.index', compact('templates', 'categories'));
+        return view('admin.funnels.templates.index', compact('templates', 'categories', 'sortBy'));
     }
 
     public function useTemplate(FunnelTemplate $template, Request $request)
