@@ -3,6 +3,13 @@
     $primaryColor = $design['primary_color'] ?? '#2563eb';
     $fontFamily = $design['font_family'] ?? 'Tajawal, sans-serif';
     $scoringEnabled = $design['scoring_enabled'] ?? true;
+    $thankYouPage = $design['thank_you_page'] ?? [
+        'enabled' => true,
+        'title' => app()->getLocale() === 'ar' ? 'شكراً لإكمال البيانات!' : 'Thanks for your submission!',
+        'subtitle' => app()->getLocale() === 'ar' ? 'تم استلام معلوماتك بنجاح، وسنواصل التواصل معك في أقرب وقت.' : 'Made with involve.me, the quickest way to create interactive lead funnels.',
+        'button_text' => app()->getLocale() === 'ar' ? 'العودة للموقع' : 'Create your own',
+        'button_action' => 'restart'
+    ];
     $steps = $funnel->steps;
     $totalSteps = count($steps);
 @endphp
@@ -947,6 +954,39 @@
                 </div>
             @endforeach
 
+            <!-- THANK YOU PAGE CONTAINER -->
+            <div class="funnel-step-view d-none text-center py-4" id="thank_you_container">
+                <div class="mb-4 d-flex justify-content-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 90px; height: 90px; background: #dcfce7; color: #22c55e;">
+                        <iconify-icon icon="solar:check-circle-bold" width="60"></iconify-icon>
+                    </div>
+                </div>
+                <h2 class="fw-bold mb-3 text-dark" id="ty_view_title">
+                    {{ $thankYouPage['title'] ?? (app()->getLocale() === 'ar' ? 'شكراً لإكمال البيانات!' : 'Thanks for your submission!') }}
+                </h2>
+                <p class="text-muted fs-6 mb-4 px-3" style="max-width: 520px; margin: 0 auto;" id="ty_view_subtitle">
+                    {{ $thankYouPage['subtitle'] ?? (app()->getLocale() === 'ar' ? 'تم استلام معلوماتك بنجاح، وسنواصل التواصل معك في أقرب وقت.' : 'Made with involve.me, the quickest way to create interactive lead funnels.') }}
+                </p>
+
+                <div class="mt-4" id="ty_view_cta_wrapper">
+                    @if(($thankYouPage['button_action'] ?? 'restart') === 'url' && !empty($thankYouPage['button_url']))
+                        <a href="{{ $thankYouPage['button_url'] }}" class="btn-primary-custom w-auto px-5 text-decoration-none">
+                            <span>{{ $thankYouPage['button_text'] ?? 'Create your own' }}</span>
+                            <iconify-icon icon="solar:alt-arrow-right-bold" width="18"></iconify-icon>
+                        </a>
+                    @elseif(($thankYouPage['button_action'] ?? 'restart') === 'whatsapp')
+                        <a href="https://wa.me/{{ $thankYouPage['button_whatsapp'] ?? '966500000000' }}?text=مرحباً، أتممت تسجيل بياناتي" target="_blank" class="btn-whatsapp-custom w-auto px-5 text-decoration-none">
+                            <iconify-icon icon="logos:whatsapp-icon" width="22"></iconify-icon>
+                            <span>{{ $thankYouPage['button_text'] ?? 'تواصل معنا عبر الواتساب' }}</span>
+                        </a>
+                    @else
+                        <button type="button" class="btn-primary-custom w-auto px-5" onclick="location.reload()">
+                            <span>{{ $thankYouPage['button_text'] ?? 'Create your own' }}</span>
+                        </button>
+                    @endif
+                </div>
+            </div>
+
             <!-- RESULT / SUCCESS CONTAINER -->
             <div class="funnel-step-view d-none text-center py-4" id="result_container">
                 <div class="mb-3">
@@ -982,6 +1022,7 @@
 <script>
     const totalSteps = {{ $totalSteps }};
     const isScoringActive = {{ $scoringEnabled ? 'true' : 'false' }};
+    const thankYouConfig = @json($thankYouPage);
     let currentStepIndex = 0;
     let accumulatedScore = 0;
     const userAnswers = {};

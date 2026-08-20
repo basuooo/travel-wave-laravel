@@ -279,6 +279,142 @@
             box-shadow: 0 0 0 1px var(--fb-accent);
         }
 
+        /* Bottom Page Navigation Bar (Involve.me style) */
+        .fb-pages-bar-container {
+            width: 100%;
+            max-width: 740px;
+            margin-top: 1.25rem;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08);
+            position: relative;
+            z-index: 50;
+        }
+        .mobile-mode + .fb-pages-bar-container {
+            max-width: 390px;
+        }
+        .fb-pages-scroll-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+        .fb-page-pill-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+            position: relative;
+            user-select: none;
+        }
+        .fb-page-pill-item:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            color: #2563eb;
+        }
+        .fb-page-pill-item.active {
+            border: 2px solid #2563eb;
+            background: #ffffff;
+            color: #2563eb;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.18);
+        }
+        .fb-page-pill-item.is-disabled-step {
+            opacity: 0.55;
+            text-decoration: line-through;
+        }
+
+        .fb-page-dropdown-menu {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 0;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+            padding: 6px;
+            min-width: 170px;
+            z-index: 1050;
+            display: none;
+        }
+        [dir="rtl"] .fb-page-dropdown-menu {
+            left: auto;
+            right: 0;
+        }
+        .fb-page-dropdown-menu.show {
+            display: block;
+        }
+        .fb-page-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .fb-page-dropdown-item:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .fb-page-dropdown-item.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .fb-page-dropdown-item.text-danger:hover {
+            background: #fef2f2;
+            color: #dc2626 !important;
+        }
+
+        .fb-page-bar-add-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px dashed #cbd5e1;
+            background: #f8fafc;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .fb-page-bar-add-btn:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .fb-logic-connector-icon {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 0 6px;
+        }
+
         .device-toggle-btn {
             background: #1e293b;
             border: 1px solid var(--fb-border);
@@ -596,6 +732,11 @@
         <div class="fb-canvas" id="canvas_container">
             <!-- Rendered Live by JS Engine -->
         </div>
+
+        <!-- BOTTOM PAGES BAR (INVOLVE.ME STYLE) -->
+        <div class="fb-pages-bar-container" id="fb_pages_bar_container">
+            <!-- Rendered by JS Engine -->
+        </div>
     </main>
 
     <!-- RIGHT PANEL: Inspector -->
@@ -834,7 +975,20 @@
             align_center: 'وسط (Center)',
             align_right: 'يمين (Right)',
             align_left: 'يسار (Left)',
-            custom_design_badge: '🎨 تخصيص التصميم'
+            custom_design_badge: '🎨 تخصيص التصميم',
+            move_left: 'تحريك لليسار',
+            move_right: 'تحريك لليمين',
+            edit_step: 'تعديل اسم الصفحة',
+            duplicate_step: 'تكرار الصفحة',
+            disable_step: 'تعطيل الصفحة',
+            enable_step: 'تفعيل الصفحة',
+            delete_step: 'حذف الصفحة',
+            thank_you_page: 'Thank you page',
+            add_thank_you_page: 'إضافة صفحة الشكر',
+            remove_thank_you_page: 'إزالة صفحة الشكر',
+            thank_you_settings_title: '🎉 إعدادات صفحة الشكر (Thank You Page)',
+            show_thank_you_lbl: 'إظهار صفحة الشكر للعميل عند الانتهاء',
+            show_thank_you_sub: 'عند تفعيله، سيتم توجيه العميل فوراً لصفحة الشكر هذه بعد إكمال النموذج.'
         },
         en: {
             switch_to: 'العربية 🇸🇦',
@@ -907,6 +1061,19 @@
             media_modal_presets: 'Or choose from presets gallery:',
             tab_content: 'Content',
             tab_element_design: 'Design',
+            move_left: 'Move left',
+            move_right: 'Move right',
+            edit_step: 'Edit',
+            duplicate_step: 'Duplicate',
+            disable_step: 'Disable',
+            enable_step: 'Enable',
+            delete_step: 'Delete',
+            thank_you_page: 'Thank you page',
+            add_thank_you_page: 'Add Thank You page',
+            remove_thank_you_page: 'Remove Thank You page',
+            thank_you_settings_title: '🎉 Thank You Page Settings',
+            show_thank_you_lbl: 'Show Thank You Page to customers upon completion',
+            show_thank_you_sub: 'When enabled, customers will see this custom Thank You page immediately after submitting the form.',
             heading_text_lbl: 'Question / Heading Text',
             subline_text_lbl: 'Subline Text',
             variables_btn: '{ } Variables',
@@ -1200,6 +1367,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         applyLanguageToUI();
         renderStepsList();
+        renderPagesBar();
         renderCanvas();
         renderResultsList();
         setupDragAndDrop();
@@ -1213,9 +1381,12 @@
 
         applyLanguageToUI();
         renderStepsList();
+        renderPagesBar();
         renderCanvas();
         if (selectedElementIndex !== null) {
             inspectElement(selectedElementIndex, currentElementActiveSubTab);
+        } else if (activeStepIndex === 'thank_you') {
+            inspectThankYouPage();
         } else {
             inspectStepProperties();
         }
@@ -1267,6 +1438,7 @@
         document.getElementById('txt_media_modal_presets').innerText = t('media_modal_presets');
 
         renderPaletteCategories();
+        renderPagesBar();
     }
 
     function renderPaletteCategories() {
@@ -1323,9 +1495,10 @@
         });
     }
 
-    // ── 1. STEPS MANAGEMENT ──────────────────────────────────────────────────
+    // ── 1. STEPS & PAGE NAVIGATION MANAGEMENT ────────────────────────────────
     function renderStepsList() {
         const wrapper = document.getElementById('steps_list_wrapper');
+        if (!wrapper) return;
         let html = '';
 
         funnelData.steps.forEach((step, idx) => {
@@ -1352,13 +1525,237 @@
             animation: 150,
             ghostClass: 'bg-primary-subtle',
             onEnd: function (evt) {
-                const movedItem = funnelData.steps.splice(evt.oldIndex, 1)[0];
-                funnelData.steps.splice(evt.newIndex, 0, movedItem);
-                activeStepIndex = evt.newIndex;
-                renderStepsList();
-                renderCanvas();
+                if (evt.oldIndex !== undefined && evt.newIndex !== undefined) {
+                    const movedItem = funnelData.steps.splice(evt.oldIndex, 1)[0];
+                    funnelData.steps.splice(evt.newIndex, 0, movedItem);
+                    activeStepIndex = evt.newIndex;
+                    renderStepsList();
+                    renderPagesBar();
+                    renderCanvas();
+                }
             }
         });
+    }
+
+    function renderPagesBar() {
+        const container = document.getElementById('fb_pages_bar_container');
+        if (!container) return;
+
+        if (!funnelData.design_settings) funnelData.design_settings = {};
+        if (!funnelData.design_settings.thank_you_page) {
+            funnelData.design_settings.thank_you_page = {
+                enabled: true,
+                title: currentLang === 'ar' ? 'شكراً لإكمال البيانات!' : 'Thanks for your submission!',
+                subtitle: currentLang === 'ar' ? 'تم استلام معلوماتك بنجاح، وسنواصل التواصل معك في أقرب وقت.' : 'Made with involve.me, the quickest way to create interactive lead funnels.',
+                icon_type: 'checkmark',
+                button_text: currentLang === 'ar' ? 'العودة للموقع' : 'Create your own',
+                button_action: 'restart',
+                button_url: '',
+                button_whatsapp: ''
+            };
+        }
+
+        const tySettings = funnelData.design_settings.thank_you_page;
+        const totalSteps = funnelData.steps.length;
+
+        let html = `
+            <div class="d-flex align-items-center gap-2" style="overflow-x: auto; max-width: 75%;">
+                <div class="fb-pages-scroll-area" id="fb_step_pills_wrapper">
+        `;
+
+        funnelData.steps.forEach((step, idx) => {
+            const isActive = activeStepIndex === idx;
+            const isDisabled = !!step.is_hidden;
+            const stepNum = idx + 1;
+            const stepName = step.title ? `${stepNum}. ${step.title}` : `${stepNum}. page`;
+
+            html += `
+                <div class="fb-page-pill-item ${isActive ? 'active' : ''} ${isDisabled ? 'is-disabled-step' : ''}" onclick="selectStep(${idx})">
+                    <span>${escapeHtml(stepName)}</span>
+                    <span class="ms-1 opacity-75" onclick="event.stopPropagation(); togglePageMenu(event, ${idx})">
+                        <iconify-icon icon="solar:alt-arrow-down-bold" width="12"></iconify-icon>
+                    </span>
+                    
+                    <!-- Page Dropdown Menu -->
+                    <div class="fb-page-dropdown-menu" id="page_menu_${idx}">
+                        <div class="fb-page-dropdown-item ${idx === 0 ? 'disabled' : ''}" onclick="event.stopPropagation(); moveStepLeft(${idx})">
+                            <iconify-icon icon="solar:alt-arrow-left-linear" width="16"></iconify-icon>
+                            <span>${t('move_left')}</span>
+                        </div>
+                        <div class="fb-page-dropdown-item ${idx === totalSteps - 1 ? 'disabled' : ''}" onclick="event.stopPropagation(); moveStepRight(${idx})">
+                            <iconify-icon icon="solar:alt-arrow-right-linear" width="16"></iconify-icon>
+                            <span>${t('move_right')}</span>
+                        </div>
+                        <hr class="my-1 border-secondary opacity-25">
+                        <div class="fb-page-dropdown-item" onclick="event.stopPropagation(); editStepTitle(${idx})">
+                            <iconify-icon icon="solar:pen-bold" width="16"></iconify-icon>
+                            <span>${t('edit_step')}</span>
+                        </div>
+                        <div class="fb-page-dropdown-item" onclick="event.stopPropagation(); duplicateStep(${idx})">
+                            <iconify-icon icon="solar:copy-bold" width="16"></iconify-icon>
+                            <span>${t('duplicate_step')}</span>
+                        </div>
+                        <div class="fb-page-dropdown-item" onclick="event.stopPropagation(); toggleDisableStep(${idx})">
+                            <iconify-icon icon="${step.is_hidden ? 'solar:eye-bold' : 'solar:eye-closed-bold'}" width="16"></iconify-icon>
+                            <span>${step.is_hidden ? t('enable_step') : t('disable_step')}</span>
+                        </div>
+                        <hr class="my-1 border-secondary opacity-25">
+                        <div class="fb-page-dropdown-item text-danger" onclick="event.stopPropagation(); deleteStep(${idx})">
+                            <iconify-icon icon="solar:trash-bin-trash-bold" width="16"></iconify-icon>
+                            <span>${t('delete_step')}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+                <button type="button" class="fb-page-bar-add-btn" onclick="addNewStep()" title="${t('btn_add_step')}">+</button>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <!-- Logic Connector Icon -->
+                <div class="fb-logic-connector-icon" title="Logic Routing">
+                    <iconify-icon icon="solar:routing-2-bold" width="20"></iconify-icon>
+                </div>
+
+                <!-- Thank You Page Pill -->
+                <div class="position-relative">
+                    <div class="fb-page-pill-item ${activeStepIndex === 'thank_you' ? 'active' : ''} ${!tySettings.enabled ? 'is-disabled-step' : ''}" onclick="selectThankYouPage()">
+                        <span>${t('thank_you_page')}</span>
+                        <span class="ms-1 opacity-75" onclick="event.stopPropagation(); toggleThankYouMenu(event)">
+                            <iconify-icon icon="solar:alt-arrow-down-bold" width="12"></iconify-icon>
+                        </span>
+
+                        <div class="fb-page-dropdown-menu" id="thank_you_menu">
+                            <div class="fb-page-dropdown-item" onclick="event.stopPropagation(); selectThankYouPage()">
+                                <iconify-icon icon="solar:pen-bold" width="16"></iconify-icon>
+                                <span>${t('edit_step')}</span>
+                            </div>
+                            <div class="fb-page-dropdown-item" onclick="event.stopPropagation(); toggleThankYouPage(!${tySettings.enabled})">
+                                <iconify-icon icon="${tySettings.enabled ? 'solar:eye-closed-bold' : 'solar:eye-bold'}" width="16"></iconify-icon>
+                                <span>${tySettings.enabled ? t('disable_step') : t('enable_step')}</span>
+                            </div>
+                            <hr class="my-1 border-secondary opacity-25">
+                            <div class="fb-page-dropdown-item text-danger" onclick="event.stopPropagation(); toggleThankYouPage(false)">
+                                <iconify-icon icon="solar:trash-bin-trash-bold" width="16"></iconify-icon>
+                                <span>${t('remove_thank_you_page')}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="fb-page-bar-add-btn" onclick="toggleThankYouPage(true); selectThankYouPage();" title="${t('add_thank_you_page')}">+</button>
+            </div>
+        `;
+
+        container.innerHTML = html;
+
+        const wrapperEl = document.getElementById('fb_step_pills_wrapper');
+        if (wrapperEl) {
+            new Sortable(wrapperEl, {
+                animation: 150,
+                ghostClass: 'bg-primary-subtle',
+                onEnd: function (evt) {
+                    if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
+                        const movedItem = funnelData.steps.splice(evt.oldIndex, 1)[0];
+                        funnelData.steps.splice(evt.newIndex, 0, movedItem);
+                        if (typeof activeStepIndex === 'number') {
+                            activeStepIndex = evt.newIndex;
+                        }
+                        renderStepsList();
+                        renderPagesBar();
+                        renderCanvas();
+                    }
+                }
+            });
+        }
+    }
+
+    function togglePageMenu(evt, idx) {
+        closeAllPageMenus();
+        const menu = document.getElementById(`page_menu_${idx}`);
+        if (menu) menu.classList.toggle('show');
+    }
+
+    function toggleThankYouMenu(evt) {
+        closeAllPageMenus();
+        const menu = document.getElementById('thank_you_menu');
+        if (menu) menu.classList.toggle('show');
+    }
+
+    function closeAllPageMenus() {
+        document.querySelectorAll('.fb-page-dropdown-menu').forEach(m => m.classList.remove('show'));
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.fb-page-pill-item')) {
+            closeAllPageMenus();
+        }
+    });
+
+    function moveStepLeft(index) {
+        if (index > 0) {
+            const temp = funnelData.steps[index];
+            funnelData.steps[index] = funnelData.steps[index - 1];
+            funnelData.steps[index - 1] = temp;
+            activeStepIndex = index - 1;
+            closeAllPageMenus();
+            renderStepsList();
+            renderPagesBar();
+            renderCanvas();
+        }
+    }
+
+    function moveStepRight(index) {
+        if (index < funnelData.steps.length - 1) {
+            const temp = funnelData.steps[index];
+            funnelData.steps[index] = funnelData.steps[index + 1];
+            funnelData.steps[index + 1] = temp;
+            activeStepIndex = index + 1;
+            closeAllPageMenus();
+            renderStepsList();
+            renderPagesBar();
+            renderCanvas();
+        }
+    }
+
+    function editStepTitle(index) {
+        const currentTitle = funnelData.steps[index].title || '';
+        const newTitle = prompt(currentLang === 'ar' ? 'تعديل اسم الصفحة:' : 'Edit Page Title:', currentTitle);
+        if (newTitle !== null && newTitle.trim() !== '') {
+            funnelData.steps[index].title = newTitle.trim();
+            closeAllPageMenus();
+            renderStepsList();
+            renderPagesBar();
+            renderCanvas();
+        }
+    }
+
+    function duplicateStep(index) {
+        const original = funnelData.steps[index];
+        const cloned = JSON.parse(JSON.stringify(original));
+        delete cloned.id;
+        cloned.title = (cloned.title || 'Step') + ' (Copy)';
+        (cloned.elements || []).forEach(el => {
+            delete el.id;
+            el.question_key = 'q_' + Math.random().toString(36).substr(2, 6);
+        });
+        funnelData.steps.splice(index + 1, 0, cloned);
+        activeStepIndex = index + 1;
+        closeAllPageMenus();
+        renderStepsList();
+        renderPagesBar();
+        renderCanvas();
+    }
+
+    function toggleDisableStep(index) {
+        funnelData.steps[index].is_hidden = !funnelData.steps[index].is_hidden;
+        closeAllPageMenus();
+        renderStepsList();
+        renderPagesBar();
+        renderCanvas();
     }
 
     function selectStep(index) {
@@ -1366,8 +1763,32 @@
             activeStepIndex = index;
             selectedElementIndex = null;
             renderStepsList();
+            renderPagesBar();
             renderCanvas();
             inspectStepProperties();
+        }
+    }
+
+    function selectThankYouPage() {
+        activeStepIndex = 'thank_you';
+        selectedElementIndex = null;
+        closeAllPageMenus();
+        renderStepsList();
+        renderPagesBar();
+        renderCanvas();
+        inspectThankYouPage();
+    }
+
+    function toggleThankYouPage(enabled) {
+        if (!funnelData.design_settings) funnelData.design_settings = {};
+        if (!funnelData.design_settings.thank_you_page) {
+            funnelData.design_settings.thank_you_page = {};
+        }
+        funnelData.design_settings.thank_you_page.enabled = !!enabled;
+        closeAllPageMenus();
+        renderPagesBar();
+        if (activeStepIndex === 'thank_you') {
+            inspectThankYouPage();
         }
     }
 
@@ -1422,6 +1843,7 @@
         funnelData.steps.push(newStep);
         activeStepIndex = funnelData.steps.length - 1;
         renderStepsList();
+        renderPagesBar();
         renderCanvas();
     }
 
@@ -1432,8 +1854,9 @@
         }
         if (confirm(t('delete_step_confirm'))) {
             funnelData.steps.splice(index, 1);
-            activeStepIndex = Math.max(0, activeStepIndex - 1);
+            activeStepIndex = Math.max(0, typeof activeStepIndex === 'number' ? activeStepIndex - 1 : 0);
             renderStepsList();
+            renderPagesBar();
             renderCanvas();
         }
     }
@@ -1483,6 +1906,12 @@
     // ── 2. CANVAS RENDERING WITH INLINE EDITING ──────────────────────────────
     function renderCanvas() {
         const canvas = document.getElementById('canvas_container');
+
+        if (activeStepIndex === 'thank_you') {
+            renderThankYouCanvas();
+            return;
+        }
+
         const currentStep = funnelData.steps[activeStepIndex];
 
         if (!currentStep) {
@@ -2926,6 +3355,156 @@
         toast.innerText = msg;
         toast.style.display = 'block';
         setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
+
+    // ── 3. THANK YOU PAGE RENDERER & INSPECTOR ───────────────────────────────
+    function renderThankYouCanvas() {
+        const canvas = document.getElementById('canvas_container');
+        const ty = funnelData.design_settings?.thank_you_page || {};
+
+        const title = ty.title || (currentLang === 'ar' ? 'شكراً لإكمال البيانات!' : 'Thanks for your submission!');
+        const subtitle = ty.subtitle || (currentLang === 'ar' ? 'تم استلام معلوماتك بنجاح، وسنواصل التواصل معك في أقرب وقت.' : 'Made with involve.me, the quickest way to create interactive lead funnels.');
+        const btnText = ty.button_text || (currentLang === 'ar' ? 'العودة للموقع' : 'Create your own');
+
+        canvas.innerHTML = `
+            <div class="text-center py-5" onclick="inspectThankYouPage()">
+                <div class="mb-4 d-flex justify-content-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 90px; height: 90px; background: #dcfce7; color: #22c55e;">
+                        <iconify-icon icon="solar:check-circle-bold" width="56"></iconify-icon>
+                    </div>
+                </div>
+
+                <h2 class="fw-bold mb-3 text-dark canvas-inline-editable" contenteditable="true" onblur="updateThankYouTitle(this.innerText)">
+                    ${escapeHtml(title)}
+                </h2>
+
+                <p class="text-muted fs-6 mb-4 px-4 canvas-inline-editable" contenteditable="true" style="max-width: 520px; margin: 0 auto;" onblur="updateThankYouSubtitle(this.innerText)">
+                    ${escapeHtml(subtitle)}
+                </p>
+
+                <div class="mt-4">
+                    <button type="button" class="btn btn-primary btn-lg rounded-3 fw-bold px-5 py-3 shadow-sm" onclick="event.stopPropagation(); inspectThankYouPage()">
+                        ${escapeHtml(btnText)}
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    function inspectThankYouPage() {
+        const panel = document.getElementById('inspector_element_panel');
+        if (!panel) return;
+        const ty = funnelData.design_settings?.thank_you_page || {};
+
+        const tabBtn = document.getElementById('tab_btn_props');
+        if (tabBtn) {
+            const bsTab = new bootstrap.Tab(tabBtn);
+            bsTab.show();
+        }
+
+        panel.innerHTML = `
+            <div class="p-2">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-white">${t('thank_you_settings_title')}</h6>
+                    <span class="badge ${ty.enabled !== false ? 'bg-success' : 'bg-danger'}">${ty.enabled !== false ? t('visible_badge') : t('hidden_badge')}</span>
+                </div>
+
+                <div class="p-3 bg-dark rounded-3 border border-secondary mb-3">
+                    <div class="form-check form-switch mb-1">
+                        <input class="form-check-input" type="checkbox" id="ty_enabled_toggle" onchange="toggleThankYouPage(this.checked)" ${ty.enabled !== false ? 'checked' : ''}>
+                        <label class="form-check-label fw-bold small text-white" for="ty_enabled_toggle">
+                            ${t('show_thank_you_lbl')}
+                        </label>
+                    </div>
+                    <small class="text-muted d-block" style="font-size: 11px;">
+                        ${t('show_thank_you_sub')}
+                    </small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">${currentLang==='ar'?'عنوان صفحة الشكر (Heading Title)':'Thank You Heading'}</label>
+                    <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(ty.title || '')}" oninput="updateThankYouTitle(this.value)">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">${currentLang==='ar'?'نص الوصف (Subtitle Description)':'Subtitle Description'}</label>
+                    <textarea class="form-control form-control-sm form-control-dark" rows="3" oninput="updateThankYouSubtitle(this.value)">${escapeHtml(ty.subtitle || '')}</textarea>
+                </div>
+
+                <hr class="border-secondary my-3">
+
+                <h6 class="fw-bold small text-white mb-2">${currentLang==='ar'?'إعدادات زر الإجراء (CTA Button Settings)':'CTA Button Settings'}</h6>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">${currentLang==='ar'?'نص الزر (Button Label)':'Button Text'}</label>
+                    <input type="text" class="form-control form-control-sm form-control-dark" value="${escapeHtml(ty.button_text || '')}" oninput="updateThankYouButtonText(this.value)">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">${currentLang==='ar'?'نوع الإجراء (Action Type)':'Button Action'}</label>
+                    <select class="form-select form-select-sm form-select-dark" onchange="updateThankYouButtonAction(this.value)">
+                        <option value="restart" ${ty.button_action === 'restart' ? 'selected' : ''}>${currentLang==='ar'?'إعادة تشغيل الفانل (Restart Funnel)':'Restart Funnel'}</option>
+                        <option value="url" ${ty.button_action === 'url' ? 'selected' : ''}>${currentLang==='ar'?'التحويل لرابط آخر (Redirect URL)':'Redirect to URL'}</option>
+                        <option value="whatsapp" ${ty.button_action === 'whatsapp' ? 'selected' : ''}>${currentLang==='ar'?'فتح الواتساب (Open WhatsApp)':'Open WhatsApp'}</option>
+                    </select>
+                </div>
+
+                ${ty.button_action === 'url' ? `
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">${currentLang==='ar'?'رابط التحويل (Redirect URL)':'Target URL'}</label>
+                        <input type="url" class="form-control form-control-sm form-control-dark" placeholder="https://example.com" value="${escapeHtml(ty.button_url || '')}" oninput="updateThankYouButtonUrl(this.value)">
+                    </div>
+                ` : ''}
+
+                ${ty.button_action === 'whatsapp' ? `
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">${currentLang==='ar'?'رقم الواتساب (WhatsApp Number)':'WhatsApp Number'}</label>
+                        <input type="text" class="form-control form-control-sm form-control-dark" placeholder="966500000000" value="${escapeHtml(ty.button_whatsapp || '')}" oninput="updateThankYouButtonWhatsapp(this.value)">
+                    </div>
+                ` : ''}
+
+                <hr class="border-secondary my-3">
+
+                <button type="button" class="btn btn-outline-danger btn-sm w-100 fw-bold" onclick="toggleThankYouPage(false); selectStep(0);">
+                    🗑️ ${t('remove_thank_you_page')}
+                </button>
+            </div>
+        `;
+    }
+
+    function updateThankYouTitle(val) {
+        if (!funnelData.design_settings.thank_you_page) funnelData.design_settings.thank_you_page = {};
+        funnelData.design_settings.thank_you_page.title = val;
+        if (activeStepIndex === 'thank_you') renderThankYouCanvas();
+    }
+
+    function updateThankYouSubtitle(val) {
+        if (!funnelData.design_settings.thank_you_page) funnelData.design_settings.thank_you_page = {};
+        funnelData.design_settings.thank_you_page.subtitle = val;
+        if (activeStepIndex === 'thank_you') renderThankYouCanvas();
+    }
+
+    function updateThankYouButtonText(val) {
+        if (!funnelData.design_settings.thank_you_page) funnelData.design_settings.thank_you_page = {};
+        funnelData.design_settings.thank_you_page.button_text = val;
+        if (activeStepIndex === 'thank_you') renderThankYouCanvas();
+    }
+
+    function updateThankYouButtonAction(val) {
+        if (!funnelData.design_settings.thank_you_page) funnelData.design_settings.thank_you_page = {};
+        funnelData.design_settings.thank_you_page.button_action = val;
+        inspectThankYouPage();
+        if (activeStepIndex === 'thank_you') renderThankYouCanvas();
+    }
+
+    function updateThankYouButtonUrl(val) {
+        if (!funnelData.design_settings.thank_you_page) funnelData.design_settings.thank_you_page = {};
+        funnelData.design_settings.thank_you_page.button_url = val;
+    }
+
+    function updateThankYouButtonWhatsapp(val) {
+        if (!funnelData.design_settings.thank_you_page) funnelData.design_settings.thank_you_page = {};
+        funnelData.design_settings.thank_you_page.button_whatsapp = val;
     }
 
     function escapeHtml(str) {
