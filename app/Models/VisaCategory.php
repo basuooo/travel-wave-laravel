@@ -49,25 +49,6 @@ class VisaCategory extends Model
                     }
                 }
             });
-
-            $euCats = static::withTrashed()->where(function ($q) {
-                $q->whereIn('slug', ['eu', 'european-union'])
-                    ->orWhere('name_ar', 'like', '%الاتحاد الاوروبي%')
-                    ->orWhere('name_ar', 'like', '%الاتحاد الأوروبي%');
-            })->get();
-
-            $europeCat = static::where('slug', 'europe')->first();
-
-            foreach ($euCats as $cat) {
-                if ($europeCat) {
-                    $countries = $cat->pivotCountries;
-                    foreach ($countries as $c) {
-                        $c->categories()->syncWithoutDetaching([$europeCat->id]);
-                    }
-                }
-                \Illuminate\Support\Facades\DB::table('country_visa_category')->where('visa_category_id', $cat->id)->delete();
-                $cat->forceDelete();
-            }
         } catch (\Throwable $e) {
             // ignore
         }
