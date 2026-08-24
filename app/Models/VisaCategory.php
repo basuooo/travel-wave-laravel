@@ -15,6 +15,32 @@ class VisaCategory extends Model
     use HasLocalizedContent;
     use SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::ensureTableSchema();
+    }
+
+    public static function ensureTableSchema(): void
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('visa_categories')) {
+            return;
+        }
+
+        if (
+            ! \Illuminate\Support\Facades\Schema::hasColumn('visa_categories', 'deleted_at') ||
+            ! \Illuminate\Support\Facades\Schema::hasColumn('visa_categories', 'deleted_by')
+        ) {
+            \Illuminate\Support\Facades\Schema::table('visa_categories', function (\Illuminate\Database\Schema\Blueprint $table) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('visa_categories', 'deleted_at')) {
+                    $table->softDeletes();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('visa_categories', 'deleted_by')) {
+                    $table->foreignId('deleted_by')->nullable()->constrained('users')->nullOnDelete();
+                }
+            });
+        }
+    }
+
     protected $fillable = [
         'name_en',
         'name_ar',

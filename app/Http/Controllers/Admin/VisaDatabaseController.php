@@ -18,13 +18,21 @@ class VisaDatabaseController extends Controller
 
         $query = VisaRecord::query()->with(['country.categories', 'activityLogs']);
 
-        // Search query (Country name AR/EN or Visa Type)
+        // Search query (Country name AR/EN, Visa Type, Notes, Documents, or Category name)
         if ($search = trim($request->input('search', ''))) {
             $query->where(function ($q) use ($search) {
                 $q->where('visa_type', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%")
+                    ->orWhere('required_documents', 'like', "%{$search}%")
                     ->orWhereHas('country', function ($cq) use ($search) {
-                        $cq->where('name_ar', 'like', "%{$search}%")
-                            ->orWhere('name_en', 'like', "%{$search}%");
+                        $cq->withTrashed()->where(function ($cInner) use ($search) {
+                            $cInner->where('name_ar', 'like', "%{$search}%")
+                                ->orWhere('name_en', 'like', "%{$search}%")
+                                ->orWhereHas('categories', function ($catQ) use ($search) {
+                                    $catQ->where('name_ar', 'like', "%{$search}%")
+                                        ->orWhere('name_en', 'like', "%{$search}%");
+                                });
+                        });
                     });
             });
         }
@@ -32,8 +40,10 @@ class VisaDatabaseController extends Controller
         // Category filter
         if ($categoryId = $request->input('category_id')) {
             $query->whereHas('country', function ($cq) use ($categoryId) {
-                $cq->where('visa_category_id', $categoryId)
-                    ->orWhereHas('categories', fn ($catQ) => $catQ->where('visa_categories.id', $categoryId));
+                $cq->withTrashed()->where(function ($cInner) use ($categoryId) {
+                    $cInner->where('visa_category_id', $categoryId)
+                        ->orWhereHas('categories', fn ($catQ) => $catQ->where('visa_categories.id', $categoryId));
+                });
             });
         }
 

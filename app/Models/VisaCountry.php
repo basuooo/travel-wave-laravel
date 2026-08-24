@@ -32,7 +32,9 @@ class VisaCountry extends Model
             ! Schema::hasColumn('visa_countries', 'content_mode') ||
             ! Schema::hasColumn('visa_countries', 'html_content_en') ||
             ! Schema::hasColumn('visa_countries', 'html_content_ar') ||
-            ! Schema::hasColumn('visa_countries', 'sections')
+            ! Schema::hasColumn('visa_countries', 'sections') ||
+            ! Schema::hasColumn('visa_countries', 'deleted_at') ||
+            ! Schema::hasColumn('visa_countries', 'deleted_by')
         ) {
             Schema::table('visa_countries', function (Blueprint $table) {
                 if (! Schema::hasColumn('visa_countries', 'content_mode')) {
@@ -46,6 +48,12 @@ class VisaCountry extends Model
                 }
                 if (! Schema::hasColumn('visa_countries', 'sections')) {
                     $table->json('sections')->nullable()->after('html_content_ar');
+                }
+                if (! Schema::hasColumn('visa_countries', 'deleted_at')) {
+                    $table->softDeletes();
+                }
+                if (! Schema::hasColumn('visa_countries', 'deleted_by')) {
+                    $table->foreignId('deleted_by')->nullable()->constrained('users')->nullOnDelete();
                 }
             });
         }

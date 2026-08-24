@@ -19,6 +19,8 @@ class VisaRecord extends Model
     public static function ensureTableSchema(): void
     {
         try {
+            VisaCountry::ensureTableSchema();
+
             if (! \Illuminate\Support\Facades\Schema::hasTable('country_visa_category')) {
                 \Illuminate\Support\Facades\Schema::create('country_visa_category', function (\Illuminate\Database\Schema\Blueprint $table) {
                     $table->id();
@@ -73,6 +75,29 @@ class VisaRecord extends Model
                     $table->text('description')->nullable();
                     $table->timestamps();
                 });
+            }
+            // Ensure every VisaCountry has at least one VisaRecord attached
+            $countriesWithoutRecords = VisaCountry::whereDoesntHave('visaRecords')->get();
+            foreach ($countriesWithoutRecords as $c) {
+                VisaRecord::create([
+                    'visa_country_id' => $c->id,
+                    'visa_type' => 'سياحة',
+                    'price' => null,
+                    'currency' => 'EGP',
+                    'working_days' => 'حسب نوع الطلب',
+                    'proposed_duration' => 'حسب قرار السفارة',
+                    'stay_duration' => 'حسب القرار',
+                    'entries_count' => 'حسب القرار',
+                    'required_documents' => "الأوراق المطلوبة غير محدودة حالياً، يرجى التواصل مع خدمة العملاء لتدقيق الملف.",
+                    'embassy_fee' => 'غير محدد',
+                    'embassy_fee_currency' => 'EGP',
+                    'embassy_fee_payment_method' => 'داخل السفارة / المركز المعني',
+                    'application_center' => ['السفارة مباشرة'],
+                    'is_biometrics_required' => true,
+                    'is_interview_required' => true,
+                    'notes' => 'يرجى استكمال البيانات وتحديد الرسوم مع إدارة المبيعات.',
+                    'status' => 'active',
+                ]);
             }
         } catch (\Throwable $e) {
             logger()->error('ensureTableSchema error: ' . $e->getMessage());
