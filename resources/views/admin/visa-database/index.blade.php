@@ -657,7 +657,33 @@
     </div>
 </div>
 
+<style>
+/* Ensure Bootstrap Modals always sit above stacking contexts and backdrops */
+body > .modal,
+.modal {
+    z-index: 1060 !important;
+}
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+</style>
+
 <script>
+// Automatically move all modal elements directly to document.body to escape .admin-content-column (z-index: 1) stacking context
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.modal').forEach(function(modalEl) {
+        if (modalEl.parentElement !== document.body) {
+            document.body.appendChild(modalEl);
+        }
+    });
+});
+
+document.addEventListener('show.bs.modal', function(e) {
+    if (e.target && e.target.classList.contains('modal') && e.target.parentElement !== document.body) {
+        document.body.appendChild(e.target);
+    }
+});
+
 function copyToClipboard(id) {
     var copyText = document.getElementById("copyContent" + id);
     if (!copyText) return;
