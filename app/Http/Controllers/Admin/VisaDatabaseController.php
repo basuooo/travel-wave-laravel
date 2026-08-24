@@ -291,4 +291,47 @@ class VisaDatabaseController extends Controller
 
         return back()->with('success', 'تمت إضافة التصنيف الجديد بنجاح.');
     }
+
+    public function publicPreview($id)
+    {
+        VisaRecord::ensureTableSchema();
+        $record = VisaRecord::with(['country.categories'])->findOrFail($id);
+
+        return view('admin.visa-database.public_preview', compact('record'));
+    }
+
+    public function publicCatalog(Request $request)
+    {
+        VisaRecord::ensureTableSchema();
+
+        $query = VisaRecord::query()->with(['country.categories'])->where('status', 'active');
+
+        if ($request->filled('search')) {
+            $rawSearch = trim($request->input('search'));
+            $normalizedSearch = preg_replace('/[أإآ]/u', 'ا', preg_replace('/[\x{064B}-\x{0652}\x{0670}]/u', '', $rawSearch));
+
+            $query->where(function ($q) use ($rawSearch, $normalizedSearch) {
+                $q->where('visa_type', 'like', "%{$rawSearch}%")
+                    ->orWhere('visa_type', 'like', "%{$normalizedSearch}%")
+                    ->orWhereHas('country', function ($cq) use ($rawSearch, $normalizedSearch) {
+                        $cq->where('name_ar', 'like', "%{$rawSearch}%")
+                            ->orWhere('name_ar', 'like', "%{$normalizedSearch}%")
+                            ->orWhere('name_en', 'like', "%{$rawSearch}%");
+                    });
+            });
+        }
+
+        if ($request->filled('category_id')) {
+            $categoryId = $request->input('category_id');
+            $query->whereHas('country', function ($cq) use ($categoryId) {
+                $cq->where('visa_category_id', $categoryId)
+                    ->orWhereHas('categories', fn ($catQ) => $catQ->where('visa_categories.id', $categoryId));
+            });
+        }
+
+        $records = $query->orderBy('sort_order')->paginate(24);
+        $categories = VisaCategory::where('is_active', true)->orderBy('sort_order')->get();
+
+        return view('admin.visa-database.public_catalog', compact('records', 'categories'));
+    }
 }

@@ -125,6 +125,9 @@
                 </span>
             </div>
             <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('visa-database.public-catalog') }}" target="_blank" class="btn btn-outline-primary btn-sm me-2 fw-bold">
+                    <i class="bi bi-globe me-1"></i> معاينة الدليل العام للعملاء
+                </a>
                 <span class="small fw-bold text-muted"><i class="bi bi-list-ol me-1"></i>عرض في الصفحة:</span>
                 <select class="form-select form-select-sm" style="width: 140px;" onchange="changePerPage(this.value)">
                     <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 سجلات</option>
@@ -256,6 +259,9 @@
                                 </td>
                                 <td class="text-end px-3">
                                     <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#shareModal{{ $rec->id }}" title="معاينة ومشاركة رابط التأشيرة للعميل">
+                                            <i class="bi bi-share-fill me-1"></i> معاينة / مشاركة
+                                        </button>
                                         <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewModal{{ $rec->id }}" title="عرض التفاصيل">
                                             <i class="bi bi-eye"></i> التفاصيل
                                         </button>
@@ -755,6 +761,18 @@ function copyToClipboard(id) {
         document.execCommand("copy");
         copyText.classList.add('d-none');
         alert("✅ تم نسخ البيانات إلى الحافظة!");
+    });
+}
+
+function copyShareUrl(id) {
+    var input = document.getElementById("shareUrl" + id);
+    if (!input) return;
+    navigator.clipboard.writeText(input.value).then(function() {
+        alert("✅ تم نسخ رابط المعاينة المباشر بنجاح! يمكنك الآن إرساله للعميل.");
+    }, function(err) {
+        input.select();
+        document.execCommand("copy");
+        alert("✅ تم نسخ الرابط!");
     });
 }
 

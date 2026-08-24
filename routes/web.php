@@ -73,6 +73,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('locale/{locale}', [FrontendController::class, 'switchLocale'])->name('locale.switch');
 
 Route::middleware(['website.status'])->group(function () {
+    // Public Visa Database Preview Routes (No authentication required)
+    Route::get('/visa-database/preview/{id}', [VisaDatabaseController::class, 'publicPreview'])->name('visa-database.public-preview');
+    Route::get('/visa-database/catalog', [VisaDatabaseController::class, 'publicCatalog'])->name('visa-database.public-catalog');
+
     Route::get('/', [FrontendController::class, 'home'])->name('home');
     Route::get('/visas', [FrontendController::class, 'visaIndex'])->name('visas.index');
     Route::get('/visas/{category:slug}', [FrontendController::class, 'visaCategory'])->name('visas.category');
