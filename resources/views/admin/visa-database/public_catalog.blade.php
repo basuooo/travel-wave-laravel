@@ -122,10 +122,10 @@
             @empty
                 <div class="col-12 text-center py-5">
                     <i class="bi bi-search text-muted display-1"></i>
-                    <h4 class="fw-bold mt-3 text-muted">لم يتم العثور على نتائج طابق بحثك</h4>
+                    <h4 class="fw-bold mt-3 text-muted">لم يتم العثور على نتائج تطابق بحثك</h4>
                     <p class="text-muted">جرب البحث بكلمة مختلفة أو اختر تصنيف آخر</p>
                 </div>
-            @forelse
+            @endforelse
         </div>
 
         <!-- Pagination -->
