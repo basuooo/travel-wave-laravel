@@ -142,21 +142,15 @@ class EmbassyAppointment extends Model
                 return;
             }
 
-            $category = VisaCategory::first();
-            if (! $category && Schema::hasTable('visa_categories')) {
-                try {
-                    $category = VisaCategory::create([
-                        'name_ar' => 'شنغن (Schengen)',
-                        'name_en' => 'Schengen',
-                        'slug' => 'schengen',
-                        'is_active' => true,
-                    ]);
-                } catch (\Throwable $e) {
-                    $category = null;
-                }
+            if (class_exists(\App\Models\VisaCategory::class)) {
+                try { \App\Models\VisaCategory::ensureTableSchema(); } catch (\Throwable $e) {}
+            }
+            if (class_exists(\App\Models\VisaCountry::class)) {
+                try { \App\Models\VisaCountry::ensureTableSchema(); } catch (\Throwable $e) {}
             }
 
-            $categoryId = $category?->id;
+            $category = VisaCategory::first() ?? VisaCategory::withTrashed()->first();
+            $categoryId = $category?->id ?? 1;
 
             $appointmentsData = [
                 ['name_ar' => 'ألمانيا', 'name_en' => 'Germany', 'slug' => 'germany', 'dates' => 'شهر 12', 'center' => 'VFS'],
@@ -188,9 +182,7 @@ class EmbassyAppointment extends Model
 
                     if (! $country) {
                         $country = new VisaCountry();
-                        if ($categoryId) {
-                            $country->visa_category_id = $categoryId;
-                        }
+                        $country->visa_category_id = $categoryId;
                         $country->name_ar = $item['name_ar'];
                         $country->name_en = $item['name_en'];
                         $country->slug = $item['slug'];
@@ -198,7 +190,7 @@ class EmbassyAppointment extends Model
                         $country->save();
                     }
 
-                    if ($country) {
+                    if ($country && $country->id) {
                         static::updateOrCreate([
                             'visa_country_id' => $country->id,
                             'visa_type' => 'سياحة',
