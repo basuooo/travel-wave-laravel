@@ -104,7 +104,7 @@ class EmbassyAppointmentController extends Controller
                 EmbassyAppointment::STATUS_NO_AVAILABILITY,
                 EmbassyAppointment::STATUS_UNKNOWN,
             ])],
-            'earliest_date' => ['nullable', 'date'],
+            'earliest_date' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
             'booking_link' => ['nullable', 'url', 'max:500'],
         ]);
@@ -149,7 +149,7 @@ class EmbassyAppointmentController extends Controller
                 EmbassyAppointment::STATUS_NO_AVAILABILITY,
                 EmbassyAppointment::STATUS_UNKNOWN,
             ])],
-            'earliest_date' => ['nullable', 'date'],
+            'earliest_date' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
             'booking_link' => ['nullable', 'url', 'max:500'],
         ]);
@@ -178,7 +178,7 @@ class EmbassyAppointmentController extends Controller
         $this->service->updateStatus(
             $embassyAppointment,
             EmbassyAppointment::STATUS_AVAILABLE_NOW,
-            $embassyAppointment->earliest_date?->format('Y-m-d'),
+            $embassyAppointment->earliest_date,
             $embassyAppointment->notes,
             auth()->user()
         );
@@ -274,7 +274,7 @@ class EmbassyAppointmentController extends Controller
                 'visa_type' => $notif->appointment?->visa_type ?? '',
                 'appointment_center' => $notif->appointment?->appointment_center ?? '',
                 'appointment_type' => $notif->appointment?->appointment_type ?? '',
-                'earliest_date' => $notif->appointment?->earliest_date?->format('Y-m-d') ?? 'غير محدد',
+                'earliest_date' => $notif->appointment?->earliest_date ?? 'غير محدد',
                 'booking_link' => $notif->appointment?->booking_link ?? '',
             ];
         });

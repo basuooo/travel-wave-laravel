@@ -37,7 +37,7 @@ class EmbassyAppointment extends Model
                     $table->string('appointment_center')->default('BLS');
                     $table->string('appointment_type')->default('Regular');
                     $table->string('status', 30)->default('unknown');
-                    $table->date('earliest_date')->nullable();
+                    $table->string('earliest_date', 255)->nullable();
                     $table->timestamp('last_updated_at')->nullable();
                     $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
                     $table->text('notes')->nullable();
@@ -86,8 +86,8 @@ class EmbassyAppointment extends Model
                     $table->string('action');
                     $table->string('old_status', 30)->nullable();
                     $table->string('new_status', 30)->nullable();
-                    $table->date('old_earliest_date')->nullable();
-                    $table->date('new_earliest_date')->nullable();
+                    $table->string('old_earliest_date', 255)->nullable();
+                    $table->string('new_earliest_date', 255)->nullable();
                     $table->text('notes')->nullable();
                     $table->timestamps();
                 });
@@ -146,7 +146,6 @@ class EmbassyAppointment extends Model
     ];
 
     protected $casts = [
-        'earliest_date' => 'date',
         'last_updated_at' => 'datetime',
     ];
 

@@ -186,7 +186,7 @@
                                 </td>
                                 <td class="small">
                                     @if($appt->earliest_date)
-                                        <span class="fw-bold text-dark">{{ $appt->earliest_date->format('Y-m-d') }}</span>
+                                        <span class="fw-bold text-dark">{{ $appt->earliest_date }}</span>
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
@@ -233,7 +233,7 @@
                                             data-center="{{ $appt->appointment_center }}"
                                             data-appt-type="{{ $appt->appointment_type }}"
                                             data-status="{{ $appt->status }}"
-                                            data-earliest-date="{{ $appt->earliest_date?->format('Y-m-d') }}"
+                                            data-earliest-date="{{ $appt->earliest_date }}"
                                             data-notes="{{ $appt->notes }}"
                                             data-booking-link="{{ $appt->booking_link }}"
                                             title="تعديل البيانات">
@@ -284,6 +284,44 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalTitle = document.getElementById('modalTitle');
     const methodContainer = document.getElementById('methodContainer');
 
+    const countrySearchInput = document.getElementById('countrySearchInput');
+    const countrySelect = document.getElementById('modal_visa_country_id');
+
+    if (countrySearchInput && countrySelect) {
+        countrySearchInput.addEventListener('input', function () {
+            const val = this.value.trim().toLowerCase();
+            let firstMatch = null;
+            Array.from(countrySelect.options).forEach(opt => {
+                if (!opt.value) return;
+                const searchData = (opt.dataset.search || opt.textContent).toLowerCase();
+                if (!val || searchData.includes(val)) {
+                    opt.style.display = '';
+                    if (!firstMatch && val) firstMatch = opt;
+                } else {
+                    opt.style.display = 'none';
+                }
+            });
+            if (firstMatch && val) {
+                countrySelect.value = firstMatch.value;
+            }
+        });
+    }
+
+    function setSelectValueOrAdd(selectId, val) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        if (!val) {
+            select.selectedIndex = 0;
+            return;
+        }
+        let exists = Array.from(select.options).some(opt => opt.value === val);
+        if (!exists) {
+            const newOpt = new Option(val, val, true, true);
+            select.add(newOpt);
+        }
+        select.value = val;
+    }
+
     document.querySelectorAll('.editApptBtn').forEach(btn => {
         btn.addEventListener('click', function () {
             const data = this.dataset;
@@ -292,8 +330,8 @@ document.addEventListener('DOMContentLoaded', function () {
             methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
 
             document.getElementById('modal_visa_country_id').value = data.countryId;
-            document.getElementById('modal_visa_type').value = data.visaType;
-            document.getElementById('modal_appointment_center').value = data.center;
+            setSelectValueOrAdd('modal_visa_type', data.visaType);
+            setSelectValueOrAdd('modal_appointment_center', data.center);
             document.getElementById('modal_appointment_type').value = data.apptType;
             document.getElementById('modal_status').value = data.status;
             document.getElementById('modal_earliest_date').value = data.earliestDate || '';
@@ -309,6 +347,10 @@ document.addEventListener('DOMContentLoaded', function () {
         form.action = "{{ route('admin.embassy-appointments.store') }}";
         methodContainer.innerHTML = '';
         form.reset();
+        if (countrySearchInput) countrySearchInput.value = '';
+        if (countrySelect) {
+            Array.from(countrySelect.options).forEach(opt => opt.style.display = '');
+        }
     });
 });
 </script>

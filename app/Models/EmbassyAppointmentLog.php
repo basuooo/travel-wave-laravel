@@ -22,10 +22,7 @@ class EmbassyAppointmentLog extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'old_earliest_date' => 'date',
-        'new_earliest_date' => 'date',
-    ];
+    protected $casts = [];
 
     public function appointment(): BelongsTo
     {

@@ -13,30 +13,55 @@
                 <div class="modal-body p-4">
                     <div class="row g-3">
 
-                        {{-- Country --}}
+                        {{-- Country with live search filter --}}
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">الدولة / السفارة <span class="text-danger">*</span></label>
-                            <select name="visa_country_id" id="modal_visa_country_id" class="form-select" required>
+                            <label class="form-label fw-semibold d-flex justify-content-between align-items-center">
+                                <span>الدولة / السفارة <span class="text-danger">*</span></span>
+                                <small class="text-muted fw-normal">اكتب بالتصفية للبحث 🔍</small>
+                            </label>
+                            <div class="input-group input-group-sm mb-1">
+                                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" id="countrySearchInput" class="form-control" placeholder="ابحث باسم الدولة (مثال: إسبانيا، إيطاليا)..." autocomplete="off">
+                            </div>
+                            <select name="visa_country_id" id="modal_visa_country_id" class="form-select" required size="4">
                                 <option value="">اختر الدولة...</option>
                                 @foreach($countries as $c)
-                                    <option value="{{ $c->id }}">{{ $c->name_ar ?: $c->name_en }}</option>
+                                    <option value="{{ $c->id }}" data-search="{{ mb_strtolower(($c->name_ar ?? '') . ' ' . ($c->name_en ?? '')) }}">
+                                        {{ $c->name_ar ?: $c->name_en }} ({{ $c->name_en }})
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
 
-                        {{-- Visa Type --}}
+                        {{-- Visa Type Dropdown --}}
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold">نوع التأشيرة <span class="text-danger">*</span></label>
-                            <input type="text" name="visa_type" id="modal_visa_type" class="form-control" placeholder="مثال: Tourist / سياحة" value="سياحة" required>
+                            <select name="visa_type" id="modal_visa_type" class="form-select" required>
+                                <option value="سياحة">سياحة (Tourist)</option>
+                                <option value="عمل / بيزنس">عمل / بيزنس (Business)</option>
+                                <option value="دراسة">دراسة (Study)</option>
+                                <option value="فيزا عمل">فيزا عمل (Work Visa)</option>
+                                <option value="زيارة عائلية">زيارة عائلية (Family Visit)</option>
+                                <option value="علاج">علاج (Medical)</option>
+                                <option value="ترانزيت">ترانزيت (Transit)</option>
+                                <option value="أخرى">أخرى (Other)</option>
+                            </select>
                         </div>
 
-                        {{-- Appointment Center --}}
+                        {{-- Application Center Dropdown --}}
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold">مركز التقديم <span class="text-danger">*</span></label>
-                            <input type="text" name="appointment_center" id="modal_appointment_center" class="form-control" placeholder="مثال: BLS, VFS, TLS, السفارة مباشرة" value="BLS" required>
+                            <select name="appointment_center" id="modal_appointment_center" class="form-select" required>
+                                <option value="BLS">BLS (إسبانيا...)</option>
+                                <option value="VFS">VFS Global (إيطاليا، فرنسا، ألمانيا...)</option>
+                                <option value="TLS">TLScontact (المملكة المتحدة، فرنسا...)</option>
+                                <option value="iOM">iOM (المجر وغيرها)</option>
+                                <option value="السفارة مباشرة">السفارة مباشرة (Direct Embassy)</option>
+                                <option value="مركز تقديم آخر">مركز تقديم آخر / أخرى</option>
+                            </select>
                         </div>
 
-                        {{-- Appointment Type --}}
+                        {{-- Appointment Type Dropdown --}}
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold">نوع الموعد <span class="text-danger">*</span></label>
                             <select name="appointment_type" id="modal_appointment_type" class="form-select" required>
@@ -49,7 +74,7 @@
 
                         <hr class="my-2">
 
-                        {{-- Status --}}
+                        {{-- Status Dropdown --}}
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold">حالة الموعد <span class="text-danger">*</span></label>
                             <select name="status" id="modal_status" class="form-select" required>
@@ -60,10 +85,11 @@
                             </select>
                         </div>
 
-                        {{-- Earliest Available Date --}}
+                        {{-- Earliest Available Date / Period (Text Input) --}}
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold">أقرب موعد متاح (اختياري)</label>
-                            <input type="date" name="earliest_date" id="modal_earliest_date" class="form-control">
+                            <input type="text" name="earliest_date" id="modal_earliest_date" class="form-control" placeholder="أدخل التقدير، مثال: أول شهر 9، منتصف سبتمبر، بداية أكتوبر...">
+                            <div class="form-text text-muted fs-8">خانة نصية تتيح كتابة تقدير الفترة يدويًا (مثال: أول شهر 9...).</div>
                         </div>
 
                         {{-- Booking Link --}}

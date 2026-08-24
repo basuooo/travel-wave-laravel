@@ -76,7 +76,7 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                             <span class="text-muted">أقرب موعد متاح:</span>
-                            <span class="fw-bold text-dark">{{ $item->earliest_date?->format('Y-m-d') ?: 'غير محدد' }}</span>
+                            <span class="fw-bold text-dark">{{ $item->earliest_date ?: 'غير محدد' }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                             <span class="text-muted">آخر تحديث:</span>
@@ -222,7 +222,7 @@
                                         <td>
                                             <span class="fw-bold text-primary">{{ $log->new_status }}</span>
                                         </td>
-                                        <td>{{ $log->new_earliest_date?->format('Y-m-d') ?: '—' }}</td>
+                                        <td>{{ $log->new_earliest_date ?: '—' }}</td>
                                         <td class="text-muted">{{ $log->notes ?: '—' }}</td>
                                     </tr>
                                 @empty

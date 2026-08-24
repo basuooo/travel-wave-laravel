@@ -44,7 +44,7 @@ class EmbassyAppointmentService
             'old_status' => $oldStatus,
             'new_status' => $newStatus,
             'old_earliest_date' => $oldEarliestDate,
-            'new_earliest_date' => $appointment->earliest_date?->format('Y-m-d'),
+            'new_earliest_date' => $appointment->earliest_date,
             'notes' => $notes,
         ]);
 
