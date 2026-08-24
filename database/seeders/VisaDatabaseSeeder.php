@@ -23,8 +23,7 @@ class VisaDatabaseSeeder extends Seeder
         $categoriesData = [
             ['name_ar' => 'الاتحاد الأوروبي (European Union)', 'name_en' => 'European Union', 'slug' => 'eu', 'sort_order' => 1],
             ['name_ar' => 'دول شنغن خارج الاتحاد الأوروبي', 'name_en' => 'Schengen Non-EU', 'slug' => 'schengen-non-eu', 'sort_order' => 2],
-            ['name_ar' => 'أوروبا', 'name_en' => 'Europe', 'slug' => 'europe', 'sort_order' => 3],
-            ['name_ar' => 'آسيا', 'name_en' => 'Asia', 'slug' => 'asia', 'sort_order' => 4],
+            ['name_ar' => 'آسيا', 'name_en' => 'Asia', 'slug' => 'asia', 'sort_order' => 3],
             ['name_ar' => 'الشرق الأوسط', 'name_en' => 'Middle East', 'slug' => 'middle-east', 'sort_order' => 5],
             ['name_ar' => 'أفريقيا', 'name_en' => 'Africa', 'slug' => 'africa', 'sort_order' => 6],
             ['name_ar' => 'أمريكا الشمالية', 'name_en' => 'North America', 'slug' => 'north-america', 'sort_order' => 7],
@@ -128,7 +127,7 @@ class VisaDatabaseSeeder extends Seeder
                 $country->update(['name_ar' => $this->normalizeArabic($item['name_ar'])]);
             }
 
-            $country->categories()->syncWithoutDetaching([$categoriesMap['eu'], $categoriesMap['europe']]);
+            $country->categories()->syncWithoutDetaching([$categoriesMap['eu']]);
 
             VisaRecord::updateOrCreate(
                 [
@@ -155,7 +154,6 @@ class VisaDatabaseSeeder extends Seeder
             );
         }
 
-        // Spain Exception: 2 records (Regular 6500, VIP 8500, 126 USD Cash)
         $spainCountry = VisaCountry::where('slug', 'spain')->first()
             ?? VisaCountry::where('name_en', 'Spain')->first();
 
@@ -170,7 +168,7 @@ class VisaDatabaseSeeder extends Seeder
         } else {
             $spainCountry->update(['name_ar' => $this->normalizeArabic('إسبانيا')]);
         }
-        $spainCountry->categories()->syncWithoutDetaching([$categoriesMap['eu'], $categoriesMap['europe']]);
+        $spainCountry->categories()->syncWithoutDetaching([$categoriesMap['eu']]);
 
         VisaRecord::updateOrCreate(
             [
@@ -222,7 +220,6 @@ class VisaDatabaseSeeder extends Seeder
             ]
         );
 
-        // Non-EU Schengen Countries
         $schengenNonEu = [
             ['name_ar' => 'سويسرا', 'name_en' => 'Switzerland', 'slug' => 'switzerland', 'center' => ['VFS']],
             ['name_ar' => 'النرويج', 'name_en' => 'Norway', 'slug' => 'norway', 'center' => ['VFS']],
@@ -246,7 +243,7 @@ class VisaDatabaseSeeder extends Seeder
                 $country->update(['name_ar' => $this->normalizeArabic($item['name_ar'])]);
             }
 
-            $country->categories()->syncWithoutDetaching([$categoriesMap['schengen-non-eu'], $categoriesMap['europe']]);
+            $country->categories()->syncWithoutDetaching([$categoriesMap['schengen-non-eu']]);
 
             VisaRecord::updateOrCreate(
                 [
@@ -273,9 +270,7 @@ class VisaDatabaseSeeder extends Seeder
             );
         }
 
-        // Complete list of remaining countries in the world
         $otherWorldCountries = [
-            // GCC & Middle East & Arab
             ['name_ar' => 'المملكة العربية السعودية', 'name_en' => 'Saudi Arabia', 'slug' => 'saudi-arabia', 'cats' => ['gcc', 'middle-east', 'arab-countries', 'asia']],
             ['name_ar' => 'الإمارات العربية المتحدة', 'name_en' => 'United Arab Emirates', 'slug' => 'uae', 'cats' => ['gcc', 'middle-east', 'arab-countries', 'asia']],
             ['name_ar' => 'قطر', 'name_en' => 'Qatar', 'slug' => 'qatar', 'cats' => ['gcc', 'middle-east', 'arab-countries', 'asia']],
@@ -299,23 +294,22 @@ class VisaDatabaseSeeder extends Seeder
             ['name_ar' => 'جيبوتي', 'name_en' => 'Djibouti', 'slug' => 'djibouti', 'cats' => ['arab-countries', 'africa']],
             ['name_ar' => 'جزر القمر', 'name_en' => 'Comoros', 'slug' => 'comoros', 'cats' => ['arab-countries', 'africa']],
 
-            // Europe Non-Schengen
-            ['name_ar' => 'المملكة المتحدة', 'name_en' => 'United Kingdom', 'slug' => 'united-kingdom', 'cats' => ['europe'], 'center' => ['TLS'], 'price' => 7500],
-            ['name_ar' => 'تركيا', 'name_en' => 'Turkey', 'slug' => 'turkey', 'cats' => ['europe', 'asia', 'middle-east'], 'center' => ['VFS'], 'price' => 5500],
-            ['name_ar' => 'ألبانيا', 'name_en' => 'Albania', 'slug' => 'albania', 'cats' => ['europe']],
-            ['name_ar' => 'أندورا', 'name_en' => 'Andorra', 'slug' => 'andorra', 'cats' => ['europe']],
-            ['name_ar' => 'أرمينيا', 'name_en' => 'Armenia', 'slug' => 'armenia', 'cats' => ['europe', 'asia', 'cis']],
-            ['name_ar' => 'أذربيجان', 'name_en' => 'Azerbaijan', 'slug' => 'azerbaijan', 'cats' => ['europe', 'asia', 'cis']],
-            ['name_ar' => 'البوسنة والهرسك', 'name_en' => 'Bosnia and Herzegovina', 'slug' => 'bosnia-herzegovina', 'cats' => ['europe']],
-            ['name_ar' => 'جورجيا', 'name_en' => 'Georgia', 'slug' => 'georgia', 'cats' => ['europe', 'asia']],
-            ['name_ar' => 'كوسوفو', 'name_en' => 'Kosovo', 'slug' => 'kosovo', 'cats' => ['europe']],
-            ['name_ar' => 'مقدونيا الشمالية', 'name_en' => 'North Macedonia', 'slug' => 'north-macedonia', 'cats' => ['europe']],
-            ['name_ar' => 'مولدوفا', 'name_en' => 'Moldova', 'slug' => 'moldova', 'cats' => ['europe', 'cis']],
-            ['name_ar' => 'الجبل الأسود', 'name_en' => 'Montenegro', 'slug' => 'montenegro', 'cats' => ['europe']],
-            ['name_ar' => 'صربيا', 'name_en' => 'Serbia', 'slug' => 'serbia', 'cats' => ['europe']],
-            ['name_ar' => 'أوكرانيا', 'name_en' => 'Ukraine', 'slug' => 'ukraine', 'cats' => ['europe']],
-            ['name_ar' => 'بيلاروسيا', 'name_en' => 'Belarus', 'slug' => 'belarus', 'cats' => ['europe', 'cis']],
-            ['name_ar' => 'روسيا', 'name_en' => 'Russia', 'slug' => 'russia', 'cats' => ['europe', 'asia', 'cis']],
+            ['name_ar' => 'المملكة المتحدة', 'name_en' => 'United Kingdom', 'slug' => 'united-kingdom', 'cats' => ['other-countries'], 'center' => ['TLS'], 'price' => 7500],
+            ['name_ar' => 'تركيا', 'name_en' => 'Turkey', 'slug' => 'turkey', 'cats' => ['asia', 'middle-east'], 'center' => ['VFS'], 'price' => 5500],
+            ['name_ar' => 'ألبانيا', 'name_en' => 'Albania', 'slug' => 'albania', 'cats' => ['other-countries']],
+            ['name_ar' => 'أندورا', 'name_en' => 'Andorra', 'slug' => 'andorra', 'cats' => ['other-countries']],
+            ['name_ar' => 'أرمينيا', 'name_en' => 'Armenia', 'slug' => 'armenia', 'cats' => ['asia', 'cis']],
+            ['name_ar' => 'أذربيجان', 'name_en' => 'Azerbaijan', 'slug' => 'azerbaijan', 'cats' => ['asia', 'cis']],
+            ['name_ar' => 'البوسنة والهرسك', 'name_en' => 'Bosnia and Herzegovina', 'slug' => 'bosnia-herzegovina', 'cats' => ['other-countries']],
+            ['name_ar' => 'جورجيا', 'name_en' => 'Georgia', 'slug' => 'georgia', 'cats' => ['asia']],
+            ['name_ar' => 'كوسوفو', 'name_en' => 'Kosovo', 'slug' => 'kosovo', 'cats' => ['other-countries']],
+            ['name_ar' => 'مقدونيا الشمالية', 'name_en' => 'North Macedonia', 'slug' => 'north-macedonia', 'cats' => ['other-countries']],
+            ['name_ar' => 'مولدوفا', 'name_en' => 'Moldova', 'slug' => 'moldova', 'cats' => ['cis']],
+            ['name_ar' => 'الجبل الأسود', 'name_en' => 'Montenegro', 'slug' => 'montenegro', 'cats' => ['other-countries']],
+            ['name_ar' => 'صربيا', 'name_en' => 'Serbia', 'slug' => 'serbia', 'cats' => ['other-countries']],
+            ['name_ar' => 'أوكرانيا', 'name_en' => 'Ukraine', 'slug' => 'ukraine', 'cats' => ['other-countries']],
+            ['name_ar' => 'بيلاروسيا', 'name_en' => 'Belarus', 'slug' => 'belarus', 'cats' => ['cis']],
+            ['name_ar' => 'روسيا', 'name_en' => 'Russia', 'slug' => 'russia', 'cats' => ['asia', 'cis']],
 
             // North America
             ['name_ar' => 'الولايات المتحدة الأمريكية', 'name_en' => 'United States', 'slug' => 'united-states', 'cats' => ['north-america'], 'center' => ['السفارة مباشرة'], 'price' => 8500],

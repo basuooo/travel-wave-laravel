@@ -49,6 +49,18 @@ class VisaCategory extends Model
                     }
                 }
             });
+
+            // Force delete category Europe (slug: europe)
+            $europeCats = static::withTrashed()->where(function ($q) {
+                $q->where('slug', 'europe')
+                    ->orWhere('name_ar', 'اوروبا')
+                    ->orWhere('name_ar', 'أوروبا');
+            })->get();
+
+            foreach ($europeCats as $europeCat) {
+                \Illuminate\Support\Facades\DB::table('country_visa_category')->where('visa_category_id', $europeCat->id)->delete();
+                $europeCat->forceDelete();
+            }
         } catch (\Throwable $e) {
             // ignore
         }
