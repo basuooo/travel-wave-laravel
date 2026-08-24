@@ -209,6 +209,16 @@ class VisaCountry extends Model
         return $this->belongsTo(VisaCategory::class, 'visa_category_id');
     }
 
+    public function categories()
+    {
+        return $this->belongsToMany(VisaCategory::class, 'country_visa_category');
+    }
+
+    public function visaRecords()
+    {
+        return $this->hasMany(VisaRecord::class, 'visa_country_id')->orderBy('sort_order');
+    }
+
     public function deletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');

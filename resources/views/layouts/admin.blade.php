@@ -53,6 +53,7 @@
             $adminUser?->hasPermission('media.manage') ? ['label' => __('admin.media_library'), 'route' => 'admin.media-library.index', 'match' => 'admin.media-library.*'] : null,
             $adminUser?->hasPermission('pages.view') ? ['label' => __('admin.hero_slider'), 'route' => 'admin.hero-slides.index', 'match' => 'admin.hero-slides.*'] : null,
             $adminUser?->hasPermission('pages.view') ? ['label' => __('admin.homepage_country_strip'), 'route' => 'admin.home-country-strip.index', 'match' => 'admin.home-country-strip.*'] : null,
+            ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => '🌐 قاعدة بيانات التأشيرات (Visa Database)', 'route' => 'admin.visa-database.index', 'match' => 'admin.visa-database.*'] : null,
             ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => __('admin.visa_categories'), 'route' => 'admin.visa-categories.index', 'match' => 'admin.visa-categories.*'] : null,
             ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => __('admin.visa_destinations'), 'route' => 'admin.visa-countries.index', 'match' => 'admin.visa-countries.*'] : null,
             ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => __('admin.destinations'), 'route' => 'admin.destinations.index', 'match' => 'admin.destinations.*'] : null,

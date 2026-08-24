@@ -39,6 +39,11 @@ class VisaCategory extends Model
         return $this->hasMany(VisaCountry::class)->orderBy('sort_order');
     }
 
+    public function pivotCountries()
+    {
+        return $this->belongsToMany(VisaCountry::class, 'country_visa_category');
+    }
+
     public function deletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');

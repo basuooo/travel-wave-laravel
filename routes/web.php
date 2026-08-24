@@ -53,6 +53,7 @@ use App\Http\Controllers\Admin\UtmController;
 use App\Http\Controllers\Admin\WorkflowAutomationController;
 use App\Http\Controllers\Admin\VisaCategoryController;
 use App\Http\Controllers\Admin\VisaCountryController;
+use App\Http\Controllers\Admin\VisaDatabaseController;
 use App\Http\Controllers\Admin\LandingPageBuilderController;
 use App\Http\Controllers\Admin\LandingPageNewController;
 use App\Http\Controllers\Admin\FunnelController;
@@ -272,6 +273,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/visa-countries/{visa_country}/duplicate', [VisaCountryController::class, 'duplicate'])->name('visa-countries.duplicate');
             Route::post('/visa-countries/{visa_country}/restore', [VisaCountryController::class, 'restore'])->name('visa-countries.restore');
             Route::delete('/visa-countries/{visa_country}/force-delete', [VisaCountryController::class, 'forceDestroy'])->name('visa-countries.force-destroy');
+            Route::prefix('visa-database')->name('visa-database.')->group(function () {
+                Route::get('/', [VisaDatabaseController::class, 'index'])->name('index');
+                Route::post('/', [VisaDatabaseController::class, 'store'])->name('store');
+                Route::put('/{visa_record}', [VisaDatabaseController::class, 'update'])->name('update');
+                Route::delete('/{visa_record}', [VisaDatabaseController::class, 'destroy'])->name('destroy');
+                Route::patch('/{visa_record}/toggle-status', [VisaDatabaseController::class, 'toggleStatus'])->name('toggle-status');
+                Route::get('/{visa_record}/logs', [VisaDatabaseController::class, 'activityLogs'])->name('logs');
+                Route::post('/categories', [VisaDatabaseController::class, 'storeCategory'])->name('categories.store');
+            });
+
             Route::resource('visa-countries', VisaCountryController::class);
             Route::get('/destinations/trash', [DestinationController::class, 'trash'])->name('destinations.trash');
             Route::post('/destinations/{destination}/duplicate', [DestinationController::class, 'duplicate'])->name('destinations.duplicate');
