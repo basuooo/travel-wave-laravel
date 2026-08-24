@@ -80,7 +80,14 @@ class VisaDatabaseController extends Controller
             $query->where('status', $status);
         }
 
-        $records = $query->orderBy('sort_order')->orderByDesc('id')->paginate(25)->withQueryString();
+        $perPageInput = strtolower((string) $request->input('per_page', '25'));
+        if ($perPageInput === 'all') {
+            $perPage = 5000;
+        } else {
+            $perPage = in_array((int) $perPageInput, [10, 20, 25, 50, 100, 500]) ? (int) $perPageInput : 25;
+        }
+
+        $records = $query->orderBy('sort_order')->orderByDesc('id')->paginate($perPage)->withQueryString();
 
         $categories = VisaCategory::orderBy('sort_order')->get();
         $countries = VisaCountry::orderBy('name_ar')->get();

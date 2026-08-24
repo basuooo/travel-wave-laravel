@@ -108,6 +108,18 @@
                         <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>غير متاحة</option>
                     </select>
                 </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold mb-1">عرض في الصفحة</label>
+                    <select name="per_page" class="form-select form-select-sm">
+                        <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 سجلات</option>
+                        <option value="20" {{ request('per_page') == '20' ? 'selected' : '' }}>20 سجل</option>
+                        <option value="25" {{ request('per_page', '25') == '25' ? 'selected' : '' }}>25 سجل</option>
+                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 سجل</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 سجل</option>
+                        <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 سجل</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>عرض الكل (All)</option>
+                    </select>
+                </div>
                 <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search me-1"></i> بحث</button>
                     <a href="{{ route('admin.visa-database.index') }}" class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-x-circle me-1"></i> إلغاء</a>
@@ -117,7 +129,33 @@
     </div>
 
     <!-- Data Table Card -->
-    <div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-table text-primary me-2"></i>جدول التأشيرات</h5>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2">
+                    إجمالي السجلات: <strong>{{ number_format($records->total()) }}</strong>
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="small fw-bold text-muted"><i class="bi bi-list-ol me-1"></i>عرض في الصفحة:</span>
+                <select class="form-select form-select-sm" style="width: 140px;" onchange="changePerPage(this.value)">
+                    <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 سجلات</option>
+                    <option value="20" {{ request('per_page') == '20' ? 'selected' : '' }}>20 سجل</option>
+                    <option value="25" {{ request('per_page', '25') == '25' ? 'selected' : '' }}>25 سجل</option>
+                    <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 سجل</option>
+                    <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 سجل</option>
+                    <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 سجل</option>
+                    <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>الكل (All)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Top Scrollbar Helper for table horizontal scrolling -->
+        <div id="tableTopScroll" class="overflow-x-auto bg-light border-bottom px-2 py-1" style="overflow-y: hidden; height: 16px;">
+            <div id="tableTopScrollInner" style="height: 1px;"></div>
+        </div>
+
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 text-nowrap">
@@ -259,11 +297,14 @@
                 </table>
             </div>
         </div>
-        @if($records->hasPages())
-            <div class="card-footer bg-light p-3">
+        <div class="card-footer bg-light p-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="small text-muted">
+                عرض من <strong>{{ $records->firstItem() ?: 0 }}</strong> إلى <strong>{{ $records->lastItem() ?: 0 }}</strong> من إجمالي <strong>{{ number_format($records->total()) }}</strong> تأشيرة
+            </div>
+            <div>
                 {{ $records->links() }}
             </div>
-        @endif
+        </div>
     </div>
 </div>
 
@@ -682,6 +723,36 @@ document.addEventListener('show.bs.modal', function(e) {
     if (e.target && e.target.classList.contains('modal') && e.target.parentElement !== document.body) {
         document.body.appendChild(e.target);
     }
+});
+
+function changePerPage(val) {
+    var url = new URL(window.location.href);
+    url.searchParams.set('per_page', val);
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+}
+
+function syncTopScroll() {
+    var topScroll = document.getElementById('tableTopScroll');
+    var topInner = document.getElementById('tableTopScrollInner');
+    var tableResp = document.querySelector('.table-responsive');
+    var tableEl = tableResp ? tableResp.querySelector('table') : null;
+    
+    if (topScroll && topInner && tableResp && tableEl) {
+        topInner.style.width = tableEl.offsetWidth + 'px';
+        
+        topScroll.onscroll = function() {
+            tableResp.scrollLeft = topScroll.scrollLeft;
+        };
+        tableResp.onscroll = function() {
+            topScroll.scrollLeft = tableResp.scrollLeft;
+        };
+    }
+}
+window.addEventListener('resize', syncTopScroll);
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(syncTopScroll, 150);
+    setTimeout(syncTopScroll, 600);
 });
 
 function copyToClipboard(id) {
