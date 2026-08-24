@@ -25,6 +25,7 @@ class EmbassyAppointmentController extends Controller
     public function index(Request $request)
     {
         EmbassyAppointment::ensureTableSchema();
+        EmbassyAppointment::autoSeedAppointmentsFromImage();
 
         $query = EmbassyAppointment::query()
             ->with(['country', 'updatedBy'])

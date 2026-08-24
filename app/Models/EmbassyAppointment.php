@@ -164,18 +164,22 @@ class EmbassyAppointment extends Model
             ];
 
             foreach ($appointmentsData as $item) {
+                $cleanAr = preg_replace('/[أإآ]/u', 'ا', $item['name_ar']);
+
                 $country = VisaCountry::where('slug', $item['slug'])
-                    ->orWhere('name_ar', $item['name_ar'])
+                    ->orWhere('name_en', 'like', $item['name_en'])
+                    ->orWhere('name_ar', 'like', '%' . $cleanAr . '%')
+                    ->orWhere('name_ar', 'like', '%' . $item['name_ar'] . '%')
                     ->first();
 
                 if (! $country) {
-                    $country = VisaCountry::create([
-                        'visa_category_id' => $category->id,
-                        'name_ar' => $item['name_ar'],
-                        'name_en' => $item['name_en'],
-                        'slug' => $item['slug'],
-                        'status' => 'active',
-                    ]);
+                    $country = new VisaCountry();
+                    $country->visa_category_id = $category->id;
+                    $country->name_ar = $item['name_ar'];
+                    $country->name_en = $item['name_en'];
+                    $country->slug = $item['slug'];
+                    $country->is_active = true;
+                    $country->save();
                 }
 
                 static::updateOrCreate([
