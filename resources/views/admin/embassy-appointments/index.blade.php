@@ -243,6 +243,14 @@
                                         <a href="{{ route('admin.embassy-appointments.show', $appt) }}" class="btn btn-sm btn-light border" title="التفاصيل وسجل التغييرات">
                                             👁️
                                         </a>
+
+                                        <form method="POST" action="{{ route('admin.embassy-appointments.destroy', $appt) }}" class="d-inline" onsubmit="return confirm('هل أنت تأكد من رغبتك في حذف سجل هذا الموعد بالكامل؟');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="حذف سجل الموعد">
+                                                🗑️
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

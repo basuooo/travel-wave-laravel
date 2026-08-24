@@ -31,6 +31,14 @@
                     </button>
                 </form>
             @endif
+
+            <form method="POST" action="{{ route('admin.embassy-appointments.destroy', $item) }}" class="d-inline" onsubmit="return confirm('هل أنت تأكد من رغبتك في حذف سجل هذا الموعد بالكامل؟');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger">
+                    🗑️ حذف الموعد
+                </button>
+            </form>
         </div>
     </div>
 
