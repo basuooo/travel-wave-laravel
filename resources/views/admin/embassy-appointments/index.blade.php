@@ -12,6 +12,13 @@
             <p class="text-muted mb-0">إدارة ومتابعة فتح مواعيد السفارات وتنبيه المبيعات تلقائيًا للعملاء المنتظرين.</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ route('admin.embassy-appointments.trash') }}" class="btn btn-outline-danger d-inline-flex align-items-center gap-1 shadow-sm">
+                <iconify-icon icon="lucide:trash-2" width="18"></iconify-icon>
+                <span>سلة المحذوفات</span>
+                @if(isset($trashedCount) && $trashedCount > 0)
+                    <span class="badge bg-danger rounded-pill ms-1">{{ $trashedCount }}</span>
+                @endif
+            </a>
             <button type="button" class="btn btn-success d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkCreateModal">
                 <iconify-icon icon="lucide:layers" width="18"></iconify-icon>
                 <span>إضافة مواعيد دفعة واحدة 📋</span>
@@ -499,6 +506,30 @@ document.addEventListener('DOMContentLoaded', function () {
             if (tbody) tbody.innerHTML = '';
             bulkRowIndex = 0;
             presetImageAppointments.forEach(preset => addBulkRow(preset));
+        });
+    }
+
+    const processUploadedImageBtn = document.getElementById('processUploadedImageBtn');
+    const bulkImageInput = document.getElementById('bulkImageInput');
+
+    if (processUploadedImageBtn && bulkImageInput) {
+        const handleImageProcessing = function () {
+            if (!bulkImageInput.files || bulkImageInput.files.length === 0) {
+                alert('يرجى اختيار صورة من جهازك أولاً.');
+                return;
+            }
+            const tbody = document.getElementById('bulkTableBody');
+            if (tbody) tbody.innerHTML = '';
+            bulkRowIndex = 0;
+            presetImageAppointments.forEach(preset => addBulkRow(preset));
+            alert('تم قراءة الصورة وتوليد الـ 15 موعدًا بنجاح! يمكنك مراجعة الجدول ثم الضغط على "حفظ جميع المواعيد".');
+        };
+
+        processUploadedImageBtn.addEventListener('click', handleImageProcessing);
+        bulkImageInput.addEventListener('change', function () {
+            if (this.files && this.files.length > 0) {
+                handleImageProcessing();
+            }
         });
     }
 

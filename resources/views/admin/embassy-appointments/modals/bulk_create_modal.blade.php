@@ -12,6 +12,19 @@
                 </div>
 
                 <div class="modal-body p-4">
+                    <div class="mb-3 p-3 bg-light rounded border">
+                        <label for="bulkImageInput" class="form-label fw-bold text-dark mb-1">
+                            📷 رفع صورة المواعيد لاستخراجها تلقائيًا:
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <input type="file" class="form-control" id="bulkImageInput" accept="image/*">
+                            <button type="button" class="btn btn-outline-primary" id="processUploadedImageBtn">
+                                🔍 قراءة الصورة وتعبئة الجدول
+                            </button>
+                        </div>
+                        <div class="form-text small text-muted">اختر صورة المواعيد من جهازك أو اضغط على زر التعبئة التلقائية الجاهزة بالأسفل.</div>
+                    </div>
+
                     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                         <div>
                             <span class="fw-bold text-dark">جدول المواعيد المتعددة</span>

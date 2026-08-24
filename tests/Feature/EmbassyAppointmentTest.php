@@ -31,7 +31,9 @@ class EmbassyAppointmentTest extends TestCase
             'database/migrations/2026_03_22_210000_create_crm_core_tables.php',
             'database/migrations/2026_03_22_220000_upgrade_crm_status_workflow.php',
             'database/migrations/2026_03_22_230000_simplify_crm_workflow.php',
+            'database/migrations/2026_03_18_155647_create_settings_table.php',
             'database/migrations/2026_08_24_220000_create_embassy_appointments_tables.php',
+            'database/migrations/2026_08_25_023000_add_soft_deletes_to_embassy_appointments_table.php',
         ] as $migrationPath) {
             \Illuminate\Support\Facades\Artisan::call('migrate', ['--path' => $migrationPath]);
         }
@@ -280,5 +282,48 @@ class EmbassyAppointmentTest extends TestCase
             'visa_country_id' => $c2->id,
             'earliest_date' => 'شهر 1',
         ]);
+    }
+
+    public function test_soft_delete_restore_and_force_delete_embassy_appointment()
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
+        $category = \App\Models\VisaCategory::firstOrCreate(
+            ['slug' => 'europe-test-trash'],
+            ['name_ar' => 'أوروبا', 'name_en' => 'Europe']
+        );
+        $country = VisaCountry::firstOrCreate(
+            ['slug' => 'italy-trash'],
+            ['visa_category_id' => $category->id, 'name_ar' => 'إيطاليا', 'name_en' => 'Italy']
+        );
+
+        $appt = EmbassyAppointment::create([
+            'visa_country_id' => $country->id,
+            'visa_type' => 'سياحة',
+            'appointment_center' => 'VFS',
+            'appointment_type' => 'Regular',
+            'status' => 'available_later',
+            'earliest_date' => 'شهر 9',
+        ]);
+
+        // 1. Soft Delete
+        $deleteResp = $this->actingAs($admin)->delete(route('admin.embassy-appointments.destroy', $appt->id));
+        $deleteResp->assertRedirect(route('admin.embassy-appointments.index'));
+        $this->assertSoftDeleted('embassy_appointments', ['id' => $appt->id]);
+
+        // 2. View Trash
+        $trashResp = $this->actingAs($admin)->get(route('admin.embassy-appointments.trash'));
+        $trashResp->assertOk();
+        $trashResp->assertSee($country->fresh()->name_ar);
+
+        // 3. Restore
+        $restoreResp = $this->actingAs($admin)->post(route('admin.embassy-appointments.restore', $appt->id));
+        $restoreResp->assertRedirect(route('admin.embassy-appointments.trash'));
+        $this->assertDatabaseHas('embassy_appointments', ['id' => $appt->id, 'deleted_at' => null]);
+
+        // 4. Force Delete
+        $appt->delete(); // soft delete again
+        $forceResp = $this->actingAs($admin)->delete(route('admin.embassy-appointments.force-delete', $appt->id));
+        $forceResp->assertRedirect(route('admin.embassy-appointments.trash'));
+        $this->assertDatabaseMissing('embassy_appointments', ['id' => $appt->id]);
     }
 }

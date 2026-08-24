@@ -85,11 +85,13 @@ class EmbassyAppointmentController extends Controller
         ];
 
         $countries = VisaCountry::orderBy('name_ar')->get();
+        $trashedCount = EmbassyAppointment::onlyTrashed()->count();
 
         return view('admin.embassy-appointments.index', [
             'items' => $appointments,
             'summary' => $summary,
             'countries' => $countries,
+            'trashedCount' => $trashedCount,
         ]);
     }
 
@@ -369,10 +371,42 @@ class EmbassyAppointmentController extends Controller
 
     public function destroy(EmbassyAppointment $embassyAppointment)
     {
+        $embassyAppointment->update(['deleted_by' => auth()->id()]);
         $embassyAppointment->delete();
 
         return redirect()->route('admin.embassy-appointments.index')
-            ->with('success', 'تم حذف سجل الموعد بنجاح.');
+            ->with('success', 'تم نقل موعد السفارة إلى سلة المحذوفات 🗑️');
+    }
+
+    public function trash()
+    {
+        $deletedItems = EmbassyAppointment::onlyTrashed()
+            ->with(['country'])
+            ->latest('deleted_at')
+            ->get();
+
+        return view('admin.embassy-appointments.trash', [
+            'items' => $deletedItems,
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $appointment = EmbassyAppointment::onlyTrashed()->findOrFail($id);
+        $appointment->restore();
+        $appointment->update(['deleted_by' => null]);
+
+        return redirect()->route('admin.embassy-appointments.trash')
+            ->with('success', 'تم استعادة موعد السفارة من سلة المحذوفات بنجاح 🟢');
+    }
+
+    public function forceDelete($id)
+    {
+        $appointment = EmbassyAppointment::onlyTrashed()->findOrFail($id);
+        $appointment->forceDelete();
+
+        return redirect()->route('admin.embassy-appointments.trash')
+            ->with('success', 'تم حذف موعد السفارة بشكل نهائي ❌');
     }
 
     // --- Seller Popup API Endpoints ---

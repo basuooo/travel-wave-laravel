@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class EmbassyAppointment extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     public const STATUS_AVAILABLE_NOW = 'available_now';
     public const STATUS_AVAILABLE_LATER = 'available_later';
@@ -44,9 +45,20 @@ class EmbassyAppointment extends Model
                     $table->unsignedBigInteger('updated_by')->nullable();
                     $table->text('notes')->nullable();
                     $table->text('booking_link')->nullable();
+                    $table->softDeletes();
+                    $table->unsignedBigInteger('deleted_by')->nullable();
                     $table->timestamps();
 
                     $table->unique(['visa_country_id', 'visa_type', 'appointment_center', 'appointment_type'], 'embassy_appts_unique_combo');
+                });
+            } else {
+                Schema::table('embassy_appointments', function (Blueprint $table) {
+                    if (! Schema::hasColumn('embassy_appointments', 'deleted_at')) {
+                        $table->softDeletes();
+                    }
+                    if (! Schema::hasColumn('embassy_appointments', 'deleted_by')) {
+                        $table->unsignedBigInteger('deleted_by')->nullable();
+                    }
                 });
             }
 
@@ -241,6 +253,7 @@ class EmbassyAppointment extends Model
         'updated_by',
         'notes',
         'booking_link',
+        'deleted_by',
     ];
 
     protected $casts = [
