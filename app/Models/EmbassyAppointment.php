@@ -140,10 +140,21 @@ class EmbassyAppointment extends Model
                 return;
             }
 
-            $category = VisaCategory::firstOrCreate(
-                ['slug' => 'schengen'],
-                ['name_ar' => 'شنغن (Schengen)', 'name_en' => 'Schengen']
-            );
+            $category = VisaCategory::first();
+            if (! $category && Schema::hasTable('visa_categories')) {
+                try {
+                    $category = VisaCategory::create([
+                        'name_ar' => 'شنغن (Schengen)',
+                        'name_en' => 'Schengen',
+                        'slug' => 'schengen',
+                        'is_active' => true,
+                    ]);
+                } catch (\Throwable $e) {
+                    $category = null;
+                }
+            }
+
+            $categoryId = $category?->id;
 
             $appointmentsData = [
                 ['name_ar' => 'ألمانيا', 'name_en' => 'Germany', 'slug' => 'germany', 'dates' => 'شهر 12', 'center' => 'VFS'],
@@ -164,35 +175,43 @@ class EmbassyAppointment extends Model
             ];
 
             foreach ($appointmentsData as $item) {
-                $cleanAr = preg_replace('/[أإآ]/u', 'ا', $item['name_ar']);
+                try {
+                    $cleanAr = preg_replace('/[أإآ]/u', 'ا', $item['name_ar']);
 
-                $country = VisaCountry::where('slug', $item['slug'])
-                    ->orWhere('name_en', 'like', $item['name_en'])
-                    ->orWhere('name_ar', 'like', '%' . $cleanAr . '%')
-                    ->orWhere('name_ar', 'like', '%' . $item['name_ar'] . '%')
-                    ->first();
+                    $country = VisaCountry::where('slug', $item['slug'])
+                        ->orWhere('name_en', 'like', $item['name_en'])
+                        ->orWhere('name_ar', 'like', '%' . $cleanAr . '%')
+                        ->orWhere('name_ar', 'like', '%' . $item['name_ar'] . '%')
+                        ->first();
 
-                if (! $country) {
-                    $country = new VisaCountry();
-                    $country->visa_category_id = $category->id;
-                    $country->name_ar = $item['name_ar'];
-                    $country->name_en = $item['name_en'];
-                    $country->slug = $item['slug'];
-                    $country->is_active = true;
-                    $country->save();
+                    if (! $country) {
+                        $country = new VisaCountry();
+                        if ($categoryId) {
+                            $country->visa_category_id = $categoryId;
+                        }
+                        $country->name_ar = $item['name_ar'];
+                        $country->name_en = $item['name_en'];
+                        $country->slug = $item['slug'];
+                        $country->is_active = true;
+                        $country->save();
+                    }
+
+                    if ($country) {
+                        static::updateOrCreate([
+                            'visa_country_id' => $country->id,
+                            'visa_type' => 'سياحة',
+                            'appointment_center' => $item['center'],
+                            'appointment_type' => 'Regular',
+                        ], [
+                            'status' => self::STATUS_AVAILABLE_LATER,
+                            'earliest_date' => $item['dates'],
+                            'last_updated_at' => now(),
+                            'notes' => '🟡 مواعيد متاحة بتاريخ مستقبلي',
+                        ]);
+                    }
+                } catch (\Throwable $ex) {
+                    logger()->error('autoSeedAppointmentsFromImage item error: ' . $ex->getMessage());
                 }
-
-                static::updateOrCreate([
-                    'visa_country_id' => $country->id,
-                    'visa_type' => 'سياحة',
-                    'appointment_center' => $item['center'],
-                    'appointment_type' => 'Regular',
-                ], [
-                    'status' => self::STATUS_AVAILABLE_LATER,
-                    'earliest_date' => $item['dates'],
-                    'last_updated_at' => now(),
-                    'notes' => '🟡 مواعيد متاحة بتاريخ مستقبلي',
-                ]);
             }
         } catch (\Throwable $e) {
             logger()->error('autoSeedAppointmentsFromImage error: ' . $e->getMessage());
