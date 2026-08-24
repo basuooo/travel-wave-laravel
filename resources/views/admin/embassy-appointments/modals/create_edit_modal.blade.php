@@ -89,3 +89,12 @@
         </div>
     </div>
 </div>
+
+<script>
+(function() {
+    var modalEl = document.getElementById('createApptModal');
+    if (modalEl && modalEl.parentNode !== document.body) {
+        document.body.appendChild(modalEl);
+    }
+})();
+</script>

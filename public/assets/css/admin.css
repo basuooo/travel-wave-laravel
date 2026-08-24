@@ -1377,10 +1377,13 @@ textarea.form-control {
 }
 
 /* Fix Bootstrap Modals Stacking & Backdrop */
-.modal {
-    z-index: 2600 !important;
+.modal-backdrop,
+body > .modal-backdrop {
+    z-index: 10050 !important;
 }
-.modal-backdrop {
-    z-index: 2550 !important;
+.modal,
+body > .modal {
+    z-index: 10060 !important;
 }
+
 
