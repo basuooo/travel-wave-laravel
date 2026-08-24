@@ -1375,3 +1375,12 @@ textarea.form-control {
         grid-template-columns: 1fr;
     }
 }
+
+/* Fix Bootstrap Modals Stacking & Backdrop */
+.modal {
+    z-index: 2600 !important;
+}
+.modal-backdrop {
+    z-index: 2550 !important;
+}
+

@@ -1154,6 +1154,13 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('show.bs.modal', function (e) {
+    if (e.target && e.target.parentNode !== document.body) {
+        document.body.appendChild(e.target);
+    }
+});
+</script>
 @include('admin.embassy-appointments.components.seller_popup_modal')
 @stack('scripts')
 </body>
