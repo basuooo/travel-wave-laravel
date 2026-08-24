@@ -107,19 +107,6 @@
                         <option value="temporarily_unavailable" {{ request('status') == 'temporarily_unavailable' ? 'selected' : '' }}>متوقفة مؤقتاً</option>
                         <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>غير متاحة</option>
                     </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold mb-1">عرض في الصفحة</label>
-                    <select name="per_page" class="form-select form-select-sm">
-                        <option value="10" {{ request('per_page') == '10' ? 'selected' : '' }}>10 سجلات</option>
-                        <option value="20" {{ request('per_page') == '20' ? 'selected' : '' }}>20 سجل</option>
-                        <option value="25" {{ request('per_page', '25') == '25' ? 'selected' : '' }}>25 سجل</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50 سجل</option>
-                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100 سجل</option>
-                        <option value="500" {{ request('per_page') == '500' ? 'selected' : '' }}>500 سجل</option>
-                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>عرض الكل (All)</option>
-                    </select>
-                </div>
                 <div class="col-md-3 d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search me-1"></i> بحث</button>
                     <a href="{{ route('admin.visa-database.index') }}" class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-x-circle me-1"></i> إلغاء</a>

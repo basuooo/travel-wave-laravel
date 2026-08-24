@@ -19,7 +19,8 @@ class VisaDatabaseController extends Controller
         $query = VisaRecord::query()->with(['country.categories', 'activityLogs']);
 
         // Search query (Country name AR/EN, Visa Type, Notes, Documents, or Category name)
-        if ($search = trim($request->input('search', ''))) {
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('visa_type', 'like', "%{$search}%")
                     ->orWhere('notes', 'like', "%{$search}%")
@@ -38,7 +39,8 @@ class VisaDatabaseController extends Controller
         }
 
         // Category filter
-        if ($categoryId = $request->input('category_id')) {
+        if ($request->filled('category_id')) {
+            $categoryId = $request->input('category_id');
             $query->whereHas('country', function ($cq) use ($categoryId) {
                 $cq->withTrashed()->where(function ($cInner) use ($categoryId) {
                     $cInner->where('visa_category_id', $categoryId)
@@ -48,17 +50,18 @@ class VisaDatabaseController extends Controller
         }
 
         // Country filter
-        if ($countryId = $request->input('country_id')) {
-            $query->where('visa_country_id', $countryId);
+        if ($request->filled('country_id')) {
+            $query->where('visa_country_id', $request->input('country_id'));
         }
 
         // Visa Type filter
-        if ($visaType = $request->input('visa_type')) {
-            $query->where('visa_type', $visaType);
+        if ($request->filled('visa_type')) {
+            $query->where('visa_type', $request->input('visa_type'));
         }
 
         // Application Center filter
-        if ($center = $request->input('application_center')) {
+        if ($request->filled('application_center')) {
+            $center = $request->input('application_center');
             $query->where(function ($q) use ($center) {
                 $q->whereJsonContains('application_center', $center)
                     ->orWhere('application_center', 'like', "%{$center}%");
@@ -66,18 +69,20 @@ class VisaDatabaseController extends Controller
         }
 
         // Biometrics filter
-        if ($request->has('is_biometrics_required') && $request->input('is_biometrics_required') !== '') {
-            $query->where('is_biometrics_required', $request->boolean('is_biometrics_required'));
+        if ($request->filled('is_biometrics_required')) {
+            $val = $request->input('is_biometrics_required');
+            $query->where('is_biometrics_required', (bool) (int) $val);
         }
 
         // Interview filter
-        if ($request->has('is_interview_required') && $request->input('is_interview_required') !== '') {
-            $query->where('is_interview_required', $request->boolean('is_interview_required'));
+        if ($request->filled('is_interview_required')) {
+            $val = $request->input('is_interview_required');
+            $query->where('is_interview_required', (bool) (int) $val);
         }
 
         // Status filter
-        if ($status = $request->input('status')) {
-            $query->where('status', $status);
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
         }
 
         $perPageInput = strtolower((string) $request->input('per_page', '25'));
