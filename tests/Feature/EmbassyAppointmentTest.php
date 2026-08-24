@@ -231,4 +231,54 @@ class EmbassyAppointmentTest extends TestCase
             'user_id' => $seller->id,
         ]);
     }
+
+    public function test_can_store_bulk_embassy_appointments()
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
+        $category = \App\Models\VisaCategory::firstOrCreate(
+            ['slug' => 'europe-test-bulk'],
+            ['name_ar' => 'أوروبا', 'name_en' => 'Europe']
+        );
+
+        $c1 = VisaCountry::firstOrCreate(
+            ['slug' => 'germany-bulk'],
+            ['visa_category_id' => $category->id, 'name_ar' => 'ألمانيا', 'name_en' => 'Germany']
+        );
+        $c2 = VisaCountry::firstOrCreate(
+            ['slug' => 'france-bulk'],
+            ['visa_category_id' => $category->id, 'name_ar' => 'فرنسا', 'name_en' => 'France']
+        );
+
+        $response = $this->actingAs($admin)->post(route('admin.embassy-appointments.store-bulk'), [
+            'appointments' => [
+                [
+                    'visa_country_id' => $c1->id,
+                    'visa_type' => 'سياحة',
+                    'appointment_center' => 'VFS',
+                    'appointment_type' => 'Regular',
+                    'status' => 'available_later',
+                    'earliest_date' => 'شهر 12',
+                ],
+                [
+                    'visa_country_id' => $c2->id,
+                    'visa_type' => 'سياحة',
+                    'appointment_center' => 'TLS',
+                    'appointment_type' => 'Regular',
+                    'status' => 'available_later',
+                    'earliest_date' => 'شهر 1',
+                ],
+            ],
+        ]);
+
+        $response->assertRedirect(route('admin.embassy-appointments.index'));
+
+        $this->assertDatabaseHas('embassy_appointments', [
+            'visa_country_id' => $c1->id,
+            'earliest_date' => 'شهر 12',
+        ]);
+        $this->assertDatabaseHas('embassy_appointments', [
+            'visa_country_id' => $c2->id,
+            'earliest_date' => 'شهر 1',
+        ]);
+    }
 }

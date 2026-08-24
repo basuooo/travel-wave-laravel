@@ -25,6 +25,7 @@ class EmbassyAppointmentController extends Controller
     public function index(Request $request)
     {
         EmbassyAppointment::ensureTableSchema();
+        $this->ensureSchengenCountriesExist();
         EmbassyAppointment::autoSeedAppointmentsFromImage();
 
         $query = EmbassyAppointment::query()
@@ -114,6 +115,106 @@ class EmbassyAppointmentController extends Controller
             return redirect()->route('admin.embassy-appointments.index')
                 ->with('error', "حدث خطأ أثناء المزامنة: " . $e->getMessage());
         }
+    }
+
+    protected function ensureSchengenCountriesExist(): void
+    {
+        try {
+            $category = \App\Models\VisaCategory::first() ?? \App\Models\VisaCategory::withTrashed()->first();
+            if (! $category && \Illuminate\Support\Facades\Schema::hasTable('visa_categories')) {
+                try {
+                    $category = \App\Models\VisaCategory::create([
+                        'name_ar' => 'شنغن (Schengen)',
+                        'name_en' => 'Schengen',
+                        'slug' => 'schengen',
+                        'is_active' => true,
+                    ]);
+                } catch (\Throwable $e) {}
+            }
+            $catId = $category?->id ?? 1;
+
+            $list = [
+                ['name_ar' => 'ألمانيا', 'name_en' => 'Germany', 'slug' => 'germany'],
+                ['name_ar' => 'إسبانيا', 'name_en' => 'Spain', 'slug' => 'spain'],
+                ['name_ar' => 'اليونان', 'name_en' => 'Greece', 'slug' => 'greece'],
+                ['name_ar' => 'المجر', 'name_en' => 'Hungary', 'slug' => 'hungary'],
+                ['name_ar' => 'هولندا', 'name_en' => 'Netherlands', 'slug' => 'netherlands'],
+                ['name_ar' => 'البرتغال', 'name_en' => 'Portugal', 'slug' => 'portugal'],
+                ['name_ar' => 'السويد', 'name_en' => 'Sweden', 'slug' => 'sweden'],
+                ['name_ar' => 'إيطاليا', 'name_en' => 'Italy', 'slug' => 'italy'],
+                ['name_ar' => 'سويسرا', 'name_en' => 'Switzerland', 'slug' => 'switzerland'],
+                ['name_ar' => 'كرواتيا', 'name_en' => 'Croatia', 'slug' => 'croatia'],
+                ['name_ar' => 'بلجيكا', 'name_en' => 'Belgium', 'slug' => 'belgium'],
+                ['name_ar' => 'فرنسا', 'name_en' => 'France', 'slug' => 'france'],
+                ['name_ar' => 'النمسا', 'name_en' => 'Austria', 'slug' => 'austria'],
+                ['name_ar' => 'النرويج', 'name_en' => 'Norway', 'slug' => 'norway'],
+            ];
+
+            foreach ($list as $item) {
+                $cleanAr = preg_replace('/[أإآ]/u', 'ا', $item['name_ar']);
+                $c = VisaCountry::where('slug', $item['slug'])
+                    ->orWhere('name_en', 'like', $item['name_en'])
+                    ->orWhere('name_ar', 'like', '%' . $cleanAr . '%')
+                    ->first();
+
+                if (! $c) {
+                    try {
+                        $c = new VisaCountry();
+                        $c->visa_category_id = $catId;
+                        $c->name_ar = $item['name_ar'];
+                        $c->name_en = $item['name_en'];
+                        $c->slug = $item['slug'];
+                        $c->is_active = true;
+                        $c->save();
+                    } catch (\Throwable $ex) {}
+                }
+            }
+        } catch (\Throwable $e) {}
+    }
+
+    public function storeBulk(Request $request)
+    {
+        $validated = $request->validate([
+            'appointments' => ['required', 'array', 'min:1'],
+            'appointments.*.visa_country_id' => ['required', 'exists:visa_countries,id'],
+            'appointments.*.visa_type' => ['required', 'string', 'max:100'],
+            'appointments.*.appointment_center' => ['required', 'string', 'max:100'],
+            'appointments.*.appointment_type' => ['required', 'string', 'max:100'],
+            'appointments.*.status' => ['required', 'string'],
+            'appointments.*.earliest_date' => ['nullable', 'string', 'max:255'],
+            'appointments.*.notes' => ['nullable', 'string'],
+        ]);
+
+        $savedCount = 0;
+        foreach ($validated['appointments'] as $item) {
+            $appt = EmbassyAppointment::updateOrCreate([
+                'visa_country_id' => $item['visa_country_id'],
+                'visa_type' => $item['visa_type'],
+                'appointment_center' => $item['appointment_center'],
+                'appointment_type' => $item['appointment_type'],
+            ], [
+                'status' => $item['status'],
+                'earliest_date' => $item['earliest_date'] ?? null,
+                'notes' => $item['notes'] ?? null,
+                'last_updated_at' => now(),
+                'updated_by' => auth()->id(),
+            ]);
+
+            if ($item['status'] === EmbassyAppointment::STATUS_AVAILABLE_NOW) {
+                $this->service->updateStatus(
+                    $appt,
+                    EmbassyAppointment::STATUS_AVAILABLE_NOW,
+                    $item['earliest_date'] ?? null,
+                    $item['notes'] ?? null,
+                    auth()->user()
+                );
+            }
+
+            $savedCount++;
+        }
+
+        return redirect()->route('admin.embassy-appointments.index')
+            ->with('success', "تم إضافة وتحديث {$savedCount} موعد سفارة بنجاح 🟢");
     }
 
     public function store(Request $request)

@@ -11,7 +11,11 @@
             <h1 class="h3 fw-bold mb-1">🏛️ مواعيد السفارات (Embassy Appointments)</h1>
             <p class="text-muted mb-0">إدارة ومتابعة فتح مواعيد السفارات وتنبيه المبيعات تلقائيًا للعملاء المنتظرين.</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-success d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkCreateModal">
+                <iconify-icon icon="lucide:layers" width="18"></iconify-icon>
+                <span>إضافة مواعيد دفعة واحدة 📋</span>
+            </button>
             <form method="POST" action="{{ route('admin.embassy-appointments.sync-seed') }}" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1 shadow-sm" title="إعادة التوليد والمزامنة التلقائية لمواعيد السفارات من الصورة">
@@ -293,86 +297,220 @@
 
 @push('modals')
     @include('admin.embassy-appointments.modals.create_edit_modal')
+    @include('admin.embassy-appointments.modals.bulk_create_modal')
 @endpush
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modalEl = document.getElementById('createApptModal');
-    if (!modalEl) return;
-    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-    const form = document.getElementById('apptForm');
-    const modalTitle = document.getElementById('modalTitle');
-    const methodContainer = document.getElementById('methodContainer');
+    if (modalEl) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        const form = document.getElementById('apptForm');
+        const modalTitle = document.getElementById('modalTitle');
+        const methodContainer = document.getElementById('methodContainer');
 
-    const countrySearchInput = document.getElementById('countrySearchInput');
-    const countrySelect = document.getElementById('modal_visa_country_id');
+        const countrySearchInput = document.getElementById('countrySearchInput');
+        const countrySelect = document.getElementById('modal_visa_country_id');
 
-    if (countrySearchInput && countrySelect) {
-        countrySearchInput.addEventListener('input', function () {
-            const val = this.value.trim().toLowerCase();
-            let firstMatch = null;
-            Array.from(countrySelect.options).forEach(opt => {
-                if (!opt.value) return;
-                const searchData = (opt.dataset.search || opt.textContent).toLowerCase();
-                if (!val || searchData.includes(val)) {
-                    opt.style.display = '';
-                    if (!firstMatch && val) firstMatch = opt;
-                } else {
-                    opt.style.display = 'none';
+        if (countrySearchInput && countrySelect) {
+            countrySearchInput.addEventListener('input', function () {
+                const val = this.value.trim().toLowerCase();
+                let firstMatch = null;
+                Array.from(countrySelect.options).forEach(opt => {
+                    if (!opt.value) return;
+                    const searchData = (opt.dataset.search || opt.textContent).toLowerCase();
+                    if (!val || searchData.includes(val)) {
+                        opt.style.display = '';
+                        if (!firstMatch && val) firstMatch = opt;
+                    } else {
+                        opt.style.display = 'none';
+                    }
+                });
+                if (firstMatch && val) {
+                    countrySelect.value = firstMatch.value;
                 }
             });
-            if (firstMatch && val) {
-                countrySelect.value = firstMatch.value;
+        }
+
+        function setSelectValueOrAdd(selectId, val) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            if (!val) {
+                select.selectedIndex = 0;
+                return;
+            }
+            let exists = Array.from(select.options).some(opt => opt.value === val);
+            if (!exists) {
+                const newOpt = new Option(val, val, true, true);
+                select.add(newOpt);
+            }
+            select.value = val;
+        }
+
+        document.querySelectorAll('.editApptBtn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const data = this.dataset;
+                modalTitle.textContent = 'تعديل موعد سفارة';
+                form.action = `/admin/embassy-appointments/${data.id}`;
+                methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+
+                document.getElementById('modal_visa_country_id').value = data.countryId;
+                setSelectValueOrAdd('modal_visa_type', data.visaType);
+                setSelectValueOrAdd('modal_appointment_center', data.center);
+                document.getElementById('modal_appointment_type').value = data.apptType;
+                document.getElementById('modal_status').value = data.status;
+                document.getElementById('modal_earliest_date').value = data.earliestDate || '';
+                document.getElementById('modal_notes').value = data.notes || '';
+                document.getElementById('modal_booking_link').value = data.bookingLink || '';
+
+                modal.show();
+            });
+        });
+
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            modalTitle.textContent = 'إضافة موعد سفارة جديد';
+            form.action = "{{ route('admin.embassy-appointments.store') }}";
+            methodContainer.innerHTML = '';
+            form.reset();
+            if (countrySearchInput) countrySearchInput.value = '';
+            if (countrySelect) {
+                Array.from(countrySelect.options).forEach(opt => opt.style.display = '');
             }
         });
     }
 
-    function setSelectValueOrAdd(selectId, val) {
-        const select = document.getElementById(selectId);
-        if (!select) return;
-        if (!val) {
-            select.selectedIndex = 0;
-            return;
+    // Bulk Modal logic
+    const countryOptionsHtml = `@foreach($countries as $c)<option value="{{ $c->id }}" data-name-ar="{{ $c->name_ar }}" data-name-en="{{ $c->name_en }}">{{ $c->name_ar ?: $c->name_en }} ({{ $c->name_en }})</option>@endforeach`;
+
+    const presetImageAppointments = [
+        { countryName: 'ألمانيا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 12' },
+        { countryName: 'إسبانيا', visaType: 'سياحة', center: 'BLS', apptType: 'Regular', status: 'available_later', date: 'شهر 9 و 10' },
+        { countryName: 'اليونان', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9 و 10' },
+        { countryName: 'المجر', visaType: 'سياحة', center: 'iOM', apptType: 'Regular', status: 'available_later', date: 'شهر 9 و 10' },
+        { countryName: 'هولندا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 11 و 12' },
+        { countryName: 'اليونان', visaType: 'سياحة', center: 'VFS (إسكندرية)', apptType: 'Regular', status: 'available_later', date: 'شهر 9 (إسكندرية)' },
+        { countryName: 'البرتغال', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9 و 10' },
+        { countryName: 'السويد', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9' },
+        { countryName: 'إيطاليا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9' },
+        { countryName: 'سويسرا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9' },
+        { countryName: 'كرواتيا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 10' },
+        { countryName: 'بلجيكا', visaType: 'سياحة', center: 'TLS', apptType: 'Regular', status: 'available_later', date: 'شهر 11 و 12' },
+        { countryName: 'فرنسا', visaType: 'سياحة', center: 'TLS', apptType: 'Regular', status: 'available_later', date: 'شهر 1' },
+        { countryName: 'النمسا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 10 و 11' },
+        { countryName: 'النرويج', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9' },
+    ];
+
+    let bulkRowIndex = 0;
+
+    function addBulkRow(preset = null) {
+        const tbody = document.getElementById('bulkTableBody');
+        if (!tbody) return;
+
+        const idx = bulkRowIndex++;
+        const tr = document.createElement('tr');
+        tr.id = `bulk_row_${idx}`;
+
+        tr.innerHTML = `
+            <td>
+                <select name="appointments[${idx}][visa_country_id]" class="form-select form-select-sm country-select" required>
+                    <option value="">اختر الدولة...</option>
+                    ${countryOptionsHtml}
+                </select>
+            </td>
+            <td>
+                <select name="appointments[${idx}][visa_type]" class="form-select form-select-sm" required>
+                    <option value="سياحة" ${preset && preset.visaType === 'سياحة' ? 'selected' : ''}>سياحة</option>
+                    <option value="عمل / بيزنس" ${preset && preset.visaType === 'عمل / بيزنس' ? 'selected' : ''}>عمل / بيزنس</option>
+                    <option value="دراسة" ${preset && preset.visaType === 'دراسة' ? 'selected' : ''}>دراسة</option>
+                    <option value="فيزا عمل" ${preset && preset.visaType === 'فيزا عمل' ? 'selected' : ''}>فيزا عمل</option>
+                    <option value="زيارة عائلية" ${preset && preset.visaType === 'زيارة عائلية' ? 'selected' : ''}>زيارة عائلية</option>
+                    <option value="أخرى" ${preset && preset.visaType === 'أخرى' ? 'selected' : ''}>أخرى</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" name="appointments[${idx}][appointment_center]" class="form-control form-control-sm" value="${preset ? preset.center : 'BLS'}" required>
+            </td>
+            <td>
+                <select name="appointments[${idx}][appointment_type]" class="form-select form-select-sm" required>
+                    <option value="Regular" ${preset && preset.apptType === 'Regular' ? 'selected' : ''}>Regular</option>
+                    <option value="VIP" ${preset && preset.apptType === 'VIP' ? 'selected' : ''}>VIP</option>
+                    <option value="Super VIP" ${preset && preset.apptType === 'Super VIP' ? 'selected' : ''}>Super VIP</option>
+                </select>
+            </td>
+            <td>
+                <select name="appointments[${idx}][status]" class="form-select form-select-sm" required>
+                    <option value="available_later" ${preset && preset.status === 'available_later' ? 'selected' : ''}>🟡 متاحة مستقبلاً</option>
+                    <option value="available_now" ${preset && preset.status === 'available_now' ? 'selected' : ''}>🟢 متاحة الآن</option>
+                    <option value="no_availability" ${preset && preset.status === 'no_availability' ? 'selected' : ''}>🔴 لا توجد مواعيد</option>
+                    <option value="unknown" ${preset && preset.status === 'unknown' ? 'selected' : ''}>⚪ غير معروف</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" name="appointments[${idx}][earliest_date]" class="form-control form-control-sm" value="${preset ? preset.date : ''}" placeholder="مثال: شهر 9">
+            </td>
+            <td>
+                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 remove-row-btn">&times;</button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+
+        if (preset) {
+            const select = tr.querySelector('.country-select');
+            const searchName = preset.countryName.toLowerCase();
+            let matchedOpt = Array.from(select.options).find(opt => {
+                const ar = (opt.dataset.nameAr || opt.textContent).toLowerCase();
+                const en = (opt.dataset.nameEn || '').toLowerCase();
+                return ar.includes(searchName) || searchName.includes(ar) || en.includes(searchName);
+            });
+            if (matchedOpt) {
+                select.value = matchedOpt.value;
+            }
         }
-        let exists = Array.from(select.options).some(opt => opt.value === val);
-        if (!exists) {
-            const newOpt = new Option(val, val, true, true);
-            select.add(newOpt);
-        }
-        select.value = val;
+
+        tr.querySelector('.remove-row-btn').addEventListener('click', function () {
+            tr.remove();
+            updateRowCountBadge();
+        });
+
+        updateRowCountBadge();
     }
 
-    document.querySelectorAll('.editApptBtn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const data = this.dataset;
-            modalTitle.textContent = 'تعديل موعد سفارة';
-            form.action = `/admin/embassy-appointments/${data.id}`;
-            methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
-
-            document.getElementById('modal_visa_country_id').value = data.countryId;
-            setSelectValueOrAdd('modal_visa_type', data.visaType);
-            setSelectValueOrAdd('modal_appointment_center', data.center);
-            document.getElementById('modal_appointment_type').value = data.apptType;
-            document.getElementById('modal_status').value = data.status;
-            document.getElementById('modal_earliest_date').value = data.earliestDate || '';
-            document.getElementById('modal_notes').value = data.notes || '';
-            document.getElementById('modal_booking_link').value = data.bookingLink || '';
-
-            modal.show();
-        });
-    });
-
-    modalEl.addEventListener('hidden.bs.modal', function () {
-        modalTitle.textContent = 'إضافة موعد سفارة جديد';
-        form.action = "{{ route('admin.embassy-appointments.store') }}";
-        methodContainer.innerHTML = '';
-        form.reset();
-        if (countrySearchInput) countrySearchInput.value = '';
-        if (countrySelect) {
-            Array.from(countrySelect.options).forEach(opt => opt.style.display = '');
+    function updateRowCountBadge() {
+        const tbody = document.getElementById('bulkTableBody');
+        const badge = document.getElementById('rowCountBadge');
+        if (tbody && badge) {
+            badge.textContent = `عدد المواعيد المدرجة: ${tbody.children.length}`;
         }
-    });
+    }
+
+    const addBulkRowBtn = document.getElementById('addBulkRowBtn');
+    if (addBulkRowBtn) {
+        addBulkRowBtn.addEventListener('click', function () {
+            addBulkRow();
+        });
+    }
+
+    const fillImagePresetBtn = document.getElementById('fillImagePresetBtn');
+    if (fillImagePresetBtn) {
+        fillImagePresetBtn.addEventListener('click', function () {
+            const tbody = document.getElementById('bulkTableBody');
+            if (tbody) tbody.innerHTML = '';
+            bulkRowIndex = 0;
+            presetImageAppointments.forEach(preset => addBulkRow(preset));
+        });
+    }
+
+    const bulkCreateModalEl = document.getElementById('bulkCreateModal');
+    if (bulkCreateModalEl) {
+        bulkCreateModalEl.addEventListener('show.bs.modal', function () {
+            const tbody = document.getElementById('bulkTableBody');
+            if (tbody && tbody.children.length === 0) {
+                addBulkRow();
+            }
+        });
+    }
 });
 </script>
 @endpush

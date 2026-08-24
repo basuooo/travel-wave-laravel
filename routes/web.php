@@ -307,6 +307,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::middleware('permission:destinations.manage')->group(function () {
                 Route::get('/', [EmbassyAppointmentController::class, 'index'])->name('index');
                 Route::post('/sync-seed', [EmbassyAppointmentController::class, 'syncSeed'])->name('sync-seed');
+                Route::post('/store-bulk', [EmbassyAppointmentController::class, 'storeBulk'])->name('store-bulk');
                 Route::post('/', [EmbassyAppointmentController::class, 'store'])->name('store');
                 Route::get('/{embassy_appointment}', [EmbassyAppointmentController::class, 'show'])->name('show');
                 Route::put('/{embassy_appointment}', [EmbassyAppointmentController::class, 'update'])->name('update');
