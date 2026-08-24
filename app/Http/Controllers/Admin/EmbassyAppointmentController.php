@@ -94,13 +94,26 @@ class EmbassyAppointmentController extends Controller
 
     public function syncSeed()
     {
-        EmbassyAppointment::ensureTableSchema();
-        EmbassyAppointment::autoSeedAppointmentsFromImage();
+        try {
+            if (class_exists(\App\Models\VisaCategory::class)) {
+                try { \App\Models\VisaCategory::ensureTableSchema(); } catch (\Throwable $e) {}
+            }
+            if (class_exists(\App\Models\VisaCountry::class)) {
+                try { \App\Models\VisaCountry::ensureTableSchema(); } catch (\Throwable $e) {}
+            }
 
-        $count = EmbassyAppointment::count();
+            EmbassyAppointment::ensureTableSchema();
+            EmbassyAppointment::autoSeedAppointmentsFromImage();
 
-        return redirect()->route('admin.embassy-appointments.index')
-            ->with('success', "تم مزامنة وإدراج {$count} موعد سفارة بنجاح 🟢");
+            $count = EmbassyAppointment::count();
+            $countriesCount = VisaCountry::count();
+
+            return redirect()->route('admin.embassy-appointments.index')
+                ->with('success', "تم مزامنة وإدراج {$count} موعد سفارة بنجاح 🟢 (إجمالي الدول: {$countriesCount})");
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.embassy-appointments.index')
+                ->with('error', "حدث خطأ أثناء المزامنة: " . $e->getMessage());
+        }
     }
 
     public function store(Request $request)

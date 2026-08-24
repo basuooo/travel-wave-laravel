@@ -113,7 +113,9 @@ class VisaCategory extends Model
                     $c->restore();
                 }
 
-                $c->categories()->syncWithoutDetaching([$euCat->id]);
+                try {
+                    $c->categories()->syncWithoutDetaching([$euCat->id]);
+                } catch (\Throwable $ex) {}
             }
         } catch (\Throwable $e) {
             // ignore

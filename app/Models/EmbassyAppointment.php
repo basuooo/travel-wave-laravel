@@ -181,13 +181,30 @@ class EmbassyAppointment extends Model
                         ->first();
 
                     if (! $country) {
-                        $country = new VisaCountry();
-                        $country->visa_category_id = $categoryId;
-                        $country->name_ar = $item['name_ar'];
-                        $country->name_en = $item['name_en'];
-                        $country->slug = $item['slug'];
-                        $country->is_active = true;
-                        $country->save();
+                        try {
+                            $country = new VisaCountry();
+                            $country->visa_category_id = $categoryId;
+                            $country->name_ar = $item['name_ar'];
+                            $country->name_en = $item['name_en'];
+                            $country->slug = $item['slug'];
+                            $country->is_active = true;
+                            $country->save();
+                        } catch (\Throwable $createEx) {
+                            try {
+                                $cId = DB::table('visa_countries')->insertGetId([
+                                    'visa_category_id' => $categoryId,
+                                    'name_ar' => $item['name_ar'],
+                                    'name_en' => $item['name_en'],
+                                    'slug' => $item['slug'] . '-' . rand(100, 999),
+                                    'is_active' => true,
+                                    'created_at' => now(),
+                                    'updated_at' => now(),
+                                ]);
+                                $country = VisaCountry::find($cId);
+                            } catch (\Throwable $dbEx) {
+                                $country = VisaCountry::first();
+                            }
+                        }
                     }
 
                     if ($country && $country->id) {
