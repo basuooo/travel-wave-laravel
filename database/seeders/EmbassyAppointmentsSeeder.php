@@ -3,10 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\EmbassyAppointment;
-use App\Models\User;
 use App\Models\VisaCategory;
 use App\Models\VisaCountry;
-use App\Support\EmbassyAppointmentService;
 use Illuminate\Database\Seeder;
 
 class EmbassyAppointmentsSeeder extends Seeder
@@ -19,8 +17,6 @@ class EmbassyAppointmentsSeeder extends Seeder
             ['slug' => 'schengen'],
             ['name_ar' => 'شنغن (Schengen)', 'name_en' => 'Schengen']
         );
-
-        $admin = User::where('is_admin', true)->first() ?? User::first();
 
         $appointmentsData = [
             ['name_ar' => 'ألمانيا', 'name_en' => 'Germany', 'slug' => 'germany', 'dates' => 'شهر 12', 'center' => 'VFS'],
@@ -39,8 +35,6 @@ class EmbassyAppointmentsSeeder extends Seeder
             ['name_ar' => 'النمسا', 'name_en' => 'Austria', 'slug' => 'austria', 'dates' => 'شهر 10 و 11', 'center' => 'VFS'],
             ['name_ar' => 'النرويج', 'name_en' => 'Norway', 'slug' => 'norway', 'dates' => 'شهر 9', 'center' => 'VFS'],
         ];
-
-        $service = app(EmbassyAppointmentService::class);
 
         foreach ($appointmentsData as $item) {
             $country = VisaCountry::where('slug', $item['slug'])
@@ -63,16 +57,17 @@ class EmbassyAppointmentsSeeder extends Seeder
                 'appointment_center' => $item['center'],
                 'appointment_type' => 'Regular',
             ], [
-                'status' => EmbassyAppointment::STATUS_UNKNOWN,
+                'status' => EmbassyAppointment::STATUS_AVAILABLE_LATER,
+                'earliest_date' => $item['dates'],
+                'last_updated_at' => now(),
+                'notes' => '🟡 مواعيد متاحة بتاريخ مستقبلي',
             ]);
 
-            $service->updateStatus(
-                $appt,
-                EmbassyAppointment::STATUS_AVAILABLE_NOW,
-                $item['dates'],
-                'تمت إضافة الموعد تلقائيًا من قائمة المواعيد المتاحة الآن 🟢',
-                $admin
-            );
+            $appt->update([
+                'status' => EmbassyAppointment::STATUS_AVAILABLE_LATER,
+                'earliest_date' => $item['dates'],
+                'last_updated_at' => now(),
+            ]);
         }
     }
 }
