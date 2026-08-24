@@ -99,6 +99,15 @@ class VisaRecord extends Model
                     'status' => 'active',
                 ]);
             }
+
+            // Clean up prices for unlisted countries
+            $pricedSlugs = ['france','belgium','italy','germany','greece','netherlands','austria','czech-republic','denmark','hungary','poland','portugal','sweden','croatia','cyprus','finland','malta','romania','bulgaria','estonia','latvia','lithuania','luxembourg','slovakia','slovenia','ireland','iceland','liechtenstein','norway','switzerland','united-kingdom','turkey','united-states','canada','australia','spain'];
+
+            VisaCountry::all()->each(function ($c) use ($pricedSlugs) {
+                if (! in_array($c->slug, $pricedSlugs)) {
+                    $c->visaRecords()->update(['price' => null]);
+                }
+            });
         } catch (\Throwable $e) {
             logger()->error('ensureTableSchema error: ' . $e->getMessage());
         }
