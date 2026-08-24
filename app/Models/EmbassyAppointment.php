@@ -28,18 +28,20 @@ class EmbassyAppointment extends Model
     public static function ensureTableSchema(): void
     {
         try {
+            VisaCountry::ensureTableSchema();
+
             if (! Schema::hasTable('embassy_appointments')) {
                 Schema::create('embassy_appointments', function (Blueprint $table) {
                     $table->id();
-                    $table->foreignId('visa_country_id')->constrained('visa_countries')->cascadeOnDelete();
-                    $table->foreignId('visa_record_id')->nullable()->constrained('visa_records')->nullOnDelete();
+                    $table->unsignedBigInteger('visa_country_id');
+                    $table->unsignedBigInteger('visa_record_id')->nullable();
                     $table->string('visa_type')->default('سياحة');
                     $table->string('appointment_center')->default('BLS');
                     $table->string('appointment_type')->default('Regular');
                     $table->string('status', 30)->default('unknown');
                     $table->string('earliest_date', 255)->nullable();
                     $table->timestamp('last_updated_at')->nullable();
-                    $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+                    $table->unsignedBigInteger('updated_by')->nullable();
                     $table->text('notes')->nullable();
                     $table->text('booking_link')->nullable();
                     $table->timestamps();
@@ -51,8 +53,8 @@ class EmbassyAppointment extends Model
             if (! Schema::hasTable('embassy_availability_events')) {
                 Schema::create('embassy_availability_events', function (Blueprint $table) {
                     $table->id();
-                    $table->foreignId('embassy_appointment_id')->constrained('embassy_appointments')->cascadeOnDelete();
-                    $table->foreignId('triggered_by')->nullable()->constrained('users')->nullOnDelete();
+                    $table->unsignedBigInteger('embassy_appointment_id');
+                    $table->unsignedBigInteger('triggered_by')->nullable();
                     $table->string('status', 30)->default('active');
                     $table->text('notes')->nullable();
                     $table->timestamps();
@@ -62,10 +64,10 @@ class EmbassyAppointment extends Model
             if (! Schema::hasTable('embassy_appointment_notifications')) {
                 Schema::create('embassy_appointment_notifications', function (Blueprint $table) {
                     $table->id();
-                    $table->foreignId('embassy_availability_event_id')->constrained('embassy_availability_events')->cascadeOnDelete();
-                    $table->foreignId('embassy_appointment_id')->constrained('embassy_appointments')->cascadeOnDelete();
-                    $table->foreignId('inquiry_id')->constrained('inquiries')->cascadeOnDelete();
-                    $table->foreignId('seller_id')->constrained('users')->cascadeOnDelete();
+                    $table->unsignedBigInteger('embassy_availability_event_id');
+                    $table->unsignedBigInteger('embassy_appointment_id');
+                    $table->unsignedBigInteger('inquiry_id');
+                    $table->unsignedBigInteger('seller_id');
                     $table->string('status', 30)->default('pending');
                     $table->timestamp('snoozed_until')->nullable();
                     $table->timestamp('contacted_at')->nullable();
@@ -80,8 +82,8 @@ class EmbassyAppointment extends Model
             if (! Schema::hasTable('embassy_appointment_logs')) {
                 Schema::create('embassy_appointment_logs', function (Blueprint $table) {
                     $table->id();
-                    $table->foreignId('embassy_appointment_id')->constrained('embassy_appointments')->cascadeOnDelete();
-                    $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+                    $table->unsignedBigInteger('embassy_appointment_id');
+                    $table->unsignedBigInteger('user_id')->nullable();
                     $table->string('user_name')->nullable();
                     $table->string('action');
                     $table->string('old_status', 30)->nullable();
@@ -96,7 +98,7 @@ class EmbassyAppointment extends Model
             if (Schema::hasTable('inquiries')) {
                 Schema::table('inquiries', function (Blueprint $table) {
                     if (! Schema::hasColumn('inquiries', 'visa_country_id')) {
-                        $table->foreignId('visa_country_id')->nullable()->after('country')->constrained('visa_countries')->nullOnDelete();
+                        $table->unsignedBigInteger('visa_country_id')->nullable()->after('country');
                     }
                     if (! Schema::hasColumn('inquiries', 'appointment_center')) {
                         $table->string('appointment_center')->nullable()->after('visa_country_id');

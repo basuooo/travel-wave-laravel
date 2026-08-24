@@ -11,7 +11,14 @@
             <h1 class="h3 fw-bold mb-1">🏛️ مواعيد السفارات (Embassy Appointments)</h1>
             <p class="text-muted mb-0">إدارة ومتابعة فتح مواعيد السفارات وتنبيه المبيعات تلقائيًا للعملاء المنتظرين.</p>
         </div>
-        <div>
+        <div class="d-flex gap-2">
+            <form method="POST" action="{{ route('admin.embassy-appointments.sync-seed') }}" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1 shadow-sm" title="إعادة التوليد والمزامنة التلقائية لمواعيد السفارات من الصورة">
+                    <iconify-icon icon="lucide:refresh-cw" width="18"></iconify-icon>
+                    <span>مزامنة المواعيد 🔄</span>
+                </button>
+            </form>
             <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#createApptModal">
                 <iconify-icon icon="lucide:plus-circle" width="18"></iconify-icon>
                 <span>إضافة موعد سفارة جديد</span>

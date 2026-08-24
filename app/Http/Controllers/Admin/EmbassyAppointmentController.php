@@ -92,6 +92,17 @@ class EmbassyAppointmentController extends Controller
         ]);
     }
 
+    public function syncSeed()
+    {
+        EmbassyAppointment::ensureTableSchema();
+        EmbassyAppointment::autoSeedAppointmentsFromImage();
+
+        $count = EmbassyAppointment::count();
+
+        return redirect()->route('admin.embassy-appointments.index')
+            ->with('success', "تم مزامنة وإدراج {$count} موعد سفارة بنجاح 🟢");
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
