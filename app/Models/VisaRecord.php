@@ -11,6 +11,74 @@ class VisaRecord extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::ensureTableSchema();
+    }
+
+    public static function ensureTableSchema(): void
+    {
+        try {
+            if (! \Illuminate\Support\Facades\Schema::hasTable('country_visa_category')) {
+                \Illuminate\Support\Facades\Schema::create('country_visa_category', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('visa_country_id')->constrained('visa_countries')->cascadeOnDelete();
+                    $table->foreignId('visa_category_id')->constrained('visa_categories')->cascadeOnDelete();
+                    $table->timestamps();
+                    $table->unique(['visa_country_id', 'visa_category_id']);
+                });
+            }
+
+            if (! \Illuminate\Support\Facades\Schema::hasTable('visa_records')) {
+                \Illuminate\Support\Facades\Schema::create('visa_records', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('visa_country_id')->constrained('visa_countries')->cascadeOnDelete();
+                    $table->string('visa_type')->default('سياحة');
+                    $table->string('visa_type_slug')->nullable();
+                    $table->decimal('price', 12, 2)->nullable();
+                    $table->string('currency', 10)->default('EGP');
+                    $table->string('working_days')->nullable();
+                    $table->string('proposed_duration')->nullable();
+                    $table->string('stay_duration')->nullable();
+                    $table->string('entries_count')->nullable();
+                    $table->longText('required_documents')->nullable();
+                    $table->string('embassy_fee')->nullable();
+                    $table->string('embassy_fee_currency', 10)->default('EUR');
+                    $table->string('embassy_fee_payment_method')->nullable();
+                    $table->json('application_center')->nullable();
+                    $table->boolean('is_biometrics_required')->default(true);
+                    $table->boolean('is_interview_required')->default(true);
+                    $table->longText('notes')->nullable();
+                    $table->string('status', 30)->default('active');
+                    $table->unsignedInteger('sort_order')->default(0);
+                    $table->timestamps();
+                });
+
+                if (class_exists(\Database\Seeders\VisaDatabaseSeeder::class)) {
+                    (new \Database\Seeders\VisaDatabaseSeeder())->run();
+                }
+            }
+
+            if (! \Illuminate\Support\Facades\Schema::hasTable('visa_activity_logs')) {
+                \Illuminate\Support\Facades\Schema::create('visa_activity_logs', function (\Illuminate\Database\Schema\Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('visa_record_id')->nullable()->constrained('visa_records')->cascadeOnDelete();
+                    $table->foreignId('visa_country_id')->nullable()->constrained('visa_countries')->cascadeOnDelete();
+                    $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+                    $table->string('user_name')->nullable();
+                    $table->string('action');
+                    $table->string('field_name')->nullable();
+                    $table->text('old_value')->nullable();
+                    $table->text('new_value')->nullable();
+                    $table->text('description')->nullable();
+                    $table->timestamps();
+                });
+            }
+        } catch (\Throwable $e) {
+            logger()->error('ensureTableSchema error: ' . $e->getMessage());
+        }
+    }
+
     protected $fillable = [
         'visa_country_id',
         'visa_type',

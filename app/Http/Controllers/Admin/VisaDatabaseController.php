@@ -14,6 +14,8 @@ class VisaDatabaseController extends Controller
 {
     public function index(Request $request)
     {
+        VisaRecord::ensureTableSchema();
+
         $query = VisaRecord::query()->with(['country.categories', 'activityLogs']);
 
         // Search query (Country name AR/EN or Visa Type)
