@@ -50,16 +50,70 @@ class VisaCategory extends Model
                 }
             });
 
-            // Force delete category Europe (slug: europe)
-            $europeCats = static::withTrashed()->where(function ($q) {
-                $q->where('slug', 'europe')
-                    ->orWhere('name_ar', 'اوروبا')
-                    ->orWhere('name_ar', 'أوروبا');
-            })->get();
+            // Ensure EU category exists
+            $euCat = static::withTrashed()->where('slug', 'eu')->first()
+                ?? static::withTrashed()->where('name_ar', 'like', '%الاتحاد%')->first();
 
-            foreach ($europeCats as $europeCat) {
-                \Illuminate\Support\Facades\DB::table('country_visa_category')->where('visa_category_id', $europeCat->id)->delete();
-                $europeCat->forceDelete();
+            if (! $euCat) {
+                $euCat = static::create([
+                    'name_ar' => 'الاتحاد الاوروبي (European Union)',
+                    'name_en' => 'European Union',
+                    'slug' => 'eu',
+                    'sort_order' => 1,
+                    'is_active' => true,
+                ]);
+            } elseif ($euCat->trashed()) {
+                $euCat->restore();
+            }
+
+            // Ensure all 27 EU countries exist and are attached to EU category
+            $euCountries = [
+                ['name_ar' => 'فرنسا', 'name_en' => 'France', 'slug' => 'france'],
+                ['name_ar' => 'بلجيكا', 'name_en' => 'Belgium', 'slug' => 'belgium'],
+                ['name_ar' => 'ايطاليا', 'name_en' => 'Italy', 'slug' => 'italy'],
+                ['name_ar' => 'المانيا', 'name_en' => 'Germany', 'slug' => 'germany'],
+                ['name_ar' => 'اليونان', 'name_en' => 'Greece', 'slug' => 'greece'],
+                ['name_ar' => 'هولندا', 'name_en' => 'Netherlands', 'slug' => 'netherlands'],
+                ['name_ar' => 'النمسا', 'name_en' => 'Austria', 'slug' => 'austria'],
+                ['name_ar' => 'جمهورية التشيك', 'name_en' => 'Czech Republic', 'slug' => 'czech-republic'],
+                ['name_ar' => 'الدنمارك', 'name_en' => 'Denmark', 'slug' => 'denmark'],
+                ['name_ar' => 'المجر', 'name_en' => 'Hungary', 'slug' => 'hungary'],
+                ['name_ar' => 'بولندا', 'name_en' => 'Poland', 'slug' => 'poland'],
+                ['name_ar' => 'البرتغال', 'name_en' => 'Portugal', 'slug' => 'portugal'],
+                ['name_ar' => 'السويد', 'name_en' => 'Sweden', 'slug' => 'sweden'],
+                ['name_ar' => 'كرواتيا', 'name_en' => 'Croatia', 'slug' => 'croatia'],
+                ['name_ar' => 'قبرص', 'name_en' => 'Cyprus', 'slug' => 'cyprus'],
+                ['name_ar' => 'فنلندا', 'name_en' => 'Finland', 'slug' => 'finland'],
+                ['name_ar' => 'مالطا', 'name_en' => 'Malta', 'slug' => 'malta'],
+                ['name_ar' => 'رومانيا', 'name_en' => 'Romania', 'slug' => 'romania'],
+                ['name_ar' => 'بلغاريا', 'name_en' => 'Bulgaria', 'slug' => 'bulgaria'],
+                ['name_ar' => 'استونيا', 'name_en' => 'Estonia', 'slug' => 'estonia'],
+                ['name_ar' => 'لاتفيا', 'name_en' => 'Latvia', 'slug' => 'latvia'],
+                ['name_ar' => 'ليتوانيا', 'name_en' => 'Lithuania', 'slug' => 'lithuania'],
+                ['name_ar' => 'لوكسمبورغ', 'name_en' => 'Luxembourg', 'slug' => 'luxembourg'],
+                ['name_ar' => 'سلوفاكيا', 'name_en' => 'Slovakia', 'slug' => 'slovakia'],
+                ['name_ar' => 'سلوفينيا', 'name_en' => 'Slovenia', 'slug' => 'slovenia'],
+                ['name_ar' => 'ايرلندا', 'name_en' => 'Ireland', 'slug' => 'ireland'],
+                ['name_ar' => 'اسبانيا', 'name_en' => 'Spain', 'slug' => 'spain'],
+            ];
+
+            foreach ($euCountries as $item) {
+                $c = \App\Models\VisaCountry::withTrashed()->where('slug', $item['slug'])->first()
+                    ?? \App\Models\VisaCountry::withTrashed()->where('name_en', $item['name_en'])->first();
+
+                if (! $c) {
+                    $c = \App\Models\VisaCountry::create([
+                        'visa_category_id' => $euCat->id,
+                        'name_ar' => $item['name_ar'],
+                        'name_en' => $item['name_en'],
+                        'slug' => $item['slug'],
+                        'is_active' => true,
+                    ]);
+                } elseif ($c->trashed()) {
+                    $c->restore();
+                }
+
+                $c->categories()->syncWithoutDetaching([$euCat->id]);
             }
         } catch (\Throwable $e) {
             // ignore
