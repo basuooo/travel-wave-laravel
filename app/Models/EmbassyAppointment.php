@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class EmbassyAppointment extends Model
 {
@@ -16,6 +19,117 @@ class EmbassyAppointment extends Model
     public const STATUS_AVAILABLE_LATER = 'available_later';
     public const STATUS_NO_AVAILABILITY = 'no_availability';
     public const STATUS_UNKNOWN = 'unknown';
+
+    protected static function booted(): void
+    {
+        static::ensureTableSchema();
+    }
+
+    public static function ensureTableSchema(): void
+    {
+        try {
+            if (! Schema::hasTable('embassy_appointments')) {
+                Schema::create('embassy_appointments', function (Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('visa_country_id')->constrained('visa_countries')->cascadeOnDelete();
+                    $table->foreignId('visa_record_id')->nullable()->constrained('visa_records')->nullOnDelete();
+                    $table->string('visa_type')->default('سياحة');
+                    $table->string('appointment_center')->default('BLS');
+                    $table->string('appointment_type')->default('Regular');
+                    $table->string('status', 30)->default('unknown');
+                    $table->date('earliest_date')->nullable();
+                    $table->timestamp('last_updated_at')->nullable();
+                    $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+                    $table->text('notes')->nullable();
+                    $table->text('booking_link')->nullable();
+                    $table->timestamps();
+
+                    $table->unique(['visa_country_id', 'visa_type', 'appointment_center', 'appointment_type'], 'embassy_appts_unique_combo');
+                });
+            }
+
+            if (! Schema::hasTable('embassy_availability_events')) {
+                Schema::create('embassy_availability_events', function (Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('embassy_appointment_id')->constrained('embassy_appointments')->cascadeOnDelete();
+                    $table->foreignId('triggered_by')->nullable()->constrained('users')->nullOnDelete();
+                    $table->string('status', 30)->default('active');
+                    $table->text('notes')->nullable();
+                    $table->timestamps();
+                });
+            }
+
+            if (! Schema::hasTable('embassy_appointment_notifications')) {
+                Schema::create('embassy_appointment_notifications', function (Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('embassy_availability_event_id')->constrained('embassy_availability_events')->cascadeOnDelete();
+                    $table->foreignId('embassy_appointment_id')->constrained('embassy_appointments')->cascadeOnDelete();
+                    $table->foreignId('inquiry_id')->constrained('inquiries')->cascadeOnDelete();
+                    $table->foreignId('seller_id')->constrained('users')->cascadeOnDelete();
+                    $table->string('status', 30)->default('pending');
+                    $table->timestamp('snoozed_until')->nullable();
+                    $table->timestamp('contacted_at')->nullable();
+                    $table->string('contact_result', 50)->nullable();
+                    $table->text('contact_notes')->nullable();
+                    $table->timestamps();
+
+                    $table->unique(['embassy_availability_event_id', 'inquiry_id'], 'embassy_notif_unique_event_lead');
+                });
+            }
+
+            if (! Schema::hasTable('embassy_appointment_logs')) {
+                Schema::create('embassy_appointment_logs', function (Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('embassy_appointment_id')->constrained('embassy_appointments')->cascadeOnDelete();
+                    $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+                    $table->string('user_name')->nullable();
+                    $table->string('action');
+                    $table->string('old_status', 30)->nullable();
+                    $table->string('new_status', 30)->nullable();
+                    $table->date('old_earliest_date')->nullable();
+                    $table->date('new_earliest_date')->nullable();
+                    $table->text('notes')->nullable();
+                    $table->timestamps();
+                });
+            }
+
+            if (Schema::hasTable('inquiries')) {
+                Schema::table('inquiries', function (Blueprint $table) {
+                    if (! Schema::hasColumn('inquiries', 'visa_country_id')) {
+                        $table->foreignId('visa_country_id')->nullable()->after('country')->constrained('visa_countries')->nullOnDelete();
+                    }
+                    if (! Schema::hasColumn('inquiries', 'appointment_center')) {
+                        $table->string('appointment_center')->nullable()->after('visa_country_id');
+                    }
+                    if (! Schema::hasColumn('inquiries', 'appointment_type')) {
+                        $table->string('appointment_type')->nullable()->after('appointment_center');
+                    }
+                });
+            }
+
+            if (Schema::hasTable('crm_statuses')) {
+                $existing = DB::table('crm_statuses')->where('slug', 'awaiting-embassy-appointment')->first();
+                $now = now();
+                if (! $existing) {
+                    DB::table('crm_statuses')->insert([
+                        'slug' => 'awaiting-embassy-appointment',
+                        'name_ar' => 'انتظار فتح مواعيد السفارة',
+                        'name_en' => 'Awaiting Embassy Appointment',
+                        'status_group' => 'secondary',
+                        'color' => 'warning',
+                        'sort_order' => 25,
+                        'is_default' => false,
+                        'is_system' => true,
+                        'is_active' => true,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            logger()->error('EmbassyAppointment ensureTableSchema error: ' . $e->getMessage());
+        }
+    }
 
     protected $fillable = [
         'visa_country_id',

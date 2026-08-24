@@ -24,6 +24,8 @@ class EmbassyAppointmentController extends Controller
 
     public function index(Request $request)
     {
+        EmbassyAppointment::ensureTableSchema();
+
         $query = EmbassyAppointment::query()
             ->with(['country', 'updatedBy'])
             ->latest('last_updated_at');
@@ -251,6 +253,8 @@ class EmbassyAppointmentController extends Controller
 
     public function getPendingPopups()
     {
+        EmbassyAppointment::ensureTableSchema();
+
         $user = auth()->user();
         if (! $user) {
             return response()->json(['items' => []]);
