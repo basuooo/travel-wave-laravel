@@ -140,16 +140,10 @@ class EmbassyAppointment extends Model
                 return;
             }
 
-            if (static::where('status', self::STATUS_AVAILABLE_LATER)->count() >= 14) {
-                return;
-            }
-
             $category = VisaCategory::firstOrCreate(
                 ['slug' => 'schengen'],
                 ['name_ar' => 'شنغن (Schengen)', 'name_en' => 'Schengen']
             );
-
-            $admin = User::where('is_admin', true)->first() ?? User::first();
 
             $appointmentsData = [
                 ['name_ar' => 'ألمانيا', 'name_en' => 'Germany', 'slug' => 'germany', 'dates' => 'شهر 12', 'center' => 'VFS'],
@@ -184,7 +178,7 @@ class EmbassyAppointment extends Model
                     ]);
                 }
 
-                $appt = static::firstOrCreate([
+                static::updateOrCreate([
                     'visa_country_id' => $country->id,
                     'visa_type' => 'سياحة',
                     'appointment_center' => $item['center'],
@@ -194,12 +188,6 @@ class EmbassyAppointment extends Model
                     'earliest_date' => $item['dates'],
                     'last_updated_at' => now(),
                     'notes' => '🟡 مواعيد متاحة بتاريخ مستقبلي',
-                ]);
-
-                $appt->update([
-                    'status' => self::STATUS_AVAILABLE_LATER,
-                    'earliest_date' => $item['dates'],
-                    'last_updated_at' => now(),
                 ]);
             }
         } catch (\Throwable $e) {
