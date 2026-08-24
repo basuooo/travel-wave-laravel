@@ -20,18 +20,25 @@ class VisaDatabaseController extends Controller
 
         // Search query (Country name AR/EN, Visa Type, Notes, Documents, or Category name)
         if ($request->filled('search')) {
-            $search = trim($request->input('search'));
-            $query->where(function ($q) use ($search) {
-                $q->where('visa_type', 'like', "%{$search}%")
-                    ->orWhere('notes', 'like', "%{$search}%")
-                    ->orWhere('required_documents', 'like', "%{$search}%")
-                    ->orWhereHas('country', function ($cq) use ($search) {
-                        $cq->withTrashed()->where(function ($cInner) use ($search) {
-                            $cInner->where('name_ar', 'like', "%{$search}%")
-                                ->orWhere('name_en', 'like', "%{$search}%")
-                                ->orWhereHas('categories', function ($catQ) use ($search) {
-                                    $catQ->where('name_ar', 'like', "%{$search}%")
-                                        ->orWhere('name_en', 'like', "%{$search}%");
+            $rawSearch = trim($request->input('search'));
+            $normalizedSearch = preg_replace('/[أإآ]/u', 'ا', preg_replace('/[\x{064B}-\x{0652}\x{0670}]/u', '', $rawSearch));
+
+            $query->where(function ($q) use ($rawSearch, $normalizedSearch) {
+                $q->where('visa_type', 'like', "%{$rawSearch}%")
+                    ->orWhere('visa_type', 'like', "%{$normalizedSearch}%")
+                    ->orWhere('notes', 'like', "%{$rawSearch}%")
+                    ->orWhere('notes', 'like', "%{$normalizedSearch}%")
+                    ->orWhere('required_documents', 'like', "%{$rawSearch}%")
+                    ->orWhere('required_documents', 'like', "%{$normalizedSearch}%")
+                    ->orWhereHas('country', function ($cq) use ($rawSearch, $normalizedSearch) {
+                        $cq->withTrashed()->where(function ($cInner) use ($rawSearch, $normalizedSearch) {
+                            $cInner->where('name_ar', 'like', "%{$rawSearch}%")
+                                ->orWhere('name_ar', 'like', "%{$normalizedSearch}%")
+                                ->orWhere('name_en', 'like', "%{$rawSearch}%")
+                                ->orWhereHas('categories', function ($catQ) use ($rawSearch, $normalizedSearch) {
+                                    $catQ->where('name_ar', 'like', "%{$rawSearch}%")
+                                        ->orWhere('name_ar', 'like', "%{$normalizedSearch}%")
+                                        ->orWhere('name_en', 'like', "%{$rawSearch}%");
                                 });
                         });
                     });

@@ -10,6 +10,12 @@ use Illuminate\Support\Str;
 
 class VisaDatabaseSeeder extends Seeder
 {
+    private function normalizeArabic(string $text): string
+    {
+        $text = preg_replace('/[\x{064B}-\x{0652}\x{0670}]/u', '', $text);
+        return preg_replace('/[أإآ]/u', 'ا', $text);
+    }
+
     public function run(): void
     {
         VisaCountry::ensureTableSchema();
@@ -37,7 +43,7 @@ class VisaDatabaseSeeder extends Seeder
             $category = VisaCategory::updateOrCreate(
                 ['slug' => $cat['slug']],
                 [
-                    'name_ar' => $cat['name_ar'],
+                    'name_ar' => $this->normalizeArabic($cat['name_ar']),
                     'name_en' => $cat['name_en'],
                     'sort_order' => $cat['sort_order'],
                     'is_active' => true,
@@ -113,11 +119,13 @@ class VisaDatabaseSeeder extends Seeder
             if (! $country) {
                 $country = VisaCountry::create([
                     'visa_category_id' => $categoriesMap['eu'],
-                    'name_ar' => $item['name_ar'],
+                    'name_ar' => $this->normalizeArabic($item['name_ar']),
                     'name_en' => $item['name_en'],
                     'slug' => VisaCountry::makeUniqueSlug($item['slug']),
                     'is_active' => true,
                 ]);
+            } else {
+                $country->update(['name_ar' => $this->normalizeArabic($item['name_ar'])]);
             }
 
             $country->categories()->syncWithoutDetaching([$categoriesMap['eu'], $categoriesMap['europe']]);
@@ -154,11 +162,13 @@ class VisaDatabaseSeeder extends Seeder
         if (! $spainCountry) {
             $spainCountry = VisaCountry::create([
                 'visa_category_id' => $categoriesMap['eu'],
-                'name_ar' => 'إسبانيا',
+                'name_ar' => $this->normalizeArabic('إسبانيا'),
                 'name_en' => 'Spain',
                 'slug' => 'spain',
                 'is_active' => true,
             ]);
+        } else {
+            $spainCountry->update(['name_ar' => $this->normalizeArabic('إسبانيا')]);
         }
         $spainCountry->categories()->syncWithoutDetaching([$categoriesMap['eu'], $categoriesMap['europe']]);
 
@@ -227,11 +237,13 @@ class VisaDatabaseSeeder extends Seeder
             if (! $country) {
                 $country = VisaCountry::create([
                     'visa_category_id' => $categoriesMap['schengen-non-eu'],
-                    'name_ar' => $item['name_ar'],
+                    'name_ar' => $this->normalizeArabic($item['name_ar']),
                     'name_en' => $item['name_en'],
                     'slug' => VisaCountry::makeUniqueSlug($item['slug']),
                     'is_active' => true,
                 ]);
+            } else {
+                $country->update(['name_ar' => $this->normalizeArabic($item['name_ar'])]);
             }
 
             $country->categories()->syncWithoutDetaching([$categoriesMap['schengen-non-eu'], $categoriesMap['europe']]);
@@ -359,11 +371,13 @@ class VisaDatabaseSeeder extends Seeder
             if (! $country) {
                 $country = VisaCountry::create([
                     'visa_category_id' => $primaryCatId,
-                    'name_ar' => $item['name_ar'],
+                    'name_ar' => $this->normalizeArabic($item['name_ar']),
                     'name_en' => $item['name_en'],
                     'slug' => VisaCountry::makeUniqueSlug($item['slug']),
                     'is_active' => true,
                 ]);
+            } else {
+                $country->update(['name_ar' => $this->normalizeArabic($item['name_ar'])]);
             }
 
             if (! empty($catIds)) {

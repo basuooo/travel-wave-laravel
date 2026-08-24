@@ -57,6 +57,19 @@ class VisaCountry extends Model
                 }
             });
         }
+
+        try {
+            static::all()->each(function ($c) {
+                if ($c->name_ar) {
+                    $clean = preg_replace('/[أإآ]/u', 'ا', preg_replace('/[\x{064B}-\x{0652}\x{0670}]/u', '', $c->name_ar));
+                    if ($clean !== $c->name_ar) {
+                        $c->update(['name_ar' => $clean]);
+                    }
+                }
+            });
+        } catch (\Throwable $e) {
+            // ignore
+        }
     }
 
     protected $fillable = [

@@ -39,6 +39,19 @@ class VisaCategory extends Model
                 }
             });
         }
+
+        try {
+            static::all()->each(function ($cat) {
+                if ($cat->name_ar) {
+                    $clean = preg_replace('/[أإآ]/u', 'ا', preg_replace('/[\x{064B}-\x{0652}\x{0670}]/u', '', $cat->name_ar));
+                    if ($clean !== $cat->name_ar) {
+                        $cat->update(['name_ar' => $clean]);
+                    }
+                }
+            });
+        } catch (\Throwable $e) {
+            // ignore
+        }
     }
 
     protected $fillable = [
