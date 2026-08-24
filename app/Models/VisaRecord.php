@@ -55,10 +55,6 @@ class VisaRecord extends Model
                     $table->unsignedInteger('sort_order')->default(0);
                     $table->timestamps();
                 });
-
-                if (class_exists(\Database\Seeders\VisaDatabaseSeeder::class)) {
-                    (new \Database\Seeders\VisaDatabaseSeeder())->run();
-                }
             }
 
             if (! \Illuminate\Support\Facades\Schema::hasTable('visa_activity_logs')) {
@@ -76,6 +72,15 @@ class VisaRecord extends Model
                     $table->timestamps();
                 });
             }
+
+            if (class_exists(\Database\Seeders\VisaDatabaseSeeder::class)) {
+                try {
+                    (new \Database\Seeders\VisaDatabaseSeeder())->run();
+                } catch (\Throwable $seederErr) {
+                    logger()->error('Seeder error: ' . $seederErr->getMessage());
+                }
+            }
+
             // Ensure every VisaCountry has at least one VisaRecord attached
             $countriesWithoutRecords = VisaCountry::whereDoesntHave('visaRecords')->get();
             foreach ($countriesWithoutRecords as $c) {
