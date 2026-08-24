@@ -23,6 +23,9 @@ class Inquiry extends Model
         'email',
         'nationality',
         'country',
+        'visa_country_id',
+        'appointment_center',
+        'appointment_type',
         'destination',
         'service_type',
         'travel_date',
@@ -136,6 +139,11 @@ class Inquiry extends Model
     public function marketingLandingPage()
     {
         return $this->belongsTo(MarketingLandingPage::class);
+    }
+
+    public function visaCountry()
+    {
+        return $this->belongsTo(VisaCountry::class, 'visa_country_id');
     }
 
     public function crmStatus()

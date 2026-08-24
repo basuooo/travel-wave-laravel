@@ -54,6 +54,7 @@ use App\Http\Controllers\Admin\WorkflowAutomationController;
 use App\Http\Controllers\Admin\VisaCategoryController;
 use App\Http\Controllers\Admin\VisaCountryController;
 use App\Http\Controllers\Admin\VisaDatabaseController;
+use App\Http\Controllers\Admin\EmbassyAppointmentController;
 use App\Http\Controllers\Admin\LandingPageBuilderController;
 use App\Http\Controllers\Admin\LandingPageNewController;
 use App\Http\Controllers\Admin\FunnelController;
@@ -293,6 +294,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/destinations/{destination}/restore', [DestinationController::class, 'restore'])->name('destinations.restore');
             Route::delete('/destinations/{destination}/force-delete', [DestinationController::class, 'forceDestroy'])->name('destinations.force-destroy');
             Route::resource('destinations', DestinationController::class);
+        });
+
+        // Embassy Appointments Module
+        Route::prefix('embassy-appointments')->name('embassy-appointments.')->group(function () {
+            // Seller endpoints (accessible by all authenticated CRM users/sellers)
+            Route::get('/pending-popups', [EmbassyAppointmentController::class, 'getPendingPopups'])->name('pending-popups');
+            Route::post('/notifications/{notification}/contact', [EmbassyAppointmentController::class, 'handleContact'])->name('notifications.contact');
+            Route::post('/notifications/{notification}/snooze', [EmbassyAppointmentController::class, 'handleSnooze'])->name('notifications.snooze');
+
+            // Admin management endpoints
+            Route::middleware('permission:destinations.manage')->group(function () {
+                Route::get('/', [EmbassyAppointmentController::class, 'index'])->name('index');
+                Route::post('/', [EmbassyAppointmentController::class, 'store'])->name('store');
+                Route::get('/{embassy_appointment}', [EmbassyAppointmentController::class, 'show'])->name('show');
+                Route::put('/{embassy_appointment}', [EmbassyAppointmentController::class, 'update'])->name('update');
+                Route::delete('/{embassy_appointment}', [EmbassyAppointmentController::class, 'destroy'])->name('destroy');
+                Route::post('/{embassy_appointment}/available-now', [EmbassyAppointmentController::class, 'toggleAvailableNow'])->name('toggle-available-now');
+                Route::post('/{embassy_appointment}/no-availability', [EmbassyAppointmentController::class, 'toggleNoAvailability'])->name('toggle-no-availability');
+            });
         });
 
         Route::middleware('permission:blog.manage')->group(function () {

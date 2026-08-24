@@ -54,6 +54,7 @@
             $adminUser?->hasPermission('pages.view') ? ['label' => __('admin.hero_slider'), 'route' => 'admin.hero-slides.index', 'match' => 'admin.hero-slides.*'] : null,
             $adminUser?->hasPermission('pages.view') ? ['label' => __('admin.homepage_country_strip'), 'route' => 'admin.home-country-strip.index', 'match' => 'admin.home-country-strip.*'] : null,
             ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => '🌐 قاعدة بيانات التأشيرات (Visa Database)', 'route' => 'admin.visa-database.index', 'match' => 'admin.visa-database.*'] : null,
+            ['label' => '🏛️ مواعيد السفارات', 'route' => 'admin.embassy-appointments.index', 'match' => 'admin.embassy-appointments.*'],
             ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => __('admin.visa_categories'), 'route' => 'admin.visa-categories.index', 'match' => 'admin.visa-categories.*'] : null,
             ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => __('admin.visa_destinations'), 'route' => 'admin.visa-countries.index', 'match' => 'admin.visa-countries.*'] : null,
             ($modDestinationsEnabled && $adminUser?->hasPermission('destinations.manage')) ? ['label' => __('admin.destinations'), 'route' => 'admin.destinations.index', 'match' => 'admin.destinations.*'] : null,
@@ -1153,6 +1154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+@include('admin.embassy-appointments.components.seller_popup_modal')
 @stack('scripts')
 </body>
 </html>
