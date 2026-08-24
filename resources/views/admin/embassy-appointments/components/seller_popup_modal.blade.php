@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const popupModalEl = document.getElementById('embassySellerPopupModal');
     if (!popupModalEl) return;
 
-    const popupModal = new bootstrap.Modal(popupModalEl);
+    const popupModal = bootstrap.Modal.getOrCreateInstance(popupModalEl);
     const popupContent = document.getElementById('embassyPopupContent');
     const popupLoader = document.getElementById('embassyPopupLoader');
     const leadsContainer = document.getElementById('embassyLeadsContainer');

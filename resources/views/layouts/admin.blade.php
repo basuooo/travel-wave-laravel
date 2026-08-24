@@ -1169,6 +1169,8 @@ document.addEventListener('show.bs.modal', function (e) {
 });
 </script>
 @include('admin.embassy-appointments.components.seller_popup_modal')
+@stack('modals')
+@yield('modals')
 @stack('scripts')
 </body>
 </html>

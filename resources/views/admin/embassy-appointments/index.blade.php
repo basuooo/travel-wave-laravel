@@ -268,17 +268,18 @@
 
 </div>
 
-{{-- Create / Edit Modal --}}
-@include('admin.embassy-appointments.modals.create_edit_modal')
-
 @endsection
+
+@push('modals')
+    @include('admin.embassy-appointments.modals.create_edit_modal')
+@endpush
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modalEl = document.getElementById('createApptModal');
     if (!modalEl) return;
-    const modal = new bootstrap.Modal(modalEl);
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
     const form = document.getElementById('apptForm');
     const modalTitle = document.getElementById('modalTitle');
     const methodContainer = document.getElementById('methodContainer');
