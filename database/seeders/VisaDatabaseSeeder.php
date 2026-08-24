@@ -21,9 +21,8 @@ class VisaDatabaseSeeder extends Seeder
         VisaCountry::ensureTableSchema();
 
         $categoriesData = [
-            ['name_ar' => 'الاتحاد الأوروبي (European Union)', 'name_en' => 'European Union', 'slug' => 'eu', 'sort_order' => 1],
-            ['name_ar' => 'دول شنغن خارج الاتحاد الأوروبي', 'name_en' => 'Schengen Non-EU', 'slug' => 'schengen-non-eu', 'sort_order' => 2],
-            ['name_ar' => 'أوروبا', 'name_en' => 'Europe', 'slug' => 'europe', 'sort_order' => 3],
+            ['name_ar' => 'دول شنغن خارج الاتحاد الأوروبي', 'name_en' => 'Schengen Non-EU', 'slug' => 'schengen-non-eu', 'sort_order' => 1],
+            ['name_ar' => 'أوروبا', 'name_en' => 'Europe', 'slug' => 'europe', 'sort_order' => 2],
             ['name_ar' => 'آسيا', 'name_en' => 'Asia', 'slug' => 'asia', 'sort_order' => 4],
             ['name_ar' => 'الشرق الأوسط', 'name_en' => 'Middle East', 'slug' => 'middle-east', 'sort_order' => 5],
             ['name_ar' => 'أفريقيا', 'name_en' => 'Africa', 'slug' => 'africa', 'sort_order' => 6],
@@ -118,7 +117,7 @@ class VisaDatabaseSeeder extends Seeder
 
             if (! $country) {
                 $country = VisaCountry::create([
-                    'visa_category_id' => $categoriesMap['eu'],
+                    'visa_category_id' => $categoriesMap['europe'],
                     'name_ar' => $this->normalizeArabic($item['name_ar']),
                     'name_en' => $item['name_en'],
                     'slug' => VisaCountry::makeUniqueSlug($item['slug']),
@@ -128,7 +127,7 @@ class VisaDatabaseSeeder extends Seeder
                 $country->update(['name_ar' => $this->normalizeArabic($item['name_ar'])]);
             }
 
-            $country->categories()->syncWithoutDetaching([$categoriesMap['eu'], $categoriesMap['europe']]);
+            $country->categories()->syncWithoutDetaching([$categoriesMap['europe']]);
 
             VisaRecord::updateOrCreate(
                 [
@@ -161,7 +160,7 @@ class VisaDatabaseSeeder extends Seeder
 
         if (! $spainCountry) {
             $spainCountry = VisaCountry::create([
-                'visa_category_id' => $categoriesMap['eu'],
+                'visa_category_id' => $categoriesMap['europe'],
                 'name_ar' => $this->normalizeArabic('إسبانيا'),
                 'name_en' => 'Spain',
                 'slug' => 'spain',
@@ -170,7 +169,7 @@ class VisaDatabaseSeeder extends Seeder
         } else {
             $spainCountry->update(['name_ar' => $this->normalizeArabic('إسبانيا')]);
         }
-        $spainCountry->categories()->syncWithoutDetaching([$categoriesMap['eu'], $categoriesMap['europe']]);
+        $spainCountry->categories()->syncWithoutDetaching([$categoriesMap['europe']]);
 
         VisaRecord::updateOrCreate(
             [
