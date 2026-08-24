@@ -247,223 +247,6 @@
                                     </div>
                                 </td>
                             </tr>
-
-                            <!-- View Details Modal -->
-                            <div class="modal fade" id="viewModal{{ $rec->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-primary text-white">
-                                            <h5 class="modal-title fw-bold">
-                                                <i class="bi bi-passport me-2"></i>تفاصيل تأشيرة {{ $rec->country?->name_ar }} — {{ $rec->visa_type }}
-                                            </h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body p-4 text-wrap" style="white-space: normal;">
-                                            <div class="row g-3 mb-4">
-                                                <div class="col-md-6">
-                                                    <div class="p-3 bg-light rounded border">
-                                                        <div class="text-muted small">الدولة والتصنيف</div>
-                                                        <div class="fw-bold fs-5 text-dark mb-1">{{ $rec->country?->name_ar }} ({{ $rec->country?->name_en }})</div>
-                                                        <div>
-                                                            @foreach($rec->country?->categories ?? [] as $c)
-                                                                <span class="badge bg-secondary me-1">{{ $c->name_ar }}</span>
-                                                            @endforeach
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="p-3 bg-light rounded border">
-                                                        <div class="text-muted small">سعر التأشيرة للعميل</div>
-                                                        <div class="fw-bold fs-4 text-success">{{ $rec->price !== null ? number_format($rec->price, 0) . ' ' . $rec->currency : 'غير محدد' }}</div>
-                                                        <div class="small text-muted">حالة الخدمة: <span class="badge {{ $rec->status_badge_class }}">{{ $rec->status_label }}</span></div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded text-center">
-                                                        <div class="text-muted small">رسوم السفارة</div>
-                                                        <div class="fw-bold">{{ $rec->embassy_fee ? $rec->embassy_fee . ' ' . $rec->embassy_fee_currency : 'غير محدد' }}</div>
-                                                        <div class="small text-muted" style="font-size: 11px;">{{ $rec->embassy_fee_payment_method }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded text-center">
-                                                        <div class="text-muted small">أيام العمل</div>
-                                                        <div class="fw-bold text-primary">{{ $rec->working_days ?: 'غير محدد' }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-2 border rounded text-center">
-                                                        <div class="text-muted small">مكان التقديم</div>
-                                                        <div class="fw-bold text-dark">{{ $rec->application_centers_formatted }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="p-2 border rounded text-center">
-                                                        <div class="text-muted small">مدة التأشيرة المقترحة</div>
-                                                        <div class="fw-bold">{{ $rec->proposed_duration ?: 'غير محدد' }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="p-2 border rounded text-center">
-                                                        <div class="text-muted small">البصمة مطلوبة</div>
-                                                        <div class="fw-bold">{{ $rec->is_biometrics_required ? 'نعم' : 'لا' }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="p-2 border rounded text-center">
-                                                        <div class="text-muted small">المقابلة مطلوبة</div>
-                                                        <div class="fw-bold">{{ $rec->is_interview_required ? 'نعم' : 'لا' }}</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            @if(filled($rec->required_documents))
-                                                <div class="mb-4">
-                                                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-2"><i class="bi bi-file-earmark-text text-primary me-2"></i>الأوراق المطلوبة</h6>
-                                                    <div class="bg-light p-3 rounded border font-monospace small" style="white-space: pre-line;">{{ $rec->required_documents }}</div>
-                                                </div>
-                                            @endif
-
-                                            @if(filled($rec->notes))
-                                                <div class="mb-3">
-                                                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-2"><i class="bi bi-info-circle text-warning me-2"></i>ملاحظات واستثناءات هامة</h6>
-                                                    <div class="bg-warning-subtle text-warning-emphasis p-3 rounded border border-warning-subtle small" style="white-space: pre-line;">{{ $rec->notes }}</div>
-                                                </div>
-                                            @endif
-
-                                            <!-- Hidden element containing text for copying -->
-                                            <textarea id="copyContent{{ $rec->id }}" class="d-none">{{ $rec->toFormattedShareText() }}</textarea>
-                                        </div>
-                                        <div class="modal-footer bg-light justify-content-between">
-                                            <button type="button" class="btn btn-outline-success" onclick="copyToClipboard({{ $rec->id }})">
-                                                <i class="bi bi-clipboard-check me-1"></i> نسخ البيانات (WhatsApp / Email)
-                                            </button>
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق X</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Edit Modal -->
-                            <div class="modal fade" id="editModal{{ $rec->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-lg">
-                                    <div class="modal-content">
-                                        <form action="{{ route('admin.visa-database.update', $rec) }}" method="POST">
-                                            @csrf @method('PUT')
-                                            <div class="modal-header bg-dark text-white">
-                                                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>تعديل بيانات تأشيرة {{ $rec->country?->name_ar }}</h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body p-4">
-                                                <div class="row g-3 mb-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-bold small">الدولة</label>
-                                                        <select name="visa_country_id" class="form-select" required>
-                                                            @foreach($countries as $c)
-                                                                <option value="{{ $c->id }}" {{ $rec->visa_country_id == $c->id ? 'selected' : '' }}>{{ $c->name_ar }} ({{ $c->name_en }})</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-bold small">نوع التأشيرة</label>
-                                                        <input type="text" name="visa_type" class="form-control" value="{{ $rec->visa_type }}" required>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <label class="form-label fw-bold small">التصنيفات المرتطبة بالدولة</label>
-                                                        <div class="d-flex flex-wrap gap-3 p-2 bg-light border rounded">
-                                                            @php($activeCatIds = $rec->country?->categories->pluck('id')->toArray() ?? [])
-                                                            @foreach($categories as $cat)
-                                                                <div class="form-check">
-                                                                    <input class="form-check-input" type="checkbox" name="category_ids[]" value="{{ $cat->id }}" id="catEdit_{{ $rec->id }}_{{ $cat->id }}" {{ in_array($cat->id, $activeCatIds) ? 'checked' : '' }}>
-                                                                    <label class="form-check-label small" for="catEdit_{{ $rec->id }}_{{ $cat->id }}">{{ $cat->name_ar }}</label>
-                                                                </div>
-                                                            @endforeach
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label fw-bold small">سعر التأشيرة للعميل</label>
-                                                        <input type="number" step="0.01" name="price" class="form-control" value="{{ $rec->price }}">
-                                                    </div>
-                                                    <div class="col-md-2">
-                                                        <label class="form-label fw-bold small">العملة</label>
-                                                        <input type="text" name="currency" class="form-control" value="{{ $rec->currency ?: 'EGP' }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label class="form-label fw-bold small">رسوم السفارة</label>
-                                                        <input type="text" name="embassy_fee" class="form-control" value="{{ $rec->embassy_fee }}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label class="form-label fw-bold small">عملة السفارة</label>
-                                                        <input type="text" name="embassy_fee_currency" class="form-control" value="{{ $rec->embassy_fee_currency ?: 'EUR' }}">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-bold small">طريقة دفع رسوم السفارة</label>
-                                                        <input type="text" name="embassy_fee_payment_method" class="form-control" value="{{ $rec->embassy_fee_payment_method }}" placeholder="مثال: بالمصري داخل السفارة — Visa أو Cash">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-bold small">أيام العمل</label>
-                                                        <input type="text" name="working_days" class="form-control" value="{{ $rec->working_days }}" placeholder="مثال: 15–20 يوم عمل">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-bold small">مدة التأشيرة المقترحة</label>
-                                                        <input type="text" name="proposed_duration" class="form-control" value="{{ $rec->proposed_duration }}" placeholder="مثال: حسب قرار السفارة من أسبوع إلى 15 يوم">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-bold small">مدة الإقامة</label>
-                                                        <input type="text" name="stay_duration" class="form-control" value="{{ $rec->stay_duration }}">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-bold small">مكان التقديم</label>
-                                                        <div class="d-flex flex-wrap gap-2 pt-1">
-                                                            @php($currCenters = $rec->application_centers_list)
-                                                            @foreach(['VFS', 'TLS', 'BLS', 'Almaviva / المافيفا', 'السفارة مباشرة'] as $centerOpt)
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="checkbox" name="application_center[]" value="{{ $centerOpt }}" id="centerEdit_{{ $rec->id }}_{{ $loop->index }}" {{ in_array($centerOpt, $currCenters) ? 'checked' : '' }}>
-                                                                    <label class="form-check-label small" for="centerEdit_{{ $rec->id }}_{{ $loop->index }}">{{ $centerOpt }}</label>
-                                                                </div>
-                                                            @endforeach
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label class="form-label fw-bold small">البصمة مطلوبة؟</label>
-                                                        <select name="is_biometrics_required" class="form-select">
-                                                            <option value="1" {{ $rec->is_biometrics_required ? 'selected' : '' }}>Yes / نعم</option>
-                                                            <option value="0" {{ ! $rec->is_biometrics_required ? 'selected' : '' }}>No / لا</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <label class="form-label fw-bold small">المقابلة مطلوبة؟</label>
-                                                        <select name="is_interview_required" class="form-select">
-                                                            <option value="1" {{ $rec->is_interview_required ? 'selected' : '' }}>Yes / نعم</option>
-                                                            <option value="0" {{ ! $rec->is_interview_required ? 'selected' : '' }}>No / لا</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-bold small">الحالة</label>
-                                                        <select name="status" class="form-select">
-                                                            <option value="active" {{ $rec->status == 'active' ? 'selected' : '' }}>Active / نشطة</option>
-                                                            <option value="temporarily_unavailable" {{ $rec->status == 'temporarily_unavailable' ? 'selected' : '' }}>Temporarily Unavailable / متوقفة مؤقتاً</option>
-                                                            <option value="inactive" {{ $rec->status == 'inactive' ? 'selected' : '' }}>Inactive / غير متاحة</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <label class="form-label fw-bold small">الأوراق المطلوبة</label>
-                                                        <textarea name="required_documents" class="form-control" rows="5">{{ $rec->required_documents }}</textarea>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <label class="form-label fw-bold small">ملاحظات واستثناءات</label>
-                                                        <textarea name="notes" class="form-control" rows="3">{{ $rec->notes }}</textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer bg-light">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                                                <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Save Changes / حفظ التعديلات</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         @empty
                             <tr>
                                 <td colspan="12" class="text-center py-5 text-muted">
@@ -483,6 +266,226 @@
         @endif
     </div>
 </div>
+
+<!-- Render Item Modals outside of the table DOM tree to prevent z-index backdrop issue -->
+@foreach($records as $rec)
+    <!-- View Details Modal -->
+    <div class="modal fade" id="viewModal{{ $rec->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-passport me-2"></i>تفاصيل تأشيرة {{ $rec->country?->name_ar }} — {{ $rec->visa_type }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-wrap" style="white-space: normal;">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border">
+                                <div class="text-muted small">الدولة والتصنيف</div>
+                                <div class="fw-bold fs-5 text-dark mb-1">{{ $rec->country?->name_ar }} ({{ $rec->country?->name_en }})</div>
+                                <div>
+                                    @foreach($rec->country?->categories ?? [] as $c)
+                                        <span class="badge bg-secondary me-1">{{ $c->name_ar }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border">
+                                <div class="text-muted small">سعر التأشيرة للعميل</div>
+                                <div class="fw-bold fs-4 text-success">{{ $rec->price !== null ? number_format($rec->price, 0) . ' ' . $rec->currency : 'غير محدد' }}</div>
+                                <div class="small text-muted">حالة الخدمة: <span class="badge {{ $rec->status_badge_class }}">{{ $rec->status_label }}</span></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-2 border rounded text-center">
+                                <div class="text-muted small">رسوم السفارة</div>
+                                <div class="fw-bold">{{ $rec->embassy_fee ? $rec->embassy_fee . ' ' . $rec->embassy_fee_currency : 'غير محدد' }}</div>
+                                <div class="small text-muted" style="font-size: 11px;">{{ $rec->embassy_fee_payment_method }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-2 border rounded text-center">
+                                <div class="text-muted small">أيام العمل</div>
+                                <div class="fw-bold text-primary">{{ $rec->working_days ?: 'غير محدد' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-2 border rounded text-center">
+                                <div class="text-muted small">مكان التقديم</div>
+                                <div class="fw-bold text-dark">{{ $rec->application_centers_formatted }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded text-center">
+                                <div class="text-muted small">مدة التأشيرة المقترحة</div>
+                                <div class="fw-bold">{{ $rec->proposed_duration ?: 'غير محدد' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded text-center">
+                                <div class="text-muted small">البصمة مطلوبة</div>
+                                <div class="fw-bold">{{ $rec->is_biometrics_required ? 'نعم' : 'لا' }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2 border rounded text-center">
+                                <div class="text-muted small">المقابلة مطلوبة</div>
+                                <div class="fw-bold">{{ $rec->is_interview_required ? 'نعم' : 'لا' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if(filled($rec->required_documents))
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark border-bottom pb-2 mb-2"><i class="bi bi-file-earmark-text text-primary me-2"></i>الأوراق المطلوبة</h6>
+                            <div class="bg-light p-3 rounded border font-monospace small" style="white-space: pre-line;">{{ $rec->required_documents }}</div>
+                        </div>
+                    @endif
+
+                    @if(filled($rec->notes))
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark border-bottom pb-2 mb-2"><i class="bi bi-info-circle text-warning me-2"></i>ملاحظات واستثناءات هامة</h6>
+                            <div class="bg-warning-subtle text-warning-emphasis p-3 rounded border border-warning-subtle small" style="white-space: pre-line;">{{ $rec->notes }}</div>
+                        </div>
+                    @endif
+
+                    <!-- Hidden element containing text for copying -->
+                    <textarea id="copyContent{{ $rec->id }}" class="d-none">{{ $rec->toFormattedShareText() }}</textarea>
+                </div>
+                <div class="modal-footer bg-light justify-content-between">
+                    <button type="button" class="btn btn-outline-success" onclick="copyToClipboard({{ $rec->id }})">
+                        <i class="bi bi-clipboard-check me-1"></i> نسخ البيانات (WhatsApp / Email)
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق X</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal{{ $rec->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form action="{{ route('admin.visa-database.update', $rec) }}" method="POST">
+                    @csrf @method('PUT')
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>تعديل بيانات تأشيرة {{ $rec->country?->name_ar }}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">الدولة</label>
+                                <select name="visa_country_id" class="form-select" required>
+                                    @foreach($countries as $c)
+                                        <option value="{{ $c->id }}" {{ $rec->visa_country_id == $c->id ? 'selected' : '' }}>{{ $c->name_ar }} ({{ $c->name_en }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">نوع التأشيرة</label>
+                                <input type="text" name="visa_type" class="form-control" value="{{ $rec->visa_type }}" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small">التصنيفات المرتطبة بالدولة</label>
+                                <div class="d-flex flex-wrap gap-3 p-2 bg-light border rounded">
+                                    @php($activeCatIds = $rec->country?->categories->pluck('id')->toArray() ?? [])
+                                    @foreach($categories as $cat)
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="category_ids[]" value="{{ $cat->id }}" id="catEdit_{{ $rec->id }}_{{ $cat->id }}" {{ in_array($cat->id, $activeCatIds) ? 'checked' : '' }}>
+                                            <label class="form-check-label small" for="catEdit_{{ $rec->id }}_{{ $cat->id }}">{{ $cat->name_ar }}</label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">سعر التأشيرة للعميل</label>
+                                <input type="number" step="0.01" name="price" class="form-control" value="{{ $rec->price }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold small">العملة</label>
+                                <input type="text" name="currency" class="form-control" value="{{ $rec->currency ?: 'EGP' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">رسوم السفارة</label>
+                                <input type="text" name="embassy_fee" class="form-control" value="{{ $rec->embassy_fee }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">عملة السفارة</label>
+                                <input type="text" name="embassy_fee_currency" class="form-control" value="{{ $rec->embassy_fee_currency ?: 'EUR' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">طريقة دفع رسوم السفارة</label>
+                                <input type="text" name="embassy_fee_payment_method" class="form-control" value="{{ $rec->embassy_fee_payment_method }}" placeholder="مثال: بالمصري داخل السفارة — Visa أو Cash">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">أيام العمل</label>
+                                <input type="text" name="working_days" class="form-control" value="{{ $rec->working_days }}" placeholder="مثال: 15–20 يوم عمل">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">مدة التأشيرة المقترحة</label>
+                                <input type="text" name="proposed_duration" class="form-control" value="{{ $rec->proposed_duration }}" placeholder="مثال: حسب قرار السفارة من أسبوع إلى 15 يوم">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">مدة الإقامة</label>
+                                <input type="text" name="stay_duration" class="form-control" value="{{ $rec->stay_duration }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">مكان التقديم</label>
+                                <div class="d-flex flex-wrap gap-2 pt-1">
+                                    @php($currCenters = $rec->application_centers_list)
+                                    @foreach(['VFS', 'TLS', 'BLS', 'Almaviva / المافيفا', 'السفارة مباشرة'] as $centerOpt)
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" name="application_center[]" value="{{ $centerOpt }}" id="centerEdit_{{ $rec->id }}_{{ $loop->index }}" {{ in_array($centerOpt, $currCenters) ? 'checked' : '' }}>
+                                            <label class="form-check-label small" for="centerEdit_{{ $rec->id }}_{{ $loop->index }}">{{ $centerOpt }}</label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">البصمة مطلوبة؟</label>
+                                <select name="is_biometrics_required" class="form-select">
+                                    <option value="1" {{ $rec->is_biometrics_required ? 'selected' : '' }}>Yes / نعم</option>
+                                    <option value="0" {{ ! $rec->is_biometrics_required ? 'selected' : '' }}>No / لا</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">المقابلة مطلوبة؟</label>
+                                <select name="is_interview_required" class="form-select">
+                                    <option value="1" {{ $rec->is_interview_required ? 'selected' : '' }}>Yes / نعم</option>
+                                    <option value="0" {{ ! $rec->is_interview_required ? 'selected' : '' }}>No / لا</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">الحالة</label>
+                                <select name="status" class="form-select">
+                                    <option value="active" {{ $rec->status == 'active' ? 'selected' : '' }}>Active / نشطة</option>
+                                    <option value="temporarily_unavailable" {{ $rec->status == 'temporarily_unavailable' ? 'selected' : '' }}>Temporarily Unavailable / متوقفة مؤقتاً</option>
+                                    <option value="inactive" {{ $rec->status == 'inactive' ? 'selected' : '' }}>Inactive / غير متاحة</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small">الأوراق المطلوبة</label>
+                                <textarea name="required_documents" class="form-control" rows="5">{{ $rec->required_documents }}</textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small">ملاحظات واستثناءات</label>
+                                <textarea name="notes" class="form-control" rows="3">{{ $rec->notes }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Save Changes / حفظ التعديلات</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endforeach
 
 <!-- Add Visa Record Modal -->
 <div class="modal fade" id="addVisaModal" tabindex="-1" aria-hidden="true">
