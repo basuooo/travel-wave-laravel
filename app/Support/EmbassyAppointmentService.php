@@ -238,6 +238,11 @@ class EmbassyAppointmentService
     {
         return EmbassyAppointmentNotification::query()
             ->with(['appointment.country', 'lead', 'event'])
+            ->where(function (Builder $q) use ($seller) {
+                $q->where('seller_id', $seller->id)
+                  ->orWhereNull('seller_id')
+                  ->orWhere('seller_id', 0);
+            })
             ->whereIn('status', [
                 EmbassyAppointmentNotification::STATUS_PENDING,
                 EmbassyAppointmentNotification::STATUS_NOTIFIED,
