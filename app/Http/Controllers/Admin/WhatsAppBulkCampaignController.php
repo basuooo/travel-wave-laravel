@@ -109,7 +109,7 @@ class WhatsAppBulkCampaignController extends Controller
             ]);
         }
 
-        AuditLogService::log('whatsapp_campaign_created', "Created Bulk Campaign #{$campaign->id} ({$campaign->name})");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'created', $campaign, ['description' => "Created Bulk Campaign #{$campaign->id} ({$campaign->name})"]);
 
         if ($campaign->status === 'running') {
             dispatch(new \App\Jobs\ProcessWhatsAppCampaignJob($campaign->id));
@@ -134,7 +134,7 @@ class WhatsAppBulkCampaignController extends Controller
             'paused_at' => now(),
         ]);
 
-        AuditLogService::log('whatsapp_campaign_paused', "Paused Campaign #{$campaign->id}");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'updated', $campaign, ['description' => "Paused Campaign #{$campaign->id}"]);
 
         return redirect()->back()->with('success', 'تم إيقاف الحملة مؤقتاً.');
     }
@@ -146,7 +146,7 @@ class WhatsAppBulkCampaignController extends Controller
             'paused_at' => null,
         ]);
 
-        AuditLogService::log('whatsapp_campaign_resumed', "Resumed Campaign #{$campaign->id}");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'updated', $campaign, ['description' => "Resumed Campaign #{$campaign->id}"]);
         dispatch(new \App\Jobs\ProcessWhatsAppCampaignJob($campaign->id));
 
         return redirect()->back()->with('success', 'تم استئناف الحملة وسوف تستكمل الإرسال من المكان الذي توقفت عنده.');
@@ -158,7 +158,7 @@ class WhatsAppBulkCampaignController extends Controller
             'status' => 'cancelled',
         ]);
 
-        AuditLogService::log('whatsapp_campaign_cancelled', "Cancelled Campaign #{$campaign->id}");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'updated', $campaign, ['description' => "Cancelled Campaign #{$campaign->id}"]);
 
         return redirect()->back()->with('success', 'تم إلغاء الحملة بنجاح.');
     }
@@ -185,14 +185,14 @@ class WhatsAppBulkCampaignController extends Controller
             $newRec->save();
         }
 
-        AuditLogService::log('whatsapp_campaign_duplicated', "Duplicated Campaign #{$campaign->id} into #{$newCampaign->id}");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'created', $newCampaign, ['description' => "Duplicated Campaign #{$campaign->id} into #{$newCampaign->id}"]);
 
         return redirect()->route('admin.whatsapp.bulk.index')->with('success', 'تم نسخ الحملة بنجاح كمسودة جديدة!');
     }
 
     public function destroy(WhatsAppCampaign $campaign)
     {
-        AuditLogService::log('whatsapp_campaign_deleted', "Deleted Campaign #{$campaign->id}");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'deleted', $campaign, ['description' => "Deleted Campaign #{$campaign->id}"]);
         $campaign->delete();
 
         return redirect()->route('admin.whatsapp.bulk.index')->with('success', 'تم حذف الحملة بنجاح!');

@@ -52,7 +52,7 @@ class WhatsAppAccountController extends Controller
             'is_active'         => true,
         ]);
 
-        AuditLogService::log('whatsapp_account_created', "Created WhatsApp Account #{$account->id} ({$account->name})");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'created', $account, ['description' => "Created WhatsApp Account #{$account->id} ({$account->name})"]);
 
         return redirect()->route('admin.whatsapp.accounts.index')->with('success', 'تم إضافة رقم الواتساب بنجاح!');
     }
@@ -86,7 +86,7 @@ class WhatsAppAccountController extends Controller
             'connection_settings' => $settings,
         ]);
 
-        AuditLogService::log('whatsapp_account_updated', "Updated WhatsApp Account #{$account->id} ({$account->name})");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'updated', $account, ['description' => "Updated WhatsApp Account #{$account->id} ({$account->name})"]);
 
         return redirect()->route('admin.whatsapp.accounts.index')->with('success', 'تم تحديث بياتات حساب الواتساب بنجاح!');
     }
@@ -99,14 +99,14 @@ class WhatsAppAccountController extends Controller
             'last_connected_at' => $newStatus === 'connected' ? now() : $account->last_connected_at,
         ]);
 
-        AuditLogService::log('whatsapp_account_status_toggle', "Toggled status for Account #{$account->id} to {$newStatus}");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'status_changed', $account, ['description' => "Toggled status for Account #{$account->id} to {$newStatus}"]);
 
         return redirect()->route('admin.whatsapp.accounts.index')->with('success', "تم تغيير حالة الاتصال إلى {$newStatus} بنجاح!");
     }
 
     public function destroy(WhatsAppAccount $account)
     {
-        AuditLogService::log('whatsapp_account_deleted', "Deleted WhatsApp Account #{$account->id} ({$account->name})");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'deleted', $account, ['description' => "Deleted WhatsApp Account #{$account->id} ({$account->name})"]);
         $account->delete();
 
         return redirect()->route('admin.whatsapp.accounts.index')->with('success', 'تم حذف رقم الواتساب بنجاح!');

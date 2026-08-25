@@ -136,7 +136,7 @@ class WhatsAppRetargetingController extends Controller
             ]);
         }
 
-        AuditLogService::log('whatsapp_campaign_created', "Created Retargeting Campaign #{$campaign->id} ({$campaign->name}) with {$campaign->total_contacts} contacts");
+        app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'created', $campaign, ['description' => "Created Retargeting Campaign #{$campaign->id} ({$campaign->name}) with {$campaign->total_contacts} contacts"]);
 
         if ($campaign->status === 'running') {
             dispatch(new \App\Jobs\ProcessWhatsAppCampaignJob($campaign->id));
