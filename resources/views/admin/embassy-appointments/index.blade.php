@@ -227,21 +227,18 @@
                                 </td>
                                 <td class="pe-3 text-end">
                                     <div class="d-inline-flex gap-1">
-                                        @if($appt->status !== 'available_now')
-                                            <form method="POST" action="{{ route('admin.embassy-appointments.toggle-available-now', $appt) }}" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 shadow-sm" title="تفعيل: مواعيد متاحة الآن (تنبيه تلقائي للبائعين)">
-                                                    <span>🟢 متاحة الآن</span>
-                                                </button>
-                                            </form>
-                                        @else
-                                            <form method="POST" action="{{ route('admin.embassy-appointments.toggle-no-availability', $appt) }}" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" title="إغلاق: لا توجد مواعيد">
-                                                    <span>🔴 إغلاق</span>
-                                                </button>
-                                            </form>
-                                        @endif
+                                        <form method="POST" action="{{ route('admin.embassy-appointments.update-quick-status', $appt) }}" class="d-inline">
+                                            @csrf
+                                            <select name="status" class="form-select form-select-sm fw-bold border-0 shadow-sm pe-4" onchange="this.form.submit()" style="cursor: pointer; display: inline-block; width: auto; font-size: 0.8rem;
+                                                background-color: {{ $appt->status === 'available_now' ? '#d1e7dd' : ($appt->status === 'available_later' ? '#fff3cd' : ($appt->status === 'no_availability' ? '#f8d7da' : '#e2e3e5')) }};
+                                                color: {{ $appt->status === 'available_now' ? '#0f5132' : ($appt->status === 'available_later' ? '#664d03' : ($appt->status === 'no_availability' ? '#842029' : '#41464b')) }};"
+                                                title="تغيير الحالة السريعة للموعد">
+                                                <option value="available_now" {{ $appt->status === 'available_now' ? 'selected' : '' }}>🟢 متاحة الآن</option>
+                                                <option value="available_later" {{ $appt->status === 'available_later' ? 'selected' : '' }}>🟡 متاحة مستقبلاً</option>
+                                                <option value="no_availability" {{ $appt->status === 'no_availability' ? 'selected' : '' }}>🔴 لا توجد مواعيد</option>
+                                                <option value="unknown" {{ $appt->status === 'unknown' ? 'selected' : '' }}>⚪ غير معروف</option>
+                                            </select>
+                                        </form>
 
                                         <button type="button" class="btn btn-sm btn-light border editApptBtn"
                                             data-id="{{ $appt->id }}"

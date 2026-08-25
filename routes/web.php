@@ -317,6 +317,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::delete('/{embassy_appointment}', [EmbassyAppointmentController::class, 'destroy'])->name('destroy');
                 Route::post('/{embassy_appointment}/available-now', [EmbassyAppointmentController::class, 'toggleAvailableNow'])->name('toggle-available-now');
                 Route::post('/{embassy_appointment}/no-availability', [EmbassyAppointmentController::class, 'toggleNoAvailability'])->name('toggle-no-availability');
+                Route::post('/{embassy_appointment}/quick-status', [EmbassyAppointmentController::class, 'updateQuickStatus'])->name('update-quick-status');
             });
         });
 

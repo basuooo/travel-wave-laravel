@@ -340,6 +340,44 @@ class EmbassyAppointmentController extends Controller
         return redirect()->back()->with('success', '🔴 تم تغيير الحالة إلى: لا توجد مواعيد.');
     }
 
+    public function updateQuickStatus(EmbassyAppointment $embassyAppointment, Request $request)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', Rule::in([
+                EmbassyAppointment::STATUS_AVAILABLE_NOW,
+                EmbassyAppointment::STATUS_AVAILABLE_LATER,
+                EmbassyAppointment::STATUS_NO_AVAILABILITY,
+                EmbassyAppointment::STATUS_UNKNOWN,
+            ])],
+        ]);
+
+        $this->service->updateStatus(
+            $embassyAppointment,
+            $validated['status'],
+            $embassyAppointment->earliest_date,
+            $embassyAppointment->notes,
+            auth()->user()
+        );
+
+        $statusLabels = [
+            EmbassyAppointment::STATUS_AVAILABLE_NOW => '🟢 متاحة الآن',
+            EmbassyAppointment::STATUS_AVAILABLE_LATER => '🟡 متاحة مستقبلاً',
+            EmbassyAppointment::STATUS_NO_AVAILABILITY => '🔴 لا توجد مواعيد',
+            EmbassyAppointment::STATUS_UNKNOWN => '⚪ غير معروف',
+        ];
+
+        $label = $statusLabels[$validated['status']] ?? $validated['status'];
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "تم تغيير حالة الموعد بنجاح إلى: {$label}",
+            ]);
+        }
+
+        return redirect()->back()->with('success', "تم تغيير حالة الموعد بنجاح إلى: {$label}");
+    }
+
     public function show(EmbassyAppointment $embassyAppointment)
     {
         $embassyAppointment->load([
