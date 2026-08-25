@@ -903,7 +903,7 @@ class CrmLeadController extends Controller
 
         if (! $whatsappSent) {
             return redirect()->back()->withErrors([
-                'whatsapp_sent' => "مينفعش تكلم\ي العميل من غير ماتبعتي رسالة الواتس يا {$userName}"
+                'whatsapp_sent' => "مينفعش تكلم/ي العميل من غير ما تبعت/ي رسالة الواتس يا {$userName}"
             ])->withInput();
         }
 

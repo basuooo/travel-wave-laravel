@@ -597,7 +597,7 @@ function validateCallForm(e) {
 
     if (!whatsappCheck || !whatsappCheck.checked) {
         e.preventDefault();
-        const msg = `مينفعش تكلم\\ي العميل من غير ماتبعتي رسالة الواتس يا ${currentUserName}`;
+        const msg = `مينفعش تكلم/ي العميل من غير ما تبعت/ي رسالة الواتس يا ${currentUserName}`;
         if (alertBox) {
             alertBox.innerText = msg;
             alertBox.classList.remove('d-none');
