@@ -24,10 +24,14 @@ class EmbassyAppointmentService
         ?User $actor = null
     ): EmbassyAppointment {
         $oldStatus = $appointment->status;
-        $oldEarliestDate = $appointment->earliest_date?->format('Y-m-d');
+        $oldEarliestDate = is_string($appointment->earliest_date)
+            ? $appointment->earliest_date
+            : ($appointment->earliest_date ? (string) $appointment->earliest_date : null);
 
         $appointment->status = $newStatus;
-        $appointment->earliest_date = $earliestDate ? Carbon::parse($earliestDate)->format('Y-m-d') : null;
+        if ($earliestDate !== null) {
+            $appointment->earliest_date = $earliestDate;
+        }
         $appointment->last_updated_at = now();
         $appointment->updated_by = $actor?->id;
         if ($notes !== null) {
