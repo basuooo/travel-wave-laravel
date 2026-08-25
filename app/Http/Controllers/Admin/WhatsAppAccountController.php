@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\WhatsAppAccount;
+use App\Services\WhatsApp\WhatsAppGatewayService;
 use App\Support\AuditLogService;
 use App\Support\WhatsAppSchemaInstaller;
 use Illuminate\Http\Request;
@@ -90,7 +91,7 @@ class WhatsAppAccountController extends Controller
 
         app(AuditLogService::class)->log(auth()->user(), 'whatsapp', 'updated', $account, ['description' => "Updated WhatsApp Account #{$account->id} ({$account->name})"]);
 
-        return redirect()->route('admin.whatsapp.accounts.index')->with('success', 'تم تحديث بياتات حساب الواتساب بنجاح!');
+        return redirect()->route('admin.whatsapp.accounts.index')->with('success', 'تم تحديث بيانات حساب الواتساب بنجاح!');
     }
 
     public function getQrCode(WhatsAppAccount $account)
@@ -98,42 +99,47 @@ class WhatsAppAccountController extends Controller
         WhatsAppSchemaInstaller::install();
 
         $settings = $account->connection_settings ?: [];
-        $gatewayUrl = $settings['gateway_url'] ?? null;
+        $customGatewayUrl = $settings['gateway_url'] ?? null;
         $hasMetaCredentials = !empty($settings['phone_number_id']) && !empty($settings['access_token']);
 
-        if ($gatewayUrl) {
-            try {
-                $client = new \GuzzleHttp\Client(['timeout' => 5]);
-                $res = $client->get(rtrim($gatewayUrl, '/') . '/qr');
-                $data = json_decode((string)$res->getBody(), true);
-                if (isset($data['qr'])) {
-                    return response()->json([
-                        'status' => 'success',
-                        'type'   => 'live_gateway',
-                        'qr'     => $data['qr'],
-                        'message'=> 'تم جلب QR Code الحي من سيرفر الـ Gateway بنجاح'
-                    ]);
-                }
-            } catch (\Throwable $e) {}
+        $gatewayService = new WhatsAppGatewayService($customGatewayUrl);
+        $gatewayResult = $gatewayService->getQrCode($account->id);
+
+        if (isset($gatewayResult['status']) && $gatewayResult['status'] === 'connected') {
+            $account->update([
+                'status'            => 'connected',
+                'last_connected_at' => now(),
+            ]);
+            return response()->json([
+                'status' => 'connected',
+                'message' => 'الرقم متصل بالفعل والجلسة شغال بنجاح!'
+            ]);
         }
 
-        // Live dynamic timestamped token for pairing request
+        if (isset($gatewayResult['qr'])) {
+            return response()->json([
+                'status'  => 'success',
+                'type'    => 'live_baileys',
+                'qr'      => $gatewayResult['qr'],
+                'message' => 'تم توليد QR Code الحي من خادم الواتساب بنجاح. امسحه الآن من الموبايل!'
+            ]);
+        }
+
+        // Fallback for Meta Cloud API or offline local server guidance
         $timestamp = time();
         $tokenSession = "WA_PAIRING_SESSION_" . $account->id . "_" . dechex($timestamp);
         $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($tokenSession);
 
         return response()->json([
             'status'             => 'success',
-            'type'               => $hasMetaCredentials ? 'meta_cloud_api' : 'dynamic_session',
+            'type'               => $hasMetaCredentials ? 'meta_cloud_api' : 'gateway_offline',
             'has_meta'           => $hasMetaCredentials,
             'qr_url'             => $qrUrl,
             'token_session'      => $tokenSession,
             'phone_number'       => $account->phone_number,
             'timestamp'          => $timestamp,
             'meta_phone_id'      => $settings['phone_number_id'] ?? null,
-            'message'            => $hasMetaCredentials 
-                ? 'تم إعداد هذا الرقم للربط المباشر عبر Meta WhatsApp Cloud API.' 
-                : 'تم توليد جلسة ربط حركية للرقم تتغير تلقائياً.'
+            'message'            => $gatewayResult['message'] ?? 'تم إعداد هذا الرقم للربط.'
         ]);
     }
 

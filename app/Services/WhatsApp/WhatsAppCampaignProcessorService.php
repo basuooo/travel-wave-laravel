@@ -9,6 +9,7 @@ use App\Models\WhatsAppConversation;
 use App\Models\WhatsAppBlacklist;
 use App\Models\WhatsAppContact;
 use App\Services\WhatsApp\WhatsAppService;
+use App\Services\WhatsApp\WhatsAppGatewayService;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -132,8 +133,20 @@ class WhatsAppCampaignProcessorService
             // Mark as processing
             $recipient->update(['status' => 'processing']);
 
-            // Send via WhatsApp Service
-            $sentResult = $this->whatsappService->sendText($recipient->phone, $messageBody);
+            // Send via Meta Cloud API or Baileys Gateway Service
+            $sentResult = null;
+            $account = $campaign->account;
+            $settings = $account?->connection_settings ?: [];
+
+            if (!empty($settings['phone_number_id']) && !empty($settings['access_token'])) {
+                $sentResult = $this->whatsappService->sendText($recipient->phone, $messageBody);
+            } else {
+                $gatewayService = new WhatsAppGatewayService($settings['gateway_url'] ?? null);
+                $gatewayRes = $gatewayService->sendMessage($campaign->whatsapp_account_id, $recipient->phone, $messageBody);
+                if ($gatewayRes && isset($gatewayRes['status']) && $gatewayRes['status'] === 'success') {
+                    $sentResult = ['messages' => [['id' => $gatewayRes['messageId'] ?? ('gw_' . uniqid())]]];
+                }
+            }
 
             if ($sentResult && isset($sentResult['messages'][0]['id'])) {
                 $metaId = $sentResult['messages'][0]['id'];
