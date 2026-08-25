@@ -93,26 +93,39 @@ class EmbassyAppointmentService
             return 0;
         }
 
-        $awaitingStatus = CrmStatus::where('slug', 'awaiting-embassy-appointment')
-            ->orWhere('name_ar', 'like', '%انتظار فتح مواعيد السفارة%')
-            ->orWhere('name_ar', 'like', '%مواعيد السفارة%')
-            ->first();
-
-        $awaitingStatusId = $awaitingStatus?->id;
+        $awaitingStatusIds = CrmStatus::query()
+            ->where('slug', 'awaiting-embassy-appointment')
+            ->orWhere('slug', 'like', '%embassy%')
+            ->orWhere('slug', 'like', '%appointment%')
+            ->orWhere('name_ar', 'like', '%انتظار%')
+            ->orWhere('name_ar', 'like', '%سفارة%')
+            ->orWhere('name_ar', 'like', '%مواعيد%')
+            ->pluck('id')
+            ->toArray();
 
         $countryNameAr = $appointment->country?->name_ar;
         $countryNameEn = $appointment->country?->name_en;
 
         $query = Inquiry::query()
-            ->where(function (Builder $q) use ($awaitingStatusId) {
-                if ($awaitingStatusId) {
-                    $q->where('crm_status_id', $awaitingStatusId)
-                      ->orWhere('crm_status2_id', $awaitingStatusId);
+            ->where(function (Builder $q) use ($awaitingStatusIds) {
+                if (! empty($awaitingStatusIds)) {
+                    $q->whereIn('crm_status_id', $awaitingStatusIds)
+                      ->orWhereIn('crm_status2_id', $awaitingStatusIds);
                 }
                 $q->orWhere('status', 'awaiting-embassy-appointment')
-                  ->orWhere('status', 'like', '%مواعيد السفارة%')
-                  ->orWhereHas('crmStatus', fn ($s) => $s->where('name_ar', 'like', '%مواعيد السفارة%'))
-                  ->orWhereHas('crmStatus2', fn ($s) => $s->where('name_ar', 'like', '%مواعيد السفارة%'));
+                  ->orWhere('status', 'like', '%سفارة%')
+                  ->orWhere('status', 'like', '%مواعيد%')
+                  ->orWhere('status', 'like', '%انتظار%')
+                  ->orWhereHas('crmStatus', function ($s) {
+                      $s->where('name_ar', 'like', '%سفارة%')
+                        ->orWhere('name_ar', 'like', '%مواعيد%')
+                        ->orWhere('name_ar', 'like', '%انتظار%');
+                  })
+                  ->orWhereHas('crmStatus2', function ($s) {
+                      $s->where('name_ar', 'like', '%سفارة%')
+                        ->orWhere('name_ar', 'like', '%مواعيد%')
+                        ->orWhere('name_ar', 'like', '%انتظار%');
+                  });
             })
             ->whereDoesntHave('crmStatus', function (Builder $q) {
                 $q->whereIn('slug', ['closed', 'cancelled', 'duplicate', 'not-interested']);
@@ -137,6 +150,18 @@ class EmbassyAppointmentService
                   ->orWhere('destination', 'like', '%' . $countryNameEn . '%')
                   ->orWhere('service_country_name', 'like', '%' . $countryNameEn . '%');
             }
+
+            $q->orWhereHas('visaCountry', function ($vc) use ($appointment, $countryNameAr, $countryNameEn) {
+                $vc->where('id', $appointment->visa_country_id);
+                if ($countryNameAr) {
+                    $cleanAr = preg_replace('/[أإآ]/u', 'ا', $countryNameAr);
+                    $vc->orWhere('name_ar', 'like', '%' . $countryNameAr . '%')
+                       ->orWhere('name_ar', 'like', '%' . $cleanAr . '%');
+                }
+                if ($countryNameEn) {
+                    $vc->orWhere('name_en', 'like', '%' . $countryNameEn . '%');
+                }
+            });
         });
 
         // Filter by center if specified on lead
@@ -144,7 +169,7 @@ class EmbassyAppointmentService
             $query->where(function (Builder $q) use ($appointment) {
                 $q->whereNull('appointment_center')
                   ->orWhere('appointment_center', '')
-                  ->orWhere('appointment_center', $appointment->appointment_center);
+                  ->orWhere('appointment_center', 'like', '%' . $appointment->appointment_center . '%');
             });
         }
 
@@ -153,7 +178,7 @@ class EmbassyAppointmentService
             $query->where(function (Builder $q) use ($appointment) {
                 $q->whereNull('appointment_type')
                   ->orWhere('appointment_type', '')
-                  ->orWhere('appointment_type', $appointment->appointment_type);
+                  ->orWhere('appointment_type', 'like', '%' . $appointment->appointment_type . '%');
             });
         }
 
@@ -162,55 +187,48 @@ class EmbassyAppointmentService
         $count = 0;
 
         foreach ($matchingLeads as $lead) {
-            $sellerIds = [];
-            if ($lead->assigned_user_id) {
-                $sellerIds[] = $lead->assigned_user_id;
-            } else {
-                $sellerIds = User::where('is_active', true)->where('is_admin', true)->pluck('id')->toArray();
-            }
+            $sellerId = $lead->assigned_user_id ?: (auth()->id() ?: 1);
 
-            foreach ($sellerIds as $sellerId) {
-                $notif = EmbassyAppointmentNotification::firstOrCreate([
-                    'embassy_availability_event_id' => $event->id,
-                    'inquiry_id' => $lead->id,
-                    'seller_id' => $sellerId,
-                ], [
-                    'embassy_appointment_id' => $appointment->id,
-                    'status' => EmbassyAppointmentNotification::STATUS_PENDING,
-                ]);
+            $notif = EmbassyAppointmentNotification::firstOrCreate([
+                'embassy_availability_event_id' => $event->id,
+                'inquiry_id' => $lead->id,
+            ], [
+                'embassy_appointment_id' => $appointment->id,
+                'seller_id' => $sellerId,
+                'status' => EmbassyAppointmentNotification::STATUS_PENDING,
+            ]);
 
-                if ($sellerId) {
-                    $seller = User::find($sellerId);
-                    if ($seller) {
-                        $notificationCenter->notifyUser($seller, [
-                            'event_key' => sprintf('embassy_appt_open:%d:%d:%d', $event->id, $lead->id, $sellerId),
-                            'type' => 'embassy_appointment_opened',
-                            'module' => 'crm',
-                            'severity' => AdminNotificationCenterService::SEVERITY_SUCCESS,
-                            'title_ar' => '🔔 مواعيد السفارة متاحة الآن: ' . $appointment->country_name,
-                            'title_en' => '🔔 Embassy Appointments Available: ' . $appointment->country_name,
-                            'message_ar' => sprintf(
-                                'مواعيد السفارة متاحة الآن للعميل %s (%s - %s - %s - %s)',
-                                $lead->full_name,
-                                $appointment->country_name,
-                                $appointment->visa_type,
-                                $appointment->appointment_center,
-                                $appointment->appointment_type
-                            ),
-                            'message_en' => sprintf(
-                                'Embassy appointments available for lead %s (%s - %s - %s - %s)',
-                                $lead->full_name,
-                                $appointment->country_name,
-                                $appointment->visa_type,
-                                $appointment->appointment_center,
-                                $appointment->appointment_type
-                            ),
-                            'action_url' => route('admin.crm.leads.show', $lead->id),
-                        ]);
-                    }
+            if ($sellerId) {
+                $seller = User::find($sellerId);
+                if ($seller) {
+                    $notificationCenter->notifyUser($seller, [
+                        'event_key' => sprintf('embassy_appt_open:%d:%d:%d', $event->id, $lead->id, $sellerId),
+                        'type' => 'embassy_appointment_opened',
+                        'module' => 'crm',
+                        'severity' => AdminNotificationCenterService::SEVERITY_SUCCESS,
+                        'title_ar' => '🔔 مواعيد السفارة متاحة الآن: ' . $appointment->country_name,
+                        'title_en' => '🔔 Embassy Appointments Available: ' . $appointment->country_name,
+                        'message_ar' => sprintf(
+                            'مواعيد السفارة متاحة الآن للعميل %s (%s - %s - %s - %s)',
+                            $lead->full_name,
+                            $appointment->country_name,
+                            $appointment->visa_type,
+                            $appointment->appointment_center,
+                            $appointment->appointment_type
+                        ),
+                        'message_en' => sprintf(
+                            'Embassy appointments available for lead %s (%s - %s - %s - %s)',
+                            $lead->full_name,
+                            $appointment->country_name,
+                            $appointment->visa_type,
+                            $appointment->appointment_center,
+                            $appointment->appointment_type
+                        ),
+                        'action_url' => route('admin.crm.leads.show', $lead->id),
+                    ]);
                 }
-                $count++;
             }
+            $count++;
         }
 
         return $count;
@@ -220,7 +238,13 @@ class EmbassyAppointmentService
     {
         return EmbassyAppointmentNotification::query()
             ->with(['appointment.country', 'lead', 'event'])
-            ->where('seller_id', $seller->id)
+            ->where(function (Builder $q) use ($seller) {
+                $q->where('seller_id', $seller->id);
+                if ($seller->is_admin) {
+                    $q->orWhereNull('seller_id')
+                      ->orWhere('seller_id', 0);
+                }
+            })
             ->whereIn('status', [
                 EmbassyAppointmentNotification::STATUS_PENDING,
                 EmbassyAppointmentNotification::STATUS_NOTIFIED,
