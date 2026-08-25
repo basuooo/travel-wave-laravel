@@ -118,6 +118,22 @@ class EmbassyAppointmentController extends Controller
         }
     }
 
+    public function checkLeads()
+    {
+        try {
+            $count = $this->service->syncAllAvailableNowAppointments();
+            if ($count > 0) {
+                return redirect()->route('admin.embassy-appointments.index')
+                    ->with('success', "تم فحص ومطابقة جميع العملاء بالـ CRM بنجاح 🔍! تم إرسال تنبيهات وتفعيل نوافذ البوب أب لـ {$count} تنبيه عميل منتظر 🟢");
+            }
+            return redirect()->route('admin.embassy-appointments.index')
+                ->with('success', 'تم فحص جميع العملاء بالـ CRM بنجاح 🔍! لا توجد مطالبات جديدة بحاجة لتنبيهات حالياً.');
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.embassy-appointments.index')
+                ->with('error', 'حدث خطأ أثناء فحص العملاء: ' . $e->getMessage());
+        }
+    }
+
     protected function ensureSchengenCountriesExist(): void
     {
         try {

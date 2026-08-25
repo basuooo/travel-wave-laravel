@@ -12,6 +12,13 @@
             <p class="text-muted mb-0">إدارة ومتابعة فتح مواعيد السفارات وتنبيه المبيعات تلقائيًا للعملاء المنتظرين.</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
+            <form method="POST" action="{{ route('admin.embassy-appointments.check-leads') }}" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-success d-inline-flex align-items-center gap-1 shadow-sm" title="فحص ومطابقة جميع عملاء الـ CRM المنتظرين للمواعيد">
+                    <iconify-icon icon="lucide:user-check" width="18"></iconify-icon>
+                    <span>🔍 فحص الليد</span>
+                </button>
+            </form>
             <a href="{{ route('admin.embassy-appointments.trash') }}" class="btn btn-outline-danger d-inline-flex align-items-center gap-1 shadow-sm">
                 <iconify-icon icon="lucide:trash-2" width="18"></iconify-icon>
                 <span>سلة المحذوفات</span>
