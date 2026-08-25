@@ -7,12 +7,20 @@ use App\Models\User;
 use App\Models\WhatsAppAccount;
 use App\Support\AuditLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 class WhatsAppAccountController extends Controller
 {
     public function index()
     {
-        $accounts = WhatsAppAccount::with('assignedUser')->latest()->get();
+        if (!Schema::hasTable('whatsapp_accounts')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
+        $accounts = Schema::hasTable('whatsapp_accounts') ? WhatsAppAccount::with('assignedUser')->latest()->get() : collect();
         $employees = User::where('is_admin', true)->orWhereHas('roles')->get();
 
         return view('admin.whatsapp.accounts.index', compact('accounts', 'employees'));
@@ -20,6 +28,12 @@ class WhatsAppAccountController extends Controller
 
     public function store(Request $request)
     {
+        if (!Schema::hasTable('whatsapp_accounts')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $validated = $request->validate([
             'name'              => 'required|string|max:255',
             'phone_number'      => 'required|string|max:50',

@@ -7,11 +7,19 @@ use App\Models\User;
 use App\Models\WhatsAppAccount;
 use App\Models\WhatsAppContact;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 class WhatsAppContactController extends Controller
 {
     public function index(Request $request)
     {
+        if (!Schema::hasTable('whatsapp_contacts')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $query = WhatsAppContact::with(['account', 'assignedUser', 'lead', 'customer']);
 
         if ($request->filled('search')) {
@@ -35,8 +43,8 @@ class WhatsAppContactController extends Controller
             $query->where('opt_out_status', $request->opt_out_status);
         }
 
-        $contacts = $query->latest()->paginate(25);
-        $accounts = WhatsAppAccount::all();
+        $contacts = Schema::hasTable('whatsapp_contacts') ? $query->latest()->paginate(25) : new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25);
+        $accounts = Schema::hasTable('whatsapp_accounts') ? WhatsAppAccount::all() : collect();
         $employees = User::all();
 
         return view('admin.whatsapp.contacts.index', compact('contacts', 'accounts', 'employees'));
@@ -44,6 +52,12 @@ class WhatsAppContactController extends Controller
 
     public function store(Request $request)
     {
+        if (!Schema::hasTable('whatsapp_contacts')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $validated = $request->validate([
             'name'                => 'required|string|max:255',
             'phone'               => 'required|string|max:50',
