@@ -237,6 +237,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/accounts', [WhatsAppAccountController::class, 'index'])->name('accounts.index');
                 Route::post('/accounts', [WhatsAppAccountController::class, 'store'])->name('accounts.store');
                 Route::put('/accounts/{account}', [WhatsAppAccountController::class, 'update'])->name('accounts.update');
+                Route::get('/accounts/{account}/qr', [WhatsAppAccountController::class, 'getQrCode'])->name('accounts.qr');
                 Route::post('/accounts/{account}/toggle-connect', [WhatsAppAccountController::class, 'toggleConnect'])->name('accounts.toggle-connect');
                 Route::delete('/accounts/{account}', [WhatsAppAccountController::class, 'destroy'])->name('accounts.destroy');
 
