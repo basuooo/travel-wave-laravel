@@ -9,22 +9,15 @@ use App\Models\WhatsAppCampaignRecipient;
 use App\Models\WhatsAppContact;
 use App\Models\WhatsAppConversation;
 use App\Models\WhatsAppMessage;
+use App\Support\WhatsAppSchemaInstaller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 
 class WhatsAppDashboardController extends Controller
 {
     public function index()
     {
-        // Auto-run migrations if tables do not exist on production database yet
-        if (!Schema::hasTable('whatsapp_accounts') || !Schema::hasTable('whatsapp_campaigns')) {
-            try {
-                Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {
-                // Log error silently
-            }
-        }
+        WhatsAppSchemaInstaller::install();
 
         $accountsCount = Schema::hasTable('whatsapp_accounts') ? WhatsAppAccount::count() : 0;
         $connectedAccountsCount = Schema::hasTable('whatsapp_accounts') ? WhatsAppAccount::where('status', 'connected')->count() : 0;

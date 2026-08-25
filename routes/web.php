@@ -730,7 +730,8 @@ Route::get('/clear-all-cache', function() {
 Route::get('/migrate-db', function() {
     try {
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        return "<h1>Success!</h1><pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+        \App\Support\WhatsAppSchemaInstaller::install();
+        return "<h1>Success!</h1><p>Database migrations & WhatsApp Module schema installed successfully!</p><pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
     } catch (\Exception $e) {
         return "<h1>Error</h1><p>" . $e->getMessage() . "</p>";
     }

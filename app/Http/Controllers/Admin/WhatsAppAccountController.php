@@ -6,19 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\WhatsAppAccount;
 use App\Support\AuditLogService;
+use App\Support\WhatsAppSchemaInstaller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 
 class WhatsAppAccountController extends Controller
 {
     public function index()
     {
-        if (!Schema::hasTable('whatsapp_accounts')) {
-            try {
-                Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {}
-        }
+        WhatsAppSchemaInstaller::install();
 
         $accounts = Schema::hasTable('whatsapp_accounts') ? WhatsAppAccount::with('assignedUser')->latest()->get() : collect();
         $employees = User::where('is_admin', true)->orWhereHas('roles')->get();
@@ -28,11 +24,7 @@ class WhatsAppAccountController extends Controller
 
     public function store(Request $request)
     {
-        if (!Schema::hasTable('whatsapp_accounts')) {
-            try {
-                Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {}
-        }
+        WhatsAppSchemaInstaller::install();
 
         $validated = $request->validate([
             'name'              => 'required|string|max:255',
@@ -67,6 +59,8 @@ class WhatsAppAccountController extends Controller
 
     public function update(Request $request, WhatsAppAccount $account)
     {
+        WhatsAppSchemaInstaller::install();
+
         $validated = $request->validate([
             'name'              => 'required|string|max:255',
             'phone_number'      => 'required|string|max:50',

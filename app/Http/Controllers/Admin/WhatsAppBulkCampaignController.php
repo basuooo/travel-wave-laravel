@@ -10,8 +10,8 @@ use App\Models\WhatsAppCampaignRecipient;
 use App\Models\WhatsAppTemplate;
 use App\Services\WhatsApp\WhatsAppContactMatchingService;
 use App\Support\AuditLogService;
+use App\Support\WhatsAppSchemaInstaller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
@@ -26,11 +26,7 @@ class WhatsAppBulkCampaignController extends Controller
 
     public function index(Request $request)
     {
-        if (!Schema::hasTable('whatsapp_campaigns')) {
-            try {
-                Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {}
-        }
+        WhatsAppSchemaInstaller::install();
 
         $query = WhatsAppCampaign::with(['account', 'creator']);
 
@@ -49,11 +45,7 @@ class WhatsAppBulkCampaignController extends Controller
 
     public function create()
     {
-        if (!Schema::hasTable('whatsapp_campaigns')) {
-            try {
-                Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {}
-        }
+        WhatsAppSchemaInstaller::install();
 
         $accounts = Schema::hasTable('whatsapp_accounts') ? WhatsAppAccount::where('is_active', true)->get() : collect();
         $templates = Schema::hasTable('whatsapp_templates') ? WhatsAppTemplate::all() : collect();
@@ -64,11 +56,7 @@ class WhatsAppBulkCampaignController extends Controller
 
     public function store(Request $request)
     {
-        if (!Schema::hasTable('whatsapp_campaigns')) {
-            try {
-                Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {}
-        }
+        WhatsAppSchemaInstaller::install();
 
         $validated = $request->validate([
             'name'                 => 'required|string|max:255',
