@@ -26,7 +26,6 @@ class EmbassyAppointmentController extends Controller
     {
         EmbassyAppointment::ensureTableSchema();
         $this->ensureSchengenCountriesExist();
-        EmbassyAppointment::autoSeedAppointmentsFromImage();
 
         $query = EmbassyAppointment::query()
             ->with(['country', 'updatedBy'])

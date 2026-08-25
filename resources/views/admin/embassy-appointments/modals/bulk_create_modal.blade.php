@@ -22,18 +22,15 @@
                                 🔍 قراءة الصورة وتعبئة الجدول
                             </button>
                         </div>
-                        <div class="form-text small text-muted">اختر صورة المواعيد من جهازك أو اضغط على زر التعبئة التلقائية الجاهزة بالأسفل.</div>
+                        <div class="form-text small text-muted">اختر صورة المواعيد من جهازك ليتم قراءتها وتوليد الصفوف لك تلقائيًا.</div>
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                         <div>
                             <span class="fw-bold text-dark">جدول المواعيد المتعددة</span>
-                            <span class="text-muted small ms-2">اضغط على زر التعبئة السريعة لتوليد مواعيد الصورة تلقائيًا.</span>
+                            <span class="text-muted small ms-2">يمكنك رفع صورة المواعيد بالأعلى أو إضافة صفوف جديدة يدويًا.</span>
                         </div>
                         <div class="d-flex gap-2">
-                            <button type="button" id="fillImagePresetBtn" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 shadow-sm">
-                                ⚡ <span>تعبئة 15 موعدًا تلقائيًا من الصورة</span>
-                            </button>
                             <button type="button" id="addBulkRowBtn" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1">
                                 ➕ <span>إضافة صف موعد جديد</span>
                             </button>
