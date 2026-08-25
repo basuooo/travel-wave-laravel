@@ -29,6 +29,18 @@ class EmbassyAppointment extends Model
     public static function ensureTableSchema(): void
     {
         try {
+            try {
+                DB::statement("ALTER TABLE embassy_appointments MODIFY earliest_date VARCHAR(255) NULL");
+            } catch (\Throwable $ex) {}
+
+            try {
+                DB::statement("ALTER TABLE embassy_appointment_logs MODIFY old_earliest_date VARCHAR(255) NULL");
+            } catch (\Throwable $ex) {}
+
+            try {
+                DB::statement("ALTER TABLE embassy_appointment_logs MODIFY new_earliest_date VARCHAR(255) NULL");
+            } catch (\Throwable $ex) {}
+
             VisaCountry::ensureTableSchema();
 
             if (! Schema::hasTable('embassy_appointments')) {
