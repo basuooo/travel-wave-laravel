@@ -84,13 +84,19 @@ class UserController extends Controller
 
     protected function validatedData(Request $request, ?User $user = null): array
     {
-        $passwordRules = [];
+        $passwordRules = ['nullable'];
+        $isChangingPassword = false;
+
         if (! $user) {
             $passwordRules = ['required', 'string', 'min:8', 'confirmed'];
-        } elseif ($request->filled('password')) {
-            $passwordRules = ['nullable', 'string', 'min:8', 'confirmed'];
+            $isChangingPassword = true;
         } else {
-            $passwordRules = ['nullable'];
+            // Only validate & update password when editing if BOTH password AND confirmation are filled.
+            // This prevents browser autofill (which fills password but leaves confirmation blank) from throwing error.
+            if ($request->filled('password') && $request->filled('password_confirmation')) {
+                $passwordRules = ['string', 'min:8', 'confirmed'];
+                $isChangingPassword = true;
+            }
         }
 
         $validated = $request->validate([
@@ -118,7 +124,7 @@ class UserController extends Controller
             'profile_image' => $this->uploadFile($request, 'profile_image', 'users', $user?->profile_image),
         ];
 
-        if (! empty($validated['password'])) {
+        if ($isChangingPassword && ! empty($validated['password'])) {
             $payload['password'] = Hash::make($validated['password']);
         }
 

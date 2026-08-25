@@ -5,7 +5,7 @@
 @section('page_description', __('admin.users_form_desc'))
 
 @section('content')
-    <form method="post" enctype="multipart/form-data" action="{{ $isEdit ? route('admin.users.update', $item) : route('admin.users.store') }}">
+    <form method="post" enctype="multipart/form-data" action="{{ $isEdit ? route('admin.users.update', $item) : route('admin.users.store') }}" autocomplete="off">
         @csrf
         @if($isEdit)
             @method('put')
@@ -38,11 +38,11 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('admin.password') }}</label>
-                                <input type="password" name="password" class="form-control" {{ $isEdit ? '' : 'required' }}>
+                                <input type="password" name="password" class="form-control" autocomplete="new-password" placeholder="{{ $isEdit ? 'اتركه فارغاً للحفاظ على كلمة المرور' : '' }}" {{ $isEdit ? '' : 'required' }}>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('admin.password_confirmation') }}</label>
-                                <input type="password" name="password_confirmation" class="form-control" {{ $isEdit ? '' : 'required' }}>
+                                <input type="password" name="password_confirmation" class="form-control" autocomplete="new-password" placeholder="{{ $isEdit ? 'تأكيد كلمة المرور عند التغيير فقط' : '' }}" {{ $isEdit ? '' : 'required' }}>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('admin.profile_image') }}</label>
