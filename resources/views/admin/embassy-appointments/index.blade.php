@@ -34,6 +34,14 @@
     </div>
 
     {{-- Alerts --}}
+    @if(session('success_raw'))
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2" role="alert">
+            <div>
+                <strong>✅ تم بنجاح:</strong> {!! session('success_raw') !!}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
             <strong>✅ تم بنجاح:</strong> {{ session('success') }}

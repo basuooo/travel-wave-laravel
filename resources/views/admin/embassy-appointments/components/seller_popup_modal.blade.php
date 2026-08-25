@@ -64,6 +64,9 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(err => console.error('Embassy popup check error:', err));
     }
 
+    window.checkPendingEmbassyPopups = checkPendingEmbassyPopups;
+    checkPendingEmbassyPopups();
+
     function renderPopupItems(items) {
         let html = '';
         if (items.length === 1) {

@@ -122,12 +122,23 @@ class EmbassyAppointmentController extends Controller
     {
         try {
             $count = $this->service->syncAllAvailableNowAppointments();
+            $crmUrl = route('admin.crm.leads.index');
+
             if ($count > 0) {
+                $msg = "تم فحص ومطابقة جميع العملاء بالـ CRM بنجاح 🔍! تم إرسال تنبيهات وتفعيل نوافذ البوب أب لـ <strong>{$count} تنبيه عميل منتظر</strong> 🟢 " .
+                       "<a href='{$crmUrl}' class='btn btn-sm btn-primary text-white fw-bold ms-2 px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1' target='_blank'>" .
+                       "👁️ فتح قائمة العملاء بالـ CRM</a>";
+
                 return redirect()->route('admin.embassy-appointments.index')
-                    ->with('success', "تم فحص ومطابقة جميع العملاء بالـ CRM بنجاح 🔍! تم إرسال تنبيهات وتفعيل نوافذ البوب أب لـ {$count} تنبيه عميل منتظر 🟢");
+                    ->with('success_raw', $msg);
             }
+
+            $msg = "تم فحص جميع العملاء بالـ CRM بنجاح 🔍! لا توجد مطالبات جديدة بحاجة لتنبيهات حالياً. " .
+                   "<a href='{$crmUrl}' class='btn btn-sm btn-outline-primary ms-2 px-3 py-1 d-inline-flex align-items-center gap-1' target='_blank'>" .
+                   "👁️ عرض جميع العملاء بالـ CRM</a>";
+
             return redirect()->route('admin.embassy-appointments.index')
-                ->with('success', 'تم فحص جميع العملاء بالـ CRM بنجاح 🔍! لا توجد مطالبات جديدة بحاجة لتنبيهات حالياً.');
+                ->with('success_raw', $msg);
         } catch (\Throwable $e) {
             return redirect()->route('admin.embassy-appointments.index')
                 ->with('error', 'حدث خطأ أثناء فحص العملاء: ' . $e->getMessage());
