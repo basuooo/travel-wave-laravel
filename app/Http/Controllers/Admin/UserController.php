@@ -80,16 +80,24 @@ class UserController extends Controller
 
         $user->delete();
 
-        return redirect()->route('admin.users.index')->with('success', __('admin.user_deleted'));
     }
 
     protected function validatedData(Request $request, ?User $user = null): array
     {
+        $passwordRules = [];
+        if (! $user) {
+            $passwordRules = ['required', 'string', 'min:8', 'confirmed'];
+        } elseif ($request->filled('password')) {
+            $passwordRules = ['nullable', 'string', 'min:8', 'confirmed'];
+        } else {
+            $passwordRules = ['nullable'];
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user?->id)],
             'phone' => ['nullable', 'string', 'max:255'],
-            'password' => [$user ? 'nullable' : 'required', 'string', 'min:8', 'confirmed'],
+            'password' => $passwordRules,
             'is_active' => ['nullable', 'boolean'],
             'preferred_language' => ['nullable', Rule::in(['ar', 'en'])],
             'roles' => ['array'],
