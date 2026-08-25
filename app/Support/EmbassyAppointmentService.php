@@ -50,12 +50,13 @@ class EmbassyAppointmentService
             'notes' => $notes,
         ]);
 
-        // Trigger Event & Notifications if status turned to available_now
-        if ($newStatus === EmbassyAppointment::STATUS_AVAILABLE_NOW && $oldStatus !== EmbassyAppointment::STATUS_AVAILABLE_NOW) {
-            $event = EmbassyAvailabilityEvent::create([
+        // Trigger Event & Notifications if status is available_now
+        if ($newStatus === EmbassyAppointment::STATUS_AVAILABLE_NOW) {
+            $event = EmbassyAvailabilityEvent::firstOrCreate([
                 'embassy_appointment_id' => $appointment->id,
-                'triggered_by' => $actor?->id,
                 'status' => 'active',
+            ], [
+                'triggered_by' => $actor?->id,
                 'notes' => $notes,
             ]);
 
@@ -65,6 +66,26 @@ class EmbassyAppointmentService
         return $appointment;
     }
 
+    public function syncAllAvailableNowAppointments(): int
+    {
+        $availableNowAppointments = EmbassyAppointment::where('status', EmbassyAppointment::STATUS_AVAILABLE_NOW)->get();
+        $totalMatched = 0;
+
+        foreach ($availableNowAppointments as $appointment) {
+            $event = EmbassyAvailabilityEvent::firstOrCreate([
+                'embassy_appointment_id' => $appointment->id,
+                'status' => 'active',
+            ], [
+                'triggered_by' => auth()->id(),
+                'notes' => 'مواصفة تلقائية للمواعيد المتاحة',
+            ]);
+
+            $totalMatched += $this->matchAndNotifyLeads($event);
+        }
+
+        return $totalMatched;
+    }
+
     public function matchAndNotifyLeads(EmbassyAvailabilityEvent $event): int
     {
         $appointment = $event->appointment()->with('country')->first();
@@ -72,7 +93,12 @@ class EmbassyAppointmentService
             return 0;
         }
 
-        $awaitingStatusId = CrmStatus::where('slug', 'awaiting-embassy-appointment')->value('id');
+        $awaitingStatus = CrmStatus::where('slug', 'awaiting-embassy-appointment')
+            ->orWhere('name_ar', 'like', '%انتظار فتح مواعيد السفارة%')
+            ->orWhere('name_ar', 'like', '%مواعيد السفارة%')
+            ->first();
+
+        $awaitingStatusId = $awaitingStatus?->id;
 
         $countryNameAr = $appointment->country?->name_ar;
         $countryNameEn = $appointment->country?->name_en;
@@ -84,6 +110,7 @@ class EmbassyAppointmentService
                       ->orWhere('crm_status2_id', $awaitingStatusId);
                 }
                 $q->orWhere('status', 'awaiting-embassy-appointment')
+                  ->orWhere('status', 'like', '%مواعيد السفارة%')
                   ->orWhereHas('crmStatus', fn ($s) => $s->where('name_ar', 'like', '%مواعيد السفارة%'))
                   ->orWhereHas('crmStatus2', fn ($s) => $s->where('name_ar', 'like', '%مواعيد السفارة%'));
             })
@@ -96,9 +123,13 @@ class EmbassyAppointmentService
             $q->where('visa_country_id', $appointment->visa_country_id);
 
             if ($countryNameAr) {
+                $cleanAr = preg_replace('/[أإآ]/u', 'ا', $countryNameAr);
                 $q->orWhere('country', 'like', '%' . $countryNameAr . '%')
+                  ->orWhere('country', 'like', '%' . $cleanAr . '%')
                   ->orWhere('destination', 'like', '%' . $countryNameAr . '%')
-                  ->orWhere('service_country_name', 'like', '%' . $countryNameAr . '%');
+                  ->orWhere('destination', 'like', '%' . $cleanAr . '%')
+                  ->orWhere('service_country_name', 'like', '%' . $countryNameAr . '%')
+                  ->orWhere('service_country_name', 'like', '%' . $cleanAr . '%');
             }
 
             if ($countryNameEn) {
@@ -131,52 +162,55 @@ class EmbassyAppointmentService
         $count = 0;
 
         foreach ($matchingLeads as $lead) {
-            $sellerId = $lead->assigned_user_id ?: ($event->triggered_by ?: 1);
-
-            $notif = EmbassyAppointmentNotification::firstOrCreate([
-                'embassy_availability_event_id' => $event->id,
-                'inquiry_id' => $lead->id,
-            ], [
-                'embassy_appointment_id' => $appointment->id,
-                'seller_id' => $sellerId,
-                'status' => EmbassyAppointmentNotification::STATUS_PENDING,
-            ]);
-
-            if ($sellerId) {
-                $seller = User::find($sellerId);
-                if ($seller) {
-                    $notificationCenter->notifyUser($seller, [
-                        'event_key' => sprintf('embassy_appt_open:%d:%d:%d', $event->id, $lead->id, $sellerId),
-                        'type' => 'embassy_appointment_opened',
-                        'module' => 'crm',
-                        'severity' => AdminNotificationCenterService::SEVERITY_SUCCESS,
-                        'title_ar' => '🔔 مواعيد السفارة متاحة الآن: ' . $appointment->country_name,
-                        'title_en' => '🔔 Embassy Appointments Available: ' . $appointment->country_name,
-                        'message_ar' => sprintf(
-                            'مواعيد السفارة متاحة الآن للعميل %s (%s - %s - %s - %s)',
-                            $lead->full_name,
-                            $appointment->country_name,
-                            $appointment->visa_type,
-                            $appointment->appointment_center,
-                            $appointment->appointment_type
-                        ),
-                        'message_en' => sprintf(
-                            'Embassy appointments available for lead %s (%s - %s - %s - %s)',
-                            $lead->full_name,
-                            $appointment->country_name,
-                            $appointment->visa_type,
-                            $appointment->appointment_center,
-                            $appointment->appointment_type
-                        ),
-                        'url' => route('admin.crm.leads.show', $lead->id),
-                        'action_label_ar' => 'فتح العميل',
-                        'action_label_en' => 'View Lead',
-                        'lead_name' => $lead->full_name,
-                    ]);
-                }
+            $sellerIds = [];
+            if ($lead->assigned_user_id) {
+                $sellerIds[] = $lead->assigned_user_id;
+            } else {
+                $sellerIds = User::where('is_active', true)->where('is_admin', true)->pluck('id')->toArray();
             }
 
-            $count++;
+            foreach ($sellerIds as $sellerId) {
+                $notif = EmbassyAppointmentNotification::firstOrCreate([
+                    'embassy_availability_event_id' => $event->id,
+                    'inquiry_id' => $lead->id,
+                    'seller_id' => $sellerId,
+                ], [
+                    'embassy_appointment_id' => $appointment->id,
+                    'status' => EmbassyAppointmentNotification::STATUS_PENDING,
+                ]);
+
+                if ($sellerId) {
+                    $seller = User::find($sellerId);
+                    if ($seller) {
+                        $notificationCenter->notifyUser($seller, [
+                            'event_key' => sprintf('embassy_appt_open:%d:%d:%d', $event->id, $lead->id, $sellerId),
+                            'type' => 'embassy_appointment_opened',
+                            'module' => 'crm',
+                            'severity' => AdminNotificationCenterService::SEVERITY_SUCCESS,
+                            'title_ar' => '🔔 مواعيد السفارة متاحة الآن: ' . $appointment->country_name,
+                            'title_en' => '🔔 Embassy Appointments Available: ' . $appointment->country_name,
+                            'message_ar' => sprintf(
+                                'مواعيد السفارة متاحة الآن للعميل %s (%s - %s - %s - %s)',
+                                $lead->full_name,
+                                $appointment->country_name,
+                                $appointment->visa_type,
+                                $appointment->appointment_center,
+                                $appointment->appointment_type
+                            ),
+                            'message_en' => sprintf(
+                                'Embassy appointments available for lead %s (%s - %s - %s - %s)',
+                                $lead->full_name,
+                                $appointment->country_name,
+                                $appointment->visa_type,
+                                $appointment->appointment_center,
+                                $appointment->appointment_type
+                            ),
+                            'action_url' => route('admin.crm.leads.show', $lead->id),
+                        ]);
+                    }
+                }
+                $count++;
+            }
         }
 
         return $count;

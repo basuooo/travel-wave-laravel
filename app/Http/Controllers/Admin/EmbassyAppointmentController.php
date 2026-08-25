@@ -506,6 +506,12 @@ class EmbassyAppointmentController extends Controller
             return response()->json(['items' => []]);
         }
 
+        try {
+            $this->service->syncAllAvailableNowAppointments();
+        } catch (\Throwable $e) {
+            logger()->error('syncAllAvailableNowAppointments error: ' . $e->getMessage());
+        }
+
         $notifications = $this->service->getSellerPendingNotifications($user);
 
         $data = $notifications->map(function (EmbassyAppointmentNotification $notif) {
