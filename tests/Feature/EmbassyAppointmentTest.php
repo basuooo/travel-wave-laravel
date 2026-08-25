@@ -368,4 +368,107 @@ class EmbassyAppointmentTest extends TestCase
 
         $this->assertEquals(5, $count);
     }
+
+    public function test_seller_only_sees_own_leads_in_show_view_and_no_leads_when_no_availability()
+    {
+        \App\Support\AccessControl::syncPermissionsInDatabase();
+        $permView = \App\Models\Permission::where('slug', 'embassy_appointments.view')->first();
+        $permDash = \App\Models\Permission::where('slug', 'dashboard.access')->first();
+
+        $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
+        $sellerDonia = User::factory()->create(['is_admin' => false, 'is_active' => true, 'name' => 'Donia Ali']);
+        $sellerHadeer = User::factory()->create(['is_admin' => false, 'is_active' => true, 'name' => 'Hadeer Alaa']);
+
+        if ($permView) {
+            $sellerDonia->permissionOverrides()->attach($permView->id, ['is_allowed' => true]);
+            $sellerHadeer->permissionOverrides()->attach($permView->id, ['is_allowed' => true]);
+        }
+        if ($permDash) {
+            $sellerDonia->permissionOverrides()->attach($permDash->id, ['is_allowed' => true]);
+            $sellerHadeer->permissionOverrides()->attach($permDash->id, ['is_allowed' => true]);
+        }
+
+        $category = \App\Models\VisaCategory::firstOrCreate(
+            ['slug' => 'europe-scope-test'],
+            ['name_ar' => 'أوروبا', 'name_en' => 'Europe']
+        );
+        $germany = VisaCountry::firstOrCreate(
+            ['slug' => 'germany-scope-test'],
+            ['visa_category_id' => $category->id, 'name_ar' => 'ألمانيا', 'name_en' => 'Germany']
+        );
+
+        $statusAwaiting = CrmStatus::firstOrCreate(['slug' => 'awaiting-embassy-appointment'], ['name_ar' => 'انتظار فتح مواعيد السفارة', 'name_en' => 'Awaiting Embassy Appointment']);
+
+        // Donia Lead
+        $leadDonia = Inquiry::create([
+            'full_name' => 'عميل دنيا',
+            'phone' => '01011111111',
+            'country' => 'ألمانيا',
+            'visa_country_id' => $germany->id,
+            'crm_status_id' => $statusAwaiting->id,
+            'assigned_user_id' => $sellerDonia->id,
+        ]);
+
+        // Hadeer Lead
+        $leadHadeer = Inquiry::create([
+            'full_name' => 'عميل هدير',
+            'phone' => '01022222222',
+            'country' => 'ألمانيا',
+            'visa_country_id' => $germany->id,
+            'crm_status_id' => $statusAwaiting->id,
+            'assigned_user_id' => $sellerHadeer->id,
+        ]);
+
+        $appt = EmbassyAppointment::create([
+            'visa_country_id' => $germany->id,
+            'visa_type' => 'سياحة',
+            'appointment_center' => 'VFS',
+            'appointment_type' => 'Regular',
+            'status' => 'no_availability',
+        ]);
+
+        $service = app(EmbassyAppointmentService::class);
+
+        // When status is no_availability -> countWaitingLeads must be 0 for both Seller and Admin
+        $this->assertEquals(0, $service->countWaitingLeads($appt, $sellerDonia));
+        $this->assertEquals(0, $service->countWaitingLeads($appt, $admin));
+
+        $service->updateStatus($appt, EmbassyAppointment::STATUS_AVAILABLE_NOW, '2026-10-01', 'مواعيد متاحة', $admin);
+
+        // When status is available_now -> Donia sees 1, Admin sees 2
+        $this->assertEquals(1, $service->countWaitingLeads($appt, $sellerDonia));
+        $this->assertEquals(2, $service->countWaitingLeads($appt, $admin));
+
+        // 1. Seller Donia views show page (when available_now) -> sees ONLY Donia Ali, NOT Hadeer Alaa, and NO delete button
+        $respDonia = $this->actingAs($sellerDonia)->get(route('admin.embassy-appointments.show', $appt->id));
+        $respDonia->assertOk();
+        $respDonia->assertSee('عميل دنيا');
+        $respDonia->assertDontSee('عميل هدير');
+        $respDonia->assertSee('Donia Ali');
+        $respDonia->assertDontSee('Hadeer Alaa');
+        $respDonia->assertDontSee('حذف الموعد');
+        $respDonia->assertSee('مواعيد متاحة الآن');
+
+        // 2. Admin views show page -> sees BOTH Donia Ali & Hadeer Alaa, AND sees delete button
+        $respAdmin = $this->actingAs($admin)->get(route('admin.embassy-appointments.show', $appt->id));
+        $respAdmin->assertOk();
+        $respAdmin->assertSee('عميل دنيا');
+        $respAdmin->assertSee('عميل هدير');
+        $respAdmin->assertSee('Donia Ali');
+        $respAdmin->assertSee('Hadeer Alaa');
+        $respAdmin->assertSee('حذف الموعد');
+
+        // 3. Toggle status to no_availability -> Neither Donia nor Admin sees leads list, and waiting count becomes 0
+        $service->updateStatus($appt, EmbassyAppointment::STATUS_NO_AVAILABILITY, null, 'إغلاق المواعيد', $admin);
+
+        $this->assertEquals(0, $service->countWaitingLeads($appt, $sellerDonia));
+        $this->assertEquals(0, $service->countWaitingLeads($appt, $admin));
+
+        $respNoAvail = $this->actingAs($admin)->get(route('admin.embassy-appointments.show', $appt->id));
+        $respNoAvail->assertOk();
+        $respNoAvail->assertSee('لا توجد مواعيد متاحة حالياً');
+        $respNoAvail->assertDontSee('عميل دنيا');
+        $respNoAvail->assertDontSee('عميل هدير');
+    }
 }
+

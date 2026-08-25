@@ -92,6 +92,22 @@
         ])) : [],
     ],
     [
+        'title' => '📱 WhatsApp CRM & Campaigns',
+        'items' => array_values(array_filter([
+            ['label' => '📊 WhatsApp Dashboard', 'route' => 'admin.whatsapp.dashboard', 'match' => 'admin.whatsapp.dashboard'],
+            ['label' => '📱 WhatsApp Accounts', 'route' => 'admin.whatsapp.accounts.index', 'match' => 'admin.whatsapp.accounts.*'],
+            ['label' => '💬 Conversations / Inbox', 'route' => 'admin.whatsapp.conversations.index', 'match' => 'admin.whatsapp.conversations.*'],
+            ['label' => '👥 WhatsApp Contacts', 'route' => 'admin.whatsapp.contacts.index', 'match' => 'admin.whatsapp.contacts.*'],
+            ['label' => '🎯 Retargeting Engine', 'route' => 'admin.whatsapp.retargeting.create', 'match' => 'admin.whatsapp.retargeting.*'],
+            ['label' => '🚀 Bulk Campaigns', 'route' => 'admin.whatsapp.bulk.index', 'match' => 'admin.whatsapp.bulk.*'],
+            ['label' => '📑 Message Templates', 'route' => 'admin.whatsapp.templates.index', 'match' => 'admin.whatsapp.templates.*'],
+            ['label' => '🔄 Follow-up Sequences', 'route' => 'admin.whatsapp.sequences.index', 'match' => 'admin.whatsapp.sequences.*'],
+            ['label' => '📈 Reports & Analytics', 'route' => 'admin.whatsapp.reports.index', 'match' => 'admin.whatsapp.reports.*'],
+            ['label' => '📋 Message Logs', 'route' => 'admin.whatsapp.logs.index', 'match' => 'admin.whatsapp.logs.*'],
+            ['label' => '⚙️ Settings & Blacklist', 'route' => 'admin.whatsapp.settings.index', 'match' => 'admin.whatsapp.settings.*'],
+        ])),
+    ],
+    [
         'title' => __('admin.nav_marketing'),
         'items' => $modMarketingEnabled ? array_values(array_filter([
             ['label' => '🚀 Landing Page Builder New', 'route' => 'admin.landing-pages-new.dashboard', 'match' => 'admin.landing-pages-new.*'],

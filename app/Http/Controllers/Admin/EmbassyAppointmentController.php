@@ -61,9 +61,11 @@ class EmbassyAppointmentController extends Controller
 
         $appointments = $query->paginate(15)->withQueryString();
 
+        $currentUser = auth()->user();
+
         // Calculate waiting leads count for listed items
-        $appointments->getCollection()->transform(function (EmbassyAppointment $appt) {
-            $appt->setAttribute('waiting_leads_count', $this->service->countWaitingLeads($appt));
+        $appointments->getCollection()->transform(function (EmbassyAppointment $appt) use ($currentUser) {
+            $appt->setAttribute('waiting_leads_count', $this->service->countWaitingLeads($appt, $currentUser));
             return $appt;
         });
 
@@ -71,7 +73,7 @@ class EmbassyAppointmentController extends Controller
         $allAppointments = EmbassyAppointment::with('country')->get();
         $totalWaitingLeads = 0;
         foreach ($allAppointments as $appt) {
-            $totalWaitingLeads += $this->service->countWaitingLeads($appt);
+            $totalWaitingLeads += $this->service->countWaitingLeads($appt, $currentUser);
         }
 
         $summary = [
@@ -464,14 +466,25 @@ class EmbassyAppointmentController extends Controller
             'logs.user',
         ]);
 
-        $waitingLeadsCount = $this->service->countWaitingLeads($embassyAppointment);
+        $user = auth()->user();
+        $canViewAllLeads = CrmLeadAccess::canViewAll($user);
+        $waitingLeadsCount = $this->service->countWaitingLeads($embassyAppointment, $user);
 
-        // Group notifications of the latest event by seller
+        // Group notifications of the latest event by seller ONLY if appointment is available_now
         $latestEvent = $embassyAppointment->events->first();
         $notificationsBySeller = collect();
 
-        if ($latestEvent) {
-            $notificationsBySeller = $latestEvent->notifications->groupBy('seller_id');
+        if ($latestEvent && $embassyAppointment->status === EmbassyAppointment::STATUS_AVAILABLE_NOW) {
+            $notifications = $latestEvent->notifications;
+
+            // Seller only sees notifications for their own assigned leads
+            if (! $canViewAllLeads) {
+                $notifications = $notifications->filter(function ($n) use ($user) {
+                    return (int) $n->seller_id === (int) $user->id || (int) $n->lead?->assigned_user_id === (int) $user->id;
+                });
+            }
+
+            $notificationsBySeller = $notifications->groupBy('seller_id');
         }
 
         return view('admin.embassy-appointments.show', [
@@ -479,6 +492,7 @@ class EmbassyAppointmentController extends Controller
             'waitingLeadsCount' => $waitingLeadsCount,
             'latestEvent' => $latestEvent,
             'notificationsBySeller' => $notificationsBySeller,
+            'canViewAllLeads' => $canViewAllLeads,
         ]);
     }
 

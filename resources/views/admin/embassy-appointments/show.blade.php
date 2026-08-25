@@ -15,30 +15,20 @@
                 🏛️ {{ $item->country_name }} — {{ $item->visa_type }} ({{ $item->appointment_center }} - {{ $item->appointment_type }})
             </h1>
         </div>
-        <div class="d-flex gap-2">
-            @if($item->status !== 'available_now')
-                <form method="POST" action="{{ route('admin.embassy-appointments.toggle-available-now', $item) }}">
+        <div class="d-flex gap-2 align-items-center">
+            <span class="badge {{ $item->status_badge_class }} fs-6 px-3 py-2 border shadow-sm d-inline-flex align-items-center gap-1">
+                {{ $item->status_icon }} {{ $item->status_label }}
+            </span>
+
+            @if(auth()->user()?->hasPermission('embassy_appointments.edit') || auth()->user()?->hasPermission('embassy_appointments.delete') || auth()->user()?->hasPermission('embassy_appointments.manage') || auth()->user()?->is_admin)
+                <form method="POST" action="{{ route('admin.embassy-appointments.destroy', $item) }}" class="d-inline" onsubmit="return confirm('هل أنت تأكد من رغبتك في حذف سجل هذا الموعد بالكامل؟');">
                     @csrf
-                    <button type="submit" class="btn btn-success shadow-sm">
-                        🟢 مواعيد متاحة الآن
-                    </button>
-                </form>
-            @else
-                <form method="POST" action="{{ route('admin.embassy-appointments.toggle-no-availability', $item) }}">
-                    @csrf
+                    @method('DELETE')
                     <button type="submit" class="btn btn-outline-danger">
-                        🔴 إغلاق المواعيد
+                        🗑️ حذف الموعد
                     </button>
                 </form>
             @endif
-
-            <form method="POST" action="{{ route('admin.embassy-appointments.destroy', $item) }}" class="d-inline" onsubmit="return confirm('هل أنت تأكد من رغبتك في حذف سجل هذا الموعد بالكامل؟');">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-outline-danger">
-                    🗑️ حذف الموعد
-                </button>
-            </form>
         </div>
     </div>
 
@@ -134,7 +124,13 @@
                     @endif
                 </div>
                 <div class="card-body p-0">
-                    @if($notificationsBySeller->isNotEmpty())
+                    @if($item->status !== \App\Models\EmbassyAppointment::STATUS_AVAILABLE_NOW)
+                        <div class="p-4 text-center text-muted">
+                            <iconify-icon icon="lucide:x-circle" width="36" class="text-danger mb-2"></iconify-icon>
+                            <h6 class="fw-bold text-dark mb-1">لا توجد مواعيد متاحة حالياً لـ {{ $item->country_name }} ({{ $item->status_label }})</h6>
+                            <p class="small text-muted mb-0">لا تظهر تنبيهات الليد والعملاء إلا عندما تكون حالة المواعيد (🟢 متاحة الآن).</p>
+                        </div>
+                    @elseif($notificationsBySeller->isNotEmpty())
                         <div class="p-3">
                             @foreach($notificationsBySeller as $sellerId => $notifs)
                                 @php($seller = $notifs->first()?->seller)
@@ -187,7 +183,7 @@
                         </div>
                     @else
                         <div class="p-4 text-center text-muted">
-                            لا توجد تنبيهات صادرة لهذا الموعد حالياً. عند النقر على 🟢 "مواعيد متاحة الآن" يتم إنشاء التنبيهات تلقائيًا.
+                            لا توجد تنبيهات ليد مخصصة لحسابك لهذا الموعد حالياً.
                         </div>
                     @endif
                 </div>

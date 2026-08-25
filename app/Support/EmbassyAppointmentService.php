@@ -61,6 +61,10 @@ class EmbassyAppointmentService
             ]);
 
             $this->matchAndNotifyLeads($event);
+        } else {
+            EmbassyAvailabilityEvent::where('embassy_appointment_id', $appointment->id)
+                ->where('status', 'active')
+                ->update(['status' => 'closed']);
         }
 
         return $appointment;
@@ -362,12 +366,21 @@ class EmbassyAppointmentService
         return $notification;
     }
 
-    public function countWaitingLeads(EmbassyAppointment $appointment): int
+    public function countWaitingLeads(EmbassyAppointment $appointment, ?User $user = null): int
     {
+        if ($appointment->status !== EmbassyAppointment::STATUS_AVAILABLE_NOW) {
+            return 0;
+        }
+
+        $user = $user ?? auth()->user();
         $countryNameAr = $appointment->country?->name_ar;
         $countryNameEn = $appointment->country?->name_en;
 
         $query = Inquiry::query();
+
+        if ($user && ! CrmLeadAccess::canViewAll($user)) {
+            $query->where('assigned_user_id', $user->id);
+        }
 
         // Filter strictly by the 5 target CRM Lead statuses
         $this->applyTargetCrmStatusFilter($query);

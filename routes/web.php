@@ -63,6 +63,16 @@ use App\Http\Controllers\Admin\FunnelDashboardController;
 use App\Http\Controllers\Admin\FunnelAnalyticsController;
 use App\Http\Controllers\Admin\FunnelResponseController;
 use App\Http\Controllers\Admin\FunnelTemplateController;
+use App\Http\Controllers\Admin\WhatsAppDashboardController;
+use App\Http\Controllers\Admin\WhatsAppAccountController;
+use App\Http\Controllers\Admin\WhatsAppContactController;
+use App\Http\Controllers\Admin\WhatsAppRetargetingController;
+use App\Http\Controllers\Admin\WhatsAppBulkCampaignController;
+use App\Http\Controllers\Admin\WhatsAppTemplateController;
+use App\Http\Controllers\Admin\WhatsAppSequenceController;
+use App\Http\Controllers\Admin\WhatsAppReportController;
+use App\Http\Controllers\Admin\WhatsAppLogController;
+use App\Http\Controllers\Admin\WhatsAppSettingController;
 use App\Http\Controllers\Frontend\LandingPagePublicController;
 use App\Http\Controllers\Frontend\LandingPageNewPublicController;
 use App\Http\Controllers\Frontend\FunnelPublicController;
@@ -219,14 +229,62 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('ai-bots', AiBotController::class);
             Route::patch('ai-bots/{ai_bot}/toggle', [AiBotController::class, 'toggle'])->name('ai-bots.toggle');
 
-            // WhatsApp Conversations
+            // WhatsApp CRM & Campaigns Module
             Route::prefix('whatsapp')->name('whatsapp.')->group(function () {
+                Route::get('/dashboard', [WhatsAppDashboardController::class, 'index'])->name('dashboard');
+                
+                // Accounts
+                Route::get('/accounts', [WhatsAppAccountController::class, 'index'])->name('accounts.index');
+                Route::post('/accounts', [WhatsAppAccountController::class, 'store'])->name('accounts.store');
+                Route::put('/accounts/{account}', [WhatsAppAccountController::class, 'update'])->name('accounts.update');
+                Route::post('/accounts/{account}/toggle-connect', [WhatsAppAccountController::class, 'toggleConnect'])->name('accounts.toggle-connect');
+                Route::delete('/accounts/{account}', [WhatsAppAccountController::class, 'destroy'])->name('accounts.destroy');
+
+                // Conversations & Inbox
                 Route::get('/conversations', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'index'])->name('conversations.index');
                 Route::get('/conversations/{conversation}', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'show'])->name('conversations.show');
                 Route::post('/conversations/{conversation}/toggle-ai', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'toggleAi'])->name('conversations.toggle-ai');
                 Route::post('/conversations/{conversation}/send', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'sendMessage'])->name('conversations.send');
                 Route::post('/conversations/{conversation}/assign', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'assign'])->name('conversations.assign');
                 Route::post('/conversations/{conversation}/clear', [\App\Http\Controllers\Admin\WhatsAppConversationController::class, 'clearHistory'])->name('conversations.clear');
+
+                // Contacts
+                Route::get('/contacts', [WhatsAppContactController::class, 'index'])->name('contacts.index');
+                Route::post('/contacts', [WhatsAppContactController::class, 'store'])->name('contacts.store');
+
+                // Retargeting
+                Route::get('/retargeting/create', [WhatsAppRetargetingController::class, 'create'])->name('retargeting.create');
+                Route::post('/retargeting/match-numbers', [WhatsAppRetargetingController::class, 'matchNumbers'])->name('retargeting.match-numbers');
+                Route::post('/retargeting', [WhatsAppRetargetingController::class, 'store'])->name('retargeting.store');
+
+                // Bulk Campaigns
+                Route::get('/bulk', [WhatsAppBulkCampaignController::class, 'index'])->name('bulk.index');
+                Route::get('/bulk/create', [WhatsAppBulkCampaignController::class, 'create'])->name('bulk.create');
+                Route::post('/bulk', [WhatsAppBulkCampaignController::class, 'store'])->name('bulk.store');
+                Route::get('/bulk/{campaign}', [WhatsAppBulkCampaignController::class, 'show'])->name('bulk.show');
+                Route::post('/bulk/{campaign}/pause', [WhatsAppBulkCampaignController::class, 'pause'])->name('bulk.pause');
+                Route::post('/bulk/{campaign}/resume', [WhatsAppBulkCampaignController::class, 'resume'])->name('bulk.resume');
+                Route::post('/bulk/{campaign}/stop', [WhatsAppBulkCampaignController::class, 'stop'])->name('bulk.stop');
+                Route::post('/bulk/{campaign}/duplicate', [WhatsAppBulkCampaignController::class, 'duplicate'])->name('bulk.duplicate');
+                Route::delete('/bulk/{campaign}', [WhatsAppBulkCampaignController::class, 'destroy'])->name('bulk.destroy');
+
+                // Templates
+                Route::resource('/templates', WhatsAppTemplateController::class)->except(['create', 'edit', 'show']);
+
+                // Sequences
+                Route::resource('/sequences', WhatsAppSequenceController::class)->except(['create', 'edit', 'show']);
+
+                // Reports
+                Route::get('/reports', [WhatsAppReportController::class, 'index'])->name('reports.index');
+                Route::get('/reports/{campaign}/export-csv', [WhatsAppReportController::class, 'exportCsv'])->name('reports.export-csv');
+
+                // Logs
+                Route::get('/logs', [WhatsAppLogController::class, 'index'])->name('logs.index');
+
+                // Settings & Blacklist
+                Route::get('/settings', [WhatsAppSettingController::class, 'index'])->name('settings.index');
+                Route::post('/settings/blacklist', [WhatsAppSettingController::class, 'storeBlacklist'])->name('settings.blacklist.store');
+                Route::delete('/settings/blacklist/{blacklist}', [WhatsAppSettingController::class, 'destroyBlacklist'])->name('settings.blacklist.destroy');
             });
         });
 
@@ -289,6 +347,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Visa Database Module (Independent Granular Permissions)
         Route::prefix('visa-database')->name('visa-database.')->group(function () {
             Route::get('/', [VisaDatabaseController::class, 'index'])->middleware('permission:visa_database.view')->name('index');
+            Route::get('/catalog-settings', [VisaDatabaseController::class, 'catalogSettings'])->middleware('permission:visa_database.manage')->name('catalog-settings');
+            Route::post('/catalog-settings', [VisaDatabaseController::class, 'updateCatalogSettings'])->middleware('permission:visa_database.manage')->name('update-catalog-settings');
             Route::get('/{visa_record}/logs', [VisaDatabaseController::class, 'activityLogs'])->middleware('permission:visa_database.view')->name('logs');
             Route::post('/', [VisaDatabaseController::class, 'store'])->middleware('permission:visa_database.create')->name('store');
             Route::put('/{visa_record}', [VisaDatabaseController::class, 'update'])->middleware('permission:visa_database.edit')->name('update');

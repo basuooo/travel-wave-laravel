@@ -153,6 +153,18 @@ class VisaRecord extends Model
         return $this->belongsTo(VisaCountry::class, 'visa_country_id');
     }
 
+    public function embassyAppointments(): HasMany
+    {
+        return $this->hasMany(EmbassyAppointment::class, 'visa_country_id', 'visa_country_id');
+    }
+
+    public function getLatestEmbassyAppointmentAttribute(): ?EmbassyAppointment
+    {
+        return EmbassyAppointment::where('visa_country_id', $this->visa_country_id)
+            ->latest('last_updated_at')
+            ->first();
+    }
+
     public function activityLogs(): HasMany
     {
         return $this->hasMany(VisaActivityLog::class, 'visa_record_id')->latest();

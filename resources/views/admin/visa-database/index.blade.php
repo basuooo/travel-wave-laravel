@@ -11,6 +11,11 @@
             <p class="text-muted small mb-0">قاعدة بيانات منظمة وتفاعلية لجميع تأشيرات دول العالم مع إدارة الأسعار، رسوم السفارة، والأوراق المطلوبة.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
+            @if(auth()->user()->hasPermission('visa_database.manage') || auth()->user()->is_admin)
+            <a href="{{ route('admin.visa-database.catalog-settings') }}" class="btn btn-outline-dark btn-sm fw-bold">
+                <i class="bi bi-sliders me-1"></i> إعدادات الدليل العام
+            </a>
+            @endif
             @if(auth()->user()->hasPermission('visa_database.manage') || auth()->user()->hasPermission('destinations.manage') || auth()->user()->is_admin)
             <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#manageCategoriesModal">
                 <i class="bi bi-tags me-1"></i> إدارة التصنيفات
@@ -111,9 +116,10 @@
                         <option value="temporarily_unavailable" {{ request('status') == 'temporarily_unavailable' ? 'selected' : '' }}>متوقفة مؤقتاً</option>
                         <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>غير متاحة</option>
                     </select>
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search me-1"></i> بحث</button>
-                    <a href="{{ route('admin.visa-database.index') }}" class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-x-circle me-1"></i> إلغاء</a>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1"><i class="bi bi-search me-1"></i> بحث</button>
+                    <a href="{{ route('admin.visa-database.index') }}" class="btn btn-outline-secondary btn-sm flex-grow-1"><i class="bi bi-x-circle me-1"></i> إلغاء</a>
                 </div>
             </form>
         </div>
@@ -158,6 +164,7 @@
                             <th>الدولة</th>
                             <th>التصنيف</th>
                             <th>نوع التأشيرة</th>
+                            <th>مواعيد السفارة</th>
                             <th>سعر العميل</th>
                             <th>رسوم السفارة</th>
                             <th>أيام العمل</th>
@@ -165,7 +172,7 @@
                             <th>مكان التقديم</th>
                             <th class="text-center">البصمة</th>
                             <th class="text-center">المقابلة</th>
-                            <th>الحالة</th>
+                            <th>الحالة (On / Off)</th>
                             <th class="text-end px-3">إجراءات</th>
                         </tr>
                     </thead>
@@ -193,6 +200,19 @@
                                 </td>
                                 <td>
                                     <span class="fw-semibold text-primary">{{ $rec->visa_type }}</span>
+                                </td>
+                                <td>
+                                    @php($embAppt = $rec->latest_embassy_appointment)
+                                    @if($embAppt)
+                                        <span class="badge {{ $embAppt->status_badge_class }} border" title="تم تحديثها من مواعيد السفارات">
+                                            {{ $embAppt->status_icon }} {{ $embAppt->status_label }}
+                                            @if($embAppt->earliest_date)
+                                                ({{ $embAppt->earliest_date }})
+                                            @endif
+                                        </span>
+                                    @else
+                                        <span class="text-muted small">غير محدد</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($rec->price !== null)
@@ -231,36 +251,20 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <!-- Toggle Status Dropdown -->
                                     @if(auth()->user()->hasPermission('visa_database.edit') || auth()->user()->hasPermission('visa_database.manage') || auth()->user()->is_admin)
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm badge {{ $rec->status_badge_class }} dropdown-toggle border-0" type="button" data-bs-toggle="dropdown">
-                                            {{ $rec->status_label }}
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end small">
-                                            <li>
-                                                <form action="{{ route('admin.visa-database.toggle-status', $rec) }}" method="POST">
-                                                    @csrf @method('PATCH')
-                                                    <input type="hidden" name="status" value="active">
-                                                    <button class="dropdown-item text-success" type="submit"><i class="bi bi-check-circle me-2"></i>Active / نشطة</button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <form action="{{ route('admin.visa-database.toggle-status', $rec) }}" method="POST">
-                                                    @csrf @method('PATCH')
-                                                    <input type="hidden" name="status" value="temporarily_unavailable">
-                                                    <button class="dropdown-item text-warning" type="submit"><i class="bi bi-pause-circle me-2"></i>متوقفة مؤقتاً</button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <form action="{{ route('admin.visa-database.toggle-status', $rec) }}" method="POST">
-                                                    @csrf @method('PATCH')
-                                                    <input type="hidden" name="status" value="inactive">
-                                                    <button class="dropdown-item text-danger" type="submit"><i class="bi bi-x-circle me-2"></i>Inactive / غير متاحة</button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="form-check form-switch m-0 fs-5 p-0 ps-4">
+                                                <input class="form-check-input status-toggle-switch" type="checkbox" role="switch"
+                                                    style="cursor: pointer;"
+                                                    data-id="{{ $rec->id }}"
+                                                    data-url="{{ route('admin.visa-database.toggle-status', $rec) }}"
+                                                    {{ $rec->status === 'active' ? 'checked' : '' }}
+                                                    title="{{ $rec->status === 'active' ? 'تأشيرة مفعلة وتظهر في الدليل العام' : 'تأشيرة غير مفعلة ومخفية عن الدليل العام' }}">
+                                            </div>
+                                            <span class="badge {{ $rec->status_badge_class }} fs-8" id="badgeRow{{ $rec->id }}">
+                                                {{ $rec->status_label }}
+                                            </span>
+                                        </div>
                                     @else
                                         <span class="badge {{ $rec->status_badge_class }}">{{ $rec->status_label }}</span>
                                     @endif
@@ -343,6 +347,25 @@
                                 <div class="text-muted small">سعر التأشيرة للعميل</div>
                                 <div class="fw-bold fs-4 text-success">{{ $rec->price !== null ? number_format($rec->price, 0) . ' ' . $rec->currency : 'غير محدد' }}</div>
                                 <div class="small text-muted">حالة الخدمة: <span class="badge {{ $rec->status_badge_class }}">{{ $rec->status_label }}</span></div>
+                            </div>
+                        </div>
+                        @php($embAppt = $rec->latest_embassy_appointment)
+                        <div class="col-md-12">
+                            <div class="p-3 bg-light rounded border border-primary-subtle">
+                                <div class="text-muted small mb-1 fw-bold"><i class="bi bi-calendar-event text-primary me-1"></i>مواعيد السفارة (Embassy Appointment Availability)</div>
+                                @if($embAppt)
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge {{ $embAppt->status_badge_class }} fs-6">
+                                            {{ $embAppt->status_icon }} {{ $embAppt->status_label }}
+                                        </span>
+                                        @if($embAppt->earliest_date)
+                                            <span class="fw-bold text-dark fs-6">({{ $embAppt->earliest_date }})</span>
+                                        @endif
+                                        <span class="small text-muted ms-auto">المركز: {{ $embAppt->appointment_center }} | النوع: {{ $embAppt->appointment_type }}</span>
+                                    </div>
+                                @else
+                                    <span class="text-muted small">لم تحدد مواعيد سفارة بعد لهذه الدولة.</span>
+                                @endif
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -506,11 +529,22 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold small">الحالة</label>
-                                <select name="status" class="form-select">
-                                    <option value="active" {{ $rec->status == 'active' ? 'selected' : '' }}>Active / نشطة</option>
-                                    <option value="temporarily_unavailable" {{ $rec->status == 'temporarily_unavailable' ? 'selected' : '' }}>Temporarily Unavailable / متوقفة مؤقتاً</option>
-                                    <option value="inactive" {{ $rec->status == 'inactive' ? 'selected' : '' }}>Inactive / غير متاحة</option>
+                                <label class="form-label fw-bold small d-block">الحالة العامة (On / Off Toggle)</label>
+                                <div class="p-2 border rounded bg-light d-flex align-items-center justify-content-between mb-2">
+                                    <div class="form-check form-switch fs-5 m-0">
+                                        <input class="form-check-input modal-status-switch" type="checkbox" id="modalSwitch{{ $rec->id }}"
+                                            data-id="{{ $rec->id }}"
+                                            {{ $rec->status === 'active' ? 'checked' : '' }}
+                                            onchange="document.getElementById('modalStatusSelect{{ $rec->id }}').value = this.checked ? 'active' : 'inactive'; document.getElementById('modalSwitchLabel{{ $rec->id }}').textContent = this.checked ? '🟢 تفعيل (تظهر بالدليل العام للعملاء)' : '🔴 إيقاف (مخفية عن الدليل العام للعملاء)';">
+                                        <label class="form-check-label small fw-bold text-dark ms-2" for="modalSwitch{{ $rec->id }}" id="modalSwitchLabel{{ $rec->id }}">
+                                            {{ $rec->status === 'active' ? '🟢 تفعيل (تظهر بالدليل العام للعملاء)' : '🔴 إيقاف (مخفية عن الدليل العام للعملاء)' }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <select name="status" id="modalStatusSelect{{ $rec->id }}" class="form-select" onchange="document.getElementById('modalSwitch{{ $rec->id }}').checked = (this.value === 'active'); document.getElementById('modalSwitchLabel{{ $rec->id }}').textContent = (this.value === 'active') ? '🟢 تفعيل (تظهر بالدليل العام للعملاء)' : '🔴 إيقاف (مخفية عن الدليل العام للعملاء)';">
+                                    <option value="active" {{ $rec->status == 'active' ? 'selected' : '' }}>Active / نشطة 🟢</option>
+                                    <option value="temporarily_unavailable" {{ $rec->status == 'temporarily_unavailable' ? 'selected' : '' }}>Temporarily Unavailable / متوقفة مؤقتاً 🟡</option>
+                                    <option value="inactive" {{ $rec->status == 'inactive' ? 'selected' : '' }}>Inactive / غير متاحة 🔴</option>
                                 </select>
                             </div>
                             <div class="col-md-12">
@@ -813,5 +847,51 @@ function showLogs(id) {
             contentDiv.innerHTML = '<div class="alert alert-danger">حدث خطأ أثناء تحميل سجل التعديلات.</div>';
         });
 }
+
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.classList.contains('status-toggle-switch')) {
+        const switchEl = e.target;
+        const id = switchEl.dataset.id;
+        const url = switchEl.dataset.url;
+        const isChecked = switchEl.checked;
+        const newStatus = isChecked ? 'active' : 'inactive';
+
+        fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const badge = document.getElementById('badgeRow' + id);
+                if (badge) {
+                    badge.textContent = data.status_label;
+                    badge.className = 'badge ' + data.status_badge_class + ' fs-8';
+                }
+                const modalSwitch = document.getElementById('modalSwitch' + id);
+                const modalSelect = document.getElementById('modalStatusSelect' + id);
+                const modalLabel = document.getElementById('modalSwitchLabel' + id);
+                if (modalSwitch) modalSwitch.checked = isChecked;
+                if (modalSelect) modalSelect.value = newStatus;
+                if (modalLabel) {
+                    modalLabel.textContent = isChecked ? '🟢 تفعيل (تظهر بالدليل العام للعملاء)' : '🔴 إيقاف (مخفية عن الدليل العام للعملاء)';
+                }
+            } else {
+                switchEl.checked = !isChecked;
+                alert(data.error || 'حدث خطأ أثناء حفظ الحالة.');
+            }
+        })
+        .catch(err => {
+            switchEl.checked = !isChecked;
+            console.error('Toggle status error:', err);
+        });
+    }
+});
 </script>
 @endsection
