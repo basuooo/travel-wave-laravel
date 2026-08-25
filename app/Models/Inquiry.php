@@ -211,6 +211,38 @@ class Inquiry extends Model
         return $this->hasOne(CrmCustomer::class, 'inquiry_id');
     }
 
+    public function calls()
+    {
+        return $this->hasMany(CrmLeadCall::class, 'inquiry_id')->latest();
+    }
+
+    /**
+     * Calculate eligible call count for Repeated Contact status requirement:
+     * Maximum 3 calls counted per day. Total required = 9.
+     */
+    public function getEligibleCallsCount(): int
+    {
+        $calls = $this->calls()->get();
+        if ($calls->isEmpty()) {
+            return 0;
+        }
+
+        $byDate = [];
+        foreach ($calls as $call) {
+            $date = $call->created_at ? $call->created_at->format('Y-m-d') : null;
+            if ($date) {
+                $byDate[$date] = ($byDate[$date] ?? 0) + 1;
+            }
+        }
+
+        $eligible = 0;
+        foreach ($byDate as $date => $count) {
+            $eligible += min($count, 3);
+        }
+
+        return $eligible;
+    }
+
     public function crmNotes()
     {
         return $this->hasMany(CrmLeadNote::class)->latest();

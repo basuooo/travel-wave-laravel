@@ -557,6 +557,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/leads/bulk', [CrmLeadController::class, 'bulkUpdate'])->name('leads.bulk-update');
             Route::post('/leads/{lead}/notes', [CrmLeadController::class, 'storeNote'])->name('leads.notes.store');
             Route::post('/leads/{lead}/tasks', [CrmLeadController::class, 'storeTask'])->name('leads.tasks.store');
+            Route::post('/leads/{lead}/calls', [CrmLeadController::class, 'storeCall'])->name('leads.calls.store');
             Route::put('/follow-ups/{followUp}', [CrmLeadController::class, 'updateFollowUp'])->name('follow-ups.update');
             Route::post('/tasks', [CrmTaskController::class, 'store'])->name('tasks.store');
             Route::put('/tasks/{task}', [CrmTaskController::class, 'update'])->name('tasks.update');

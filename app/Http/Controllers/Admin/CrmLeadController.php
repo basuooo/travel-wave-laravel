@@ -8,6 +8,7 @@ use App\Models\CrmStatusUpdate;
 use App\Models\CrmFollowUp;
 use App\Models\CrmLeadAssignment;
 use App\Models\CrmTask;
+use App\Models\CrmLeadCall;
 use App\Models\CrmLeadSource;
 use App\Models\CrmServiceSubtype;
 use App\Models\CrmServiceType;
@@ -376,8 +377,10 @@ class CrmLeadController extends Controller
     public function show(Inquiry $lead)
     {
         $this->authorizeLeadVisibility($lead);
+        CrmLeadCall::ensureTableExists();
 
         $lead->load([
+            'calls.user',
             'crmStatus',
             'crmSource',
             'crmServiceType.subtypes',
@@ -432,6 +435,7 @@ class CrmLeadController extends Controller
     {
         $auditLogService = app(AuditLogService::class);
         $this->authorizeLeadVisibility($lead);
+        CrmLeadCall::ensureTableExists();
         $beforeAudit = $this->leadAuditValues($lead->loadMissing(['crmStatus', 'crmSource', 'assignedUser']));
         $rules = [
             'full_name' => ['required', 'string', 'max:255'],
@@ -545,6 +549,25 @@ class CrmLeadController extends Controller
         $callLaterStatus = ! empty($data['crm_status_id'])
             ? CrmStatus::query()->find($data['crm_status_id'])
             : null;
+
+        if ($callLaterStatus) {
+            $isRepeatedContact = str_contains($callLaterStatus->slug, 'repeated') 
+                || str_contains($callLaterStatus->name_ar, 'اتصال متكرر') 
+                || str_contains($callLaterStatus->name_ar, 'متكرر')
+                || str_contains($callLaterStatus->name_en, 'Repeated');
+
+            if ($isRepeatedContact) {
+                $eligibleCalls = $lead->getEligibleCallsCount();
+                if ($eligibleCalls < 9) {
+                    $totalCalls = $lead->calls()->count();
+                    $remaining = 9 - $eligibleCalls;
+                    return redirect()->route('admin.crm.leads.show', $lead)->withErrors([
+                        'crm_status_id' => "عفواً، لقد قمت بإجراء {$totalCalls} مكالمة حتى الآن (مقبول منها {$eligibleCalls} بمعدل 3 يومياً كحد أقصى)، ومتبقي {$remaining} مكالمة لإتاحة حالة اتصال متكرر."
+                    ])->withInput();
+                }
+            }
+        }
+
         $requiresFollowUp = $callLaterStatus?->slug === 'call-later';
 
         if ($requiresFollowUp) {
@@ -861,9 +884,45 @@ class CrmLeadController extends Controller
             'body' => $data['body'],
         ]);
 
-        return redirect()
-            ->route('admin.crm.leads.show', $lead)
-            ->with('success', __('admin.crm_note_added'));
+        return redirect()->route('admin.crm.leads.show', $lead)->with('success', __('comment_added_successfully'));
+    }
+
+    public function storeCall(Request $request, Inquiry $lead)
+    {
+        $this->authorizeLeadVisibility($lead);
+        CrmLeadCall::ensureTableExists();
+
+        $validated = $request->validate([
+            'call_status'   => ['required', 'string', 'max:255'],
+            'comment'       => ['nullable', 'string'],
+            'whatsapp_sent' => ['nullable'],
+        ]);
+
+        $whatsappSent = $request->boolean('whatsapp_sent');
+        $userName = auth()->user()?->name ?: 'البائع';
+
+        if (! $whatsappSent) {
+            return redirect()->back()->withErrors([
+                'whatsapp_sent' => "مينفعش تكلم\ي العميل من غير ماتبعتي رسالة الواتس يا {$userName}"
+            ])->withInput();
+        }
+
+        $nextCallNumber = $lead->calls()->count() + 1;
+
+        CrmLeadCall::create([
+            'inquiry_id'    => $lead->id,
+            'user_id'       => auth()->id(),
+            'call_number'   => $nextCallNumber,
+            'call_status'   => $validated['call_status'],
+            'comment'       => $validated['comment'] ?? null,
+            'whatsapp_sent' => true,
+        ]);
+
+        app(AuditLogService::class)->log(auth()->user(), 'crm_leads', 'call_added', $lead, [
+            'description' => "أجرى الموظف {$userName} مكالمة برقم #{$nextCallNumber} مع الليد ({$lead->full_name}) بحالة: {$validated['call_status']}",
+        ]);
+
+        return redirect()->route('admin.crm.leads.show', $lead)->with('success', "تم تسجيل المكالمة رقم #{$nextCallNumber} بنجاح!");
     }
 
     public function storeTask(Request $request, Inquiry $lead)

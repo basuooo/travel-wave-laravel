@@ -18,7 +18,12 @@
                     <h2 class="h5 mb-1">{{ __('admin.crm_lead_details') }}</h2>
                     <div class="text-muted">{{ $lead->full_name }}</div>
                 </div>
-                <span class="badge text-bg-primary">{{ $lead->localizedStatus() }}</span>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-success font-weight-bold btn-sm" data-bs-toggle="modal" data-bs-target="#addCallModal">
+                        📞 إضافة مكالمة
+                    </button>
+                    <span class="badge text-bg-primary fs-6">{{ $lead->localizedStatus() }}</span>
+                </div>
             </div>
             <dl class="row mb-0">
                 <dt class="col-sm-4">{{ __('admin.full_name') }}</dt><dd class="col-sm-8">{{ $lead->full_name ?: '-' }}</dd>
@@ -46,6 +51,58 @@
                 <dt class="col-sm-4">{{ __('admin.comment') }}</dt><dd class="col-sm-8">{{ $lead->admin_notes ?: '-' }}</dd>
                 <dt class="col-sm-4">{{ __('admin.crm_additional_notes') }}</dt><dd class="col-sm-8">{{ $lead->additional_notes ?: '-' }}</dd>
             </dl>
+        </div>
+
+        <!-- Call History Card -->
+        <div class="card admin-card p-4 mb-4" id="lead-calls-card">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <div>
+                    <h2 class="h5 mb-0">📞 سجل المكالمات (Call Log)</h2>
+                    <div class="text-muted small mt-1">
+                        إجمالي المكالمات: <strong>{{ $lead->calls->count() }}</strong>
+                        (المستوفية لشرط 3/يومياً: <strong class="text-success">{{ $lead->getEligibleCallsCount() }}</strong> / 9)
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#addCallModal">
+                    ➕ إضافة مكالمة
+                </button>
+            </div>
+
+            @if($errors->has('whatsapp_sent'))
+                <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <strong>تنبيه:</strong> {{ $errors->first('whatsapp_sent') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            <div class="d-grid gap-3">
+                @forelse($lead->calls as $call)
+                    <div class="border rounded-4 p-3 bg-light position-relative">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary fs-6">مكالمة رقم #{{ $call->call_number }}</span>
+                                <span class="badge bg-dark fs-6">{{ $call->call_status }}</span>
+                                @if($call->whatsapp_sent)
+                                    <span class="badge bg-success">✅ تم إرسال واتساب</span>
+                                @endif
+                            </div>
+                            <div class="text-muted small font-monospace">
+                                🕒 {{ optional($call->created_at)->format('Y-m-d h:i A') }}
+                            </div>
+                        </div>
+                        <div class="small mb-1">
+                            <strong>البائع / الموظف:</strong> {{ $call->user?->name ?: '-' }}
+                        </div>
+                        @if($call->comment)
+                            <div class="p-2 bg-white rounded border small mt-2">
+                                <strong>الملاحظات:</strong> {{ $call->comment }}
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="text-muted text-center py-3">لا توجد مكالمات مسجلة حتى الآن لهذا العميل. اضغط "إضافة مكالمة" للبدء.</div>
+                @endforelse
+            </div>
         </div>
 
         <div class="card admin-card p-4 mb-4">
@@ -532,5 +589,73 @@ document.addEventListener('DOMContentLoaded', function () {
     syncCallLater();
     syncServiceFields();
 });
+
+function validateCallForm(e) {
+    const whatsappCheck = document.getElementById('whatsapp_sent_check');
+    const alertBox = document.getElementById('whatsapp-error-alert');
+    const currentUserName = @json(auth()->user()?->name ?: 'البائع');
+
+    if (!whatsappCheck || !whatsappCheck.checked) {
+        e.preventDefault();
+        const msg = `مينفعش تكلم\\ي العميل من غير ماتبعتي رسالة الواتس يا ${currentUserName}`;
+        if (alertBox) {
+            alertBox.innerText = msg;
+            alertBox.classList.remove('d-none');
+        } else {
+            alert(msg);
+        }
+        return false;
+    }
+    if (alertBox) {
+        alertBox.classList.add('d-none');
+    }
+    return true;
+}
 </script>
+
+<!-- Modal Add Call -->
+<div class="modal fade" id="addCallModal" tabindex="-1" aria-labelledby="addCallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{{ route('admin.crm.leads.calls.store', $lead) }}" class="modal-content" id="add-call-form" onsubmit="return validateCallForm(event)">
+            @csrf
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold" id="addCallModalLabel">📞 تسجيل مكالمة جديدة للعميل</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-start">
+                <div id="whatsapp-error-alert" class="alert alert-danger d-none mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">حالة المكالمة <span class="text-danger">*</span></label>
+                    <select class="form-select" name="call_status" required>
+                        <option value="لم يتم الرد">لم يتم الرد</option>
+                        <option value="تم الرد والتواصل">تم الرد والتواصل</option>
+                        <option value="خط مشغول">خط مشغول</option>
+                        <option value="مغلق / غير متاح">مغلق / غير متاح</option>
+                        <option value="رقم غير صحيح">رقم غير صحيح</option>
+                        <option value="تم الاتفاق والارتباط">تم الاتفاق والارتباط</option>
+                        <option value="طلب الاتصال لاحقاً">طلب الاتصال لاحقاً</option>
+                    </select>
+                    <div class="form-text text-muted small">تُحفظ حالة المكالمة مستقلة تماماً ولا تعدل على الحالة العامة لليد.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">الملاحظات والكومنت (اختياري)</label>
+                    <textarea class="form-control" name="comment" rows="3" placeholder="اكتب تفاصيل المكالمة أو رد العميل هنا..."></textarea>
+                </div>
+
+                <div class="form-check form-switch p-3 bg-light rounded border">
+                    <input class="form-check-input ms-0 me-2" type="checkbox" name="whatsapp_sent" id="whatsapp_sent_check" value="1">
+                    <label class="form-check-input-label fw-bold text-dark" for="whatsapp_sent_check">
+                        ✅ تم إرسال رسالة واتساب للعميل (إجباري)
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="submit" class="btn btn-success fw-bold">حفظ المكالمة</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
