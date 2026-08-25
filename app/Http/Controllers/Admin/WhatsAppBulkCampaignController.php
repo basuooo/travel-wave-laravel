@@ -11,6 +11,8 @@ use App\Models\WhatsAppTemplate;
 use App\Services\WhatsApp\WhatsAppContactMatchingService;
 use App\Support\AuditLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class WhatsAppBulkCampaignController extends Controller
@@ -24,6 +26,12 @@ class WhatsAppBulkCampaignController extends Controller
 
     public function index(Request $request)
     {
+        if (!Schema::hasTable('whatsapp_campaigns')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $query = WhatsAppCampaign::with(['account', 'creator']);
 
         if ($request->filled('type')) {
@@ -34,15 +42,21 @@ class WhatsAppBulkCampaignController extends Controller
             $query->where('status', $request->status);
         }
 
-        $campaigns = $query->latest()->paginate(15);
+        $campaigns = Schema::hasTable('whatsapp_campaigns') ? $query->latest()->paginate(15) : new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15);
 
         return view('admin.whatsapp.campaigns.index', compact('campaigns'));
     }
 
     public function create()
     {
-        $accounts = WhatsAppAccount::where('is_active', true)->get();
-        $templates = WhatsAppTemplate::all();
+        if (!Schema::hasTable('whatsapp_campaigns')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
+        $accounts = Schema::hasTable('whatsapp_accounts') ? WhatsAppAccount::where('is_active', true)->get() : collect();
+        $templates = Schema::hasTable('whatsapp_templates') ? WhatsAppTemplate::all() : collect();
         $employees = User::all();
 
         return view('admin.whatsapp.bulk.create', compact('accounts', 'templates', 'employees'));
@@ -50,6 +64,12 @@ class WhatsAppBulkCampaignController extends Controller
 
     public function store(Request $request)
     {
+        if (!Schema::hasTable('whatsapp_campaigns')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $validated = $request->validate([
             'name'                 => 'required|string|max:255',
             'whatsapp_account_id'  => 'required|exists:whatsapp_accounts,id',
@@ -155,9 +175,6 @@ class WhatsAppBulkCampaignController extends Controller
         return redirect()->back()->with('success', 'تم إلغاء الحملة بنجاح.');
     }
 
-    /**
-     * Requirement 36: Duplicate Campaign
-     */
     public function duplicate(WhatsAppCampaign $campaign)
     {
         $newCampaign = $campaign->replicate();

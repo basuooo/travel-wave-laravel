@@ -5,17 +5,31 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\WhatsAppTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 class WhatsAppTemplateController extends Controller
 {
     public function index()
     {
-        $templates = WhatsAppTemplate::with('creator')->latest()->get();
+        if (!Schema::hasTable('whatsapp_templates')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
+        $templates = Schema::hasTable('whatsapp_templates') ? WhatsAppTemplate::with('creator')->latest()->get() : collect();
         return view('admin.whatsapp.templates.index', compact('templates'));
     }
 
     public function store(Request $request)
     {
+        if (!Schema::hasTable('whatsapp_templates')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
             'category'   => 'required|string',

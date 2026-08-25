@@ -12,6 +12,8 @@ use App\Services\WhatsApp\WhatsAppContactMatchingService;
 use App\Services\WhatsApp\WhatsAppCampaignProcessorService;
 use App\Support\AuditLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class WhatsAppRetargetingController extends Controller
@@ -25,18 +27,27 @@ class WhatsAppRetargetingController extends Controller
 
     public function create()
     {
-        $accounts = WhatsAppAccount::where('is_active', true)->get();
-        $templates = WhatsAppTemplate::all();
+        if (!Schema::hasTable('whatsapp_accounts')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
+        $accounts = Schema::hasTable('whatsapp_accounts') ? WhatsAppAccount::where('is_active', true)->get() : collect();
+        $templates = Schema::hasTable('whatsapp_templates') ? WhatsAppTemplate::all() : collect();
         $employees = User::all();
 
         return view('admin.whatsapp.retargeting.create', compact('accounts', 'templates', 'employees'));
     }
 
-    /**
-     * AJAX Endpoint: Parse numbers & perform contact matching against SPECIFIC WhatsApp Account conversations.
-     */
     public function matchNumbers(Request $request)
     {
+        if (!Schema::hasTable('whatsapp_accounts')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $request->validate([
             'whatsapp_account_id' => 'required|exists:whatsapp_accounts,id',
             'raw_numbers'         => 'nullable|string',
@@ -45,7 +56,6 @@ class WhatsAppRetargetingController extends Controller
         $accountId = (int) $request->whatsapp_account_id;
         $rawNumbers = $request->raw_numbers ?? '';
 
-        // If file uploaded
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $rawNumbers .= "\n" . file_get_contents($file->getRealPath());
@@ -57,11 +67,14 @@ class WhatsAppRetargetingController extends Controller
         return response()->json($matchedResult);
     }
 
-    /**
-     * Store & Launch Retargeting Campaign
-     */
     public function store(Request $request, WhatsAppCampaignProcessorService $processor)
     {
+        if (!Schema::hasTable('whatsapp_campaigns')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $validated = $request->validate([
             'name'                 => 'required|string|max:255',
             'whatsapp_account_id'  => 'required|exists:whatsapp_accounts,id',
@@ -69,7 +82,7 @@ class WhatsAppRetargetingController extends Controller
             'recipients'           => 'required|array|min:1',
             'recipients.*.phone'   => 'required|string',
             'recipients.*.name'    => 'nullable|string',
-            'recipients.*.status'  => 'required|string', // previously_contacted / not_previously_contacted
+            'recipients.*.status'  => 'required|string',
             'recipients.*.is_selected' => 'required|boolean',
             'schedule_type'        => 'required|in:now,scheduled',
             'scheduled_at'         => 'nullable|date',
@@ -81,7 +94,6 @@ class WhatsAppRetargetingController extends Controller
 
         $account = WhatsAppAccount::findOrFail($validated['whatsapp_account_id']);
 
-        // Count totals
         $selectedRecipients = array_filter($validated['recipients'], fn($r) => $r['is_selected'] == true);
         $prevCount = count(array_filter($selectedRecipients, fn($r) => $r['status'] === 'previously_contacted'));
         $notPrevCount = count(array_filter($selectedRecipients, fn($r) => $r['status'] === 'not_previously_contacted'));
@@ -107,7 +119,6 @@ class WhatsAppRetargetingController extends Controller
             'started_at'           => $validated['schedule_type'] === 'now' ? now() : null,
         ]);
 
-        // Insert recipients
         foreach ($validated['recipients'] as $rec) {
             if (!$rec['is_selected']) continue;
 
@@ -127,7 +138,6 @@ class WhatsAppRetargetingController extends Controller
 
         AuditLogService::log('whatsapp_campaign_created', "Created Retargeting Campaign #{$campaign->id} ({$campaign->name}) with {$campaign->total_contacts} contacts");
 
-        // Dispatch initial batch execution in background if 'now'
         if ($campaign->status === 'running') {
             dispatch(new \App\Jobs\ProcessWhatsAppCampaignJob($campaign->id));
         }

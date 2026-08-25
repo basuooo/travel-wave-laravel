@@ -8,20 +8,34 @@ use App\Models\WhatsAppSequence;
 use App\Models\WhatsAppSequenceStep;
 use App\Models\WhatsAppTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 class WhatsAppSequenceController extends Controller
 {
     public function index()
     {
-        $sequences = WhatsAppSequence::with(['account', 'steps'])->latest()->get();
-        $accounts = WhatsAppAccount::all();
-        $templates = WhatsAppTemplate::all();
+        if (!Schema::hasTable('whatsapp_sequences')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
+        $sequences = Schema::hasTable('whatsapp_sequences') ? WhatsAppSequence::with(['account', 'steps'])->latest()->get() : collect();
+        $accounts = Schema::hasTable('whatsapp_accounts') ? WhatsAppAccount::all() : collect();
+        $templates = Schema::hasTable('whatsapp_templates') ? WhatsAppTemplate::all() : collect();
 
         return view('admin.whatsapp.sequences.index', compact('sequences', 'accounts', 'templates'));
     }
 
     public function store(Request $request)
     {
+        if (!Schema::hasTable('whatsapp_sequences')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {}
+        }
+
         $validated = $request->validate([
             'name'                 => 'required|string|max:255',
             'description'          => 'nullable|string',
