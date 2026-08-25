@@ -65,7 +65,7 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">نص الرسالة</label>
-                            <textarea name="message_content" id="bulk_message_content" class="form-control" rows="6" required placeholder="مرحباً {{name}}، يسعدنا تقديم عرض خاص بخصوص {{service}}..."></textarea>
+                            <textarea name="message_content" id="bulk_message_content" class="form-control" rows="6" required placeholder="مرحباً @{{name}}، يسعدنا تقديم عرض خاص بخصوص @{{service}}..."></textarea>
                         </div>
                     </div>
                 </div>

@@ -88,14 +88,14 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">نص الرسالة (Message Body)</label>
-                            <textarea name="message_content" id="message_content" class="form-control" rows="6" required placeholder="أهلاً بك {{name}}، أردنا متابعة استفسارك بخصوص {{service}}..."></textarea>
+                            <textarea name="message_content" id="message_content" class="form-control" rows="6" required placeholder="أهلاً بك @{{name}}، أردنا متابعة استفسارك بخصوص @{{service}}..."></textarea>
                             <div class="mt-2 small text-muted">
                                 المتغيرات المتاحة: 
-                                <span class="badge bg-light text-dark border me-1 cursor-pointer" onclick="insertVar('{{name}}')">{{name}}</span>
-                                <span class="badge bg-light text-dark border me-1 cursor-pointer" onclick="insertVar('{{phone}}')">{{phone}}</span>
-                                <span class="badge bg-light text-dark border me-1 cursor-pointer" onclick="insertVar('{{country}}')">{{country}}</span>
-                                <span class="badge bg-light text-dark border me-1 cursor-pointer" onclick="insertVar('{{service}}')">{{service}}</span>
-                                <span class="badge bg-light text-dark border me-1 cursor-pointer" onclick="insertVar('{{employee}}')">{{employee}}</span>
+                                <span class="badge bg-light text-dark border me-1 cursor-pointer" onclick="insertVar('&#123;&#123;name&#125;&#125;')">@{{name}}</span>
+                                <span class="badge bg-light text-dark border me-1 cursor-pointer" onclick="insertVar('&#123;&#123;phone&#125;&#125;')">@{{phone}}</span>
+                                <span class="badge bg-light text-dark border me-1 cursor-pointer" onclick="insertVar('&#123;&#123;country&#125;&#125;')">@{{country}}</span>
+                                <span class="badge bg-light text-dark border me-1 cursor-pointer" onclick="insertVar('&#123;&#123;service&#125;&#125;')">@{{service}}</span>
+                                <span class="badge bg-light text-dark border me-1 cursor-pointer" onclick="insertVar('&#123;&#123;employee&#125;&#125;')">@{{employee}}</span>
                             </div>
                         </div>
 

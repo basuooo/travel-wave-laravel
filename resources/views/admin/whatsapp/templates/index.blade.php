@@ -82,7 +82,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">محتوى القالب</label>
-                    <textarea name="content" class="form-control" rows="5" required placeholder="أهلاً بك {{name}}، نود تذكيرك بـ..."></textarea>
+                    <textarea name="content" class="form-control" rows="5" required placeholder="أهلاً بك @{{name}}، نود تذكيرك بـ..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
