@@ -95,7 +95,7 @@ class RoleController extends Controller
 
     protected function formViewData(Role $role): array
     {
-        $this->ensurePermissionsSeeded();
+        AccessControl::syncPermissionsInDatabase();
 
         return [
             'item' => $role,
@@ -108,23 +108,5 @@ class RoleController extends Controller
                     ->get();
             }),
         ];
-    }
-
-    protected function ensurePermissionsSeeded(): void
-    {
-        try {
-            foreach (AccessControl::flatPermissions() as $permissionData) {
-                Permission::query()->firstOrCreate(
-                    ['slug' => $permissionData['slug']],
-                    [
-                        'name' => $permissionData['name'],
-                        'module' => $permissionData['module'],
-                        'description' => $permissionData['description'],
-                    ]
-                );
-            }
-        } catch (\Throwable $e) {
-            logger()->error('ensurePermissionsSeeded error: ' . $e->getMessage());
-        }
     }
 }

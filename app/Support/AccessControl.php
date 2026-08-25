@@ -4,6 +4,28 @@ namespace App\Support;
 
 class AccessControl
 {
+    public static function syncPermissionsInDatabase(): void
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('permissions')) {
+            return;
+        }
+
+        try {
+            foreach (static::flatPermissions() as $permissionData) {
+                \App\Models\Permission::query()->updateOrCreate(
+                    ['slug' => $permissionData['slug']],
+                    [
+                        'name' => $permissionData['name'],
+                        'module' => $permissionData['module'],
+                        'description' => $permissionData['description'],
+                    ]
+                );
+            }
+        } catch (\Throwable $e) {
+            logger()->error('AccessControl syncPermissionsInDatabase error: ' . $e->getMessage());
+        }
+    }
+
     public static function permissionGroups(): array
     {
         return [

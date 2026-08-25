@@ -124,6 +124,8 @@ class UserController extends Controller
 
     protected function formViewData(User $user): array
     {
+        AccessControl::syncPermissionsInDatabase();
+
         $user->loadMissing(['roles', 'permissionOverrides']);
 
         $overrideIds = $user->permissionOverrides->mapWithKeys(fn (Permission $permission) => [
