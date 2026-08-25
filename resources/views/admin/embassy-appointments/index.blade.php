@@ -19,10 +19,6 @@
                     <span class="badge bg-danger rounded-pill ms-1">{{ $trashedCount }}</span>
                 @endif
             </a>
-            <button type="button" class="btn btn-success d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkCreateModal">
-                <iconify-icon icon="lucide:layers" width="18"></iconify-icon>
-                <span>إضافة مواعيد دفعة واحدة 📋</span>
-            </button>
             <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#createApptModal">
                 <iconify-icon icon="lucide:plus-circle" width="18"></iconify-icon>
                 <span>إضافة موعد سفارة جديد</span>
@@ -294,7 +290,6 @@
 
 @push('modals')
     @include('admin.embassy-appointments.modals.create_edit_modal')
-    @include('admin.embassy-appointments.modals.bulk_create_modal')
 @endpush
 
 @push('scripts')
@@ -389,162 +384,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (countrySearchInput) countrySearchInput.value = '';
             if (countrySelect) {
                 Array.from(countrySelect.options).forEach(opt => opt.style.display = '');
-            }
-        });
-    }
-
-    // Bulk Modal logic
-    const countryOptionsHtml = `@foreach($countries as $c)<option value="{{ $c->id }}" data-name-ar="{{ $c->name_ar }}" data-name-en="{{ $c->name_en }}">{{ $c->name_ar ?: $c->name_en }} ({{ $c->name_en }})</option>@endforeach`;
-
-    const presetImageAppointments = [
-        { countryName: 'ألمانيا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 12' },
-        { countryName: 'إسبانيا', visaType: 'سياحة', center: 'BLS', apptType: 'Regular', status: 'available_later', date: 'شهر 9 و 10' },
-        { countryName: 'اليونان', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9 و 10' },
-        { countryName: 'المجر', visaType: 'سياحة', center: 'iOM', apptType: 'Regular', status: 'available_later', date: 'شهر 9 و 10' },
-        { countryName: 'هولندا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 11 و 12' },
-        { countryName: 'اليونان', visaType: 'سياحة', center: 'VFS (إسكندرية)', apptType: 'Regular', status: 'available_later', date: 'شهر 9 (إسكندرية)' },
-        { countryName: 'البرتغال', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9 و 10' },
-        { countryName: 'السويد', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9' },
-        { countryName: 'إيطاليا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9' },
-        { countryName: 'سويسرا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9' },
-        { countryName: 'كرواتيا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 10' },
-        { countryName: 'بلجيكا', visaType: 'سياحة', center: 'TLS', apptType: 'Regular', status: 'available_later', date: 'شهر 11 و 12' },
-        { countryName: 'فرنسا', visaType: 'سياحة', center: 'TLS', apptType: 'Regular', status: 'available_later', date: 'شهر 1' },
-        { countryName: 'النمسا', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 10 و 11' },
-        { countryName: 'النرويج', visaType: 'سياحة', center: 'VFS', apptType: 'Regular', status: 'available_later', date: 'شهر 9' },
-    ];
-
-    let bulkRowIndex = 0;
-
-    function addBulkRow(preset = null) {
-        const tbody = document.getElementById('bulkTableBody');
-        if (!tbody) return;
-
-        const idx = bulkRowIndex++;
-        const tr = document.createElement('tr');
-        tr.id = `bulk_row_${idx}`;
-
-        tr.innerHTML = `
-            <td>
-                <select name="appointments[${idx}][visa_country_id]" class="form-select form-select-sm country-select" required>
-                    <option value="">اختر الدولة...</option>
-                    ${countryOptionsHtml}
-                </select>
-            </td>
-            <td>
-                <select name="appointments[${idx}][visa_type]" class="form-select form-select-sm" required>
-                    <option value="سياحة" ${preset && preset.visaType === 'سياحة' ? 'selected' : ''}>سياحة</option>
-                    <option value="عمل / بيزنس" ${preset && preset.visaType === 'عمل / بيزنس' ? 'selected' : ''}>عمل / بيزنس</option>
-                    <option value="دراسة" ${preset && preset.visaType === 'دراسة' ? 'selected' : ''}>دراسة</option>
-                    <option value="فيزا عمل" ${preset && preset.visaType === 'فيزا عمل' ? 'selected' : ''}>فيزا عمل</option>
-                    <option value="زيارة عائلية" ${preset && preset.visaType === 'زيارة عائلية' ? 'selected' : ''}>زيارة عائلية</option>
-                    <option value="أخرى" ${preset && preset.visaType === 'أخرى' ? 'selected' : ''}>أخرى</option>
-                </select>
-            </td>
-            <td>
-                <input type="text" name="appointments[${idx}][appointment_center]" class="form-control form-control-sm" value="${preset ? preset.center : 'BLS'}" required>
-            </td>
-            <td>
-                <select name="appointments[${idx}][appointment_type]" class="form-select form-select-sm" required>
-                    <option value="Regular" ${preset && preset.apptType === 'Regular' ? 'selected' : ''}>Regular</option>
-                    <option value="VIP" ${preset && preset.apptType === 'VIP' ? 'selected' : ''}>VIP</option>
-                    <option value="Super VIP" ${preset && preset.apptType === 'Super VIP' ? 'selected' : ''}>Super VIP</option>
-                </select>
-            </td>
-            <td>
-                <select name="appointments[${idx}][status]" class="form-select form-select-sm" required>
-                    <option value="available_later" ${preset && preset.status === 'available_later' ? 'selected' : ''}>🟡 متاحة مستقبلاً</option>
-                    <option value="available_now" ${preset && preset.status === 'available_now' ? 'selected' : ''}>🟢 متاحة الآن</option>
-                    <option value="no_availability" ${preset && preset.status === 'no_availability' ? 'selected' : ''}>🔴 لا توجد مواعيد</option>
-                    <option value="unknown" ${preset && preset.status === 'unknown' ? 'selected' : ''}>⚪ غير معروف</option>
-                </select>
-            </td>
-            <td>
-                <input type="text" name="appointments[${idx}][earliest_date]" class="form-control form-control-sm" value="${preset ? preset.date : ''}" placeholder="مثال: شهر 9">
-            </td>
-            <td>
-                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 remove-row-btn">&times;</button>
-            </td>
-        `;
-
-        tbody.appendChild(tr);
-
-        if (preset) {
-            const select = tr.querySelector('.country-select');
-            const searchClean = cleanArabic(preset.countryName);
-            let matchedOpt = Array.from(select.options).find(opt => {
-                const arClean = cleanArabic(opt.dataset.nameAr || opt.textContent);
-                const enClean = (opt.dataset.nameEn || '').toLowerCase();
-                return arClean.includes(searchClean) || searchClean.includes(arClean) || enClean.includes(searchClean);
-            });
-            if (matchedOpt) {
-                select.value = matchedOpt.value;
-            }
-        }
-
-        tr.querySelector('.remove-row-btn').addEventListener('click', function () {
-            tr.remove();
-            updateRowCountBadge();
-        });
-
-        updateRowCountBadge();
-    }
-
-    function updateRowCountBadge() {
-        const tbody = document.getElementById('bulkTableBody');
-        const badge = document.getElementById('rowCountBadge');
-        if (tbody && badge) {
-            badge.textContent = `عدد المواعيد المدرجة: ${tbody.children.length}`;
-        }
-    }
-
-    const addBulkRowBtn = document.getElementById('addBulkRowBtn');
-    if (addBulkRowBtn) {
-        addBulkRowBtn.addEventListener('click', function () {
-            addBulkRow();
-        });
-    }
-
-    const fillImagePresetBtn = document.getElementById('fillImagePresetBtn');
-    if (fillImagePresetBtn) {
-        fillImagePresetBtn.addEventListener('click', function () {
-            const tbody = document.getElementById('bulkTableBody');
-            if (tbody) tbody.innerHTML = '';
-            bulkRowIndex = 0;
-            presetImageAppointments.forEach(preset => addBulkRow(preset));
-        });
-    }
-
-    const processUploadedImageBtn = document.getElementById('processUploadedImageBtn');
-    const bulkImageInput = document.getElementById('bulkImageInput');
-
-    if (processUploadedImageBtn && bulkImageInput) {
-        const handleImageProcessing = function () {
-            if (!bulkImageInput.files || bulkImageInput.files.length === 0) {
-                alert('يرجى اختيار صورة من جهازك أولاً.');
-                return;
-            }
-            const tbody = document.getElementById('bulkTableBody');
-            if (tbody) tbody.innerHTML = '';
-            bulkRowIndex = 0;
-            presetImageAppointments.forEach(preset => addBulkRow(preset));
-            alert('تم قراءة الصورة وتوليد الـ 15 موعدًا بنجاح! يمكنك مراجعة الجدول ثم الضغط على "حفظ جميع المواعيد".');
-        };
-
-        processUploadedImageBtn.addEventListener('click', handleImageProcessing);
-        bulkImageInput.addEventListener('change', function () {
-            if (this.files && this.files.length > 0) {
-                handleImageProcessing();
-            }
-        });
-    }
-
-    const bulkCreateModalEl = document.getElementById('bulkCreateModal');
-    if (bulkCreateModalEl) {
-        bulkCreateModalEl.addEventListener('show.bs.modal', function () {
-            const tbody = document.getElementById('bulkTableBody');
-            if (tbody && tbody.children.length === 0) {
-                addBulkRow();
             }
         });
     }

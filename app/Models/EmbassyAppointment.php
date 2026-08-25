@@ -153,7 +153,7 @@ class EmbassyAppointment extends Model
                 }
             }
 
-            static::autoSeedAppointmentsFromImage();
+            // autoSeed disabled to allow permanent delete without auto recreation
         } catch (\Throwable $e) {
             logger()->error('EmbassyAppointment ensureTableSchema error: ' . $e->getMessage());
         }
@@ -161,6 +161,7 @@ class EmbassyAppointment extends Model
 
     public static function autoSeedAppointmentsFromImage(): void
     {
+        return;
         try {
             if (! Schema::hasTable('embassy_appointments') || ! Schema::hasTable('visa_countries')) {
                 return;
