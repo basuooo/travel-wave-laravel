@@ -278,22 +278,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/visa-countries/{visa_country}/duplicate', [VisaCountryController::class, 'duplicate'])->name('visa-countries.duplicate');
             Route::post('/visa-countries/{visa_country}/restore', [VisaCountryController::class, 'restore'])->name('visa-countries.restore');
             Route::delete('/visa-countries/{visa_country}/force-delete', [VisaCountryController::class, 'forceDestroy'])->name('visa-countries.force-destroy');
-            Route::prefix('visa-database')->name('visa-database.')->group(function () {
-                Route::get('/', [VisaDatabaseController::class, 'index'])->middleware('permission:visa_database.view')->name('index');
-                Route::get('/{visa_record}/logs', [VisaDatabaseController::class, 'activityLogs'])->middleware('permission:visa_database.view')->name('logs');
-                Route::post('/', [VisaDatabaseController::class, 'store'])->middleware('permission:visa_database.create')->name('store');
-                Route::put('/{visa_record}', [VisaDatabaseController::class, 'update'])->middleware('permission:visa_database.edit')->name('update');
-                Route::patch('/{visa_record}/toggle-status', [VisaDatabaseController::class, 'toggleStatus'])->middleware('permission:visa_database.edit')->name('toggle-status');
-                Route::delete('/{visa_record}', [VisaDatabaseController::class, 'destroy'])->middleware('permission:visa_database.delete')->name('destroy');
-                Route::post('/categories', [VisaDatabaseController::class, 'storeCategory'])->middleware('permission:visa_database.manage')->name('categories.store');
-            });
-
             Route::resource('visa-countries', VisaCountryController::class);
             Route::get('/destinations/trash', [DestinationController::class, 'trash'])->name('destinations.trash');
             Route::post('/destinations/{destination}/duplicate', [DestinationController::class, 'duplicate'])->name('destinations.duplicate');
             Route::post('/destinations/{destination}/restore', [DestinationController::class, 'restore'])->name('destinations.restore');
             Route::delete('/destinations/{destination}/force-delete', [DestinationController::class, 'forceDestroy'])->name('destinations.force-destroy');
             Route::resource('destinations', DestinationController::class);
+        });
+
+        // Visa Database Module (Independent Granular Permissions)
+        Route::prefix('visa-database')->name('visa-database.')->group(function () {
+            Route::get('/', [VisaDatabaseController::class, 'index'])->middleware('permission:visa_database.view')->name('index');
+            Route::get('/{visa_record}/logs', [VisaDatabaseController::class, 'activityLogs'])->middleware('permission:visa_database.view')->name('logs');
+            Route::post('/', [VisaDatabaseController::class, 'store'])->middleware('permission:visa_database.create')->name('store');
+            Route::put('/{visa_record}', [VisaDatabaseController::class, 'update'])->middleware('permission:visa_database.edit')->name('update');
+            Route::patch('/{visa_record}/toggle-status', [VisaDatabaseController::class, 'toggleStatus'])->middleware('permission:visa_database.edit')->name('toggle-status');
+            Route::delete('/{visa_record}', [VisaDatabaseController::class, 'destroy'])->middleware('permission:visa_database.delete')->name('destroy');
+            Route::post('/categories', [VisaDatabaseController::class, 'storeCategory'])->middleware('permission:visa_database.manage')->name('categories.store');
         });
 
         // Embassy Appointments Module
