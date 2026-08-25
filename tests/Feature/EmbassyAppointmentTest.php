@@ -346,14 +346,14 @@ class EmbassyAppointmentTest extends TestCase
         $statusUnallowed = CrmStatus::firstOrCreate(['slug' => 'new-lead'], ['name_ar' => 'عميل جديد', 'name_en' => 'New Lead']);
 
         // Eligible Leads (5)
-        Inquiry::create(['full_name' => 'ليد 1', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusAwaiting->id]);
-        Inquiry::create(['full_name' => 'ليد 2', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusWhatsapp->id]);
-        Inquiry::create(['full_name' => 'ليد 3', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusDocsWait->id]);
-        Inquiry::create(['full_name' => 'ليد 4', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusDocsComp->id]);
-        Inquiry::create(['full_name' => 'ليد 5', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusDocsWeak->id]);
+        Inquiry::create(['full_name' => 'ليد 1', 'phone' => '01000000001', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusAwaiting->id]);
+        Inquiry::create(['full_name' => 'ليد 2', 'phone' => '01000000002', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusWhatsapp->id]);
+        Inquiry::create(['full_name' => 'ليد 3', 'phone' => '01000000003', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusDocsWait->id]);
+        Inquiry::create(['full_name' => 'ليد 4', 'phone' => '01000000004', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusDocsComp->id]);
+        Inquiry::create(['full_name' => 'ليد 5', 'phone' => '01000000005', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusDocsWeak->id]);
 
         // Unallowed Lead (Should be ignored)
-        Inquiry::create(['full_name' => 'ليد غير مسموح', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusUnallowed->id]);
+        Inquiry::create(['full_name' => 'ليد غير مسموح', 'phone' => '01000000006', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusUnallowed->id]);
 
         $appt = EmbassyAppointment::create([
             'visa_country_id' => $germany->id,

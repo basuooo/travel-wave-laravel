@@ -11,12 +11,16 @@
             <p class="text-muted small mb-0">قاعدة بيانات منظمة وتفاعلية لجميع تأشيرات دول العالم مع إدارة الأسعار، رسوم السفارة، والأوراق المطلوبة.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
+            @if(auth()->user()->hasPermission('visa_database.manage') || auth()->user()->hasPermission('destinations.manage') || auth()->user()->is_admin)
             <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#manageCategoriesModal">
                 <i class="bi bi-tags me-1"></i> إدارة التصنيفات
             </button>
+            @endif
+            @if(auth()->user()->hasPermission('visa_database.create') || auth()->user()->hasPermission('visa_database.manage') || auth()->user()->is_admin)
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addVisaModal">
                 <i class="bi bi-plus-circle me-1"></i> إضافة تأشيرة جديدة
             </button>
+            @endif
         </div>
     </div>
 
@@ -228,6 +232,7 @@
                                 </td>
                                 <td>
                                     <!-- Toggle Status Dropdown -->
+                                    @if(auth()->user()->hasPermission('visa_database.edit') || auth()->user()->hasPermission('visa_database.manage') || auth()->user()->is_admin)
                                     <div class="dropdown">
                                         <button class="btn btn-sm badge {{ $rec->status_badge_class }} dropdown-toggle border-0" type="button" data-bs-toggle="dropdown">
                                             {{ $rec->status_label }}
@@ -256,6 +261,9 @@
                                             </li>
                                         </ul>
                                     </div>
+                                    @else
+                                        <span class="badge {{ $rec->status_badge_class }}">{{ $rec->status_label }}</span>
+                                    @endif
                                 </td>
                                 <td class="text-end px-3">
                                     <div class="btn-group btn-group-sm">
@@ -265,16 +273,20 @@
                                         <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewModal{{ $rec->id }}" title="عرض التفاصيل">
                                             <i class="bi bi-eye"></i> التفاصيل
                                         </button>
+                                        @if(auth()->user()->hasPermission('visa_database.edit') || auth()->user()->hasPermission('visa_database.manage') || auth()->user()->is_admin)
                                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ $rec->id }}" title="تعديل">
                                             <i class="bi bi-pencil"></i> تعديل
                                         </button>
+                                        @endif
                                         <button type="button" class="btn btn-outline-secondary" onclick="showLogs({{ $rec->id }})" title="سجل التعديلات">
                                             <i class="bi bi-history"></i> Log
                                         </button>
+                                        @if(auth()->user()->hasPermission('visa_database.delete') || auth()->user()->hasPermission('visa_database.manage') || auth()->user()->is_admin)
                                         <form action="{{ route('admin.visa-database.destroy', $rec) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت تأكد من رغبتك في حذف هذا التسجيل؟');">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-outline-danger" title="حذف"><i class="bi bi-trash"></i></button>
                                         </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

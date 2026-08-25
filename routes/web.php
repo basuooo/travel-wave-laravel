@@ -279,13 +279,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/visa-countries/{visa_country}/restore', [VisaCountryController::class, 'restore'])->name('visa-countries.restore');
             Route::delete('/visa-countries/{visa_country}/force-delete', [VisaCountryController::class, 'forceDestroy'])->name('visa-countries.force-destroy');
             Route::prefix('visa-database')->name('visa-database.')->group(function () {
-                Route::get('/', [VisaDatabaseController::class, 'index'])->name('index');
-                Route::post('/', [VisaDatabaseController::class, 'store'])->name('store');
-                Route::put('/{visa_record}', [VisaDatabaseController::class, 'update'])->name('update');
-                Route::delete('/{visa_record}', [VisaDatabaseController::class, 'destroy'])->name('destroy');
-                Route::patch('/{visa_record}/toggle-status', [VisaDatabaseController::class, 'toggleStatus'])->name('toggle-status');
-                Route::get('/{visa_record}/logs', [VisaDatabaseController::class, 'activityLogs'])->name('logs');
-                Route::post('/categories', [VisaDatabaseController::class, 'storeCategory'])->name('categories.store');
+                Route::get('/', [VisaDatabaseController::class, 'index'])->middleware('permission:visa_database.view')->name('index');
+                Route::get('/{visa_record}/logs', [VisaDatabaseController::class, 'activityLogs'])->middleware('permission:visa_database.view')->name('logs');
+                Route::post('/', [VisaDatabaseController::class, 'store'])->middleware('permission:visa_database.create')->name('store');
+                Route::put('/{visa_record}', [VisaDatabaseController::class, 'update'])->middleware('permission:visa_database.edit')->name('update');
+                Route::patch('/{visa_record}/toggle-status', [VisaDatabaseController::class, 'toggleStatus'])->middleware('permission:visa_database.edit')->name('toggle-status');
+                Route::delete('/{visa_record}', [VisaDatabaseController::class, 'destroy'])->middleware('permission:visa_database.delete')->name('destroy');
+                Route::post('/categories', [VisaDatabaseController::class, 'storeCategory'])->middleware('permission:visa_database.manage')->name('categories.store');
             });
 
             Route::resource('visa-countries', VisaCountryController::class);
@@ -303,23 +303,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/notifications/{notification}/contact', [EmbassyAppointmentController::class, 'handleContact'])->name('notifications.contact');
             Route::post('/notifications/{notification}/snooze', [EmbassyAppointmentController::class, 'handleSnooze'])->name('notifications.snooze');
 
-            // Admin management endpoints
-            Route::middleware('permission:destinations.manage')->group(function () {
-                Route::get('/', [EmbassyAppointmentController::class, 'index'])->name('index');
-                Route::post('/check-leads', [EmbassyAppointmentController::class, 'checkLeads'])->name('check-leads');
-                Route::get('/trash', [EmbassyAppointmentController::class, 'trash'])->name('trash');
-                Route::post('/sync-seed', [EmbassyAppointmentController::class, 'syncSeed'])->name('sync-seed');
-                Route::post('/store-bulk', [EmbassyAppointmentController::class, 'storeBulk'])->name('store-bulk');
-                Route::post('/{id}/restore', [EmbassyAppointmentController::class, 'restore'])->name('restore');
-                Route::delete('/{id}/force-delete', [EmbassyAppointmentController::class, 'forceDelete'])->name('force-delete');
-                Route::post('/', [EmbassyAppointmentController::class, 'store'])->name('store');
-                Route::get('/{embassy_appointment}', [EmbassyAppointmentController::class, 'show'])->name('show');
-                Route::put('/{embassy_appointment}', [EmbassyAppointmentController::class, 'update'])->name('update');
-                Route::delete('/{embassy_appointment}', [EmbassyAppointmentController::class, 'destroy'])->name('destroy');
-                Route::post('/{embassy_appointment}/available-now', [EmbassyAppointmentController::class, 'toggleAvailableNow'])->name('toggle-available-now');
-                Route::post('/{embassy_appointment}/no-availability', [EmbassyAppointmentController::class, 'toggleNoAvailability'])->name('toggle-no-availability');
-                Route::post('/{embassy_appointment}/quick-status', [EmbassyAppointmentController::class, 'updateQuickStatus'])->name('update-quick-status');
-            });
+            // View Endpoints
+            Route::get('/', [EmbassyAppointmentController::class, 'index'])->middleware('permission:embassy_appointments.view')->name('index');
+            Route::get('/trash', [EmbassyAppointmentController::class, 'trash'])->middleware('permission:embassy_appointments.delete')->name('trash');
+
+            // Create Endpoints
+            Route::post('/store-bulk', [EmbassyAppointmentController::class, 'storeBulk'])->middleware('permission:embassy_appointments.create')->name('store-bulk');
+            Route::post('/', [EmbassyAppointmentController::class, 'store'])->middleware('permission:embassy_appointments.create')->name('store');
+
+            // Edit & Management Endpoints
+            Route::post('/check-leads', [EmbassyAppointmentController::class, 'checkLeads'])->middleware('permission:embassy_appointments.edit')->name('check-leads');
+            Route::post('/sync-seed', [EmbassyAppointmentController::class, 'syncSeed'])->middleware('permission:embassy_appointments.edit')->name('sync-seed');
+            Route::put('/{embassy_appointment}', [EmbassyAppointmentController::class, 'update'])->middleware('permission:embassy_appointments.edit')->name('update');
+            Route::post('/{embassy_appointment}/available-now', [EmbassyAppointmentController::class, 'toggleAvailableNow'])->middleware('permission:embassy_appointments.edit')->name('toggle-available-now');
+            Route::post('/{embassy_appointment}/no-availability', [EmbassyAppointmentController::class, 'toggleNoAvailability'])->middleware('permission:embassy_appointments.edit')->name('toggle-no-availability');
+            Route::post('/{embassy_appointment}/quick-status', [EmbassyAppointmentController::class, 'updateQuickStatus'])->middleware('permission:embassy_appointments.edit')->name('update-quick-status');
+
+            // Delete & Restore Endpoints
+            Route::delete('/{embassy_appointment}', [EmbassyAppointmentController::class, 'destroy'])->middleware('permission:embassy_appointments.delete')->name('destroy');
+            Route::post('/{id}/restore', [EmbassyAppointmentController::class, 'restore'])->middleware('permission:embassy_appointments.delete')->name('restore');
+            Route::delete('/{id}/force-delete', [EmbassyAppointmentController::class, 'forceDelete'])->middleware('permission:embassy_appointments.delete')->name('force-delete');
+            Route::get('/{embassy_appointment}', [EmbassyAppointmentController::class, 'show'])->middleware('permission:embassy_appointments.view')->name('show');
         });
 
         Route::middleware('permission:blog.manage')->group(function () {

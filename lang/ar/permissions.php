@@ -19,6 +19,8 @@ return [
     'module_customers' => 'إدارة العملاء (Customers)',
     'module_documents' => 'المستندات',
     'module_accounting' => 'المحاسبة والمالية',
+    'module_visa_database' => 'قاعدة بيانات التأشيرات',
+    'module_embassy_appointments' => 'مواعيد السفارات',
 
     // Dashboard & Reports
     'dashboard.access' => 'الوصول للوحة التحكم',
@@ -114,4 +116,18 @@ return [
     'accounting.view' => 'عرض المحاسبة',
     'accounting.manage' => 'إدارة العمليات المحاسبية',
     'accounting.reports.view' => 'عرض التقارير المحاسبية',
+
+    // Visa Database
+    'visa_database.view' => 'عرض قاعدة بيانات التأشيرات (قراءة فقط)',
+    'visa_database.create' => 'إضافة تأشيرة جديدة',
+    'visa_database.edit' => 'تعديل بيانات التأشيرة والأسعار والوثائق',
+    'visa_database.delete' => 'حذف تأشيرة',
+    'visa_database.manage' => 'إدارة كاملة لقاعدة بيانات التأشيرات',
+
+    // Embassy Appointments
+    'embassy_appointments.view' => 'عرض جدول مواعيد السفارات والتنبيهات (قراءة فقط)',
+    'embassy_appointments.create' => 'إضافة مواعيد سفارات جديدة',
+    'embassy_appointments.edit' => 'تعديل مواعيد السفارات وتحديث الحالة والمطابقة',
+    'embassy_appointments.delete' => 'حذف وتنظيف مواعيد السفارات',
+    'embassy_appointments.manage' => 'إدارة كاملة لمواعيد السفارات',
 ];

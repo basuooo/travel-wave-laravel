@@ -50,6 +50,22 @@ class AccessControl
                 ['slug' => 'pages.delete', 'name' => 'Delete Pages', 'description' => 'Delete or archive page content.'],
                 ['slug' => 'pages.publish', 'name' => 'Publish Pages', 'description' => 'Publish or unpublish page content.'],
                 ['slug' => 'destinations.manage', 'name' => 'Manage Destinations', 'description' => 'Manage domestic destinations, visa destinations, and categories.'],
+            ],
+            'visa_database' => [
+                ['slug' => 'visa_database.view', 'name' => 'View Visa Database', 'description' => 'View visa database records, pricing, and required documents.'],
+                ['slug' => 'visa_database.create', 'name' => 'Create Visa Records', 'description' => 'Create new visa records in the visa database.'],
+                ['slug' => 'visa_database.edit', 'name' => 'Edit Visa Records', 'description' => 'Edit visa records, pricing, documents, and toggle active status.'],
+                ['slug' => 'visa_database.delete', 'name' => 'Delete Visa Records', 'description' => 'Delete visa records from the visa database.'],
+                ['slug' => 'visa_database.manage', 'name' => 'Manage Visa Database', 'description' => 'Full control over visa database, categories, and settings.'],
+            ],
+            'embassy_appointments' => [
+                ['slug' => 'embassy_appointments.view', 'name' => 'View Embassy Appointments', 'description' => 'View embassy appointments schedule, availability, and seller notifications.'],
+                ['slug' => 'embassy_appointments.create', 'name' => 'Create Embassy Appointments', 'description' => 'Create new embassy appointment schedules and bulk entries.'],
+                ['slug' => 'embassy_appointments.edit', 'name' => 'Edit Embassy Appointments', 'description' => 'Edit appointment dates, availability status, and trigger CRM lead matching.'],
+                ['slug' => 'embassy_appointments.delete', 'name' => 'Delete Embassy Appointments', 'description' => 'Delete, trash, or permanently clear embassy appointment records.'],
+                ['slug' => 'embassy_appointments.manage', 'name' => 'Manage Embassy Appointments', 'description' => 'Full control over embassy appointments system and notifications.'],
+            ],
+            'pages_content' => [
                 ['slug' => 'blog.manage', 'name' => 'Manage Blog', 'description' => 'Manage blog categories and posts.'],
                 ['slug' => 'media.manage', 'name' => 'Manage Media', 'description' => 'Upload or manage media assets used in content.'],
                 ['slug' => 'menu.manage', 'name' => 'Manage Navigation', 'description' => 'Manage site menus and navigation items.'],
@@ -131,7 +147,9 @@ class AccessControl
                 'description' => 'Broad operational access for day-to-day management without full system-owner privileges.',
                 'permissions' => [
                     'dashboard.access', 'reports.view', 'settings.manage', 'pages.view', 'pages.create', 'pages.edit', 'pages.delete', 'pages.publish',
-                    'destinations.manage', 'blog.manage', 'media.manage', 'menu.manage', 'testimonials.manage', 'forms.manage',
+                    'destinations.manage', 'visa_database.view', 'visa_database.create', 'visa_database.edit', 'visa_database.delete', 'visa_database.manage',
+                    'embassy_appointments.view', 'embassy_appointments.create', 'embassy_appointments.edit', 'embassy_appointments.delete', 'embassy_appointments.manage',
+                    'blog.manage', 'media.manage', 'menu.manage', 'testimonials.manage', 'forms.manage',
                     'forms.submissions.view', 'forms.submissions.edit', 'maps.manage', 'tracking.manage', 'utm.manage',
                     'seo.manage', 'seo.meta.manage', 'seo.redirects.manage', 'seo.sitemap.manage', 'marketing.manage', 'landing_pages.manage', 'chatbot.manage',
                     'audit_logs.view',
@@ -149,7 +167,7 @@ class AccessControl
                 'description' => 'Manage landing pages, campaigns, UTM links, tracking, and marketing performance.',
                 'permissions' => [
                     'dashboard.access', 'reports.view', 'marketing.manage', 'landing_pages.manage', 'tracking.manage', 'chatbot.manage',
-                    'utm.manage', 'forms.manage', 'forms.submissions.view', 'leads.view', 'knowledge_base.view',
+                    'utm.manage', 'forms.manage', 'forms.submissions.view', 'leads.view', 'knowledge_base.view', 'visa_database.view', 'embassy_appointments.view',
                 ],
             ],
             [
@@ -166,6 +184,7 @@ class AccessControl
                 'description' => 'Manage content pages, destinations, blog content, testimonials, and menus.',
                 'permissions' => [
                     'dashboard.access', 'pages.view', 'pages.create', 'pages.edit', 'pages.publish', 'destinations.manage',
+                    'visa_database.view', 'visa_database.edit', 'embassy_appointments.view',
                     'blog.manage', 'media.manage', 'menu.manage', 'testimonials.manage', 'knowledge_base.view', 'knowledge_base.manage',
                 ],
             ],
@@ -177,6 +196,7 @@ class AccessControl
                     'dashboard.access', 'reports.view', 'leads.view', 'leads.view_all', 'leads.create', 'leads.edit', 'leads.export', 'forms.submissions.view', 'forms.submissions.edit', 'information.manage',
                     'customers.view', 'customers.manage', 'documents.view', 'documents.manage', 'knowledge_base.view', 'knowledge_base.manage',
                     'workflow_automations.view', 'goals_commissions.view', 'leads.change_assigned_to',
+                    'visa_database.view', 'embassy_appointments.view', 'embassy_appointments.edit',
                 ],
             ],
             [
@@ -187,6 +207,7 @@ class AccessControl
                     'dashboard.access', 'reports.view', 'leads.view', 'leads.view_all', 'leads.create', 'leads.edit', 'leads.export', 'forms.submissions.view', 'forms.submissions.edit', 'information.manage',
                     'customers.view', 'customers.manage', 'documents.view', 'documents.manage', 'knowledge_base.view', 'knowledge_base.manage',
                     'workflow_automations.view', 'goals_commissions.view', 'leads.change_assigned_to',
+                    'visa_database.view', 'embassy_appointments.view', 'embassy_appointments.edit',
                 ],
             ],
             [
@@ -195,7 +216,7 @@ class AccessControl
                 'description' => 'Read-only access to dashboards, reports, and approved admin areas.',
                 'permissions' => [
                     'dashboard.access', 'reports.view', 'pages.view', 'leads.view', 'forms.submissions.view', 'knowledge_base.view',
-                    'workflow_automations.view', 'goals_commissions.view',
+                    'workflow_automations.view', 'goals_commissions.view', 'visa_database.view', 'embassy_appointments.view',
                 ],
             ],
         ];

@@ -12,6 +12,7 @@
             <p class="text-muted mb-0">إدارة ومتابعة فتح مواعيد السفارات وتنبيه المبيعات تلقائيًا للعملاء المنتظرين.</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
+            @if(auth()->user()->hasPermission('embassy_appointments.edit') || auth()->user()->hasPermission('embassy_appointments.manage') || auth()->user()->is_admin)
             <form method="POST" action="{{ route('admin.embassy-appointments.check-leads') }}" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-success d-inline-flex align-items-center gap-1 shadow-sm" title="فحص ومطابقة جميع عملاء الـ CRM المنتظرين للمواعيد">
@@ -19,6 +20,8 @@
                     <span>🔍 فحص الليد</span>
                 </button>
             </form>
+            @endif
+            @if(auth()->user()->hasPermission('embassy_appointments.delete') || auth()->user()->hasPermission('embassy_appointments.manage') || auth()->user()->is_admin)
             <a href="{{ route('admin.embassy-appointments.trash') }}" class="btn btn-outline-danger d-inline-flex align-items-center gap-1 shadow-sm">
                 <iconify-icon icon="lucide:trash-2" width="18"></iconify-icon>
                 <span>سلة المحذوفات</span>
@@ -26,10 +29,13 @@
                     <span class="badge bg-danger rounded-pill ms-1">{{ $trashedCount }}</span>
                 @endif
             </a>
+            @endif
+            @if(auth()->user()->hasPermission('embassy_appointments.create') || auth()->user()->hasPermission('embassy_appointments.manage') || auth()->user()->is_admin)
             <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#createApptModal">
                 <iconify-icon icon="lucide:plus-circle" width="18"></iconify-icon>
                 <span>إضافة موعد سفارة جديد</span>
             </button>
+            @endif
         </div>
     </div>
 
@@ -238,6 +244,7 @@
                                 </td>
                                 <td class="pe-3 text-end">
                                     <div class="d-inline-flex gap-1">
+                                        @if(auth()->user()->hasPermission('embassy_appointments.edit') || auth()->user()->hasPermission('embassy_appointments.manage') || auth()->user()->is_admin)
                                         <form method="POST" action="{{ route('admin.embassy-appointments.update-quick-status', $appt) }}" class="d-inline">
                                             @csrf
                                             <select name="status" class="form-select form-select-sm fw-bold border-0 shadow-sm pe-4" onchange="this.form.submit()" style="cursor: pointer; display: inline-block; width: auto; font-size: 0.8rem;
@@ -264,11 +271,13 @@
                                             title="تعديل البيانات">
                                             ✏️
                                         </button>
+                                        @endif
 
                                         <a href="{{ route('admin.embassy-appointments.show', $appt) }}" class="btn btn-sm btn-light border" title="التفاصيل وسجل التغييرات">
                                             👁️
                                         </a>
 
+                                        @if(auth()->user()->hasPermission('embassy_appointments.delete') || auth()->user()->hasPermission('embassy_appointments.manage') || auth()->user()->is_admin)
                                         <form method="POST" action="{{ route('admin.embassy-appointments.destroy', $appt) }}" class="d-inline" onsubmit="return confirm('هل أنت تأكد من رغبتك في حذف سجل هذا الموعد بالكامل؟');">
                                             @csrf
                                             @method('DELETE')
@@ -276,6 +285,7 @@
                                                 🗑️
                                             </button>
                                         </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
