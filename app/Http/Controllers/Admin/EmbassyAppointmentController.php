@@ -267,6 +267,7 @@ class EmbassyAppointmentController extends Controller
     public function update(Request $request, EmbassyAppointment $embassyAppointment)
     {
         $validated = $request->validate([
+            'visa_country_id' => ['required', 'exists:visa_countries,id'],
             'visa_type' => ['required', 'string', 'max:100'],
             'appointment_center' => ['required', 'string', 'max:100'],
             'appointment_type' => ['required', 'string', 'max:100'],
@@ -282,6 +283,7 @@ class EmbassyAppointmentController extends Controller
         ]);
 
         $embassyAppointment->update([
+            'visa_country_id' => $validated['visa_country_id'],
             'visa_type' => $validated['visa_type'],
             'appointment_center' => $validated['appointment_center'],
             'appointment_type' => $validated['appointment_type'],
@@ -291,8 +293,8 @@ class EmbassyAppointmentController extends Controller
         $this->service->updateStatus(
             $embassyAppointment,
             $validated['status'],
-            $validated['earliest_date'] ?? null,
-            $validated['notes'] ?? null,
+            $request->input('earliest_date'),
+            $request->input('notes'),
             auth()->user()
         );
 

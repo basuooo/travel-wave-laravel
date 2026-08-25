@@ -29,9 +29,7 @@ class EmbassyAppointmentService
             : ($appointment->earliest_date ? (string) $appointment->earliest_date : null);
 
         $appointment->status = $newStatus;
-        if ($earliestDate !== null) {
-            $appointment->earliest_date = $earliestDate;
-        }
+        $appointment->earliest_date = $earliestDate;
         $appointment->last_updated_at = now();
         $appointment->updated_by = $actor?->id;
         if ($notes !== null) {
