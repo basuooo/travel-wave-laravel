@@ -307,16 +307,25 @@ document.addEventListener('DOMContentLoaded', function () {
         const modalTitle = document.getElementById('modalTitle');
         const methodContainer = document.getElementById('methodContainer');
 
+        function cleanArabic(str) {
+            if (!str) return '';
+            return str.toString().toLowerCase()
+                .replace(/[أإآٱ]/g, 'ا')
+                .replace(/ة/g, 'ه')
+                .replace(/ى/g, 'ي')
+                .trim();
+        }
+
         const countrySearchInput = document.getElementById('countrySearchInput');
         const countrySelect = document.getElementById('modal_visa_country_id');
 
         if (countrySearchInput && countrySelect) {
             countrySearchInput.addEventListener('input', function () {
-                const val = this.value.trim().toLowerCase();
+                const val = cleanArabic(this.value);
                 let firstMatch = null;
                 Array.from(countrySelect.options).forEach(opt => {
                     if (!opt.value) return;
-                    const searchData = (opt.dataset.search || opt.textContent).toLowerCase();
+                    const searchData = cleanArabic(opt.dataset.search || opt.textContent);
                     if (!val || searchData.includes(val)) {
                         opt.style.display = '';
                         if (!firstMatch && val) firstMatch = opt;
@@ -352,7 +361,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 form.action = `/admin/embassy-appointments/${data.id}`;
                 methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
 
-                document.getElementById('modal_visa_country_id').value = data.countryId;
+                if (countrySearchInput) countrySearchInput.value = '';
+                if (countrySelect) {
+                    Array.from(countrySelect.options).forEach(opt => opt.style.display = '');
+                    if (data.countryId) {
+                        countrySelect.value = String(data.countryId);
+                    }
+                }
+
                 setSelectValueOrAdd('modal_visa_type', data.visaType);
                 setSelectValueOrAdd('modal_appointment_center', data.center);
                 document.getElementById('modal_appointment_type').value = data.apptType;
@@ -455,11 +471,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (preset) {
             const select = tr.querySelector('.country-select');
-            const searchName = preset.countryName.toLowerCase();
+            const searchClean = cleanArabic(preset.countryName);
             let matchedOpt = Array.from(select.options).find(opt => {
-                const ar = (opt.dataset.nameAr || opt.textContent).toLowerCase();
-                const en = (opt.dataset.nameEn || '').toLowerCase();
-                return ar.includes(searchName) || searchName.includes(ar) || en.includes(searchName);
+                const arClean = cleanArabic(opt.dataset.nameAr || opt.textContent);
+                const enClean = (opt.dataset.nameEn || '').toLowerCase();
+                return arClean.includes(searchClean) || searchClean.includes(arClean) || enClean.includes(searchClean);
             });
             if (matchedOpt) {
                 select.value = matchedOpt.value;
