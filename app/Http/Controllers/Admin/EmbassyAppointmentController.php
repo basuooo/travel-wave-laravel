@@ -233,24 +233,20 @@ class EmbassyAppointmentController extends Controller
             ])],
             'earliest_date' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'booking_link' => ['nullable', 'url', 'max:500'],
+            'booking_link' => ['nullable', 'string', 'max:500'],
         ]);
 
         $bookingLink = $validated['booking_link'] ?? null;
 
-        $appointment = EmbassyAppointment::firstOrCreate([
+        $appointment = EmbassyAppointment::updateOrCreate([
             'visa_country_id' => $validated['visa_country_id'],
             'visa_type' => $validated['visa_type'],
             'appointment_center' => $validated['appointment_center'],
             'appointment_type' => $validated['appointment_type'],
         ], [
             'booking_link' => $bookingLink,
-            'status' => EmbassyAppointment::STATUS_UNKNOWN,
+            'status' => $validated['status'],
         ]);
-
-        if ($bookingLink !== null) {
-            $appointment->update(['booking_link' => $bookingLink]);
-        }
 
         $this->service->updateStatus(
             $appointment,
@@ -261,7 +257,7 @@ class EmbassyAppointmentController extends Controller
         );
 
         return redirect()->route('admin.embassy-appointments.index')
-            ->with('success', 'تم إضافة / تحديث موعد السفارة بنجاح.');
+            ->with('success', 'تم حفظ موعد السفارة وتحديث حالته بنجاح 🟢');
     }
 
     public function update(Request $request, EmbassyAppointment $embassyAppointment)
@@ -279,19 +275,31 @@ class EmbassyAppointmentController extends Controller
             ])],
             'earliest_date' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'booking_link' => ['nullable', 'url', 'max:500'],
+            'booking_link' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $embassyAppointment->update([
-            'visa_country_id' => $validated['visa_country_id'],
-            'visa_type' => $validated['visa_type'],
-            'appointment_center' => $validated['appointment_center'],
-            'appointment_type' => $validated['appointment_type'],
-            'booking_link' => $validated['booking_link'] ?? null,
-        ]);
+        $existing = EmbassyAppointment::where('visa_country_id', $validated['visa_country_id'])
+            ->where('visa_type', $validated['visa_type'])
+            ->where('appointment_center', $validated['appointment_center'])
+            ->where('appointment_type', $validated['appointment_type'])
+            ->where('id', '!=', $embassyAppointment->id)
+            ->first();
+
+        if ($existing) {
+            $target = $existing;
+            $embassyAppointment->delete();
+        } else {
+            $target = $embassyAppointment;
+            $target->visa_country_id = $validated['visa_country_id'];
+            $target->visa_type = $validated['visa_type'];
+            $target->appointment_center = $validated['appointment_center'];
+            $target->appointment_type = $validated['appointment_type'];
+            $target->booking_link = $validated['booking_link'] ?? null;
+            $target->save();
+        }
 
         $this->service->updateStatus(
-            $embassyAppointment,
+            $target,
             $validated['status'],
             $request->input('earliest_date'),
             $request->input('notes'),
@@ -299,7 +307,7 @@ class EmbassyAppointmentController extends Controller
         );
 
         return redirect()->route('admin.embassy-appointments.index')
-            ->with('success', 'تم تحديث موعد السفارة بنجاح.');
+            ->with('success', 'تم تحديث موعد السفارة وحفظ حالته الجديدة بنجاح 🟢');
     }
 
     public function toggleAvailableNow(EmbassyAppointment $embassyAppointment)
