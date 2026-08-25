@@ -18,9 +18,12 @@
                     <h2 class="h5 mb-1">{{ __('admin.crm_lead_details') }}</h2>
                     <div class="text-muted">{{ $lead->full_name }}</div>
                 </div>
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
                     <button type="button" class="btn btn-success font-weight-bold btn-sm" data-bs-toggle="modal" data-bs-target="#addCallModal">
                         📞 إضافة مكالمة
+                    </button>
+                    <button type="button" class="btn btn-primary font-weight-bold btn-sm" data-bs-toggle="modal" data-bs-target="#addWhatsAppModal">
+                        💬 إضافة واتساب
                     </button>
                     <span class="badge text-bg-primary fs-6">{{ $lead->localizedStatus() }}</span>
                 </div>
@@ -101,6 +104,48 @@
                     </div>
                 @empty
                     <div class="text-muted text-center py-3">لا توجد مكالمات مسجلة حتى الآن لهذا العميل. اضغط "إضافة مكالمة" للبدء.</div>
+                @endforelse
+            </div>
+        </div>
+
+        <!-- WhatsApp Log Card -->
+        <div class="card admin-card p-4 mb-4" id="lead-whatsapps-card">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <div>
+                    <h2 class="h5 mb-0">💬 سجل الواتساب (WhatsApp Log)</h2>
+                    <div class="text-muted small mt-1">
+                        إجمالي التسجيلات: <strong>{{ $lead->whatsappLogs->count() }}</strong>
+                        (المستوفية لشرط 1/يومياً: <strong class="text-primary">{{ $lead->getEligibleWhatsAppCount() }}</strong> / 9)
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#addWhatsAppModal">
+                    ➕ إضافة واتساب
+                </button>
+            </div>
+
+            <div class="d-grid gap-3">
+                @forelse($lead->whatsappLogs as $waLog)
+                    <div class="border rounded-4 p-3 bg-light position-relative">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary fs-6">رسالة رقم #{{ $waLog->log_number }}</span>
+                                <span class="badge bg-success fs-6">{{ $waLog->whatsapp_status }}</span>
+                            </div>
+                            <div class="text-muted small font-monospace">
+                                🕒 {{ optional($waLog->created_at)->format('Y-m-d h:i A') }}
+                            </div>
+                        </div>
+                        <div class="small mb-1">
+                            <strong>البائع / الموظف:</strong> {{ $waLog->user?->name ?: '-' }}
+                        </div>
+                        @if($waLog->comment)
+                            <div class="p-2 bg-white rounded border small mt-2">
+                                <strong>الملاحظات:</strong> {{ $waLog->comment }}
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="text-muted text-center py-3">لا توجد سجلات واتساب مسجلة حتى الآن لهذا العميل. اضغط "إضافة واتساب" للبدء.</div>
                 @endforelse
             </div>
         </div>
@@ -533,15 +578,18 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const selected = statusSelect.options[statusSelect.selectedIndex]?.text?.trim();
-        const isCallLater = selected === 'اتصل لاحقًا' || selected === 'Call Later';
-        callLaterBox.classList.toggle('d-none', !isCallLater);
+        const selected = statusSelect.options[statusSelect.selectedIndex]?.text?.trim() || '';
         const callLaterSlug = statusSelect.options[statusSelect.selectedIndex]?.dataset.statusSlug || '';
-        const callLaterEnabled = callLaterSlug === 'call-later';
-        callLaterBox.classList.toggle('d-none', !callLaterEnabled);
+        const isCallLater = callLaterSlug === 'call-later' 
+            || callLaterSlug === 'whatsapp-followup'
+            || selected.includes('اتصل') 
+            || selected.includes('متابعة') 
+            || selected.includes('واتساب');
+
+        callLaterBox.classList.toggle('d-none', !isCallLater);
         callLaterFields.forEach((field) => {
-            field.required = callLaterEnabled;
-            field.disabled = !callLaterEnabled;
+            field.required = isCallLater;
+            field.disabled = !isCallLater;
         });
     };
 
@@ -654,6 +702,43 @@ function validateCallForm(e) {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
                 <button type="submit" class="btn btn-success fw-bold">حفظ المكالمة</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Add WhatsApp -->
+<div class="modal fade" id="addWhatsAppModal" tabindex="-1" aria-labelledby="addWhatsAppModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{{ route('admin.crm.leads.whatsapps.store', $lead) }}" class="modal-content" id="add-whatsapp-form">
+            @csrf
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="addWhatsAppModalLabel">💬 تسجيل تفاعل واتساب للعميل</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-start">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">حالة الواتساب (WhatsApp Status) <span class="text-danger">*</span></label>
+                    <select class="form-select" name="whatsapp_status" required>
+                        <option value="تم إرسال رسالة">تم إرسال رسالة</option>
+                        <option value="تم الرد والتواصل">تم الرد والتواصل</option>
+                        <option value="لم يتم الرد على الرسالة">لم يتم الرد على الرسالة</option>
+                        <option value="طلب التواصل لاحقاً">طلب التواصل لاحقاً</option>
+                        <option value="تم إرسال تفاصيل العرض">تم إرسال تفاصيل العرض</option>
+                        <option value="تم التأكيد والاتفاق">تم التأكيد والاتفاق</option>
+                        <option value="بيكنسل / غير مهتم">بيكنسل / غير مهتم</option>
+                    </select>
+                    <div class="form-text text-muted small">تُحفظ حالة الواتساب مستقلة تماماً ولا تعدل على الحالة العامة لليد.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">الملاحظات والكومنت (اختياري)</label>
+                    <textarea class="form-control" name="comment" rows="3" placeholder="اكتب تفاصيل المحادثة أو ملخص الرد هنا..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="submit" class="btn btn-primary fw-bold">حفظ سجل الواتساب</button>
             </div>
         </form>
     </div>

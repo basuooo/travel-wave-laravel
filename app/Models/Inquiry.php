@@ -243,6 +243,33 @@ class Inquiry extends Model
         return $eligible;
     }
 
+    public function whatsappLogs()
+    {
+        return $this->hasMany(CrmLeadWhatsApp::class, 'inquiry_id')->latest();
+    }
+
+    /**
+     * Calculate eligible WhatsApp count:
+     * 1 counted per day up to 9 days or total logs.
+     */
+    public function getEligibleWhatsAppCount(): int
+    {
+        $logs = $this->whatsappLogs()->get();
+        if ($logs->isEmpty()) {
+            return 0;
+        }
+
+        $byDate = [];
+        foreach ($logs as $log) {
+            $date = $log->created_at ? $log->created_at->format('Y-m-d') : null;
+            if ($date) {
+                $byDate[$date] = ($byDate[$date] ?? 0) + 1;
+            }
+        }
+
+        return count($byDate);
+    }
+
     public function crmNotes()
     {
         return $this->hasMany(CrmLeadNote::class)->latest();

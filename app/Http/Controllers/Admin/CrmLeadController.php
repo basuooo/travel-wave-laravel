@@ -9,6 +9,7 @@ use App\Models\CrmFollowUp;
 use App\Models\CrmLeadAssignment;
 use App\Models\CrmTask;
 use App\Models\CrmLeadCall;
+use App\Models\CrmLeadWhatsApp;
 use App\Models\CrmLeadSource;
 use App\Models\CrmServiceSubtype;
 use App\Models\CrmServiceType;
@@ -378,9 +379,11 @@ class CrmLeadController extends Controller
     {
         $this->authorizeLeadVisibility($lead);
         CrmLeadCall::ensureTableExists();
+        CrmLeadWhatsApp::ensureTableExists();
 
         $lead->load([
             'calls.user',
+            'whatsappLogs.user',
             'crmStatus',
             'crmSource',
             'crmServiceType.subtypes',
@@ -551,6 +554,29 @@ class CrmLeadController extends Controller
             : null;
 
         if ($callLaterStatus) {
+            $selectedStatusName = $callLaterStatus->name_ar ?: ($callLaterStatus->name_en ?: '');
+            $totalCalls = $lead->calls()->count();
+            $totalWhatsApps = $lead->whatsappLogs()->count();
+
+            $isNotInterestedStatus = str_contains($callLaterStatus->slug ?? '', 'not-interested') 
+                || str_contains($selectedStatusName, 'غير مهتم') 
+                || str_contains($selectedStatusName, 'غير المهتمين');
+
+            // 1. Mandatory "غير مهتم" after 9 Calls
+            if ($totalCalls >= 9 && !$isNotInterestedStatus) {
+                return redirect()->route('admin.crm.leads.show', $lead)->withErrors([
+                    'crm_status_id' => 'لقد بلغت الحد الأقصى للمكالمات مع هذا العميل (9 مكالمات). برجاء تغيير الحالة إلى غير مهتم.'
+                ])->withInput();
+            }
+
+            // 2. Mandatory "غير مهتم" after 9 WhatsApp Logs
+            if ($totalWhatsApps >= 9 && !$isNotInterestedStatus) {
+                return redirect()->route('admin.crm.leads.show', $lead)->withErrors([
+                    'crm_status_id' => 'لقد بلغت الحد الأقصى للواتساب مع هذا العميل (9 رسائل واتساب). برجاء تغيير الحالة إلى غير مهتم.'
+                ])->withInput();
+            }
+
+            // 3. Repeated Contact status check
             $isRepeatedContact = str_contains($callLaterStatus->slug, 'repeated') 
                 || str_contains($callLaterStatus->name_ar, 'اتصال متكرر') 
                 || str_contains($callLaterStatus->name_ar, 'متكرر')
@@ -559,16 +585,36 @@ class CrmLeadController extends Controller
             if ($isRepeatedContact) {
                 $eligibleCalls = $lead->getEligibleCallsCount();
                 if ($eligibleCalls < 9) {
-                    $totalCalls = $lead->calls()->count();
                     $remaining = 9 - $eligibleCalls;
                     return redirect()->route('admin.crm.leads.show', $lead)->withErrors([
                         'crm_status_id' => "عفواً، لقد قمت بإجراء {$totalCalls} مكالمة حتى الآن (مقبول منها {$eligibleCalls} بمعدل 3 يومياً كحد أقصى)، ومتبقي {$remaining} مكالمة لإتاحة حالة اتصال متكرر."
                     ])->withInput();
                 }
             }
+
+            // 4. Mandatory Call logged check for specific statuses
+            $mustHaveCallStatuses = ['لم يتم الرد', 'مشغول', 'غير متاح', 'بيكنسل', 'مغلق'];
+            $isMandatoryCallStatus = false;
+            foreach ($mustHaveCallStatuses as $chk) {
+                if (str_contains($selectedStatusName, $chk)) {
+                    $isMandatoryCallStatus = true;
+                    break;
+                }
+            }
+
+            if ($isMandatoryCallStatus && $totalCalls === 0) {
+                return redirect()->route('admin.crm.leads.show', $lead)->withErrors([
+                    'crm_status_id' => "عفواً، يجب استخدام زر 'إضافة مكالمة' وتسجيل المكالمة أولاً لتتمكن من إحالة الليد إلى حالة {$selectedStatusName}."
+                ])->withInput();
+            }
         }
 
-        $requiresFollowUp = $callLaterStatus?->slug === 'call-later';
+        $requiresFollowUp = $callLaterStatus && (
+            in_array($callLaterStatus->slug, ['call-later', 'whatsapp-followup'])
+            || str_contains($callLaterStatus->name_ar ?: '', 'اتصل')
+            || str_contains($callLaterStatus->name_ar ?: '', 'متابعة واتساب')
+            || str_contains($callLaterStatus->name_ar ?: '', 'متابعه واتساب')
+        );
 
         if ($requiresFollowUp) {
             $request->validate([
@@ -923,6 +969,34 @@ class CrmLeadController extends Controller
         ]);
 
         return redirect()->route('admin.crm.leads.show', $lead)->with('success', "تم تسجيل المكالمة رقم #{$nextCallNumber} بنجاح!");
+    }
+
+    public function storeWhatsApp(Request $request, Inquiry $lead)
+    {
+        $this->authorizeLeadVisibility($lead);
+        CrmLeadWhatsApp::ensureTableExists();
+
+        $validated = $request->validate([
+            'whatsapp_status' => ['required', 'string', 'max:255'],
+            'comment'         => ['nullable', 'string'],
+        ]);
+
+        $userName = auth()->user()?->name ?: 'البائع';
+        $nextLogNumber = $lead->whatsappLogs()->count() + 1;
+
+        CrmLeadWhatsApp::create([
+            'inquiry_id'      => $lead->id,
+            'user_id'         => auth()->id(),
+            'log_number'      => $nextLogNumber,
+            'whatsapp_status' => $validated['whatsapp_status'],
+            'comment'         => $validated['comment'] ?? null,
+        ]);
+
+        app(AuditLogService::class)->log(auth()->user(), 'crm_leads', 'whatsapp_logged', $lead, [
+            'description' => "أجرى الموظف {$userName} تسجيلاً عبر الواتساب برقم #{$nextLogNumber} لليد ({$lead->full_name}) بحالة: {$validated['whatsapp_status']}",
+        ]);
+
+        return redirect()->route('admin.crm.leads.show', $lead)->with('success', "تم تسجيل الواتساب رقم #{$nextLogNumber} بنجاح!");
     }
 
     public function storeTask(Request $request, Inquiry $lead)
