@@ -188,18 +188,37 @@ class EmbassyAppointmentController extends Controller
 
         $savedCount = 0;
         foreach ($validated['appointments'] as $item) {
-            $appt = EmbassyAppointment::updateOrCreate([
+            $appt = EmbassyAppointment::withTrashed()->where([
                 'visa_country_id' => $item['visa_country_id'],
                 'visa_type' => $item['visa_type'],
                 'appointment_center' => $item['appointment_center'],
                 'appointment_type' => $item['appointment_type'],
-            ], [
-                'status' => $item['status'],
-                'earliest_date' => $item['earliest_date'] ?? null,
-                'notes' => $item['notes'] ?? null,
-                'last_updated_at' => now(),
-                'updated_by' => auth()->id(),
-            ]);
+            ])->first();
+
+            if ($appt) {
+                if ($appt->trashed()) {
+                    $appt->restore();
+                }
+                $appt->update([
+                    'status' => $item['status'],
+                    'earliest_date' => $item['earliest_date'] ?? null,
+                    'notes' => $item['notes'] ?? null,
+                    'last_updated_at' => now(),
+                    'updated_by' => auth()->id(),
+                ]);
+            } else {
+                $appt = EmbassyAppointment::create([
+                    'visa_country_id' => $item['visa_country_id'],
+                    'visa_type' => $item['visa_type'],
+                    'appointment_center' => $item['appointment_center'],
+                    'appointment_type' => $item['appointment_type'],
+                    'status' => $item['status'],
+                    'earliest_date' => $item['earliest_date'] ?? null,
+                    'notes' => $item['notes'] ?? null,
+                    'last_updated_at' => now(),
+                    'updated_by' => auth()->id(),
+                ]);
+            }
 
             if ($item['status'] === EmbassyAppointment::STATUS_AVAILABLE_NOW) {
                 $this->service->updateStatus(
@@ -238,15 +257,31 @@ class EmbassyAppointmentController extends Controller
 
         $bookingLink = $validated['booking_link'] ?? null;
 
-        $appointment = EmbassyAppointment::updateOrCreate([
+        $appointment = EmbassyAppointment::withTrashed()->where([
             'visa_country_id' => $validated['visa_country_id'],
             'visa_type' => $validated['visa_type'],
             'appointment_center' => $validated['appointment_center'],
             'appointment_type' => $validated['appointment_type'],
-        ], [
-            'booking_link' => $bookingLink,
-            'status' => $validated['status'],
-        ]);
+        ])->first();
+
+        if ($appointment) {
+            if ($appointment->trashed()) {
+                $appointment->restore();
+            }
+            $appointment->update([
+                'booking_link' => $bookingLink,
+                'status' => $validated['status'],
+            ]);
+        } else {
+            $appointment = EmbassyAppointment::create([
+                'visa_country_id' => $validated['visa_country_id'],
+                'visa_type' => $validated['visa_type'],
+                'appointment_center' => $validated['appointment_center'],
+                'appointment_type' => $validated['appointment_type'],
+                'booking_link' => $bookingLink,
+                'status' => $validated['status'],
+            ]);
+        }
 
         $this->service->updateStatus(
             $appointment,
@@ -278,7 +313,8 @@ class EmbassyAppointmentController extends Controller
             'booking_link' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $existing = EmbassyAppointment::where('visa_country_id', $validated['visa_country_id'])
+        $existing = EmbassyAppointment::withTrashed()
+            ->where('visa_country_id', $validated['visa_country_id'])
             ->where('visa_type', $validated['visa_type'])
             ->where('appointment_center', $validated['appointment_center'])
             ->where('appointment_type', $validated['appointment_type'])
@@ -286,6 +322,9 @@ class EmbassyAppointmentController extends Controller
             ->first();
 
         if ($existing) {
+            if ($existing->trashed()) {
+                $existing->restore();
+            }
             $target = $existing;
             $embassyAppointment->delete();
         } else {
