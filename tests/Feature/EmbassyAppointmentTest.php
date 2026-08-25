@@ -326,4 +326,46 @@ class EmbassyAppointmentTest extends TestCase
         $forceResp->assertRedirect(route('admin.embassy-appointments.trash'));
         $this->assertDatabaseMissing('embassy_appointments', ['id' => $appt->id]);
     }
+
+    public function test_only_matches_the_five_allowed_statuses()
+    {
+        $category = \App\Models\VisaCategory::firstOrCreate(
+            ['slug' => 'europe-germany-test'],
+            ['name_ar' => 'أوروبا', 'name_en' => 'Europe']
+        );
+        $germany = VisaCountry::firstOrCreate(
+            ['slug' => 'germany-strict-test'],
+            ['visa_category_id' => $category->id, 'name_ar' => 'ألمانيا', 'name_en' => 'Germany']
+        );
+
+        $statusAwaiting = CrmStatus::firstOrCreate(['slug' => 'awaiting-embassy-appointment'], ['name_ar' => 'انتظار فتح مواعيد السفارة', 'name_en' => 'Awaiting Embassy Appointment']);
+        $statusWhatsapp = CrmStatus::firstOrCreate(['slug' => 'whatsapp-follow-up'], ['name_ar' => 'متابعة واتساب', 'name_en' => 'WhatsApp Follow-up']);
+        $statusDocsWait = CrmStatus::firstOrCreate(['slug' => 'awaiting-documents'], ['name_ar' => 'بانتظار المستندات', 'name_en' => 'Awaiting Documents']);
+        $statusDocsComp = CrmStatus::firstOrCreate(['slug' => 'documents-complete'], ['name_ar' => 'الأوراق مكتملة', 'name_en' => 'Documents Complete']);
+        $statusDocsWeak = CrmStatus::firstOrCreate(['slug' => 'documents-complete-weak'], ['name_ar' => 'الأوراق مكتملة (ضعيفة)', 'name_en' => 'Documents Complete (Weak)']);
+        $statusUnallowed = CrmStatus::firstOrCreate(['slug' => 'new-lead'], ['name_ar' => 'عميل جديد', 'name_en' => 'New Lead']);
+
+        // Eligible Leads (5)
+        Inquiry::create(['full_name' => 'ليد 1', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusAwaiting->id]);
+        Inquiry::create(['full_name' => 'ليد 2', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusWhatsapp->id]);
+        Inquiry::create(['full_name' => 'ليد 3', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusDocsWait->id]);
+        Inquiry::create(['full_name' => 'ليد 4', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusDocsComp->id]);
+        Inquiry::create(['full_name' => 'ليد 5', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusDocsWeak->id]);
+
+        // Unallowed Lead (Should be ignored)
+        Inquiry::create(['full_name' => 'ليد غير مسموح', 'country' => 'ألمانيا', 'visa_country_id' => $germany->id, 'crm_status_id' => $statusUnallowed->id]);
+
+        $appt = EmbassyAppointment::create([
+            'visa_country_id' => $germany->id,
+            'visa_type' => 'سياحة',
+            'appointment_center' => 'VFS',
+            'appointment_type' => 'Regular',
+            'status' => 'available_now',
+        ]);
+
+        $service = app(EmbassyAppointmentService::class);
+        $count = $service->countWaitingLeads($appt);
+
+        $this->assertEquals(5, $count);
+    }
 }

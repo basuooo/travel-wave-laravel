@@ -86,6 +86,87 @@ class EmbassyAppointmentService
         return $totalMatched;
     }
 
+    public static function targetCrmStatusSlugs(): array
+    {
+        return [
+            'awaiting-embassy-appointment',
+            'whatsapp-follow-up',
+            'awaiting-documents',
+            'missing-documents',
+            'documents-complete',
+            'documents-complete-weak',
+            'documents-needs-followup',
+            'complete-lead',
+        ];
+    }
+
+    public static function targetCrmStatusNames(): array
+    {
+        return [
+            'انتظار فتح مواعيد السفارة',
+            'متابعة واتساب',
+            'بانتظار المستندات',
+            'الأوراق مكتملة',
+            'الاوراق مكتملة',
+            'الأوراق مكتملة (ضعيفة)',
+            'الاوراق مكتملة (ضعيفة)',
+            'الأوراق مكملة',
+            'أوراق ناقصة مستندات',
+        ];
+    }
+
+    public function applyTargetCrmStatusFilter(Builder $query): Builder
+    {
+        $slugs = static::targetCrmStatusSlugs();
+        $names = static::targetCrmStatusNames();
+
+        $statusIds = CrmStatus::query()
+            ->whereIn('slug', $slugs)
+            ->orWhere(function ($q) use ($names) {
+                foreach ($names as $name) {
+                    $q->orWhere('name_ar', 'like', "%{$name}%");
+                }
+            })
+            ->pluck('id')
+            ->toArray();
+
+        return $query->where(function (Builder $q) use ($statusIds, $slugs, $names) {
+            if (! empty($statusIds)) {
+                $q->whereIn('crm_status_id', $statusIds)
+                  ->orWhereIn('crm_status2_id', $statusIds);
+            }
+
+            foreach ($slugs as $slug) {
+                $q->orWhere('status', $slug);
+            }
+
+            foreach ($names as $name) {
+                $q->orWhere('status', 'like', "%{$name}%");
+            }
+
+            $q->orWhereHas('crmStatus', function ($s) use ($slugs, $names) {
+                $s->whereIn('slug', $slugs)
+                  ->orWhere(function ($subQ) use ($names) {
+                      foreach ($names as $name) {
+                          $subQ->orWhere('name_ar', 'like', "%{$name}%");
+                      }
+                  });
+            });
+
+            $q->orWhereHas('crmStatus2', function ($s) use ($slugs, $names) {
+                $s->whereIn('slug', $slugs)
+                  ->orWhere(function ($subQ) use ($names) {
+                      foreach ($names as $name) {
+                          $subQ->orWhere('name_ar', 'like', "%{$name}%");
+                      }
+                  });
+            });
+        })
+        ->whereDoesntHave('crmStatus', function (Builder $q) {
+            $q->whereIn('slug', ['closed', 'cancelled', 'duplicate', 'not-interested', 'no-answer', 'wrong-number']);
+        });
+    }
+
     public function matchAndNotifyLeads(EmbassyAvailabilityEvent $event): int
     {
         $appointment = $event->appointment()->with('country')->first();
@@ -93,43 +174,13 @@ class EmbassyAppointmentService
             return 0;
         }
 
-        $awaitingStatusIds = CrmStatus::query()
-            ->where('slug', 'awaiting-embassy-appointment')
-            ->orWhere('slug', 'like', '%embassy%')
-            ->orWhere('slug', 'like', '%appointment%')
-            ->orWhere('name_ar', 'like', '%انتظار%')
-            ->orWhere('name_ar', 'like', '%سفارة%')
-            ->orWhere('name_ar', 'like', '%مواعيد%')
-            ->pluck('id')
-            ->toArray();
-
         $countryNameAr = $appointment->country?->name_ar;
         $countryNameEn = $appointment->country?->name_en;
 
-        $query = Inquiry::query()
-            ->where(function (Builder $q) use ($awaitingStatusIds) {
-                if (! empty($awaitingStatusIds)) {
-                    $q->whereIn('crm_status_id', $awaitingStatusIds)
-                      ->orWhereIn('crm_status2_id', $awaitingStatusIds);
-                }
-                $q->orWhere('status', 'awaiting-embassy-appointment')
-                  ->orWhere('status', 'like', '%سفارة%')
-                  ->orWhere('status', 'like', '%مواعيد%')
-                  ->orWhere('status', 'like', '%انتظار%')
-                  ->orWhereHas('crmStatus', function ($s) {
-                      $s->where('name_ar', 'like', '%سفارة%')
-                        ->orWhere('name_ar', 'like', '%مواعيد%')
-                        ->orWhere('name_ar', 'like', '%انتظار%');
-                  })
-                  ->orWhereHas('crmStatus2', function ($s) {
-                      $s->where('name_ar', 'like', '%سفارة%')
-                        ->orWhere('name_ar', 'like', '%مواعيد%')
-                        ->orWhere('name_ar', 'like', '%انتظار%');
-                  });
-            })
-            ->whereDoesntHave('crmStatus', function (Builder $q) {
-                $q->whereIn('slug', ['closed', 'cancelled', 'duplicate', 'not-interested']);
-            });
+        $query = Inquiry::query();
+
+        // Filter strictly by the 5 target CRM Lead statuses
+        $this->applyTargetCrmStatusFilter($query);
 
         // Filter by country
         $query->where(function (Builder $q) use ($appointment, $countryNameAr, $countryNameEn) {
@@ -313,32 +364,26 @@ class EmbassyAppointmentService
 
     public function countWaitingLeads(EmbassyAppointment $appointment): int
     {
-        $awaitingStatusId = CrmStatus::where('slug', 'awaiting-embassy-appointment')->value('id');
-
         $countryNameAr = $appointment->country?->name_ar;
         $countryNameEn = $appointment->country?->name_en;
 
-        $query = Inquiry::query()
-            ->where(function (Builder $q) use ($awaitingStatusId) {
-                if ($awaitingStatusId) {
-                    $q->where('crm_status_id', $awaitingStatusId)
-                      ->orWhere('crm_status2_id', $awaitingStatusId);
-                }
-                $q->orWhere('status', 'awaiting-embassy-appointment')
-                  ->orWhereHas('crmStatus', fn ($s) => $s->where('name_ar', 'like', '%مواعيد السفارة%'))
-                  ->orWhereHas('crmStatus2', fn ($s) => $s->where('name_ar', 'like', '%مواعيد السفارة%'));
-            })
-            ->whereDoesntHave('crmStatus', function (Builder $q) {
-                $q->whereIn('slug', ['closed', 'cancelled', 'duplicate', 'not-interested']);
-            });
+        $query = Inquiry::query();
 
+        // Filter strictly by the 5 target CRM Lead statuses
+        $this->applyTargetCrmStatusFilter($query);
+
+        // Filter by country
         $query->where(function (Builder $q) use ($appointment, $countryNameAr, $countryNameEn) {
             $q->where('visa_country_id', $appointment->visa_country_id);
 
             if ($countryNameAr) {
+                $cleanAr = preg_replace('/[أإآ]/u', 'ا', $countryNameAr);
                 $q->orWhere('country', 'like', '%' . $countryNameAr . '%')
+                  ->orWhere('country', 'like', '%' . $cleanAr . '%')
                   ->orWhere('destination', 'like', '%' . $countryNameAr . '%')
-                  ->orWhere('service_country_name', 'like', '%' . $countryNameAr . '%');
+                  ->orWhere('destination', 'like', '%' . $cleanAr . '%')
+                  ->orWhere('service_country_name', 'like', '%' . $countryNameAr . '%')
+                  ->orWhere('service_country_name', 'like', '%' . $cleanAr . '%');
             }
 
             if ($countryNameEn) {
@@ -346,13 +391,25 @@ class EmbassyAppointmentService
                   ->orWhere('destination', 'like', '%' . $countryNameEn . '%')
                   ->orWhere('service_country_name', 'like', '%' . $countryNameEn . '%');
             }
+
+            $q->orWhereHas('visaCountry', function ($vc) use ($appointment, $countryNameAr, $countryNameEn) {
+                $vc->where('id', $appointment->visa_country_id);
+                if ($countryNameAr) {
+                    $cleanAr = preg_replace('/[أإآ]/u', 'ا', $countryNameAr);
+                    $vc->orWhere('name_ar', 'like', '%' . $countryNameAr . '%')
+                       ->orWhere('name_ar', 'like', '%' . $cleanAr . '%');
+                }
+                if ($countryNameEn) {
+                    $vc->orWhere('name_en', 'like', '%' . $countryNameEn . '%');
+                }
+            });
         });
 
         if (filled($appointment->appointment_center)) {
             $query->where(function (Builder $q) use ($appointment) {
                 $q->whereNull('appointment_center')
                   ->orWhere('appointment_center', '')
-                  ->orWhere('appointment_center', $appointment->appointment_center);
+                  ->orWhere('appointment_center', 'like', '%' . $appointment->appointment_center . '%');
             });
         }
 
@@ -360,7 +417,7 @@ class EmbassyAppointmentService
             $query->where(function (Builder $q) use ($appointment) {
                 $q->whereNull('appointment_type')
                   ->orWhere('appointment_type', '')
-                  ->orWhere('appointment_type', $appointment->appointment_type);
+                  ->orWhere('appointment_type', 'like', '%' . $appointment->appointment_type . '%');
             });
         }
 

@@ -134,22 +134,32 @@ class EmbassyAppointment extends Model
             }
 
             if (Schema::hasTable('crm_statuses')) {
-                $existing = DB::table('crm_statuses')->where('slug', 'awaiting-embassy-appointment')->first();
+                $targetStatuses = [
+                    ['slug' => 'awaiting-embassy-appointment', 'name_ar' => 'انتظار فتح مواعيد السفارة', 'name_en' => 'Awaiting Embassy Appointment', 'color' => 'warning'],
+                    ['slug' => 'whatsapp-follow-up', 'name_ar' => 'متابعة واتساب', 'name_en' => 'WhatsApp Follow-up', 'color' => 'success'],
+                    ['slug' => 'awaiting-documents', 'name_ar' => 'بانتظار المستندات', 'name_en' => 'Awaiting Documents', 'color' => 'warning'],
+                    ['slug' => 'documents-complete', 'name_ar' => 'الأوراق مكتملة', 'name_en' => 'Documents Complete', 'color' => 'success'],
+                    ['slug' => 'documents-complete-weak', 'name_ar' => 'الأوراق مكتملة (ضعيفة)', 'name_en' => 'Documents Complete (Weak)', 'color' => 'secondary'],
+                ];
+
                 $now = now();
-                if (! $existing) {
-                    DB::table('crm_statuses')->insert([
-                        'slug' => 'awaiting-embassy-appointment',
-                        'name_ar' => 'انتظار فتح مواعيد السفارة',
-                        'name_en' => 'Awaiting Embassy Appointment',
-                        'status_group' => 'secondary',
-                        'color' => 'warning',
-                        'sort_order' => 25,
-                        'is_default' => false,
-                        'is_system' => true,
-                        'is_active' => true,
-                        'created_at' => $now,
-                        'updated_at' => $now,
-                    ]);
+                foreach ($targetStatuses as $index => $ts) {
+                    $existing = DB::table('crm_statuses')->where('slug', $ts['slug'])->first();
+                    if (! $existing) {
+                        DB::table('crm_statuses')->insert([
+                            'slug' => $ts['slug'],
+                            'name_ar' => $ts['name_ar'],
+                            'name_en' => $ts['name_en'],
+                            'status_group' => 'secondary',
+                            'color' => $ts['color'],
+                            'sort_order' => 25 + $index,
+                            'is_default' => false,
+                            'is_system' => true,
+                            'is_active' => true,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ]);
+                    }
                 }
             }
 
