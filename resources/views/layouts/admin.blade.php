@@ -10,6 +10,33 @@
 </head>
 <body class="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 @php($adminUser = auth()->user())
+@php($sellerDelayedCount = 0)
+@php($hasDelayedNewLeads = false)
+@php($delayedNewLeadsCount = 0)
+@php
+if ($adminUser && \Illuminate\Support\Facades\Schema::hasTable('inquiries')) {
+    try {
+        $delayedQuery = \App\Models\Inquiry::query();
+        if (! $adminUser->hasPermission('leads.view_all')) {
+            $delayedQuery->where('assigned_user_id', $adminUser->id);
+        }
+        $sellerDelayedCount = app(\App\Support\CrmDelayedLeadService::class)->applyDelayedScope($delayedQuery)->count();
+
+        if ($sellerDelayedCount > 0) {
+            $newDelayedQuery = \App\Models\Inquiry::query()
+                ->where(function($q) {
+                    $q->whereNull('crm_status_id')
+                      ->orWhereHas('crmStatus', fn($sq) => $sq->whereIn('slug', ['new', 'new-lead', 'fresh'])->orWhere('name_ar', 'like', '%جديد%'));
+                });
+            if (! $adminUser->hasPermission('leads.view_all')) {
+                $newDelayedQuery->where('assigned_user_id', $adminUser->id);
+            }
+            $delayedNewLeadsCount = app(\App\Support\CrmDelayedLeadService::class)->applyDelayedScope($newDelayedQuery)->count();
+            $hasDelayedNewLeads = $delayedNewLeadsCount > 0;
+        }
+    } catch (\Throwable $e) {}
+}
+@endphp
 @php($currentRoute = request()->route()?->getName())
 @php($notificationCenter = app(\App\Support\AdminNotificationCenterService::class))
 @php($sysSettings = \App\Http\Controllers\Admin\WebsiteSettingController::getWebsiteSettings())
@@ -298,33 +325,7 @@
                     </form>
                     <a class="btn btn-primary" href="{{ route('home') }}" target="_blank">{{ __('admin.view_website') }}</a>
                 </div>
-            </div>
-                @php
-                    $sellerDelayedCount = 0;
-                    $hasDelayedNewLeads = false;
-                    $delayedNewLeadsCount = 0;
-
-                    if ($adminUser && \Illuminate\Support\Facades\Schema::hasTable('inquiries')) {
-                        $delayedQuery = \App\Models\Inquiry::query();
-                        if (! $adminUser->hasPermission('leads.view_all')) {
-                            $delayedQuery->where('assigned_user_id', $adminUser->id);
-                        }
-                        $sellerDelayedCount = app(\App\Support\CrmDelayedLeadService::class)->applyDelayedScope($delayedQuery)->count();
-
-                        if ($sellerDelayedCount > 0) {
-                            $newDelayedQuery = \App\Models\Inquiry::query()
-                                ->where(function($q) {
-                                    $q->whereNull('crm_status_id')
-                                      ->orWhereHas('crmStatus', fn($sq) => $sq->whereIn('slug', ['new', 'new-lead', 'fresh'])->orWhere('name_ar', 'like', '%جديد%'));
-                                });
-                            if (! $adminUser->hasPermission('leads.view_all')) {
-                                $newDelayedQuery->where('assigned_user_id', $adminUser->id);
-                            }
-                            $delayedNewLeadsCount = app(\App\Support\CrmDelayedLeadService::class)->applyDelayedScope($newDelayedQuery)->count();
-                            $hasDelayedNewLeads = $delayedNewLeadsCount > 0;
-                        }
-                    }
-                @endphp
+            <div class="admin-main-content p-4">
 
                 @if($sellerDelayedCount > 0)
                     <a href="{{ route('admin.crm.leads.delayed') }}" class="alert alert-warning border-2 border-warning text-dark d-flex justify-content-between align-items-center mb-4 text-decoration-none shadow-sm p-3 rounded-3">
