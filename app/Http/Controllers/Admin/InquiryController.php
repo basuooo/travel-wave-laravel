@@ -4,13 +4,22 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inquiry;
+use App\Models\LeadForm;
 use Illuminate\Http\Request;
 
 class InquiryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Inquiry::query()->with('form')->latest();
+        $query = Inquiry::query()
+            ->where(function ($q) {
+                $q->whereNotNull('lead_form_id')
+                  ->orWhereNotNull('form_name')
+                  ->orWhere('created_from', 'website_form')
+                  ->orWhere('source_type', 'form');
+            })
+            ->with(['form', 'crmStatus', 'assignedUser', 'crmServiceType'])
+            ->latest();
 
         if ($request->filled('type')) {
             $query->where('type', $request->string('type'));
@@ -28,32 +37,51 @@ class InquiryController extends Controller
             $query->whereDate('created_at', $request->date('date'));
         }
 
+        if ($request->filled('q')) {
+            $search = $request->string('q');
+            $query->where(function ($sq) use ($search) {
+                $sq->where('full_name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('form_name', 'like', "%{$search}%");
+            });
+        }
+
+        $formLeadsBaseQuery = fn () => Inquiry::query()->where(function ($q) {
+            $q->whereNotNull('lead_form_id')
+              ->orWhereNotNull('form_name')
+              ->orWhere('created_from', 'website_form')
+              ->orWhere('source_type', 'form');
+        });
+
         return view('admin.inquiries.index', [
-            'items' => $query->paginate(20)->withQueryString(),
-            'forms' => \App\Models\LeadForm::query()->orderBy('name')->get(),
+            'items' => $query->paginate(25)->withQueryString(),
+            'forms' => LeadForm::query()->orderBy('name')->get(),
             'stats' => [
-                'all' => Inquiry::count(),
-                'new' => Inquiry::where('status', 'new')->count(),
-                'contacted' => Inquiry::where('status', 'contacted')->count(),
-                'closed' => Inquiry::where('status', 'closed')->count(),
+                'إجمالي فورس ليد' => $formLeadsBaseQuery()->count(),
+                'جديد' => $formLeadsBaseQuery()->where(fn ($q) => $q->where('status', 'new')->orWhereNull('status'))->count(),
+                'تم التواصل' => $formLeadsBaseQuery()->where('status', 'contacted')->count(),
+                'مغلق / تم الاتفاق' => $formLeadsBaseQuery()->where('status', 'closed')->count(),
             ],
         ]);
     }
 
     public function show(Inquiry $inquiry)
     {
+        $inquiry->load(['form', 'crmStatus', 'assignedUser', 'crmServiceType', 'crmServiceSubtype']);
+
         return view('admin.inquiries.show', compact('inquiry'));
     }
 
     public function update(Request $request, Inquiry $inquiry)
     {
         $data = $request->validate([
-            'status' => ['required', 'in:new,contacted,closed'],
+            'status' => ['required', 'string'],
             'admin_notes' => ['nullable', 'string'],
         ]);
 
         $inquiry->update($data);
 
-        return back()->with('success', 'Inquiry updated.');
+        return back()->with('success', 'تم تحديث الليد بنجاح.');
     }
 }
