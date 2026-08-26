@@ -341,33 +341,6 @@ if ($adminUser && \Illuminate\Support\Facades\Schema::hasTable('inquiries')) {
                     </a>
                 @endif
 
-                @if($hasDelayedNewLeads && !session('dismiss_new_leads_popup'))
-                    <div class="modal fade show d-block" id="delayedNewLeadsWarningModal" tabindex="-1" style="background: rgba(0,0,0,0.6);" data-bs-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content border-3 border-danger shadow-lg">
-                                <div class="modal-header bg-danger text-white">
-                                    <h5 class="modal-title fw-bold">⚠️ تنبيه هام: ليدز جديدة متأخرة!</h5>
-                                    <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('delayedNewLeadsWarningModal').remove()"></button>
-                                </div>
-                                <div class="modal-body p-4 text-center">
-                                    <div class="fs-1 text-danger mb-2">🚨</div>
-                                    <h4 class="fw-bold text-dark mb-2">لديك {{ $delayedNewLeadsCount }} ليد جديد لم يتم العمل عليه!</h4>
-                                    <p class="text-muted mb-4">لقد مرت 48 ساعة أو أكثر دون إجراء أي مكالمة أو تفاعل مع هذا الليد الجديد. يرجى التواصل فوراً لمنع فقدان العملاء.</p>
-                                    
-                                    <div class="d-flex justify-content-center gap-3">
-                                        <a href="{{ route('admin.crm.leads.delayed') }}" class="btn btn-danger btn-lg fw-bold px-4">
-                                            انتقل لليد المتأخرة الآن 🚀
-                                        </a>
-                                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="document.getElementById('delayedNewLeadsWarningModal').remove()">
-                                            إغلاق التنبيه
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
                 @yield('content')
             </div>
         </div>
@@ -1225,6 +1198,73 @@ document.addEventListener('show.bs.modal', function (e) {
     }
 });
 </script>
+@if($hasDelayedNewLeads)
+<div id="delayedNewLeadsWarningModal" class="d-none" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 15px;">
+    <div style="width: 100%; max-width: 500px; background: #ffffff; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.35); overflow: hidden; border: 3px solid #dc3545;">
+        <div style="background: #dc3545; color: #ffffff; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <h5 style="margin: 0; font-weight: 700; font-size: 1.1rem; color: #ffffff;">⚠️ تنبيه هام: ليدز جديدة متأخرة!</h5>
+            <button type="button" style="background: none; border: none; color: #ffffff; font-size: 1.6rem; cursor: pointer; line-height: 1;" onclick="dismissDelayedNewLeadsModal()">&times;</button>
+        </div>
+        <div style="padding: 24px; text-align: center;">
+            <div style="font-size: 3.2rem; margin-bottom: 12px; line-height: 1;">🚨</div>
+            <h4 style="font-weight: 800; color: #212529; margin-bottom: 12px; font-size: 1.25rem;">لديك <span style="color: #dc3545;">{{ $delayedNewLeadsCount }}</span> ليد جديد لم يتم العمل عليه!</h4>
+            <p style="color: #6c757d; margin-bottom: 24px; font-size: 0.95rem; line-height: 1.6;">لقد مرت 48 ساعة أو أكثر دون إجراء أي مكالمة أو تفاعل مع هذا الليد الجديد. يرجى التواصل فوراً لمنع فقدان العملاء.</p>
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <a href="{{ route('admin.crm.leads.delayed') }}" class="btn btn-danger btn-lg fw-bold px-4">انتقل لليد المتأخرة الآن 🚀</a>
+                <button type="button" class="btn btn-outline-secondary btn-lg" onclick="dismissDelayedNewLeadsModal()">إغلاق التنبيه</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const currentHour = @json((int) now()->format('H'));
+    const todayDate = @json(today()->format('Y-m-d'));
+    const hasDelayed = @json($hasDelayedNewLeads);
+
+    let currentWindowKey = null;
+    if (currentHour >= 15) {
+        currentWindowKey = todayDate + '_3pm';
+    } else if (currentHour >= 11) {
+        currentWindowKey = todayDate + '_11am';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalEl = document.getElementById('delayedNewLeadsWarningModal');
+        if (!modalEl || !hasDelayed || !currentWindowKey) return;
+
+        const lastDismissed = localStorage.getItem('dismissed_delayed_new_leads_window');
+        if (lastDismissed !== currentWindowKey) {
+            modalEl.classList.remove('d-none');
+            modalEl.style.display = 'flex';
+        }
+    });
+})();
+
+function dismissDelayedNewLeadsModal() {
+    const modalEl = document.getElementById('delayedNewLeadsWarningModal');
+    if (modalEl) {
+        modalEl.classList.add('d-none');
+        modalEl.style.display = 'none';
+    }
+
+    const currentHour = new Date().getHours();
+    const todayDate = new Date().toISOString().split('T')[0];
+    let currentWindowKey = null;
+    if (currentHour >= 15) {
+        currentWindowKey = todayDate + '_3pm';
+    } else if (currentHour >= 11) {
+        currentWindowKey = todayDate + '_11am';
+    }
+
+    if (currentWindowKey) {
+        localStorage.setItem('dismissed_delayed_new_leads_window', currentWindowKey);
+    }
+}
+</script>
+@endif
+
 @include('admin.embassy-appointments.components.seller_popup_modal')
 @stack('modals')
 @yield('modals')
