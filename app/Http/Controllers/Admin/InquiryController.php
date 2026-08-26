@@ -14,9 +14,7 @@ class InquiryController extends Controller
         $query = Inquiry::query()
             ->where(function ($q) {
                 $q->whereNotNull('lead_form_id')
-                  ->orWhereNotNull('form_name')
-                  ->orWhere('created_from', 'website_form')
-                  ->orWhere('source_type', 'form');
+                  ->orWhereNotNull('form_name');
             })
             ->with(['form', 'crmStatus', 'assignedUser', 'crmServiceType'])
             ->latest();
@@ -49,16 +47,14 @@ class InquiryController extends Controller
 
         $formLeadsBaseQuery = fn () => Inquiry::query()->where(function ($q) {
             $q->whereNotNull('lead_form_id')
-              ->orWhereNotNull('form_name')
-              ->orWhere('created_from', 'website_form')
-              ->orWhere('source_type', 'form');
+              ->orWhereNotNull('form_name');
         });
 
         return view('admin.inquiries.index', [
             'items' => $query->paginate(25)->withQueryString(),
             'forms' => LeadForm::query()->orderBy('name')->get(),
             'stats' => [
-                'إجمالي فورس ليد' => $formLeadsBaseQuery()->count(),
+                'إجمالي فورـم لـيـد' => $formLeadsBaseQuery()->count(),
                 'جديد' => $formLeadsBaseQuery()->where(fn ($q) => $q->where('status', 'new')->orWhereNull('status'))->count(),
                 'تم التواصل' => $formLeadsBaseQuery()->where('status', 'contacted')->count(),
                 'مغلق / تم الاتفاق' => $formLeadsBaseQuery()->where('status', 'closed')->count(),
