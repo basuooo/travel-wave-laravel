@@ -299,19 +299,73 @@
                     <a class="btn btn-primary" href="{{ route('home') }}" target="_blank">{{ __('admin.view_website') }}</a>
                 </div>
             </div>
-            <div class="admin-main-content p-4">
-                @if (session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
+                @php
+                    $sellerDelayedCount = 0;
+                    $hasDelayedNewLeads = false;
+                    $delayedNewLeadsCount = 0;
+
+                    if ($adminUser && \Illuminate\Support\Facades\Schema::hasTable('inquiries')) {
+                        $delayedQuery = \App\Models\Inquiry::query();
+                        if (! $adminUser->hasPermission('leads.view_all')) {
+                            $delayedQuery->where('assigned_user_id', $adminUser->id);
+                        }
+                        $sellerDelayedCount = app(\App\Support\CrmDelayedLeadService::class)->applyDelayedScope($delayedQuery)->count();
+
+                        if ($sellerDelayedCount > 0) {
+                            $newDelayedQuery = \App\Models\Inquiry::query()
+                                ->where(function($q) {
+                                    $q->whereNull('crm_status_id')
+                                      ->orWhereHas('crmStatus', fn($sq) => $sq->whereIn('slug', ['new', 'new-lead', 'fresh'])->orWhere('name_ar', 'like', '%جديد%'));
+                                });
+                            if (! $adminUser->hasPermission('leads.view_all')) {
+                                $newDelayedQuery->where('assigned_user_id', $adminUser->id);
+                            }
+                            $delayedNewLeadsCount = app(\App\Support\CrmDelayedLeadService::class)->applyDelayedScope($newDelayedQuery)->count();
+                            $hasDelayedNewLeads = $delayedNewLeadsCount > 0;
+                        }
+                    }
+                @endphp
+
+                @if($sellerDelayedCount > 0)
+                    <a href="{{ route('admin.crm.leads.delayed') }}" class="alert alert-warning border-2 border-warning text-dark d-flex justify-content-between align-items-center mb-4 text-decoration-none shadow-sm p-3 rounded-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="fs-4">⚠️</span>
+                            <div>
+                                <strong class="fs-6 text-danger">تنبيه ليدز متأخرة: لديك {{ $sellerDelayedCount }} ليدز متأخرة (أكثر من 48 ساعة دون إجراء) تحتاج إلى اتخاذ إجراء فوراً!</strong>
+                                <div class="small text-muted">اضغط هنا للانتقال مباشرة لصفحة الليد المتأخرة والبدء في متابعتها.</div>
+                            </div>
+                        </div>
+                        <span class="btn btn-sm btn-danger fw-bold px-3">متابعة المتأخرات ⬅️</span>
+                    </a>
                 @endif
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+
+                @if($hasDelayedNewLeads && !session('dismiss_new_leads_popup'))
+                    <div class="modal fade show d-block" id="delayedNewLeadsWarningModal" tabindex="-1" style="background: rgba(0,0,0,0.6);" data-bs-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-3 border-danger shadow-lg">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title fw-bold">⚠️ تنبيه هام: ليدز جديدة متأخرة!</h5>
+                                    <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('delayedNewLeadsWarningModal').remove()"></button>
+                                </div>
+                                <div class="modal-body p-4 text-center">
+                                    <div class="fs-1 text-danger mb-2">🚨</div>
+                                    <h4 class="fw-bold text-dark mb-2">لديك {{ $delayedNewLeadsCount }} ليد جديد لم يتم العمل عليه!</h4>
+                                    <p class="text-muted mb-4">لقد مرت 48 ساعة أو أكثر دون إجراء أي مكالمة أو تفاعل مع هذا الليد الجديد. يرجى التواصل فوراً لمنع فقدان العملاء.</p>
+                                    
+                                    <div class="d-flex justify-content-center gap-3">
+                                        <a href="{{ route('admin.crm.leads.delayed') }}" class="btn btn-danger btn-lg fw-bold px-4">
+                                            انتقل لليد المتأخرة الآن 🚀
+                                        </a>
+                                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="document.getElementById('delayedNewLeadsWarningModal').remove()">
+                                            إغلاق التنبيه
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 @endif
+
                 @yield('content')
             </div>
         </div>

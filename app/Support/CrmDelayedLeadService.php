@@ -3,29 +3,42 @@
 namespace App\Support;
 
 use App\Models\Inquiry;
+use App\Models\CrmStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class CrmDelayedLeadService
 {
-    public const INACTIVE_DAYS = 5;
+    public const INACTIVE_HOURS = 48;
 
     public function applyDelayedScope(Builder $query): Builder
     {
-        $threshold = now()->subDays(self::INACTIVE_DAYS)->format('Y-m-d H:i:s');
+        $threshold = now()->subHours(self::INACTIVE_HOURS)->format('Y-m-d H:i:s');
         $lastActionSql = $this->lastActionSql();
         $overdueFollowUpSql = $this->overdueFollowUpSql();
+
+        $targetStatusIds = $this->resolveTargetStatusIds();
 
         return $query
             ->select('inquiries.*')
             ->selectRaw($lastActionSql . ' as delay_last_action_at')
             ->selectRaw($overdueFollowUpSql . ' as delay_overdue_follow_up_at')
-            ->where(function (Builder $builder) use ($lastActionSql, $overdueFollowUpSql, $threshold) {
-                $builder
-                    ->whereRaw($overdueFollowUpSql . ' IS NOT NULL AND ' . $lastActionSql . ' <= ' . $overdueFollowUpSql)
-                    ->orWhereRaw($lastActionSql . ' <= ?', [$threshold]);
+            ->where(function (Builder $builder) use ($lastActionSql, $overdueFollowUpSql, $threshold, $targetStatusIds) {
+                // Overdue scheduled follow-up
+                $builder->whereRaw($overdueFollowUpSql . ' IS NOT NULL AND ' . $lastActionSql . ' <= ' . $overdueFollowUpSql)
+                    // Or no action in last 48 hours for target statuses (or null status/new)
+                    ->orWhere(function (Builder $subQuery) use ($lastActionSql, $threshold, $targetStatusIds) {
+                        $subQuery->whereRaw($lastActionSql . ' <= ?', [$threshold])
+                            ->where(function (Builder $stQuery) use ($targetStatusIds) {
+                                $stQuery->whereNull('inquiries.crm_status_id');
+                                if (!empty($targetStatusIds)) {
+                                    $stQuery->orWhereIn('inquiries.crm_status_id', $targetStatusIds);
+                                }
+                            });
+                    });
             })
             ->orderByRaw('CASE WHEN ' . $overdueFollowUpSql . ' IS NULL THEN 1 ELSE 0 END')
             ->orderByRaw($overdueFollowUpSql . ' ASC')
@@ -52,7 +65,7 @@ class CrmDelayedLeadService
             ?? $this->fallbackLastActionAt($lead);
         $overdueFollowUpAt = $this->resolveLeadTimestamp($lead->getAttribute('delay_overdue_follow_up_at'));
         $statusChangedAt = $lead->crm_status_updated_at ? Carbon::parse($lead->crm_status_updated_at) : null;
-        $threshold = now()->subDays(self::INACTIVE_DAYS);
+        $threshold = now()->subHours(self::INACTIVE_HOURS);
 
         if ($overdueFollowUpAt && (! $lastActionAt || $lastActionAt->lessThanOrEqualTo($overdueFollowUpAt))) {
             $reason = (! $statusChangedAt || $statusChangedAt->lessThanOrEqualTo($overdueFollowUpAt))
@@ -70,7 +83,7 @@ class CrmDelayedLeadService
         if ($lastActionAt && $lastActionAt->lessThanOrEqualTo($threshold)) {
             return [
                 'type' => 'inactive',
-                'reason' => 'لم يتم اتخاذ أي إجراء منذ 5 أيام',
+                'reason' => 'لم يتم اتخاذ أي إجراء منذ 48 ساعة',
                 'last_action_at' => $lastActionAt,
                 'reference_at' => $lastActionAt,
             ];
@@ -84,13 +97,49 @@ class CrmDelayedLeadService
         ];
     }
 
+    protected function resolveTargetStatusIds(): array
+    {
+        if (!Schema::hasTable('crm_statuses')) {
+            return [];
+        }
+
+        $targetKeywords = ['جديد', 'new', 'لم يتم الرد', 'مشغول', 'غير متاح', 'بيكنسل', 'مغلق', 'no-answer', 'busy', 'unavailable'];
+
+        return CrmStatus::query()
+            ->get()
+            ->filter(function ($status) use ($targetKeywords) {
+                $name = mb_strtolower(($status->name_ar ?: '') . ' ' . ($status->name_en ?: '') . ' ' . ($status->slug ?: ''));
+                foreach ($targetKeywords as $kw) {
+                    if (str_contains($name, mb_strtolower($kw))) {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            ->pluck('id')
+            ->toArray();
+    }
+
     protected function lastActionSql(): string
     {
+        $hasCallsTable = Schema::hasTable('crm_lead_calls');
+        $hasWhatsAppsTable = Schema::hasTable('crm_lead_whatsapps');
+
+        $callsSql = $hasCallsTable
+            ? "COALESCE((SELECT MAX(created_at) FROM crm_lead_calls WHERE crm_lead_calls.inquiry_id = inquiries.id), '1970-01-01 00:00:00')"
+            : "'1970-01-01 00:00:00'";
+
+        $whatsAppsSql = $hasWhatsAppsTable
+            ? "COALESCE((SELECT MAX(created_at) FROM crm_lead_whatsapps WHERE crm_lead_whatsapps.inquiry_id = inquiries.id), '1970-01-01 00:00:00')"
+            : "'1970-01-01 00:00:00'";
+
         return $this->rowGreatestSql([
             "COALESCE(inquiries.updated_at, '1970-01-01 00:00:00')",
             "COALESCE(inquiries.crm_status_updated_at, '1970-01-01 00:00:00')",
             "COALESCE((SELECT MAX(created_at) FROM crm_lead_notes WHERE crm_lead_notes.inquiry_id = inquiries.id), '1970-01-01 00:00:00')",
             "COALESCE((SELECT MAX(changed_at) FROM crm_status_updates WHERE crm_status_updates.inquiry_id = inquiries.id), '1970-01-01 00:00:00')",
+            $callsSql,
+            $whatsAppsSql,
             "COALESCE((" . $this->taskLastActionSql() . "), '1970-01-01 00:00:00')",
         ]);
     }
@@ -140,6 +189,8 @@ class CrmDelayedLeadService
             $lead->crm_status_updated_at,
             $lead->crmNotes->max('created_at') ?? null,
             $lead->crmStatusUpdates->max('changed_at') ?? null,
+            $lead->calls->max('created_at') ?? null,
+            $lead->whatsappLogs->max('created_at') ?? null,
             $lead->crmTasks->max(function ($task) {
                 return $task->completed_at ?? $task->due_at ?? $task->updated_at ?? $task->created_at;
             }) ?? null,

@@ -42,7 +42,7 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
         <div>
             <h2 class="h5 mb-1">{{ __('admin.crm_delayed_leads') }}</h2>
-            <p class="text-muted mb-0">{{ __('admin.crm_delayed_leads_hint', ['count' => $delayedLeadsCount ?? 0]) }}</p>
+            <p class="text-muted mb-0">قائمة العملاء الجدد أو الحالات المعلقة التي لم يتم اتخاذ أي إجراء عليها خلال <strong>48 ساعة</strong> (إجمالي المتأخرات: {{ $delayedLeadsCount ?? 0 }}).</p>
         </div>
     </div>
     <div class="table-responsive">
