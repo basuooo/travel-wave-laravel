@@ -9,11 +9,12 @@
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
 </head>
 <body class="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
-@php($adminUser = auth()->user())
-@php($sellerDelayedCount = 0)
-@php($hasDelayedNewLeads = false)
-@php($delayedNewLeadsCount = 0)
 @php
+$adminUser = auth()->user();
+$sellerDelayedCount = 0;
+$hasDelayedNewLeads = false;
+$delayedNewLeadsCount = 0;
+
 if ($adminUser && \Illuminate\Support\Facades\Schema::hasTable('inquiries')) {
     try {
         $delayedQuery = \App\Models\Inquiry::query();
