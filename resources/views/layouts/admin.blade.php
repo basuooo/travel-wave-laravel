@@ -326,6 +326,7 @@ if ($adminUser && \Illuminate\Support\Facades\Schema::hasTable('inquiries')) {
                     </form>
                     <a class="btn btn-primary" href="{{ route('home') }}" target="_blank">{{ __('admin.view_website') }}</a>
                 </div>
+            </div>
             <div class="admin-main-content p-4">
 
                 @if($sellerDelayedCount > 0)
