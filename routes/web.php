@@ -131,8 +131,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware(['auth', 'admin', 'crm.followups.dispatch'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-        Route::post('/clear-cache', [DashboardController::class, 'clearCache'])->name('clear-cache');
-        Route::get('/', [DashboardController::class, 'index'])->middleware('permission:dashboard.access')->name('dashboard');
+        Route::get('/shortcuts', [\App\Http\Controllers\Admin\ShortcutController::class, 'index'])->name('shortcuts.index');
+        Route::post('/shortcuts', [\App\Http\Controllers\Admin\ShortcutController::class, 'update'])->name('shortcuts.update');
+        Route::get('/', [\App\Http\Controllers\Admin\ShortcutController::class, 'index'])->name('dashboard');
         Route::get('/sync-pages-and-menus', function () {
             try {
                 \App\Support\PageAndMenuSyncer::sync();

@@ -203,6 +203,9 @@ if ($adminUser && \Illuminate\Support\Facades\Schema::hasTable('inquiries')) {
                 </div>
             </div>
             <nav class="nav flex-column gap-1">
+                <a class="nav-link rounded px-3 py-2 fw-bold text-white bg-primary mb-2 d-flex align-items-center gap-2 {{ request()->routeIs('admin.shortcuts.*') ? 'active shadow-sm' : '' }}" href="{{ route('admin.shortcuts.index') }}">
+                    <span>⚡</span> <span>اختصارات (Shortcuts)</span>
+                </a>
                 @if($adminUser?->hasPermission('dashboard.access'))
                     <a class="nav-link rounded px-3 py-2 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">{{ __('admin.dashboard') }}</a>
                     @if($adminUser?->hasPermission('marketing.manage') || $adminUser?->is_admin)
