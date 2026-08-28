@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 class ShortcutController extends Controller
 {
@@ -165,10 +163,11 @@ class ShortcutController extends Controller
         $allShortcuts = self::getAvailableShortcuts();
         $defaultKeys = array_keys($allShortcuts);
 
-        if (Schema::hasTable('settings')) {
-            $setting = DB::table('settings')->where('key', 'system_shortcuts')->first();
-            if ($setting && !empty($setting->value)) {
-                $decoded = json_decode($setting->value, true);
+        $filePath = storage_path('app/shortcuts_config.json');
+        if (file_exists($filePath)) {
+            $content = @file_get_contents($filePath);
+            if ($content) {
+                $decoded = json_decode($content, true);
                 if (is_array($decoded)) {
                     return $decoded;
                 }
@@ -191,7 +190,7 @@ class ShortcutController extends Controller
                 continue;
             }
             $item = $allRegistry[$key];
-            
+
             // Permission check: If shortcut requires a permission and user does NOT have it, skip
             if (!empty($item['permission']) && $user && method_exists($user, 'hasPermission')) {
                 if (!$user->hasPermission($item['permission'])) {
@@ -232,12 +231,8 @@ class ShortcutController extends Controller
         $allRegistry = self::getAvailableShortcuts();
         $validKeys = array_values(array_intersect($selected, array_keys($allRegistry)));
 
-        if (Schema::hasTable('settings')) {
-            DB::table('settings')->updateOrInsert(
-                ['key' => 'system_shortcuts'],
-                ['value' => json_encode($validKeys), 'updated_at' => now()]
-            );
-        }
+        $filePath = storage_path('app/shortcuts_config.json');
+        @file_put_contents($filePath, json_encode($validKeys, JSON_PRETTY_PRINT));
 
         return redirect()->route('admin.shortcuts.index')->with('success', 'تم حفظ وتحديث قائمة الاختصارات بنجاح.');
     }
