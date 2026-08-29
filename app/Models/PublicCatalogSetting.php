@@ -40,7 +40,42 @@ class PublicCatalogSetting extends Model
                     $table->unsignedBigInteger('selected_map_section_id')->nullable();
                     $table->timestamps();
                 });
+
+                return;
             }
+
+            \Illuminate\Support\Facades\Schema::table('public_catalog_settings', function (\Illuminate\Database\Schema\Blueprint $table) {
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('public_catalog_settings', 'logo_path')) {
+                    $table->string('logo_path')->nullable();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('public_catalog_settings', 'logo_width')) {
+                    $table->integer('logo_width')->default(180);
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('public_catalog_settings', 'logo_height')) {
+                    $table->integer('logo_height')->default(50);
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('public_catalog_settings', 'logo_keep_aspect_ratio')) {
+                    $table->boolean('logo_keep_aspect_ratio')->default(true);
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('public_catalog_settings', 'whatsapp_phone')) {
+                    $table->string('whatsapp_phone')->nullable();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('public_catalog_settings', 'whatsapp_message_template')) {
+                    $table->text('whatsapp_message_template')->nullable();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('public_catalog_settings', 'floating_whatsapp_enabled')) {
+                    $table->boolean('floating_whatsapp_enabled')->default(true);
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('public_catalog_settings', 'custom_buttons')) {
+                    $table->json('custom_buttons')->nullable();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('public_catalog_settings', 'selected_lead_form_id')) {
+                    $table->unsignedBigInteger('selected_lead_form_id')->nullable();
+                }
+                if (! \Illuminate\Support\Facades\Schema::hasColumn('public_catalog_settings', 'selected_map_section_id')) {
+                    $table->unsignedBigInteger('selected_map_section_id')->nullable();
+                }
+            });
         } catch (\Throwable $e) {
             logger()->error('PublicCatalogSetting ensureTableSchema error: ' . $e->getMessage());
         }
