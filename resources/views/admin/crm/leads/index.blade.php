@@ -4,16 +4,24 @@
 @section('page_description', __('admin.crm_leads_desc'))
 
 @section('content')
-<form class="card admin-card p-4 mb-4">
+<form method="get" action="{{ route('admin.crm.leads.index') }}" class="card admin-card p-4 mb-4" id="crm-leads-filter-form">
     <div class="row g-3 align-items-end">
         <div class="col-md-3">
             <label class="form-label">{{ __('admin.search') }}</label>
             <input class="form-control" name="q" value="{{ request('q') }}" placeholder="{{ __('admin.crm_search_placeholder') }}">
         </div>
         @php
-            $reqStatusIds = (array)(request('crm_status_ids') ?? (request('crm_status_id') ? [request('crm_status_id')] : []));
-            $reqSourceIds = (array)(request('crm_source_ids') ?? (request('crm_source_id') ? [request('crm_source_id')] : []));
-            $reqUserIds = (array)(request('assigned_user_ids') ?? (request('assigned_user_id') ? [request('assigned_user_id')] : []));
+            $rawStatus = request('crm_status_ids') ?? request('crm_status_id');
+            $reqStatusIds = is_array($rawStatus) ? $rawStatus : ($rawStatus !== null && $rawStatus !== '' ? [$rawStatus] : []);
+            $reqStatusIds = array_values(array_filter(array_map('strval', $reqStatusIds), fn($v) => $v !== ''));
+
+            $rawSource = request('crm_source_ids') ?? request('crm_source_id');
+            $reqSourceIds = is_array($rawSource) ? $rawSource : ($rawSource !== null && $rawSource !== '' ? [$rawSource] : []);
+            $reqSourceIds = array_values(array_filter(array_map('strval', $reqSourceIds), fn($v) => $v !== ''));
+
+            $rawUser = request('assigned_user_ids') ?? request('assigned_user_id');
+            $reqUserIds = is_array($rawUser) ? $rawUser : ($rawUser !== null && $rawUser !== '' ? [$rawUser] : []);
+            $reqUserIds = array_values(array_filter(array_map('strval', $reqUserIds), fn($v) => $v !== ''));
         @endphp
         <div class="col-md-2">
             <label class="form-label d-flex justify-content-between align-items-center">
@@ -36,7 +44,7 @@
                     <div class="fw-bold small text-muted mb-2 border-bottom pb-1">تحديد الحالات (يمكن اختيار أكثر من حالة):</div>
                     @foreach($statuses as $status)
                         <div class="form-check mb-1">
-                            <input class="form-check-input" type="checkbox" name="crm_status_ids[]" value="{{ $status->id }}" id="status_chk_{{ $status->id }}" @checked(in_array((string)$status->id, array_map('strval', $reqStatusIds), true))>
+                            <input class="form-check-input" type="checkbox" name="crm_status_ids[]" value="{{ $status->id }}" id="status_chk_{{ $status->id }}" @checked(in_array((string)$status->id, $reqStatusIds, true))>
                             <label class="form-check-label small cursor-pointer" for="status_chk_{{ $status->id }}">
                                 {{ $status->localizedName() }}
                             </label>
@@ -66,7 +74,7 @@
                     <div class="fw-bold small text-muted mb-2 border-bottom pb-1">تحديد المصادر:</div>
                     @foreach($sources as $source)
                         <div class="form-check mb-1">
-                            <input class="form-check-input" type="checkbox" name="crm_source_ids[]" value="{{ $source->id }}" id="source_chk_{{ $source->id }}" @checked(in_array((string)$source->id, array_map('strval', $reqSourceIds), true))>
+                            <input class="form-check-input" type="checkbox" name="crm_source_ids[]" value="{{ $source->id }}" id="source_chk_{{ $source->id }}" @checked(in_array((string)$source->id, $reqSourceIds, true))>
                             <label class="form-check-label small cursor-pointer" for="source_chk_{{ $source->id }}">
                                 {{ $source->localizedName() }}
                             </label>
@@ -104,7 +112,7 @@
                     @endif
                     @foreach($users as $user)
                         <div class="form-check mb-1">
-                            <input class="form-check-input" type="checkbox" name="assigned_user_ids[]" value="{{ $user->id }}" id="user_chk_{{ $user->id }}" @checked(in_array((string)$user->id, array_map('strval', $reqUserIds), true))>
+                            <input class="form-check-input" type="checkbox" name="assigned_user_ids[]" value="{{ $user->id }}" id="user_chk_{{ $user->id }}" @checked(in_array((string)$user->id, $reqUserIds, true))>
                             <label class="form-check-label small cursor-pointer" for="user_chk_{{ $user->id }}">
                                 {{ $user->name }}
                             </label>
@@ -390,6 +398,38 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // Live update multi-select dropdown button labels & badges
+    document.querySelectorAll('#crm-leads-filter-form .dropdown-menu').forEach(menu => {
+        menu.addEventListener('change', function (e) {
+            if (e.target.matches('input[type="checkbox"]')) {
+                const dropdown = menu.closest('.dropdown');
+                const colParent = menu.closest('.col-md-2');
+                const checkedCount = menu.querySelectorAll('input[type="checkbox"]:checked').length;
+
+                if (dropdown) {
+                    const btnSpan = dropdown.querySelector('.dropdown-toggle .text-truncate');
+                    if (btnSpan) {
+                        btnSpan.textContent = checkedCount === 0 ? '{{ __("admin.all_types") }}' : checkedCount + ' محددة';
+                    }
+                }
+
+                if (colParent) {
+                    let badge = colParent.querySelector('.form-label .badge');
+                    if (checkedCount > 0) {
+                        if (!badge) {
+                            badge = document.createElement('span');
+                            badge.className = 'badge text-bg-primary';
+                            colParent.querySelector('.form-label').appendChild(badge);
+                        }
+                        badge.textContent = checkedCount + ' محدد';
+                    } else if (badge) {
+                        badge.remove();
+                    }
+                }
+            }
+        });
+    });
 });
 </script>
 @endsection
