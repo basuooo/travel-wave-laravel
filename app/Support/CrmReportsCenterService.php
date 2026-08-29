@@ -253,10 +253,10 @@ class CrmReportsCenterService
 
         // Contacted leads (have calls/whatsapps/notes)
         $contactedLeads = (clone $currentQuery)->where(function ($q) {
-            $q->has('calls')->orHas('whatsappLogs')->orHas('leadNotes')->orWhereNotNull('last_follow_up_at');
+            $q->has('calls')->orHas('whatsappLogs')->orHas('crmNotes')->orWhereNotNull('last_follow_up_at');
         })->count();
         $prevContactedLeads = (clone $prevQuery)->where(function ($q) {
-            $q->has('calls')->orHas('whatsappLogs')->orHas('leadNotes')->orWhereNotNull('last_follow_up_at');
+            $q->has('calls')->orHas('whatsappLogs')->orHas('crmNotes')->orWhereNotNull('last_follow_up_at');
         })->count();
 
         // Qualified leads
@@ -354,7 +354,7 @@ class CrmReportsCenterService
         $total = (clone $baseQuery)->count();
 
         $contacted = (clone $baseQuery)->where(function ($q) {
-            $q->has('calls')->orHas('whatsappLogs')->orHas('leadNotes')->orWhereNotNull('last_follow_up_at');
+            $q->has('calls')->orHas('whatsappLogs')->orHas('crmNotes')->orWhereNotNull('last_follow_up_at');
         })->count();
 
         $qualifiedStatusIds = CrmStatus::query()->whereIn('slug', ['qualified', 'hot', 'interested'])->pluck('id')->toArray();
@@ -398,7 +398,7 @@ class CrmReportsCenterService
 
             $totalLeads = (clone $query)->count();
             $contacted = (clone $query)->where(function ($q) {
-                $q->has('calls')->orHas('whatsappLogs')->orHas('leadNotes')->orWhereNotNull('last_follow_up_at');
+                $q->has('calls')->orHas('whatsappLogs')->orHas('crmNotes')->orWhereNotNull('last_follow_up_at');
             })->count();
 
             $bookingStatusIds = CrmStatus::query()->whereIn('slug', ['won', 'booked', 'complete-lead', 'documents-complete'])->pluck('id')->toArray();
