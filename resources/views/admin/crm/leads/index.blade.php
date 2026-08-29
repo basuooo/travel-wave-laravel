@@ -10,35 +10,108 @@
             <label class="form-label">{{ __('admin.search') }}</label>
             <input class="form-control" name="q" value="{{ request('q') }}" placeholder="{{ __('admin.crm_search_placeholder') }}">
         </div>
+        @php
+            $reqStatusIds = (array)(request('crm_status_ids') ?? (request('crm_status_id') ? [request('crm_status_id')] : []));
+            $reqSourceIds = (array)(request('crm_source_ids') ?? (request('crm_source_id') ? [request('crm_source_id')] : []));
+            $reqUserIds = (array)(request('assigned_user_ids') ?? (request('assigned_user_id') ? [request('assigned_user_id')] : []));
+        @endphp
         <div class="col-md-2">
-            <label class="form-label">{{ __('admin.status') }}</label>
-            <select class="form-select" name="crm_status_id">
-                <option value="">{{ __('admin.all_types') }}</option>
-                @foreach($statuses as $status)
-                    <option value="{{ $status->id }}" @selected((string) request('crm_status_id') === (string) $status->id)>{{ $status->localizedName() }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label class="form-label">{{ __('admin.source') }}</label>
-            <select class="form-select" name="crm_source_id">
-                <option value="">{{ __('admin.all_types') }}</option>
-                @foreach($sources as $source)
-                    <option value="{{ $source->id }}" @selected((string) request('crm_source_id') === (string) $source->id)>{{ $source->localizedName() }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label class="form-label">{{ __('admin.assigned_to') }}</label>
-            <select class="form-select" name="assigned_user_id">
-                <option value="">{{ __('admin.all_types') }}</option>
-                @if($canViewAllLeads)
-                    <option value="unassigned" @selected(request('assigned_user_id') === 'unassigned')>{{ __('admin.crm_unassigned') }}</option>
+            <label class="form-label d-flex justify-content-between align-items-center">
+                <span>{{ __('admin.status') }}</span>
+                @if(count($reqStatusIds) > 0)
+                    <span class="badge text-bg-primary">{{ count($reqStatusIds) }} محدد</span>
                 @endif
-                @foreach($users as $user)
-                    <option value="{{ $user->id }}" @selected((string) request('assigned_user_id') === (string) $user->id)>{{ $user->name }}</option>
-                @endforeach
-            </select>
+            </label>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm w-100 dropdown-toggle text-start d-flex justify-content-between align-items-center bg-white" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <span class="text-truncate">
+                        @if(count($reqStatusIds) === 0)
+                            {{ __('admin.all_types') }}
+                        @else
+                            {{ count($reqStatusIds) }} حالات محددة
+                        @endif
+                    </span>
+                </button>
+                <div class="dropdown-menu p-3 shadow-sm" style="max-height: 280px; overflow-y: auto; width: 260px;">
+                    <div class="fw-bold small text-muted mb-2 border-bottom pb-1">تحديد الحالات (يمكن اختيار أكثر من حالة):</div>
+                    @foreach($statuses as $status)
+                        <div class="form-check mb-1">
+                            <input class="form-check-input" type="checkbox" name="crm_status_ids[]" value="{{ $status->id }}" id="status_chk_{{ $status->id }}" @checked(in_array((string)$status->id, array_map('strval', $reqStatusIds), true))>
+                            <label class="form-check-label small cursor-pointer" for="status_chk_{{ $status->id }}">
+                                {{ $status->localizedName() }}
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label d-flex justify-content-between align-items-center">
+                <span>{{ __('admin.source') }}</span>
+                @if(count($reqSourceIds) > 0)
+                    <span class="badge text-bg-primary">{{ count($reqSourceIds) }} محدد</span>
+                @endif
+            </label>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm w-100 dropdown-toggle text-start d-flex justify-content-between align-items-center bg-white" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <span class="text-truncate">
+                        @if(count($reqSourceIds) === 0)
+                            {{ __('admin.all_types') }}
+                        @else
+                            {{ count($reqSourceIds) }} مصادر محددة
+                        @endif
+                    </span>
+                </button>
+                <div class="dropdown-menu p-3 shadow-sm" style="max-height: 280px; overflow-y: auto; width: 240px;">
+                    <div class="fw-bold small text-muted mb-2 border-bottom pb-1">تحديد المصادر:</div>
+                    @foreach($sources as $source)
+                        <div class="form-check mb-1">
+                            <input class="form-check-input" type="checkbox" name="crm_source_ids[]" value="{{ $source->id }}" id="source_chk_{{ $source->id }}" @checked(in_array((string)$source->id, array_map('strval', $reqSourceIds), true))>
+                            <label class="form-check-label small cursor-pointer" for="source_chk_{{ $source->id }}">
+                                {{ $source->localizedName() }}
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label d-flex justify-content-between align-items-center">
+                <span>{{ __('admin.assigned_to') }}</span>
+                @if(count($reqUserIds) > 0)
+                    <span class="badge text-bg-primary">{{ count($reqUserIds) }} محدد</span>
+                @endif
+            </label>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm w-100 dropdown-toggle text-start d-flex justify-content-between align-items-center bg-white" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <span class="text-truncate">
+                        @if(count($reqUserIds) === 0)
+                            {{ __('admin.all_types') }}
+                        @else
+                            {{ count($reqUserIds) }} موظفين محددين
+                        @endif
+                    </span>
+                </button>
+                <div class="dropdown-menu p-3 shadow-sm" style="max-height: 280px; overflow-y: auto; width: 240px;">
+                    <div class="fw-bold small text-muted mb-2 border-bottom pb-1">تحديد البائعين / الموظفين:</div>
+                    @if($canViewAllLeads)
+                        <div class="form-check mb-1">
+                            <input class="form-check-input" type="checkbox" name="assigned_user_ids[]" value="unassigned" id="user_chk_unassigned" @checked(in_array('unassigned', $reqUserIds, true))>
+                            <label class="form-check-label small cursor-pointer text-muted" for="user_chk_unassigned">
+                                {{ __('admin.crm_unassigned') }}
+                            </label>
+                        </div>
+                    @endif
+                    @foreach($users as $user)
+                        <div class="form-check mb-1">
+                            <input class="form-check-input" type="checkbox" name="assigned_user_ids[]" value="{{ $user->id }}" id="user_chk_{{ $user->id }}" @checked(in_array((string)$user->id, array_map('strval', $reqUserIds), true))>
+                            <label class="form-check-label small cursor-pointer" for="user_chk_{{ $user->id }}">
+                                {{ $user->name }}
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
         <div class="col-md-2">
             <label class="form-label">{{ __('admin.crm_service_type') }}</label>

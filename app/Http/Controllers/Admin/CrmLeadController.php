@@ -1217,18 +1217,35 @@ class CrmLeadController extends Controller
             $query->where('additional_notes', 'like', '%' . trim((string) $request->query('additional_notes')) . '%');
         }
 
-        foreach (['crm_status_id', 'crm_source_id'] as $field) {
-            if ($request->filled($field)) {
-                $query->where($field, $request->integer($field));
-            }
+        // Multi-select or single status
+        $statusIds = (array) ($request->input('crm_status_ids') ?? ($request->filled('crm_status_id') ? [$request->input('crm_status_id')] : []));
+        $statusIds = array_filter(array_map('intval', $statusIds));
+        if (!empty($statusIds)) {
+            $query->whereIn('crm_status_id', $statusIds);
         }
 
-        if ($request->filled('assigned_user_id')) {
-            if ($request->string('assigned_user_id')->toString() === 'unassigned') {
-                $query->whereNull('assigned_user_id');
-            } else {
-                $query->where('assigned_user_id', $request->integer('assigned_user_id'));
-            }
+        // Multi-select or single source
+        $sourceIds = (array) ($request->input('crm_source_ids') ?? ($request->filled('crm_source_id') ? [$request->input('crm_source_id')] : []));
+        $sourceIds = array_filter(array_map('intval', $sourceIds));
+        if (!empty($sourceIds)) {
+            $query->whereIn('crm_source_id', $sourceIds);
+        }
+
+        // Multi-select or single assigned user (seller)
+        $userValues = (array) ($request->input('assigned_user_ids') ?? ($request->filled('assigned_user_id') ? [$request->input('assigned_user_id')] : []));
+        if (!empty($userValues)) {
+            $query->where(function ($q) use ($userValues) {
+                $hasUnassigned = in_array('unassigned', $userValues, true);
+                $userIds = array_filter(array_map('intval', $userValues));
+
+                if ($hasUnassigned && !empty($userIds)) {
+                    $q->whereNull('assigned_user_id')->orWhereIn('assigned_user_id', $userIds);
+                } elseif ($hasUnassigned) {
+                    $q->whereNull('assigned_user_id');
+                } elseif (!empty($userIds)) {
+                    $q->whereIn('assigned_user_id', $userIds);
+                }
+            });
         }
 
         if ($request->filled('crm_service_type_id')) {
