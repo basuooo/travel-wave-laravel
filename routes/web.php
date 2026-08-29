@@ -532,6 +532,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/service-types', [CrmController::class, 'serviceTypes'])->name('service-types');
                 Route::get('/reports', [CrmController::class, 'reports'])->middleware('permission:reports.view')->name('reports');
                 Route::get('/reports-2', [CrmController::class, 'reports2'])->middleware('permission:reports.view')->name('reports2');
+                Route::get('/reports-center', [\App\Http\Controllers\Admin\CrmReportsCenterController::class, 'index'])->middleware('permission:reports.view')->name('reports-center.index');
+                Route::get('/reports-center/drilldown', [\App\Http\Controllers\Admin\CrmReportsCenterController::class, 'drilldown'])->middleware('permission:reports.view')->name('reports-center.drilldown');
+                Route::get('/reports-center/export', [\App\Http\Controllers\Admin\CrmReportsCenterController::class, 'export'])->middleware('permission:reports.view')->name('reports-center.export');
             });
         });
         Route::middleware('permission:documents.view')->prefix('documents')->name('documents.')->group(function () {

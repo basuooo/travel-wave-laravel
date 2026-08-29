@@ -207,6 +207,17 @@ class ShortcutController extends Controller
                 'permission' => 'leads.delete',
                 'badge_color' => 'danger',
             ],
+            'reports_center' => [
+                'id' => 'reports_center',
+                'category_key' => 'crm',
+                'category_name' => 'إدارة العملاء (CRM)',
+                'title_ar' => '📊 مركز التقارير والتحليل الإداري (Reports Control Center)',
+                'description_ar' => 'مركز التحليل الشامل لأداء الشركة، المبيعات، التسويق والماليات.',
+                'icon' => '📊',
+                'route' => 'admin.crm.reports-center.index',
+                'permission' => 'reports.view',
+                'badge_color' => 'dark',
+            ],
             'crm_reports' => [
                 'id' => 'crm_reports',
                 'category_key' => 'crm',

@@ -115,6 +115,7 @@ if ($adminUser && \Illuminate\Support\Facades\Schema::hasTable('inquiries')) {
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_sources'), 'route' => 'admin.crm.sources', 'match' => 'admin.crm.sources'] : null,
             $adminUser?->hasPermission('leads.view') ? ['label' => __('admin.crm_service_types'), 'route' => 'admin.crm.service-types', 'match' => 'admin.crm.service-types'] : null,
             $adminUser?->hasPermission('leads.delete') ? ['label' => __('admin.crm_deleted_leads'), 'route' => 'admin.crm.leads.trash', 'match' => 'admin.crm.leads.trash'] : null,
+            $adminUser?->hasPermission('reports.view') ? ['label' => '📊 مركز التقارير الشامل (Reports Center)', 'route' => 'admin.crm.reports-center.index', 'match' => 'admin.crm.reports-center.*'] : null,
             $adminUser?->hasPermission('reports.view') ? ['label' => __('admin.crm_reports'), 'route' => 'admin.crm.reports', 'match' => 'admin.crm.reports'] : null,
             $adminUser?->hasPermission('reports.view') ? ['label' => __('admin.crm_reports2'), 'route' => 'admin.crm.reports2', 'match' => 'admin.crm.reports2'] : null,
         ])) : [],
