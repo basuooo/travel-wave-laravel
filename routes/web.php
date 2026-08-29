@@ -78,6 +78,7 @@ Route::middleware(['website.status'])->group(function () {
     // Public Visa Database Preview Routes (No authentication required)
     Route::get('/visa-database/preview/{identifier}/{id?}', [VisaDatabaseController::class, 'publicPreview'])->name('visa-database.public-preview');
     Route::get('/visa-database/catalog', [VisaDatabaseController::class, 'publicCatalog'])->name('visa-database.public-catalog');
+    Route::get('/thank-you', [FrontendController::class, 'thankYouPage'])->name('thank-you');
 
     Route::get('/', [FrontendController::class, 'home'])->name('home');
     Route::get('/visas', [FrontendController::class, 'visaIndex'])->name('visas.index');

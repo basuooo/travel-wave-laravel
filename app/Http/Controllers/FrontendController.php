@@ -422,10 +422,11 @@ class FrontendController extends Controller
         }
 
         if ($selectedForm && $selectedForm->thankYouAction() === 'thank_you_page') {
-            return view('frontend.thank_you', [
-                'form' => $selectedForm,
-                'inquiry' => $inquiry,
-            ]);
+            return redirect()->route('thank-you', array_filter([
+                'form_id' => $selectedForm->id,
+                'inquiry_id' => $inquiry->id,
+                'visa_record_id' => $request->input('visa_record_id'),
+            ]));
         }
 
         return back()->with('success', $data['success_message'] ?? __('ui.inquiry_success'));
@@ -554,14 +555,40 @@ class FrontendController extends Controller
         }
 
         if ($form->thankYouAction() === 'thank_you_page') {
-            return view('frontend.thank_you', [
-                'form' => $form,
-                'inquiry' => $inquiry,
-                'visaRecord' => $visaRecord,
-            ]);
+            return redirect()->route('thank-you', array_filter([
+                'form_id' => $form->id,
+                'inquiry_id' => $inquiry->id,
+                'visa_record_id' => $meta['visa_record_id'] ?? null,
+            ]));
         }
 
         return back()->with('success', $meta['success_message'] ?? ($form->localized('success_message') ?: __('ui.inquiry_success')));
+    }
+
+    public function thankYouPage(Request $request)
+    {
+        $formId = $request->input('form_id');
+        $inquiryId = $request->input('inquiry_id');
+        $visaRecordId = $request->input('visa_record_id');
+
+        $form = $formId ? LeadForm::find($formId) : null;
+        if (! $form) {
+            $catalogSetting = PublicCatalogSetting::getSettings();
+            $form = $catalogSetting->selected_lead_form_id ? LeadForm::find($catalogSetting->selected_lead_form_id) : null;
+        }
+
+        $inquiry = $inquiryId ? Inquiry::find($inquiryId) : null;
+        $visaRecord = $visaRecordId ? \App\Models\VisaRecord::with('country')->find($visaRecordId) : null;
+
+        if ($form && $form->thankYouAction() === 'redirect' && $form->thankYouRedirectUrl()) {
+            return redirect($form->thankYouRedirectUrl());
+        }
+
+        return view('frontend.thank_you', [
+            'form' => $form,
+            'inquiry' => $inquiry,
+            'visaRecord' => $visaRecord,
+        ]);
     }
 
     protected function defaultMetaEventNameForType(?string $type): string
