@@ -550,6 +550,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('crm')->name('crm.')->group(function () {
             Route::post('/leads/import/preview', [CrmLeadController::class, 'previewImport'])->name('leads.import.preview');
+            Route::post('/leads/import/cancel', [CrmLeadController::class, 'cancelImport'])->name('leads.import.cancel');
             Route::post('/leads/import', [CrmLeadController::class, 'import'])->name('leads.import');
             Route::get('/leads/import/template', [CrmLeadController::class, 'downloadTemplate'])->name('leads.import.template');
             Route::get('/leads/import/report/{report}', [CrmLeadController::class, 'downloadImportReport'])->name('leads.import.report');

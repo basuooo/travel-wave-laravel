@@ -96,10 +96,20 @@
                         <h2 class="h5 mb-1">{{ __('admin.crm_import_preview') }}</h2>
                         <p class="text-muted mb-0">{{ __('admin.crm_import_preview_desc') }}</p>
                     </div>
-                    <form method="post" action="{{ route('admin.crm.leads.import') }}">
-                        @csrf
-                        <button class="btn btn-primary">{{ __('admin.crm_confirm_import') }}</button>
-                    </form>
+                    <div class="d-flex align-items-center gap-2">
+                        <form method="post" action="{{ route('admin.crm.leads.import.cancel') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-danger fw-bold d-flex align-items-center gap-1" onclick="return confirm('هل أنت متأكد من إلغاء عملية الاستيراد كلياً؟');">
+                                ❌ إلغاء / كنسل الاستيراد
+                            </button>
+                        </form>
+                        <form method="post" action="{{ route('admin.crm.leads.import') }}">
+                            @csrf
+                            <button class="btn btn-success fw-bold d-flex align-items-center gap-1">
+                                ✅ {{ __('admin.crm_confirm_import') }}
+                            </button>
+                        </form>
+                    </div>
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-3"><div class="admin-stat-card"><div class="admin-stat-card__label">{{ __('admin.total') }}</div><div class="admin-stat-card__value">{{ $preview['summary']['total_rows'] ?? 0 }}</div></div></div>

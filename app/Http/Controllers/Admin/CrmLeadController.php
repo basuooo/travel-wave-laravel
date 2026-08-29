@@ -253,6 +253,17 @@ class CrmLeadController extends Controller
             ->with('success', __('admin.crm_import_preview_ready'));
     }
 
+    public function cancelImport(Request $request)
+    {
+        $this->authorizeLeadTransfer($request->user(), export: false);
+
+        session()->forget(self::IMPORT_PREVIEW_SESSION_KEY);
+
+        return redirect()
+            ->route('admin.crm.leads.transfer')
+            ->with('info', 'تم إلغاء معاينة الاستيراد بنجاح ويمكنك إرجاع أو إدخال ملف جديد.');
+    }
+
     public function import(Request $request, CrmLeadTransferService $transferService)
     {
         $this->authorizeLeadTransfer($request->user(), export: false);
