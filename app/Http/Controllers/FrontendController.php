@@ -414,6 +414,20 @@ class FrontendController extends Controller
             ], fn ($value) => filled($value)),
         ]);
 
+        $catalogSetting = PublicCatalogSetting::getSettings();
+        $selectedForm = $catalogSetting->selected_lead_form_id ? LeadForm::find($catalogSetting->selected_lead_form_id) : null;
+
+        if ($selectedForm && $selectedForm->thankYouAction() === 'redirect' && $selectedForm->thankYouRedirectUrl()) {
+            return redirect($selectedForm->thankYouRedirectUrl());
+        }
+
+        if ($selectedForm && $selectedForm->thankYouAction() === 'thank_you_page') {
+            return view('frontend.thank_you', [
+                'form' => $selectedForm,
+                'inquiry' => $inquiry,
+            ]);
+        }
+
         return back()->with('success', $data['success_message'] ?? __('ui.inquiry_success'));
     }
 
@@ -531,6 +545,17 @@ class FrontendController extends Controller
                 'inquiry_id' => $inquiry->id,
             ], fn ($value) => filled($value)),
         ]);
+
+        if ($form->thankYouAction() === 'redirect' && $form->thankYouRedirectUrl()) {
+            return redirect($form->thankYouRedirectUrl());
+        }
+
+        if ($form->thankYouAction() === 'thank_you_page') {
+            return view('frontend.thank_you', [
+                'form' => $form,
+                'inquiry' => $inquiry,
+            ]);
+        }
 
         return back()->with('success', $meta['success_message'] ?? ($form->localized('success_message') ?: __('ui.inquiry_success')));
     }

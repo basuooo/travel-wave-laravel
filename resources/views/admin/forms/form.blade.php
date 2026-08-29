@@ -37,6 +37,11 @@
                 <i class="fas fa-map-marker-alt me-1"></i> Page Assignments
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-success" id="thankyou-tab" data-bs-toggle="tab" data-bs-target="#thankyou" type="button" role="tab" aria-controls="thankyou" aria-selected="false">
+                🎉 صفحة شكراً لك (Thank You Page)
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content" id="formTabsContent">
@@ -195,6 +200,83 @@
                     @foreach($assignments as $index => $assignment)
                         @include('admin.forms.partials.assignment-row', ['index' => $index, 'assignment' => $assignment, 'assignmentTargets' => $assignmentTargets, 'positionOptions' => $positionOptions])
                     @endforeach
+                </div>
+            </div>
+        </div>
+
+        <!-- Thank You Page Settings Tab -->
+        @php
+            $thankYouSettings = old('settings.thank_you', $settings['thank_you'] ?? []);
+        @endphp
+        <div class="tab-pane fade" id="thankyou" role="tabpanel" aria-labelledby="thankyou-tab">
+            <div class="card admin-card p-4 mb-4 border-top-0 rounded-bottom-4 rounded-top-0 mt-[-1.5rem]">
+                <h2 class="h5 mb-3 text-success d-flex align-items-center gap-2">
+                    <span>🎉</span> <span>إعدادات وتصاميم صفحة "شكراً لك" (Thank You Page Settings)</span>
+                </h2>
+                <p class="text-muted small mb-4">تخصيص الرسالة، الألوان، وأزرار الإجراءات، مع إمكانية إدخال كود HTML / CSS حُر بالكامل.</p>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">نوع الاستجابة بعد التسجيل (Submission Action)</label>
+                        <select name="settings[thank_you][action]" class="form-select">
+                            <option value="thank_you_page" @selected(($thankYouSettings['action'] ?? 'thank_you_page') === 'thank_you_page')>🎉 عرض صفحة / واجهة شكراً لك المخصصة (Custom Thank You Page)</option>
+                            <option value="alert" @selected(($thankYouSettings['action'] ?? '') === 'alert')>💬 رسالة نجاح عادية منبثقة (Standard Alert)</option>
+                            <option value="redirect" @selected(($thankYouSettings['action'] ?? '') === 'redirect')>🔗 إعادة توجيه لرابط مخصص (External Redirect URL)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">رابط التوجيه (Redirect URL) - عند اختيار إعادة التوجيه</label>
+                        <input type="url" name="settings[thank_you][redirect_url]" class="form-control" value="{{ $thankYouSettings['redirect_url'] ?? '' }}" placeholder="https://example.com/thank-you">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">عنوان صفحة الشكر (بالعربي)</label>
+                        <input type="text" dir="rtl" name="settings[thank_you][title_ar]" class="form-control text-end" value="{{ $thankYouSettings['title_ar'] ?? '' }}" placeholder="مثال: تم إرسال طلبك بنجاح 🎉">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">عنوان صفحة الشكر (EN)</label>
+                        <input type="text" name="settings[thank_you][title_en]" class="form-control" value="{{ $thankYouSettings['title_en'] ?? '' }}" placeholder="e.g. Thank You! Request Submitted">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">رسالة وصف الشكر (بالعربي)</label>
+                        <textarea dir="rtl" name="settings[thank_you][message_ar]" class="form-control text-end" rows="3" placeholder="مثال: شكراً لك! تم استلام بياناتك بنجاح وسيقوم فريق المبيعات بالتواصل معك في أقرب وقت.">{{ $thankYouSettings['message_ar'] ?? '' }}</textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">رسالة وصف الشكر (EN)</label>
+                        <textarea name="settings[thank_you][message_en]" class="form-control" rows="3" placeholder="e.g. Thank you! We have received your request and our team will contact you shortly.">{{ $thankYouSettings['message_en'] ?? '' }}</textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">لون خلفية بطاقة الشكر (Card Background Color)</label>
+                        <div class="input-group">
+                            <input type="color" name="settings[thank_you][bg_color]" class="form-control form-control-color" value="{{ $thankYouSettings['bg_color'] ?? '#ffffff' }}">
+                            <input type="text" class="form-control" value="{{ $thankYouSettings['bg_color'] ?? '#ffffff' }}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">لون النص والعنوان (Text Color)</label>
+                        <div class="input-group">
+                            <input type="color" name="settings[thank_you][text_color]" class="form-control form-control-color" value="{{ $thankYouSettings['text_color'] ?? '#212529' }}">
+                            <input type="text" class="form-control" value="{{ $thankYouSettings['text_color'] ?? '#212529' }}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success">🎨 كود HTML حُر مخصص (Custom HTML Code)</label>
+                        <textarea name="settings[thank_you][custom_html]" class="form-control font-monospace dir-ltr" rows="5" placeholder="<div class='my-custom-badge'>أهلاً بك! يمكنك كتابة أي كود HTML هنا...</div>">{{ $thankYouSettings['custom_html'] ?? '' }}</textarea>
+                        <span class="form-text text-muted">يمكنك إدخال محتوى HTML حُر لبطاقات الشكر، صور، أو أكواد تتبع وإحصائيات.</span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-primary">🎨 كود CSS حُر مخصص (Custom CSS Styles)</label>
+                        <textarea name="settings[thank_you][custom_css]" class="form-control font-monospace dir-ltr" rows="5" placeholder=".my-custom-badge { background: gold; border-radius: 8px; }">{{ $thankYouSettings['custom_css'] ?? '' }}</textarea>
+                        <span class="form-text text-muted">يمكنك كتابة تنسيقات CSS لتغيير الخطوط والإنيميشن وألوان العناصر بالكامل.</span>
+                    </div>
                 </div>
             </div>
         </div>
