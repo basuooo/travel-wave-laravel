@@ -44,7 +44,10 @@
                 مراقبة لحظية وشاملة لأداء الشركة، تحليلات التحويل، سرعة الاستجابة، وأداء المبيعات والتسويق.
             </p>
         </div>
-        <div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.crm.reports-center.custom-builder') }}" class="btn btn-warning text-dark fw-bold px-4 py-2 shadow-sm rounded-3">
+                🛠️ منشئ التقارير المخصصة (Custom Builder)
+            </a>
             <a href="{{ route('admin.crm.reports-center.export', array_merge(request()->all(), ['metric_key' => 'total_leads'])) }}" class="btn btn-outline-light fw-bold px-4 py-2 shadow-sm rounded-3">
                 📥 تصدير التقرير الفعلي (Excel)
             </a>

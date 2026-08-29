@@ -535,6 +535,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/reports-center', [\App\Http\Controllers\Admin\CrmReportsCenterController::class, 'index'])->middleware('permission:reports.view')->name('reports-center.index');
                 Route::get('/reports-center/drilldown', [\App\Http\Controllers\Admin\CrmReportsCenterController::class, 'drilldown'])->middleware('permission:reports.view')->name('reports-center.drilldown');
                 Route::get('/reports-center/export', [\App\Http\Controllers\Admin\CrmReportsCenterController::class, 'export'])->middleware('permission:reports.view')->name('reports-center.export');
+                Route::get('/reports-center/custom-builder', [\App\Http\Controllers\Admin\CrmReportsCenterController::class, 'customBuilder'])->middleware('permission:reports.view')->name('reports-center.custom-builder');
+                Route::post('/reports-center/custom-builder/save', [\App\Http\Controllers\Admin\CrmReportsCenterController::class, 'saveCustomTemplate'])->middleware('permission:reports.view')->name('reports-center.custom-builder.save');
+                Route::delete('/reports-center/custom-builder/templates/{template}', [\App\Http\Controllers\Admin\CrmReportsCenterController::class, 'deleteCustomTemplate'])->middleware('permission:reports.view')->name('reports-center.custom-builder.delete');
+                Route::get('/reports-center/custom-builder/export', [\App\Http\Controllers\Admin\CrmReportsCenterController::class, 'exportCustomReport'])->middleware('permission:reports.view')->name('reports-center.custom-builder.export');
             });
         });
         Route::middleware('permission:documents.view')->prefix('documents')->name('documents.')->group(function () {
