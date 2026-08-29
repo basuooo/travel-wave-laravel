@@ -444,6 +444,7 @@ class FrontendController extends Controller
             'success_message' => ['nullable', 'string', 'max:500'],
             'meta_event_id' => ['nullable', 'string', 'max:100'],
             'meta_event_name' => ['nullable', 'string', 'max:100'],
+            'visa_record_id' => ['nullable', 'integer'],
         ]);
 
         $form = LeadForm::query()
@@ -546,6 +547,8 @@ class FrontendController extends Controller
             ], fn ($value) => filled($value)),
         ]);
 
+        $visaRecord = !empty($meta['visa_record_id']) ? \App\Models\VisaRecord::with('country')->find($meta['visa_record_id']) : null;
+
         if ($form->thankYouAction() === 'redirect' && $form->thankYouRedirectUrl()) {
             return redirect($form->thankYouRedirectUrl());
         }
@@ -554,6 +557,7 @@ class FrontendController extends Controller
             return view('frontend.thank_you', [
                 'form' => $form,
                 'inquiry' => $inquiry,
+                'visaRecord' => $visaRecord,
             ]);
         }
 
@@ -636,9 +640,7 @@ class FrontendController extends Controller
             'date' => [...$rules, 'date'],
             'number' => [...$rules, 'integer'],
             'textarea' => [...$rules, 'string'],
-            'select' => !empty($options)
-                ? [...$rules, 'in:' . implode(',', collect($options)->pluck('value')->filter()->all())]
-                : [...$rules, 'string', 'max:255'],
+            'select' => [...$rules, 'string', 'max:255'],
             default => [...$rules, 'string', 'max:255'],
         };
 
