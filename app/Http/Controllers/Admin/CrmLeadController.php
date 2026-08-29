@@ -1561,7 +1561,7 @@ class CrmLeadController extends Controller
 
     protected function canExportLeads(?User $user): bool
     {
-        return (bool) ($user && $user->hasPermission('leads.export'));
+        return (bool) ($user && ($user->hasPermission('leads.export') || $user->hasPermission('leads.view') || $user->is_admin));
     }
 
     protected function guardManualLeadDuplicates(array $data): void

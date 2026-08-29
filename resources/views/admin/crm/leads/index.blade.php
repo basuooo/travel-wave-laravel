@@ -137,6 +137,25 @@
                 <input class="form-control form-control-sm" name="bulk_note" form="crm-bulk-action-form" placeholder="{{ __('admin.notes') }}" style="min-width: 220px;">
                 <button class="btn btn-sm btn-primary" type="submit" form="crm-bulk-action-form">{{ __('admin.apply') }}</button>
             @endif
+            @if(auth()->user()?->hasPermission('leads.export') || auth()->user()?->hasPermission('leads.view') || auth()->user()?->is_admin)
+                <div class="dropdown d-inline-block ms-1">
+                    <button class="btn btn-sm btn-outline-success dropdown-toggle fw-bold d-inline-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span>📥</span> <span>استخراج المحدد (Export)</span>
+                    </button>
+                    <ul class="dropdown-menu shadow">
+                        <li>
+                            <button type="submit" form="crm-bulk-export-xlsx-form" class="dropdown-item fw-bold text-success d-flex align-items-center gap-2">
+                                <span>📊</span> <span>تصدير Excel (.xlsx)</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="submit" form="crm-bulk-export-csv-form" class="dropdown-item fw-bold text-primary d-flex align-items-center gap-2">
+                                <span>📄</span> <span>تصدير CSV (.csv)</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            @endif
             @if(auth()->user()?->hasPermission('leads.delete'))
                 <a href="{{ route('admin.crm.leads.trash') }}" class="btn btn-outline-secondary btn-sm">{{ __('admin.crm_deleted_leads') }}</a>
             @endif
@@ -225,29 +244,79 @@
     @csrf
 </form>
 
+<form id="crm-bulk-export-xlsx-form" method="post" action="{{ route('admin.crm.leads.export') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="format" value="xlsx">
+    <div id="bulk-export-xlsx-inputs"></div>
+</form>
+<form id="crm-bulk-export-csv-form" method="post" action="{{ route('admin.crm.leads.export') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="format" value="csv">
+    <div id="bulk-export-csv-inputs"></div>
+</form>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const bulkForm = document.getElementById('crm-bulk-action-form');
     const selectAll = document.querySelector('[data-select-all]');
     const checkboxes = Array.from(document.querySelectorAll('[data-lead-checkbox]'));
-    if (!bulkForm || !selectAll || checkboxes.length === 0) {
-        return;
+
+    if (selectAll && checkboxes.length > 0) {
+        selectAll.addEventListener('change', function () {
+            checkboxes.forEach((checkbox) => {
+                checkbox.checked = selectAll.checked;
+            });
+        });
     }
 
-    selectAll.addEventListener('change', function () {
-        checkboxes.forEach((checkbox) => {
-            checkbox.checked = selectAll.checked;
+    if (bulkForm && checkboxes.length > 0) {
+        bulkForm.addEventListener('submit', function (event) {
+            const hasSelection = checkboxes.some((checkbox) => checkbox.checked);
+            if (!hasSelection) {
+                event.preventDefault();
+                alert('يرجى تحديد عميل واحد على الأقل من الجدول عبر المربعات (Checkboxes).');
+            }
         });
-    });
+    }
 
-    bulkForm.addEventListener('submit', function (event) {
-        const hasSelection = checkboxes.some((checkbox) => checkbox.checked);
+    const xlsxForm = document.getElementById('crm-bulk-export-xlsx-form');
+    const csvForm = document.getElementById('crm-bulk-export-csv-form');
+    const xlsxInputs = document.getElementById('bulk-export-xlsx-inputs');
+    const csvInputs = document.getElementById('bulk-export-csv-inputs');
 
-        if (!hasSelection) {
-            event.preventDefault();
-            alert('{{ __('admin.no_search_results') }}');
+    function syncExportInputs(targetContainer) {
+        targetContainer.innerHTML = '';
+        const selectedBoxes = checkboxes.filter(cb => cb.checked);
+        if (selectedBoxes.length === 0) {
+            return false;
         }
-    });
+        selectedBoxes.forEach(cb => {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'lead_ids[]';
+            hidden.value = cb.value;
+            targetContainer.appendChild(hidden);
+        });
+        return true;
+    }
+
+    if (xlsxForm) {
+        xlsxForm.addEventListener('submit', function (event) {
+            if (!syncExportInputs(xlsxInputs)) {
+                event.preventDefault();
+                alert('يرجى تحديد عميل واحد على الأقل من الجدول عبر مربعات الاختيار (Checkboxes) للاستخراج.');
+            }
+        });
+    }
+
+    if (csvForm) {
+        csvForm.addEventListener('submit', function (event) {
+            if (!syncExportInputs(csvInputs)) {
+                event.preventDefault();
+                alert('يرجى تحديد عميل واحد على الأقل من الجدول عبر مربعات الاختيار (Checkboxes) للاستخراج.');
+            }
+        });
+    }
 });
 </script>
 @endsection
