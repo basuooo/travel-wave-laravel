@@ -10,7 +10,23 @@
         <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ $inquiry->email }}</dd>
         <dt class="col-sm-3">Type</dt><dd class="col-sm-9">{{ $inquiry->type }}</dd>
         <dt class="col-sm-3">Destination</dt><dd class="col-sm-9">{{ $inquiry->destination }}</dd>
-        <dt class="col-sm-3">Source Page</dt><dd class="col-sm-9">{{ $inquiry->source_page }}</dd>
+        <dt class="col-sm-3">Source Page</dt>
+        <dd class="col-sm-9">
+            @if($inquiry->source_page)
+                @php
+                    $rawSource = $inquiry->source_page;
+                    $sourceUrl = (str_starts_with($rawSource, 'http://') || str_starts_with($rawSource, 'https://'))
+                        ? $rawSource
+                        : url(ltrim($rawSource, '/'));
+                @endphp
+                <a href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer" class="badge text-bg-light border text-decoration-none text-primary d-inline-flex align-items-center gap-1 fs-6" title="فتح صفحة المصدر في نافذة جديدة: {{ $sourceUrl }}">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>
+                    <span>{{ ltrim($rawSource, '/') }}</span>
+                </a>
+            @else
+                -
+            @endif
+        </dd>
         <dt class="col-sm-3">Display Position</dt><dd class="col-sm-9">{{ $inquiry->display_position ?: '-' }}</dd>
         <dt class="col-sm-3">Message</dt><dd class="col-sm-9">{{ $inquiry->message }}</dd>
     </dl>

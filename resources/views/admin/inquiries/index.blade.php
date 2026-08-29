@@ -120,7 +120,16 @@
                             <div class="mb-1">
                                 <span class="badge bg-secondary">{{ $item->crmServiceType?->name_ar ?: ucfirst($item->type ?: 'عام') }}</span>
                                 @if($item->source_page)
-                                    <span class="badge text-bg-light border" title="صفحة المصدر">{{ Str::limit($item->source_page, 25) }}</span>
+                                    @php
+                                        $rawSource = $item->source_page;
+                                        $sourceUrl = (str_starts_with($rawSource, 'http://') || str_starts_with($rawSource, 'https://'))
+                                            ? $rawSource
+                                            : url(ltrim($rawSource, '/'));
+                                    @endphp
+                                    <a href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer" class="badge text-bg-light border text-decoration-none text-primary d-inline-flex align-items-center gap-1" title="فتح صفحة المصدر في نافذة جديدة: {{ $sourceUrl }}">
+                                        <i class="bi bi-box-arrow-up-right small"></i>
+                                        <span>{{ ltrim($rawSource, '/') }}</span>
+                                    </a>
                                 @endif
                             </div>
                             <div>

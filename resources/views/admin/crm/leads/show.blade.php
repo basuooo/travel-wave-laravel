@@ -38,6 +38,23 @@
                 <dt class="col-sm-4">{{ $lead->localizedServiceDestinationLabel() ?: __('admin.destination') }}</dt><dd class="col-sm-8">{{ $lead->serviceDestinationValue() ?: ($lead->country ?: ($lead->nationality ?: '-')) }}</dd>
                 <dt class="col-sm-4">{{ __('admin.crm_number_of_persons') }}</dt><dd class="col-sm-8">{{ $lead->travelers_count ?: '-' }}</dd>
                 <dt class="col-sm-4">{{ __('admin.source') }}</dt><dd class="col-sm-8">{{ $lead->crmSource?->localizedName() ?: ($lead->lead_source ?: '-') }}</dd>
+                <dt class="col-sm-4">صفحة المصدر (Source Page)</dt>
+                <dd class="col-sm-8">
+                    @if($lead->source_page)
+                        @php
+                            $rawSource = $lead->source_page;
+                            $sourceUrl = (str_starts_with($rawSource, 'http://') || str_starts_with($rawSource, 'https://'))
+                                ? $rawSource
+                                : url(ltrim($rawSource, '/'));
+                        @endphp
+                        <a href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer" class="badge text-bg-light border text-decoration-none text-primary d-inline-flex align-items-center gap-1 fs-6" title="فتح صفحة المصدر في نافذة جديدة: {{ $sourceUrl }}">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>
+                            <span>{{ ltrim($rawSource, '/') }}</span>
+                        </a>
+                    @else
+                        -
+                    @endif
+                </dd>
                 <dt class="col-sm-4">{{ __('admin.marketing_campaign') }}</dt>
                 <dd class="col-sm-8">
                     @if($lead->utmCampaign)
