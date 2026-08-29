@@ -1,4 +1,4 @@
-@extends('layouts.frontend')
+@extends('layouts.app')
 
 @php
     $isEn = app()->getLocale() === 'en';
