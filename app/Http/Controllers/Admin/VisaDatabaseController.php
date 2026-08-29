@@ -384,10 +384,44 @@ class VisaDatabaseController extends Controller
         return back()->with('success', 'تم حفظ إعدادات الدليل العام للعملاء بنجاح.');
     }
 
-    public function publicPreview($id)
+    public function publicPreview($identifier, $id = null)
     {
         VisaRecord::ensureTableSchema();
-        $record = VisaRecord::with(['country.categories'])->findOrFail($id);
+        VisaCountry::ensureTableSchema();
+
+        $record = null;
+
+        if ($id) {
+            $record = VisaRecord::with(['country.categories'])->find($id);
+        }
+
+        if (! $record && is_numeric($identifier)) {
+            $record = VisaRecord::with(['country.categories'])->find($identifier);
+        }
+
+        if (! $record) {
+            $rawSearch = trim((string) $identifier);
+            $slugSearch = \Illuminate\Support\Str::slug($rawSearch);
+            $normalizedSearch = preg_replace('/[أإآ]/u', 'ا', preg_replace('/[\x{064B}-\x{0652}\x{0670}]/u', '', $rawSearch));
+
+            $record = VisaRecord::with(['country.categories'])
+                ->where('status', 'active')
+                ->whereHas('country', function ($cq) use ($rawSearch, $slugSearch, $normalizedSearch) {
+                    $cq->where('slug', $rawSearch)
+                        ->orWhere('slug', $slugSearch)
+                        ->orWhere('name_en', 'like', "%{$rawSearch}%")
+                        ->orWhere('name_en', 'like', "%{$slugSearch}%")
+                        ->orWhere('name_ar', 'like', "%{$rawSearch}%")
+                        ->orWhere('name_ar', 'like', "%{$normalizedSearch}%");
+                })
+                ->orderBy('sort_order')
+                ->first();
+        }
+
+        if (! $record) {
+            $record = VisaRecord::with(['country.categories'])->findOrFail($identifier);
+        }
+
         $setting = PublicCatalogSetting::getSettings();
 
         $selectedLeadForm = $setting->selected_lead_form_id ? LeadForm::with('fields')->find($setting->selected_lead_form_id) : null;

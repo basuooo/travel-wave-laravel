@@ -170,7 +170,7 @@
 
                         <div class="d-flex flex-column gap-2">
                             @if(($setting->show_preview_button ?? true))
-                                <a href="{{ route('visa-database.public-preview', $rec->id) }}" class="btn btn-outline-primary w-100 fw-bold rounded-3 py-2">
+                                <a href="{{ route('visa-database.public-preview', $rec->country?->slug ?: $rec->id) }}" class="btn btn-outline-primary w-100 fw-bold rounded-3 py-2">
                                     <i class="bi bi-eye-fill me-1"></i> {{ $isEn ? 'View Requirements & Details' : 'معاينة الشروط والأوراق' }}
                                 </a>
                             @endif

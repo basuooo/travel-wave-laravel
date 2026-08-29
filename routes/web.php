@@ -76,7 +76,7 @@ Route::get('locale/{locale}', [FrontendController::class, 'switchLocale'])->name
 
 Route::middleware(['website.status'])->group(function () {
     // Public Visa Database Preview Routes (No authentication required)
-    Route::get('/visa-database/preview/{id}', [VisaDatabaseController::class, 'publicPreview'])->name('visa-database.public-preview');
+    Route::get('/visa-database/preview/{identifier}/{id?}', [VisaDatabaseController::class, 'publicPreview'])->name('visa-database.public-preview');
     Route::get('/visa-database/catalog', [VisaDatabaseController::class, 'publicCatalog'])->name('visa-database.public-catalog');
 
     Route::get('/', [FrontendController::class, 'home'])->name('home');

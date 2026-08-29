@@ -66,6 +66,10 @@ class VisaCountry extends Model
                         $c->update(['name_ar' => $clean]);
                     }
                 }
+                if (empty($c->slug)) {
+                    $base = $c->name_en ?: $c->name_ar ?: ('country-' . $c->id);
+                    $c->update(['slug' => static::makeUniqueSlug($base, $c->id)]);
+                }
             });
         } catch (\Throwable $e) {
             // ignore
