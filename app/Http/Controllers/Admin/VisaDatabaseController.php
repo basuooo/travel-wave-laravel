@@ -141,7 +141,13 @@ class VisaDatabaseController extends Controller
 
         // Update country categories if provided
         if ($request->has('category_ids') && is_array($request->input('category_ids'))) {
-            $record->country?->categories()->sync($request->input('category_ids'));
+            $catIds = array_filter(array_map('intval', $request->input('category_ids')));
+            if ($record->country) {
+                $record->country->categories()->sync($catIds);
+                if (! empty($catIds)) {
+                    $record->country->update(['visa_category_id' => reset($catIds)]);
+                }
+            }
         }
 
         VisaActivityLog::create([
@@ -206,7 +212,13 @@ class VisaDatabaseController extends Controller
 
         // Update country categories if provided
         if ($request->has('category_ids') && is_array($request->input('category_ids'))) {
-            $visa_record->country?->categories()->sync($request->input('category_ids'));
+            $catIds = array_filter(array_map('intval', $request->input('category_ids')));
+            if ($visa_record->country) {
+                $visa_record->country->categories()->sync($catIds);
+                if (! empty($catIds)) {
+                    $visa_record->country->update(['visa_category_id' => reset($catIds)]);
+                }
+            }
         }
 
         // Log to Activity Log

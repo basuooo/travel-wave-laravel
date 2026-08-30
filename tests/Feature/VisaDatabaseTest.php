@@ -176,7 +176,7 @@ class VisaDatabaseTest extends TestCase
         $this->assertEquals('available_later', $record->latest_embassy_appointment->status);
         $this->assertEquals('آخر شهر 12', $record->latest_embassy_appointment->earliest_date);
 
-        $response = $this->actingAs($admin)->get(route('admin.visa-database.index'));
+        $response = $this->actingAs($admin)->get(route('admin.visa-database.index', ['country_id' => $country->id]));
         $response->assertOk();
         $response->assertSee('آخر شهر 12');
         $response->assertSee('بتاريخ مستقبلي');

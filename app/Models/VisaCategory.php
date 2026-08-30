@@ -179,18 +179,13 @@ class VisaCategory extends Model
                         'is_active' => true,
                     ]);
                 } else {
-                    $c->update([
-                        'visa_category_id' => $euCat->id,
-                        'is_active' => true,
-                    ]);
                     if ($c->trashed()) {
                         $c->restore();
                     }
+                    if (empty($c->visa_category_id)) {
+                        $c->update(['visa_category_id' => $euCat->id]);
+                    }
                 }
-
-                try {
-                    $c->categories()->syncWithoutDetaching([$euCat->id]);
-                } catch (\Throwable $ex) {}
             }
         } catch (\Throwable $e) {
             // ignore
