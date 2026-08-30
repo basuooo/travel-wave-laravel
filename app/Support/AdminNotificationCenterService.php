@@ -6,6 +6,7 @@ use App\Models\AccountingCustomerAccount;
 use App\Models\AccountingCustomerPayment;
 use App\Models\CrmInformation;
 use App\Models\CrmInformationRecipient;
+use App\Models\CrmStatus;
 use App\Models\CrmTask;
 use App\Models\Inquiry;
 use App\Models\User;

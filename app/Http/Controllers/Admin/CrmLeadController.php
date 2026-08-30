@@ -217,7 +217,7 @@ class CrmLeadController extends Controller
         $this->authorizeLeadTransfer($request->user(), export: false);
 
         $data = $request->validate([
-            'duplicate_mode' => ['required', 'in:none,skip,merge_existing'],
+            'duplicate_mode' => ['required', 'in:none,skip,merge_existing,status_update_only'],
             'duplicate_detector' => ['nullable', 'in:full_name,phone,whatsapp_number'],
             'import_file' => ['nullable', 'file', 'mimes:csv,txt,xlsx,xls'],
             'google_sheet_url' => ['nullable', 'url'],
@@ -272,7 +272,15 @@ class CrmLeadController extends Controller
 
         abort_if(empty($preview), 422, 'No import preview found.');
 
-        $summary = $transferService->importPreview($preview, $request->user());
+        $targetCrmStatusId = $request->input('target_crm_status_id');
+        $rowStatusOverrides = (array) $request->input('row_status_ids', []);
+
+        $summary = $transferService->importPreview(
+            $preview,
+            $request->user(),
+            $targetCrmStatusId ? (int) $targetCrmStatusId : null,
+            $rowStatusOverrides
+        );
         $result = $transferService->buildImportResult($preview, $summary);
 
         session()->forget(self::IMPORT_PREVIEW_SESSION_KEY);
@@ -936,6 +944,65 @@ class CrmLeadController extends Controller
         $item->forceDelete();
 
         return redirect()->route('admin.crm.leads.trash')->with('success', __('admin.crm_lead_deleted_permanently'));
+    }
+
+    public function bulkRestoreTrash(Request $request)
+    {
+        $this->ensureDeletionPermission();
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $trashedLeads = Inquiry::onlyTrashed()
+            ->whereIn('id', $data['ids'])
+            ->get();
+
+        $count = 0;
+        foreach ($trashedLeads as $lead) {
+            $lead->restore();
+            $count++;
+        }
+
+        return redirect()
+            ->route('admin.crm.leads.trash')
+            ->with('success', "تم استعادة {$count} عميل بنجاح إلى النظام.");
+    }
+
+    public function bulkForceDestroyTrash(Request $request, AuditLogService $auditLogService)
+    {
+        $this->ensureDeletionPermission();
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $trashedLeads = Inquiry::onlyTrashed()
+            ->whereIn('id', $data['ids'])
+            ->get();
+
+        $count = 0;
+        foreach ($trashedLeads as $lead) {
+            $auditLogService->log(
+                auth()->user(),
+                'crm_leads',
+                'force_deleted',
+                $lead,
+                [
+                    'title' => __('admin.crm_lead_deleted_permanently'),
+                    'description' => $lead->full_name,
+                    'old_values' => $this->leadAuditValues($lead),
+                ]
+            );
+            $lead->forceDelete();
+            $count++;
+        }
+
+        return redirect()
+            ->route('admin.crm.leads.trash')
+            ->with('success', "تم حذف {$count} عميل نهائياً من قاعدة البيانات بنجاح.");
     }
 
     public function storeNote(Request $request, Inquiry $lead)

@@ -20,6 +20,7 @@ class CrmLeadTransferService
     public const DUPLICATE_MODE_NONE = 'none';
     public const DUPLICATE_MODE_SKIP = 'skip';
     public const DUPLICATE_MODE_MERGE = 'merge_existing';
+    public const DUPLICATE_MODE_STATUS_UPDATE = 'status_update_only';
     public const DUPLICATE_DETECTOR_NAME = 'full_name';
     public const DUPLICATE_DETECTOR_PHONE = 'phone';
     public const DUPLICATE_DETECTOR_WHATSAPP = 'whatsapp_number';
@@ -61,6 +62,10 @@ class CrmLeadTransferService
             self::DUPLICATE_MODE_MERGE => [
                 'label_ar' => 'تحديث بيانات العميل المحتمل الحالي',
                 'label_en' => 'Update existing lead',
+            ],
+            self::DUPLICATE_MODE_STATUS_UPDATE => [
+                'label_ar' => 'تحديث حالة الليدات الموجودة فقط (مطابقة وتعديل الحالة)',
+                'label_en' => 'Update status of existing leads only',
             ],
         ];
     }
@@ -182,16 +187,27 @@ class CrmLeadTransferService
             'duplicate_rows' => 0,
             'skipped_duplicate_rows' => 0,
             'merged_rows' => 0,
+            'omitted_rows' => 0,
         ];
+
+        $preloadedLookup = [];
+        if ($duplicateMode !== self::DUPLICATE_MODE_NONE && $duplicateDetector) {
+            $preloadedLookup = $this->preloadDuplicateLeads($rows, $normalizedHeaders, $duplicateDetector);
+        }
 
         foreach ($rows as $index => $row) {
             $mapped = $this->mapRow($normalizedHeaders, $row);
             $errors = $this->validateMappedRow($mapped);
             $duplicate = $duplicateMode === self::DUPLICATE_MODE_NONE
                 ? ['is_duplicate' => false]
-                : $this->findDuplicateLead($mapped, $duplicateDetector, $seenKeys, $index + 2);
+                : $this->findDuplicateLead($mapped, $duplicateDetector, $seenKeys, $index + 2, $preloadedLookup);
             $hasDuplicate = ($duplicate['is_duplicate'] ?? false) === true;
             $action = $this->determineRowAction($duplicateMode, $errors, $hasDuplicate);
+
+            if ($action === 'omit') {
+                $summary['omitted_rows']++;
+                continue;
+            }
 
             if ($hasDuplicate) {
                 $summary['duplicate_rows']++;
@@ -203,7 +219,7 @@ class CrmLeadTransferService
                 $summary['valid_rows']++;
                 $summary['importable_rows']++;
                 $summary['new_rows']++;
-            } elseif ($action === 'merge') {
+            } elseif (in_array($action, ['merge', 'status_update'], true)) {
                 $summary['valid_rows']++;
                 $summary['importable_rows']++;
                 $summary['merged_rows']++;
@@ -211,6 +227,16 @@ class CrmLeadTransferService
                 $summary['valid_rows']++;
                 $summary['skipped_duplicate_rows']++;
             }
+
+            $inquiry = $duplicate['inquiry'] ?? null;
+
+            $currentStatusName = $inquiry?->crmStatus?->name_ar
+                ?: ($inquiry?->crmStatus?->name_en
+                    ?: ($inquiry?->localizedStatus()
+                        ?: (filled($inquiry?->status) ? $inquiry->status : 'غير محدد')));
+
+            $currentStatusColor = $inquiry?->crmStatus?->color ?? '#6c757d';
+            $assignedUserName = $inquiry?->assignedUser?->name ?: 'غير معين';
 
             $previewRows[] = [
                 'row_number' => $index + 2,
@@ -223,10 +249,14 @@ class CrmLeadTransferService
                 'duplicate_reason' => $duplicate['reason'] ?? null,
                 'duplicate_source' => $duplicate['source'] ?? null,
                 'duplicate_with_row' => $duplicate['row_number'] ?? null,
-                'duplicate_id' => ($duplicate['inquiry'] ?? null)?->id,
-                'duplicate_name' => ($duplicate['inquiry'] ?? null)?->full_name,
+                'duplicate_id' => $inquiry?->id,
+                'duplicate_name' => $inquiry?->full_name,
+                'current_crm_status_id' => $inquiry?->crm_status_id,
+                'current_crm_status_name' => $currentStatusName,
+                'current_crm_status_color' => $currentStatusColor,
+                'assigned_user_name' => $assignedUserName,
                 'action' => $action,
-                'will_import' => in_array($action, ['import', 'merge'], true),
+                'will_import' => in_array($action, ['import', 'merge', 'status_update'], true),
             ];
         }
 
@@ -240,7 +270,7 @@ class CrmLeadTransferService
         ];
     }
 
-    public function importPreview(array $preview, User $actor): array
+    public function importPreview(array $preview, User $actor, ?int $targetCrmStatusId = null, array $rowStatusOverrides = []): array
     {
         $mergeStatus = $this->ensureMergedStatus();
         $summary = [
@@ -253,14 +283,47 @@ class CrmLeadTransferService
         $processedKeys = [];
 
         foreach ($preview['rows'] ?? [] as $row) {
-            if (! empty($row['errors'])) {
+            $action = $row['action'] ?? 'skip';
+
+            if (! empty($row['errors']) && $action !== 'status_update') {
                 $summary['errors']++;
                 continue;
             }
 
-            $action = $row['action'] ?? 'skip';
-            if (! in_array($action, ['import', 'merge'], true)) {
+            if (! in_array($action, ['import', 'merge', 'status_update'], true)) {
                 $summary['skipped']++;
+                continue;
+            }
+
+            $rowNum = $row['row_number'] ?? null;
+            $rowTargetStatusId = $rowStatusOverrides[$rowNum] ?? $row['target_crm_status_id'] ?? $targetCrmStatusId ?? $preview['target_crm_status_id'] ?? null;
+
+            if ($action === 'status_update') {
+                $targetLead = null;
+                if (! empty($row['duplicate_id'])) {
+                    $targetLead = Inquiry::query()->find($row['duplicate_id']);
+                }
+
+                if (! $targetLead) {
+                    $summary['skipped']++;
+                    continue;
+                }
+
+                if ($rowTargetStatusId) {
+                    $targetStatus = CrmStatus::query()->find($rowTargetStatusId);
+                    if ($targetStatus) {
+                        $targetLead->update([
+                            'crm_status_id' => $targetStatus->id,
+                            'status' => $targetStatus->slug,
+                            'crm_status_updated_by' => $actor->id,
+                            'crm_status_updated_at' => now(),
+                            'status_1_updated_at' => now(),
+                            'status_1_updated_by' => $actor->id,
+                        ]);
+                        $summary['updated']++;
+                        $summary['merged']++;
+                    }
+                }
                 continue;
             }
 
@@ -504,7 +567,66 @@ class CrmLeadTransferService
         return $errors;
     }
 
-    protected function findDuplicateLead(array $mapped, string $detector, array &$seenKeys, int $rowNumber): array
+    protected function preloadDuplicateLeads(array $rows, array $normalizedHeaders, string $detector): array
+    {
+        $field = $this->normalizeDuplicateDetector($detector);
+        $rawValues = [];
+        $digitsList = [];
+        $suffixList = [];
+
+        foreach ($rows as $row) {
+            $mapped = $this->mapRow($normalizedHeaders, $row);
+            $val = trim((string) ($mapped[$field] ?? ''));
+            if ($val !== '') {
+                $rawValues[] = $val;
+                if (in_array($field, ['phone', 'whatsapp_number'], true)) {
+                    $digits = preg_replace('/\D+/', '', $val);
+                    if ($digits !== '') {
+                        $digitsList[] = $digits;
+                        if (strlen($digits) >= 9) {
+                            $suffixList[] = substr($digits, -9);
+                        }
+                    }
+                }
+            }
+        }
+
+        $rawValues = array_values(array_unique($rawValues));
+        $digitsList = array_values(array_unique($digitsList));
+        $suffixList = array_values(array_unique($suffixList));
+
+        if ($rawValues === [] && $digitsList === []) {
+            return [];
+        }
+
+        $query = Inquiry::query()->with(['crmStatus', 'assignedUser']);
+
+        $query->where(function ($q) use ($field, $rawValues, $digitsList, $suffixList) {
+            if ($rawValues !== []) {
+                $q->whereIn($field, $rawValues);
+            }
+            if ($digitsList !== []) {
+                $q->orWhereIn($field, $digitsList);
+            }
+            foreach ($suffixList as $suffix) {
+                $q->orWhere($field, 'like', "%{$suffix}%");
+            }
+        });
+
+        $candidates = $query->get();
+
+        $lookup = [];
+        foreach ($candidates as $lead) {
+            $key = $this->duplicateComparableValue($field, $lead->{$field});
+            if ($key && ! isset($lookup[$key])) {
+                $lookup[$key] = $lead;
+            }
+        }
+
+        return $lookup;
+    }
+
+    protected function findDuplicateLead(array $mapped, string $detector, array &$seenKeys, int $rowNumber, array $preloadedLookup = []): array
     {
         $field = $this->normalizeDuplicateDetector($detector);
         $value = $this->duplicateComparableValue($field, $mapped[$field] ?? null);
@@ -529,14 +651,22 @@ class CrmLeadTransferService
             ];
         }
 
-        $duplicate = Inquiry::query()
-            ->whereNotNull($field)
-            ->get()
-            ->first(function (Inquiry $lead) use ($field, $value) {
-                return $this->duplicateComparableValue($field, $lead->{$field}) === $value;
-            });
-
         $seenKeys[$value] = $rowNumber;
+
+        $duplicate = $preloadedLookup[$value] ?? null;
+
+        if (! $duplicate && $displayValue !== '') {
+            $duplicate = Inquiry::query()
+                ->with(['crmStatus', 'assignedUser'])
+                ->where(function ($q) use ($field, $displayValue, $value) {
+                    $q->where($field, $displayValue);
+                    if ($value !== '') {
+                        $q->orWhere($field, $value);
+                        $q->orWhere($field, 'like', "%{$value}%");
+                    }
+                })
+                ->first();
+        }
 
         if (! $duplicate) {
             return [
@@ -571,11 +701,16 @@ class CrmLeadTransferService
             self::DUPLICATE_MODE_NONE,
             self::DUPLICATE_MODE_SKIP,
             self::DUPLICATE_MODE_MERGE,
+            self::DUPLICATE_MODE_STATUS_UPDATE,
         ], true) ? $mode : self::DUPLICATE_MODE_NONE;
     }
 
     protected function determineRowAction(string $duplicateMode, array $errors, bool $hasDuplicate): string
     {
+        if ($duplicateMode === self::DUPLICATE_MODE_STATUS_UPDATE) {
+            return $hasDuplicate ? 'status_update' : 'omit';
+        }
+
         if ($errors !== []) {
             return 'invalid';
         }

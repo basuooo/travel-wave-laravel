@@ -90,11 +90,26 @@
         @endif
 
         @if(!empty($preview))
+            @php
+                $isStatusUpdateMode = ($preview['duplicate_mode'] ?? '') === \App\Support\CrmLeadTransferService::DUPLICATE_MODE_STATUS_UPDATE;
+            @endphp
             <div class="card admin-card p-4">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
                     <div>
-                        <h2 class="h5 mb-1">{{ __('admin.crm_import_preview') }}</h2>
-                        <p class="text-muted mb-0">{{ __('admin.crm_import_preview_desc') }}</p>
+                        <h2 class="h5 mb-1">
+                            @if($isStatusUpdateMode)
+                                🔄 {{ __('admin.crm_import_preview') }} (تحديث حالة الليدات بالنظام)
+                            @else
+                                {{ __('admin.crm_import_preview') }}
+                            @endif
+                        </h2>
+                        <p class="text-muted mb-0">
+                            @if($isStatusUpdateMode)
+                                تم مطابقة الليدات الموجودة بالنظام وتصفية الليدات غير الموجودة تلقائياً. حدد الحالة الجديدة للتحديث دفعة واحدة.
+                            @else
+                                {{ __('admin.crm_import_preview_desc') }}
+                            @endif
+                        </p>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <form method="post" action="{{ route('admin.crm.leads.import.cancel') }}">
@@ -103,6 +118,33 @@
                                 ❌ إلغاء / كنسل الاستيراد
                             </button>
                         </form>
+                    </div>
+                </div>
+
+                @if($isStatusUpdateMode)
+                    <form method="post" action="{{ route('admin.crm.leads.import') }}" id="statusUpdateConfirmForm" class="mb-4 p-3 bg-light border border-primary rounded-3">
+                        @csrf
+                        <div class="row align-items-end g-3">
+                            <div class="col-md-7">
+                                <label class="form-label fw-bold text-primary fs-6">
+                                    🎯 اختر الحالة الجديدة لتطبيقها على جميع الليدات المطابقة:
+                                </label>
+                                <select name="target_crm_status_id" class="form-select form-select-lg fw-bold border-primary" id="globalTargetStatusSelect" required>
+                                    <option value="">-- اختر الحالة الجديدة التي ترغب بالتحويل إليها --</option>
+                                    @foreach($statuses as $st)
+                                        <option value="{{ $st->id }}">{{ $st->name_ar }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-5 text-end">
+                                <button type="submit" class="btn btn-success btn-lg fw-bold px-4 w-100">
+                                    ✅ تأكيد تحديث حالة الليدات الآن
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                @else
+                    <div class="d-flex justify-content-end mb-3">
                         <form method="post" action="{{ route('admin.crm.leads.import') }}">
                             @csrf
                             <button class="btn btn-success fw-bold d-flex align-items-center gap-1">
@@ -110,25 +152,35 @@
                             </button>
                         </form>
                     </div>
-                </div>
+                @endif
+
                 <div class="row g-3 mb-3">
                     <div class="col-md-3"><div class="admin-stat-card"><div class="admin-stat-card__label">{{ __('admin.total') }}</div><div class="admin-stat-card__value">{{ $preview['summary']['total_rows'] ?? 0 }}</div></div></div>
-                    <div class="col-md-3"><div class="admin-stat-card admin-stat-card--success"><div class="admin-stat-card__label">{{ __('admin.crm_ready_to_import_count') }}</div><div class="admin-stat-card__value">{{ $preview['summary']['importable_rows'] ?? 0 }}</div></div></div>
-                    <div class="col-md-3"><div class="admin-stat-card admin-stat-card--warning"><div class="admin-stat-card__label">{{ __('admin.crm_duplicate_rows') }}</div><div class="admin-stat-card__value">{{ $preview['summary']['duplicate_rows'] ?? 0 }}</div></div></div>
-                    <div class="col-md-3"><div class="admin-stat-card admin-stat-card--info"><div class="admin-stat-card__label">{{ __('admin.crm_merged_rows') }}</div><div class="admin-stat-card__value">{{ $preview['summary']['merged_rows'] ?? 0 }}</div></div></div>
-                    <div class="col-md-3"><div class="admin-stat-card admin-stat-card--danger"><div class="admin-stat-card__label">{{ __('admin.crm_error_rows') }}</div><div class="admin-stat-card__value">{{ $preview['summary']['error_rows'] ?? 0 }}</div></div></div>
-                </div>
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                    @if(($preview['summary']['duplicate_rows'] ?? 0) > 0)
-                        <a class="btn btn-outline-warning btn-sm" href="{{ route('admin.crm.leads.import.report', ['report' => 'duplicates', 'format' => 'xlsx']) }}">{{ __('admin.crm_download_duplicate_file') }}</a>
-                    @endif
-                    @if(($preview['summary']['merged_rows'] ?? 0) > 0)
-                        <a class="btn btn-outline-info btn-sm" href="{{ route('admin.crm.leads.import.report', ['report' => 'merged', 'format' => 'xlsx']) }}">{{ __('admin.crm_download_merged_file') }}</a>
-                    @endif
-                    @if(($preview['summary']['error_rows'] ?? 0) > 0)
-                        <a class="btn btn-outline-danger btn-sm" href="{{ route('admin.crm.leads.import.report', ['report' => 'invalid', 'format' => 'xlsx']) }}">{{ __('admin.crm_download_invalid_file') }}</a>
+                    @if($isStatusUpdateMode)
+                        <div class="col-md-3"><div class="admin-stat-card admin-stat-card--success"><div class="admin-stat-card__label">ليدات مطابقة بالسيستم</div><div class="admin-stat-card__value">{{ $preview['summary']['importable_rows'] ?? 0 }}</div></div></div>
+                        <div class="col-md-3"><div class="admin-stat-card admin-stat-card--warning"><div class="admin-stat-card__label">ليدات غير موجودة (مستبعدة)</div><div class="admin-stat-card__value">{{ $preview['summary']['omitted_rows'] ?? 0 }}</div></div></div>
+                    @else
+                        <div class="col-md-3"><div class="admin-stat-card admin-stat-card--success"><div class="admin-stat-card__label">{{ __('admin.crm_ready_to_import_count') }}</div><div class="admin-stat-card__value">{{ $preview['summary']['importable_rows'] ?? 0 }}</div></div></div>
+                        <div class="col-md-3"><div class="admin-stat-card admin-stat-card--warning"><div class="admin-stat-card__label">{{ __('admin.crm_duplicate_rows') }}</div><div class="admin-stat-card__value">{{ $preview['summary']['duplicate_rows'] ?? 0 }}</div></div></div>
+                        <div class="col-md-3"><div class="admin-stat-card admin-stat-card--info"><div class="admin-stat-card__label">{{ __('admin.crm_merged_rows') }}</div><div class="admin-stat-card__value">{{ $preview['summary']['merged_rows'] ?? 0 }}</div></div></div>
+                        <div class="col-md-3"><div class="admin-stat-card admin-stat-card--danger"><div class="admin-stat-card__label">{{ __('admin.crm_error_rows') }}</div><div class="admin-stat-card__value">{{ $preview['summary']['error_rows'] ?? 0 }}</div></div></div>
                     @endif
                 </div>
+
+                @if(! $isStatusUpdateMode)
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        @if(($preview['summary']['duplicate_rows'] ?? 0) > 0)
+                            <a class="btn btn-outline-warning btn-sm" href="{{ route('admin.crm.leads.import.report', ['report' => 'duplicates', 'format' => 'xlsx']) }}">{{ __('admin.crm_download_duplicate_file') }}</a>
+                        @endif
+                        @if(($preview['summary']['merged_rows'] ?? 0) > 0)
+                            <a class="btn btn-outline-info btn-sm" href="{{ route('admin.crm.leads.import.report', ['report' => 'merged', 'format' => 'xlsx']) }}">{{ __('admin.crm_download_merged_file') }}</a>
+                        @endif
+                        @if(($preview['summary']['error_rows'] ?? 0) > 0)
+                            <a class="btn btn-outline-danger btn-sm" href="{{ route('admin.crm.leads.import.report', ['report' => 'invalid', 'format' => 'xlsx']) }}">{{ __('admin.crm_download_invalid_file') }}</a>
+                        @endif
+                    </div>
+                @endif
+
                 <div class="table-responsive">
                     <table class="table align-middle">
                         <thead>
@@ -136,46 +188,92 @@
                                 <th>#</th>
                                 <th>{{ __('admin.full_name') }}</th>
                                 <th>{{ __('admin.phone') }}</th>
-                                <th>{{ __('admin.status') }}</th>
-                                <th>{{ __('admin.assigned_user') }}</th>
-                                <th>{{ __('admin.crm_import_result') }}</th>
+                                @if($isStatusUpdateMode)
+                                    <th>الحالة الحالية بالنظام</th>
+                                    <th>البائع / المسؤول</th>
+                                    <th>الحالة الجديدة المستهدفة</th>
+                                    <th>نتيجة المطابقة</th>
+                                @else
+                                    <th>{{ __('admin.status') }}</th>
+                                    <th>{{ __('admin.assigned_user') }}</th>
+                                    <th>{{ __('admin.crm_import_result') }}</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
                             @foreach(($preview['rows'] ?? []) as $row)
                                 <tr>
                                     <td>{{ $row['row_number'] }}</td>
-                                    <td>{{ $row['mapped']['full_name'] ?? '-' }}</td>
+                                    <td>{{ $row['duplicate_name'] ?: ($row['mapped']['full_name'] ?? '-') }}</td>
                                     <td>{{ $row['mapped']['phone'] ?? '-' }}</td>
-                                    <td>{{ $row['mapped']['crm_status'] ?? '-' }}</td>
-                                    <td>{{ $row['mapped']['assigned_user'] ?? '-' }}</td>
-                                    <td>
-                                        @if(!empty($row['errors']))
-                                            <span class="badge text-bg-danger">{{ implode(' | ', $row['errors']) }}</span>
-                                        @elseif(($row['action'] ?? null) === 'merge')
-                                            <span class="badge text-bg-info">
-                                                {{ __('admin.crm_duplicate_will_be_merged') }}
-                                                @if(!empty($row['duplicate_value']))
-                                                    - {{ $row['duplicate_value'] }}
-                                                @endif
+                                    @if($isStatusUpdateMode)
+                                        <td>
+                                            <span class="badge px-3 py-2 fw-bold text-dark border shadow-sm" style="background-color: {{ $row['current_crm_status_color'] ?? '#f8f9fa' }}; color: #111827 !important; font-size: 0.85rem;">
+                                                {{ $row['current_crm_status_name'] ?: 'غير محدد' }}
                                             </span>
-                                        @elseif(!empty($row['duplicate_reason']))
-                                            <span class="badge text-bg-warning">
-                                                {{ __('admin.crm_duplicate_will_be_skipped') }}
-                                                @if(!empty($row['duplicate_value']))
-                                                    - {{ $row['duplicate_value'] }}
-                                                @endif
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border px-2 py-1 fw-bold">
+                                                <i class="bi bi-person me-1"></i>{{ $row['assigned_user_name'] ?: 'غير معين' }}
                                             </span>
-                                        @else
-                                            <span class="badge text-bg-success">{{ __('admin.crm_ready_to_import') }}</span>
-                                        @endif
-                                    </td>
+                                        </td>
+                                        <td>
+                                            <select name="row_status_ids[{{ $row['row_number'] }}]" form="statusUpdateConfirmForm" class="form-select form-select-sm row-target-status fw-bold">
+                                                <option value="">-- كالحالة الجماعية --</option>
+                                                @foreach($statuses as $st)
+                                                    <option value="{{ $st->id }}">{{ $st->name_ar }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <span class="badge text-bg-success">🎯 ليد موجود بالسيستم - جاهز لتحديث الحالة</span>
+                                        </td>
+                                    @else
+                                        <td>{{ $row['mapped']['crm_status'] ?? '-' }}</td>
+                                        <td>{{ $row['mapped']['assigned_user'] ?? '-' }}</td>
+                                        <td>
+                                            @if(!empty($row['errors']))
+                                                <span class="badge text-bg-danger">{{ implode(' | ', $row['errors']) }}</span>
+                                            @elseif(($row['action'] ?? null) === 'merge')
+                                                <span class="badge text-bg-info">
+                                                    {{ __('admin.crm_duplicate_will_be_merged') }}
+                                                    @if(!empty($row['duplicate_value']))
+                                                        - {{ $row['duplicate_value'] }}
+                                                    @endif
+                                                </span>
+                                            @elseif(!empty($row['duplicate_reason']))
+                                                <span class="badge text-bg-warning">
+                                                    {{ __('admin.crm_duplicate_will_be_skipped') }}
+                                                    @if(!empty($row['duplicate_value']))
+                                                        - {{ $row['duplicate_value'] }}
+                                                    @endif
+                                                </span>
+                                            @else
+                                                <span class="badge text-bg-success">{{ __('admin.crm_ready_to_import') }}</span>
+                                            @endif
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
             </div>
+            @if($isStatusUpdateMode)
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const globalSelect = document.getElementById('globalTargetStatusSelect');
+                        if (globalSelect) {
+                            globalSelect.addEventListener('change', function() {
+                                const val = this.value;
+                                document.querySelectorAll('.row-target-status').forEach(select => {
+                                    select.value = val;
+                                });
+                            });
+                        }
+                    });
+                </script>
+            @endif
         @endif
     </div>
     @endif

@@ -599,6 +599,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/leads/{lead}', [CrmLeadController::class, 'destroy'])->name('leads.destroy');
             Route::post('/leads/{lead}/restore', [CrmLeadController::class, 'restore'])->name('leads.restore');
             Route::delete('/leads/{lead}/force-delete', [CrmLeadController::class, 'forceDestroy'])->name('leads.force-destroy');
+            Route::post('/leads/trash/bulk-restore', [CrmLeadController::class, 'bulkRestoreTrash'])->name('leads.trash.bulk-restore');
+            Route::delete('/leads/trash/bulk-force-destroy', [CrmLeadController::class, 'bulkForceDestroyTrash'])->name('leads.trash.bulk-force-destroy');
         });
         Route::middleware('permission:documents.manage')->prefix('documents')->name('documents.')->group(function () {
             Route::post('/', [CrmDocumentController::class, 'store'])->name('store');
