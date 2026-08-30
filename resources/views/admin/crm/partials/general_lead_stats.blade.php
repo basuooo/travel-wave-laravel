@@ -12,10 +12,20 @@
                 الإجمالي: <strong id="stats-total-count">...</strong>
             </span>
 
-            <!-- Date Period Filter -->
+            <!-- Date Period & Basis Filters -->
+            <div class="d-flex align-items-center gap-1 bg-light border rounded px-2 py-1">
+                <label for="stats-date-basis" class="form-label mb-0 fw-semibold small text-nowrap"><i class="bi bi-funnel me-1"></i>أساس الفلترة:</label>
+                <select class="form-select form-select-sm fw-bold border-0 bg-transparent shadow-none" id="stats-date-basis" style="width: 175px;">
+                    <option value="created_or_updated" selected>إنشاء أو تحديث بالفترة</option>
+                    <option value="created_at">تاريخ الإنشاء فقط</option>
+                    <option value="crm_status_updated_at">تاريخ تغيير الحالة فقط</option>
+                    <option value="updated_at">تاريخ آخر تعديل فقط</option>
+                </select>
+            </div>
+
             <div class="d-flex align-items-center gap-1 bg-light border rounded px-2 py-1">
                 <label for="stats-date-period" class="form-label mb-0 fw-semibold small text-nowrap"><i class="bi bi-calendar-event me-1"></i>الفترة الزمنية:</label>
-                <select class="form-select form-select-sm fw-bold border-0 bg-transparent shadow-none" id="stats-date-period" style="width: 150px;">
+                <select class="form-select form-select-sm fw-bold border-0 bg-transparent shadow-none" id="stats-date-period" style="width: 140px;">
                     <option value="today" selected>اليوم</option>
                     <option value="yesterday">أمس</option>
                     <option value="current_week">الأسبوع الحالي</option>
@@ -189,6 +199,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const dateSelect = document.getElementById('stats-date-period');
+    const dateBasisSelect = document.getElementById('stats-date-basis');
     const filterForm = document.getElementById('stats-filter-form');
     const grid = document.getElementById('stats-cards-grid');
     const loading = document.getElementById('stats-loading-spinner');
@@ -201,6 +212,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (dateSelect) {
         dateSelect.value = 'today';
     }
+    if (dateBasisSelect) {
+        dateBasisSelect.value = 'created_or_updated';
+    }
 
     let debounceTimer = null;
 
@@ -210,6 +224,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const params = new URLSearchParams();
         params.append('date_period', dateSelect.value);
+        if (dateBasisSelect) {
+            params.append('date_basis', dateBasisSelect.value);
+        }
 
         if (filterForm) {
             const formData = new FormData(filterForm);
@@ -258,6 +275,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (dateSelect) {
         dateSelect.addEventListener('change', fetchGeneralStats);
+    }
+    if (dateBasisSelect) {
+        dateBasisSelect.addEventListener('change', fetchGeneralStats);
     }
 
     if (filterForm) {

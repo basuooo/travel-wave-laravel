@@ -50,13 +50,80 @@ class VisaCategory extends Model
                 }
             });
 
-            // Ensure EU category exists
+            // 1. Remove empty "شنغن (Schengen)" category
+            static::withTrashed()
+                ->where(function ($q) {
+                    $q->where('slug', 'schengen')
+                      ->orWhere('name_ar', 'شنغن')
+                      ->orWhere('name_ar', 'like', '%شنغن (Schengen)%');
+                })
+                ->where('name_ar', 'not like', '%خارج%')
+                ->get()
+                ->each(function ($cat) {
+                    $cat->update(['is_active' => false]);
+                    $cat->delete();
+                });
+
+            // 2. Rename "دول شنغن خارج الاتحاد الاوروبي" to "دول اوربية خارج الاتحاد الاوروبي"
+            $nonEuCat = static::withTrashed()
+                ->where(function ($q) {
+                    $q->where('slug', 'schengen-non-eu')
+                      ->orWhere('slug', 'non-eu-europe')
+                      ->orWhere('name_ar', 'like', '%خارج الاتحاد%');
+                })
+                ->first();
+
+            if (! $nonEuCat) {
+                $nonEuCat = static::create([
+                    'name_ar' => 'دول اوربية خارج الاتحاد الاوروبي',
+                    'name_en' => 'European Non-EU Countries',
+                    'slug' => 'non-eu-europe',
+                    'sort_order' => 2,
+                    'is_active' => true,
+                ]);
+            } else {
+                $nonEuCat->update([
+                    'name_ar' => 'دول اوربية خارج الاتحاد الاوروبي',
+                    'name_en' => 'European Non-EU Countries',
+                    'is_active' => true,
+                ]);
+                if ($nonEuCat->trashed()) {
+                    $nonEuCat->restore();
+                }
+            }
+
+            // 3. Remove "امريكا الوسطى" (Central America)
+            static::withTrashed()
+                ->where(function ($q) {
+                    $q->where('slug', 'central-america')
+                      ->orWhere('name_ar', 'like', '%امريكا الوسطى%')
+                      ->orWhere('name_ar', 'like', '%أمريكا الوسطى%');
+                })
+                ->get()
+                ->each(function ($cat) {
+                    $cat->update(['is_active' => false]);
+                    $cat->delete();
+                });
+
+            // 4. Remove "الكاريبي" (Caribbean)
+            static::withTrashed()
+                ->where(function ($q) {
+                    $q->where('slug', 'caribbean')
+                      ->orWhere('name_ar', 'like', '%الكاريبي%');
+                })
+                ->get()
+                ->each(function ($cat) {
+                    $cat->update(['is_active' => false]);
+                    $cat->delete();
+                });
+
+            // 5. Ensure EU category exists
             $euCat = static::withTrashed()->where('slug', 'eu')->first()
                 ?? static::withTrashed()->where('name_ar', 'like', '%الاتحاد%')->first();
 
             if (! $euCat) {
                 $euCat = static::create([
-                    'name_ar' => 'الاتحاد الاوروبي (European Union)',
+                    'name_ar' => 'دول الاتحاد الاوروبي',
                     'name_en' => 'European Union',
                     'slug' => 'eu',
                     'sort_order' => 1,
@@ -66,7 +133,7 @@ class VisaCategory extends Model
                 $euCat->restore();
             }
 
-            // Ensure all 27 EU countries exist and are attached to EU category
+            // Ensure EU countries (including Norway and Switzerland) exist and are attached to EU category
             $euCountries = [
                 ['name_ar' => 'فرنسا', 'name_en' => 'France', 'slug' => 'france'],
                 ['name_ar' => 'بلجيكا', 'name_en' => 'Belgium', 'slug' => 'belgium'],
@@ -95,6 +162,8 @@ class VisaCategory extends Model
                 ['name_ar' => 'سلوفينيا', 'name_en' => 'Slovenia', 'slug' => 'slovenia'],
                 ['name_ar' => 'ايرلندا', 'name_en' => 'Ireland', 'slug' => 'ireland'],
                 ['name_ar' => 'اسبانيا', 'name_en' => 'Spain', 'slug' => 'spain'],
+                ['name_ar' => 'النرويج', 'name_en' => 'Norway', 'slug' => 'norway'],
+                ['name_ar' => 'سويسرا', 'name_en' => 'Switzerland', 'slug' => 'switzerland'],
             ];
 
             foreach ($euCountries as $item) {
@@ -109,8 +178,14 @@ class VisaCategory extends Model
                         'slug' => $item['slug'],
                         'is_active' => true,
                     ]);
-                } elseif ($c->trashed()) {
-                    $c->restore();
+                } else {
+                    $c->update([
+                        'visa_category_id' => $euCat->id,
+                        'is_active' => true,
+                    ]);
+                    if ($c->trashed()) {
+                        $c->restore();
+                    }
                 }
 
                 try {

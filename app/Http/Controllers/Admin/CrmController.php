@@ -63,37 +63,58 @@ class CrmController extends Controller
         $viewer = auth()->user();
         $query = CrmLeadAccess::applyVisibilityScope(Inquiry::query(), $viewer);
 
-        // 1. Date Period Filter (Default: today)
+        // 1. Date Period & Date Basis Filters
+        $dateBasis = (string) $request->input('date_basis', 'created_or_updated');
         $datePeriod = (string) $request->input('date_period', 'today');
+
+        $range = null;
         switch ($datePeriod) {
             case 'today':
-                $query->whereDate('created_at', today());
+                $range = [today()->startOfDay(), today()->endOfDay()];
                 break;
             case 'yesterday':
-                $query->whereDate('created_at', today()->subDay());
+                $range = [today()->subDay()->startOfDay(), today()->subDay()->endOfDay()];
                 break;
             case 'current_week':
-                $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+                $range = [now()->startOfWeek(), now()->endOfWeek()];
                 break;
             case 'last_week':
-                $query->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()]);
+                $range = [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()];
                 break;
             case 'current_month':
-                $query->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+                $range = [now()->startOfMonth(), now()->endOfMonth()];
                 break;
             case 'last_month':
-                $query->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()]);
+                $range = [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()];
                 break;
             case 'current_year':
-                $query->whereBetween('created_at', [now()->startOfYear(), now()->endOfYear()]);
+                $range = [now()->startOfYear(), now()->endOfYear()];
                 break;
             case 'last_year':
-                $query->whereBetween('created_at', [now()->subYear()->startOfYear(), now()->subYear()->endOfYear()]);
+                $range = [now()->subYear()->startOfYear(), now()->subYear()->endOfYear()];
                 break;
             case 'all':
             default:
-                // No date restriction
+                $range = null;
                 break;
+        }
+
+        if ($range !== null) {
+            [$startDate, $endDate] = $range;
+            if ($dateBasis === 'created_at') {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } elseif ($dateBasis === 'crm_status_updated_at') {
+                $query->whereBetween('crm_status_updated_at', [$startDate, $endDate]);
+            } elseif ($dateBasis === 'updated_at') {
+                $query->whereBetween('updated_at', [$startDate, $endDate]);
+            } else {
+                // 'created_or_updated' (Default) - Includes leads created OR updated / status changed in the selected period
+                $query->where(function ($q) use ($startDate, $endDate) {
+                    $q->whereBetween('created_at', [$startDate, $endDate])
+                      ->orWhereBetween('crm_status_updated_at', [$startDate, $endDate])
+                      ->orWhereBetween('updated_at', [$startDate, $endDate]);
+                });
+            }
         }
 
         // 2. Lead Filters (Same filter parameters as Leads Index)
