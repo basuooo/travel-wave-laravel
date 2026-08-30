@@ -4,6 +4,8 @@
 @section('page_description', __('admin.dashboard_overview_desc'))
 
 @section('content')
+@include('admin.crm.partials.general_lead_stats')
+
 <section class="admin-dashboard-grid">
     <div class="admin-hero-card">
         <div class="admin-hero-copy">

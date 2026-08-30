@@ -50,6 +50,11 @@ class DashboardController extends Controller
         ];
 
         return view('admin.dashboard', [
+            'allStatuses' => \App\Models\CrmStatus::query()->where('is_active', true)->orderBy('sort_order')->get(),
+            'sources' => \App\Models\CrmLeadSource::query()->where('is_active', true)->orderBy('sort_order')->get(),
+            'serviceTypes' => \App\Models\CrmServiceType::query()->where('is_active', true)->orderBy('sort_order')->get(),
+            'users' => \App\Models\User::query()->where('is_active', true)->orderBy('name')->get(),
+            'canViewAllLeads' => \App\Support\CrmLeadAccess::canViewAll(auth()->user()),
             'stats' => $stats,
             'quickAccess' => [
                 [

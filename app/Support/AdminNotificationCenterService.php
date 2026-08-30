@@ -14,6 +14,7 @@ use App\Notifications\CrmFollowUpReminderNotification;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 
 class AdminNotificationCenterService
@@ -40,30 +41,156 @@ class AdminNotificationCenterService
             return;
         }
 
-        $user->notify(new AdminDatabaseNotification($this->normalizePayload($payload)));
+        try {
+            $user->notify(new AdminDatabaseNotification($this->normalizePayload($payload)));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     public function notifyUsers(iterable $users, array $payload): void
     {
-        collect($users)
-            ->filter(fn ($user) => $user instanceof User)
-            ->unique('id')
-            ->each(fn (User $user) => $this->notifyUser($user, $payload));
+        $activeUsers = collect($users)
+            ->filter(fn ($user) => $user instanceof User && $user->is_active)
+            ->unique('id');
+
+        // 1. Instant In-App Database Notifications (< 1ms)
+        $activeUsers->each(function (User $user) use ($payload) {
+            $userPayload = $payload;
+            if (isset($payload['event_key'])) {
+                $userPayload['event_key'] = $payload['event_key'] . ':' . $user->id;
+            }
+            $this->notifyUser($user, $userPayload);
+        });
+
+        // 2. Fast Deferred Email Dispatch (Runs after HTTP response, zero user wait time)
+        $this->dispatchNotificationEmail($activeUsers, $payload);
+    }
+
+    protected function dispatchNotificationEmail(iterable $users, array $payload): void
+    {
+        dispatch(function () use ($users, $payload) {
+            try {
+                $settings = \App\Support\MailSettingsService::getSettings();
+                
+                if (blank($settings['mail_host'])) {
+                    return;
+                }
+
+                \App\Support\MailSettingsService::applyConfig();
+
+                $rawCustomEmails = $settings['notification_emails'] ?? null;
+                $mode = $settings['notification_email_mode'] ?? 'assigned_and_custom';
+
+                $customEmails = [];
+                if (filled($rawCustomEmails)) {
+                    $customEmails = preg_split('/[\s,;]+/', $rawCustomEmails);
+                    $customEmails = array_filter(array_map('trim', $customEmails), fn ($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+                    $customEmails = array_values(array_unique($customEmails));
+                }
+
+                $recipientUsers = collect($users)
+                    ->filter(fn ($u) => $u instanceof User && $u->is_active && filter_var($u->email, FILTER_VALIDATE_EMAIL))
+                    ->unique('id');
+
+                $titleAr = $payload['title_ar'] ?? $payload['title_en'] ?? 'إشعار من النظام';
+                $titleEn = $payload['title_en'] ?? $payload['title_ar'] ?? 'System Notification';
+                $messageAr = $payload['message_ar'] ?? $payload['message_en'] ?? '';
+                $messageEn = $payload['message_en'] ?? $payload['message_ar'] ?? '';
+                $url = $payload['url'] ?? null;
+                $subjectName = $payload['subject_name'] ?? $payload['lead_name'] ?? null;
+                $fromAddress = trim($settings['mail_from_address'] ?? '') ?: trim($settings['mail_username'] ?? '');
+                $fromName = trim($settings['mail_from_name'] ?? '') ?: config('app.name', 'Travel Wave');
+
+                // 1. Mode: custom_only (Sends EXACTLY 1 email to custom emails)
+                if ($mode === 'custom_only') {
+                    if (empty($customEmails)) {
+                        return;
+                    }
+
+                    $primaryEmail = array_shift($customEmails);
+
+                    Mail::raw(
+                        sprintf("%s\n\n%s%s\n\n%s", 
+                            $messageAr, 
+                            $subjectName ? "الموضوع: {$subjectName}\n" : "",
+                            $url ? "الرابط: {$url}\n" : "",
+                            "شكراً لاستخدامك Travel Wave."
+                        ),
+                        function ($msg) use ($primaryEmail, $customEmails, $titleAr, $fromAddress, $fromName) {
+                            $msg->from($fromAddress, $fromName)
+                                ->to($primaryEmail)
+                                ->subject($titleAr);
+
+                            if (! empty($customEmails)) {
+                                $msg->cc($customEmails);
+                            }
+                        }
+                    );
+                    return;
+                }
+
+                // 2. Mode: assigned_only or assigned_and_custom
+                foreach ($recipientUsers as $user) {
+                    $userEmail = $user->email;
+                    $userLocale = $user->preferred_language ?? app()->getLocale();
+                    $isAr = $userLocale === 'ar';
+                    $title = $isAr ? $titleAr : $titleEn;
+                    $message = $isAr ? $messageAr : $messageEn;
+
+                    $ccEmails = [];
+                    if ($mode === 'assigned_and_custom' && ! empty($customEmails)) {
+                        $ccEmails = array_values(array_filter($customEmails, fn ($e) => strtolower($e) !== strtolower($userEmail)));
+                    }
+
+                    Mail::raw(
+                        sprintf("مرحباً %s،\n\n%s\n\n%s%s\n\n%s",
+                            $user->name,
+                            $message,
+                            $subjectName ? ($isAr ? "الموضوع: {$subjectName}\n" : "Subject: {$subjectName}\n") : "",
+                            $url ? ($isAr ? "الرابط: {$url}\n" : "Link: {$url}\n") : "",
+                            $isAr ? "شكراً لاستخدامك Travel Wave." : "Thank you for using Travel Wave."
+                        ),
+                        function ($msg) use ($userEmail, $ccEmails, $title, $fromAddress, $fromName) {
+                            $msg->from($fromAddress, $fromName)
+                                ->to($userEmail)
+                                ->subject($title);
+
+                            if (! empty($ccEmails)) {
+                                $msg->cc($ccEmails);
+                            }
+                        }
+                    );
+                }
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        })->afterResponse();
     }
 
     public function createTaskAssignedNotification(CrmTask $task, ?User $actor = null, ?string $context = null): void
     {
         $task->loadMissing(['assignedUser', 'creator', 'inquiry']);
-        $recipient = $task->assignedUser;
+        
+        $recipients = collect();
+        if ($task->assignedUser) {
+            $recipients->push($task->assignedUser);
+        }
+        if ($actor) {
+            $recipients->push($actor);
+        }
+        $this->managementRecipients()->each(fn (User $user) => $recipients->push($user));
 
-        if (! $recipient) {
+        $recipients = $recipients->unique('id');
+
+        if ($recipients->isEmpty()) {
             return;
         }
 
         $isReassigned = $context === 'reassigned';
 
-        $this->notifyUser($recipient, [
-            'event_key' => sprintf('task_assigned:%d:%d:%s', $task->id, $recipient->id, $task->updated_at?->timestamp ?: now()->timestamp),
+        $this->notifyUsers($recipients, [
+            'event_key' => sprintf('task_assigned:%d:%s', $task->id, (string) microtime(true)),
             'type' => $isReassigned ? 'task_reassigned' : 'task_assigned',
             'module' => 'tasks',
             'severity' => self::SEVERITY_INFO,
@@ -95,12 +222,26 @@ class AdminNotificationCenterService
     {
         $task->loadMissing(['creator', 'assignedUser']);
 
-        if (! $task->creator || (int) $task->creator->id === (int) ($actor?->id)) {
+        $recipients = collect();
+        if ($task->creator) {
+            $recipients->push($task->creator);
+        }
+        if ($task->assignedUser) {
+            $recipients->push($task->assignedUser);
+        }
+        if ($actor) {
+            $recipients->push($actor);
+        }
+        $this->managementRecipients()->each(fn (User $user) => $recipients->push($user));
+
+        $recipients = $recipients->unique('id');
+
+        if ($recipients->isEmpty()) {
             return;
         }
 
-        $this->notifyUser($task->creator, [
-            'event_key' => sprintf('task_completed:%d:%d', $task->id, $task->completed_at?->timestamp ?: now()->timestamp),
+        $this->notifyUsers($recipients, [
+            'event_key' => sprintf('task_completed:%d:%s', $task->id, (string) microtime(true)),
             'type' => 'task_completed',
             'module' => 'tasks',
             'severity' => self::SEVERITY_SUCCESS,
@@ -122,14 +263,34 @@ class AdminNotificationCenterService
     {
         $lead->loadMissing(['assignedUser', 'crmStatus']);
 
-        if (! $lead->assignedUser) {
+        $recipients = collect();
+        if ($lead->assignedUser) {
+            $recipients->push($lead->assignedUser);
+        }
+        if ($actor) {
+            $recipients->push($actor);
+        }
+        $this->managementRecipients()->each(fn (User $user) => $recipients->push($user));
+
+        // Strict Lead Permission & Visibility Check
+        $recipients = $recipients->filter(function (User $user) use ($lead) {
+            if (! $user->is_active) {
+                return false;
+            }
+            if (! $user->hasPermission('leads.view') && ! CrmLeadAccess::canViewAll($user)) {
+                return false;
+            }
+            return CrmLeadAccess::canAccessLead($user, $lead);
+        })->unique('id');
+
+        if ($recipients->isEmpty()) {
             return;
         }
 
         $type = $oldAssignedUserId ? 'lead_reassigned' : 'lead_assigned';
 
-        $this->notifyUser($lead->assignedUser, [
-            'event_key' => sprintf('lead_assigned:%d:%d:%s', $lead->id, $lead->assignedUser->id, $lead->updated_at?->timestamp ?: now()->timestamp),
+        $this->notifyUsers($recipients, [
+            'event_key' => sprintf('lead_assigned:%d:%s', $lead->id, (string) microtime(true)),
             'type' => $type,
             'module' => 'crm',
             'severity' => self::SEVERITY_INFO,
@@ -151,6 +312,64 @@ class AdminNotificationCenterService
             'created_by' => $actor?->id,
             'meta' => [
                 'crm_status_id' => $lead->crm_status_id,
+                'phone' => $lead->phone,
+            ],
+        ]);
+    }
+
+    public function createLeadStatusUpdatedNotification(Inquiry $lead, ?CrmStatus $oldStatus, ?CrmStatus $newStatus, ?User $actor = null): void
+    {
+        $lead->loadMissing(['assignedUser', 'crmStatus']);
+
+        $recipients = collect();
+        if ($lead->assignedUser) {
+            $recipients->push($lead->assignedUser);
+        }
+        if ($actor) {
+            $recipients->push($actor);
+        }
+        $this->managementRecipients()->each(fn (User $user) => $recipients->push($user));
+
+        // Strict Lead Permission & Visibility Check
+        $recipients = $recipients->filter(function (User $user) use ($lead) {
+            if (! $user->is_active) {
+                return false;
+            }
+            if (! $user->hasPermission('leads.view') && ! CrmLeadAccess::canViewAll($user)) {
+                return false;
+            }
+            return CrmLeadAccess::canAccessLead($user, $lead);
+        })->unique('id');
+
+        if ($recipients->isEmpty()) {
+            return;
+        }
+
+        $oldStatusName = $oldStatus?->localizedName() ?: '-';
+        $newStatusName = $newStatus?->localizedName() ?: ($lead->crmStatus?->localizedName() ?: '-');
+        $actorName = $actor?->name ?: '';
+        $byText = $actorName ? " بواسطة ({$actorName})" : '';
+
+        $this->notifyUsers($recipients, [
+            'event_key' => sprintf('lead_status_updated:%d:%s', $lead->id, (string) microtime(true)),
+            'type' => 'lead_status_updated',
+            'module' => 'crm',
+            'severity' => self::SEVERITY_INFO,
+            'title_ar' => 'تحديث حالة العميل',
+            'title_en' => 'Lead Status Updated',
+            'message_ar' => sprintf('تم تحديث حالة العميل (%s) إلى: %s%s', $lead->full_name, $newStatusName, $byText),
+            'message_en' => sprintf('Lead (%s) status updated to: %s%s', $lead->full_name, $newStatusName, $byText),
+            'subject_name' => $lead->full_name,
+            'lead_name' => $lead->full_name,
+            'url' => route('admin.crm.leads.show', $lead),
+            'action_label_ar' => __('admin.notifications_payload_view_lead', locale: 'ar'),
+            'action_label_en' => __('admin.notifications_payload_view_lead', locale: 'en'),
+            'notifiable_type' => Inquiry::class,
+            'notifiable_id' => $lead->id,
+            'created_by' => $actor?->id,
+            'meta' => [
+                'old_status' => $oldStatusName,
+                'new_status' => $newStatusName,
                 'phone' => $lead->phone,
             ],
         ]);
@@ -392,7 +611,13 @@ class AdminNotificationCenterService
         return User::query()
             ->where('is_active', true)
             ->get()
-            ->filter(fn (User $user) => CrmLeadAccess::canViewAll($user) || $user->hasPermission('reports.view'))
+            ->filter(function (User $user) {
+                return $user->is_admin
+                    || CrmLeadAccess::canViewAll($user)
+                    || $user->hasPermission('reports.view')
+                    || $user->hasPermission('leads.manage')
+                    || $user->roles()->whereIn('slug', ['super-admin', 'admin', 'manager'])->exists();
+            })
             ->values();
     }
 

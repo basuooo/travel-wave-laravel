@@ -37,6 +37,8 @@ class SettingController extends Controller
             'maintenance_message_en' => ['nullable', 'string'],
             'maintenance_bypass_admin' => ['nullable', 'boolean'],
             'contact_email' => ['nullable', 'email', 'max:255'],
+            'notification_emails' => ['nullable', 'string'],
+            'notification_email_mode' => ['nullable', 'string', 'in:assigned_and_custom,custom_only,assigned_only'],
             'phone' => ['nullable', 'string', 'max:255'],
             'secondary_phone' => ['nullable', 'string', 'max:255'],
             'whatsapp_number' => ['nullable', 'string', 'max:255'],

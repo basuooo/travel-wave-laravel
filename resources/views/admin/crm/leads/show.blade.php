@@ -41,15 +41,9 @@
                 <dt class="col-sm-4">صفحة المصدر (Source Page)</dt>
                 <dd class="col-sm-8">
                     @if($lead->source_page)
-                        @php
-                            $rawSource = $lead->source_page;
-                            $sourceUrl = (str_starts_with($rawSource, 'http://') || str_starts_with($rawSource, 'https://'))
-                                ? $rawSource
-                                : url(ltrim($rawSource, '/'));
-                        @endphp
-                        <a href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer" class="badge text-bg-light border text-decoration-none text-primary d-inline-flex align-items-center gap-1 fs-6" title="فتح صفحة المصدر في نافذة جديدة: {{ $sourceUrl }}">
+                        <a href="{{ (str_starts_with($lead->source_page, 'http://') || str_starts_with($lead->source_page, 'https://')) ? $lead->source_page : url(ltrim($lead->source_page, '/')) }}" target="_blank" rel="noopener noreferrer" class="badge text-bg-light border text-decoration-none text-primary d-inline-flex align-items-center gap-1 fs-6" title="فتح صفحة المصدر في نافذة جديدة">
                             <i class="bi bi-box-arrow-up-right me-1"></i>
-                            <span>{{ ltrim($rawSource, '/') }}</span>
+                            <span>{{ ltrim($lead->source_page, '/') }}</span>
                         </a>
                     @else
                         -
@@ -449,6 +443,32 @@
             @csrf
             @method('PUT')
             <h2 class="h5 mb-3">{{ __('admin.crm_lead_management') }}</h2>
+
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                    <i class="bi bi-check-circle-fill me-1"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <i class="bi bi-exclamation-octagon-fill me-1"></i> {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <h6 class="alert-heading fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> تعذر الحفظ والتعديل بسبب التنبيهات التالية:</h6>
+                    <ul class="mb-0 ps-3 small">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label">{{ __('admin.full_name') }}</label><input class="form-control" name="full_name" value="{{ old('full_name', $lead->full_name) }}"></div>
                 <div class="col-md-6"><label class="form-label">{{ __('admin.phone') }}</label><input class="form-control" name="phone" value="{{ old('phone', $lead->phone) }}"></div>

@@ -45,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->ensureSchemaOnly();
+        $this->applyDynamicMailConfig();
 
         // ⚡ Interactive Funnels — auto-create tables on first access (no artisan migrate needed)
         try {
@@ -132,5 +133,45 @@ class AppServiceProvider extends ServiceProvider
             ->with(['page', 'children' => fn ($q) => $q->where('is_active', true)->with('page')->orderBy('sort_order')])
             ->orderBy('sort_order')
             ->get();
+    }
+
+    protected function applyDynamicMailConfig(): void
+    {
+        try {
+            if (! $this->safeHasTable('settings')) {
+                return;
+            }
+
+            $columns = Schema::getColumnListing('settings');
+            if (! in_array('mail_host', $columns, true)) {
+                return;
+            }
+
+            $setting = Setting::query()->first();
+            if (! $setting) {
+                return;
+            }
+
+            if (filled($setting->mail_host)) {
+                config([
+                    'mail.default' => $setting->mail_mailer ?: env('MAIL_MAILER', 'smtp'),
+                    'mail.mailers.smtp.transport' => 'smtp',
+                    'mail.mailers.smtp.host' => $setting->mail_host,
+                    'mail.mailers.smtp.port' => (int) ($setting->mail_port ?: env('MAIL_PORT', 587)),
+                    'mail.mailers.smtp.username' => $setting->mail_username,
+                    'mail.mailers.smtp.password' => $setting->mail_password,
+                    'mail.mailers.smtp.encryption' => $setting->mail_encryption ?: env('MAIL_ENCRYPTION', 'tls'),
+                ]);
+            }
+
+            if (filled($setting->mail_from_address)) {
+                config([
+                    'mail.from.address' => $setting->mail_from_address,
+                    'mail.from.name' => $setting->mail_from_name ?: config('app.name', 'Travel Wave'),
+                ]);
+            }
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 }

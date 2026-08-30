@@ -4,6 +4,8 @@
 @section('page_description', __('admin.crm_desc'))
 
 @section('content')
+@include('admin.crm.partials.general_lead_stats')
+
 <div class="row g-3 mb-4">
     <div class="col-md-2"><div class="card admin-card p-3 h-100"><div class="text-muted small">{{ __('admin.total_leads') }}</div><div class="h3 mb-0">{{ $summary['total'] }}</div></div></div>
     <div class="col-md-2"><div class="card admin-card p-3 h-100"><div class="text-muted small">{{ __('admin.crm_new_leads') }}</div><div class="h3 mb-0">{{ $summary['new'] }}</div></div></div>

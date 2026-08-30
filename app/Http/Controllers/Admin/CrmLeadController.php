@@ -657,6 +657,7 @@ class CrmLeadController extends Controller
         $updates['status'] = $status?->slug ?? $lead->status;
 
         $originalAssignedUserId = (int) ($lead->assigned_user_id ?? 0);
+        $oldStatus = $lead->crmStatus;
         $originalPaidAmount = round((float) ($lead->paid_amount ?? 0), 2);
         $legacyPricing = $this->normalizeLegacyPricing($lead, $data);
         $accountingPayload = $this->normalizeAccountingSummaryPayload($lead, $data, $canManageAccounting);
@@ -712,6 +713,15 @@ class CrmLeadController extends Controller
             $notificationCenterService->createLeadAssignedNotification(
                 $lead->fresh(['assignedUser', 'crmStatus']),
                 $originalAssignedUserId,
+                $request->user()
+            );
+        }
+
+        if ($statusChanged) {
+            $notificationCenterService->createLeadStatusUpdatedNotification(
+                $lead->fresh(['assignedUser', 'crmStatus']),
+                $oldStatus,
+                $status,
                 $request->user()
             );
         }
@@ -1145,12 +1155,23 @@ class CrmLeadController extends Controller
             }
 
             if ($lead->isDirty()) {
+                $statusWasChanged = $lead->isDirty('crm_status_id');
+                $oldStatusModel = $lead->crmStatus;
                 $lead->save();
 
                 if ($hasAssignmentChange && (int) $oldAssigned !== (int) $lead->assigned_user_id) {
                     $notificationCenterService->createLeadAssignedNotification(
                         $lead->fresh(['assignedUser', 'crmStatus']),
                         (int) $oldAssigned,
+                        $request->user()
+                    );
+                }
+
+                if ($statusWasChanged) {
+                    $notificationCenterService->createLeadStatusUpdatedNotification(
+                        $lead->fresh(['assignedUser', 'crmStatus']),
+                        $oldStatusModel,
+                        $status,
                         $request->user()
                     );
                 }

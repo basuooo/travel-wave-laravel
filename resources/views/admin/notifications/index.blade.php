@@ -40,6 +40,168 @@
         </div>
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if(isset($errors) && $errors->any())
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <h6 class="fw-bold mb-2">تنبيه في البيانات المدخلة:</h6>
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('smtp_diagnostic'))
+        @php $diag = session('smtp_diagnostic'); @endphp
+        <div class="card mb-4 {{ $diag['success'] ? 'border-success' : 'border-danger' }} shadow-sm">
+            <div class="card-header {{ $diag['success'] ? 'bg-success text-white' : 'bg-danger text-white' }} py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold">
+                    {{ $diag['success'] ? '✅ نتائج الفحص التشخيصي لـ SMTP: نجاح الاتصال 100%' : '❌ نتائج الفحص التشخيصي لـ SMTP: يوجد خطأ يحتاج إلى تعديل' }}
+                </h6>
+                <span class="badge bg-white text-dark">{{ $diag['success'] ? 'PASSED' : 'FAILED' }}</span>
+            </div>
+            <div class="card-body">
+                <p class="fw-bold mb-3 fs-6">{{ $diag['summary'] }}</p>
+                <div class="list-group">
+                    @foreach($diag['steps'] as $index => $step)
+                        <div class="list-group-item d-flex justify-content-between align-items-start {{ $step['status'] === 'passed' ? 'list-group-item-success' : ($step['status'] === 'failed' ? 'list-group-item-danger' : 'list-group-item-light') }}">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">
+                                    @if($step['status'] === 'passed')
+                                        ✅ الخطوة {{ $index + 1 }}: {{ $step['name'] }}
+                                    @elseif($step['status'] === 'failed')
+                                        ❌ الخطوة {{ $index + 1 }}: {{ $step['name'] }}
+                                    @else
+                                        ⏳ الخطوة {{ $index + 1 }}: {{ $step['name'] }}
+                                    @endif
+                                </div>
+                                <small class="d-block mt-1 text-wrap" style="white-space: pre-line;">{{ $step['detail'] ?: 'لم يتم الوصول لهذه الخطوة' }}</small>
+                            </div>
+                            <span class="badge {{ $step['status'] === 'passed' ? 'bg-success' : ($step['status'] === 'failed' ? 'bg-danger' : 'bg-secondary') }}">
+                                {{ strtoupper($step['status']) }}
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <div class="card shadow-sm mb-4 border-primary">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-primary">
+                📧 إعدادات البريد الإلكتروني وخادم SMTP
+            </h5>
+            <span class="badge text-bg-info">Email & SMTP Settings</span>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ route('admin.notifications.email-settings.update') }}">
+                @csrf
+                @method('PUT')
+                
+                <h6 class="fw-bold mb-3 text-secondary">1. إيميلات استقبال الإشعارات (Notification Recipients)</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">إيميلات الاستقبال (ممكن إضافة أكثر من إيميل تفصل بينها فاصلة)</label>
+                        <textarea class="form-control" name="notification_emails" rows="2" placeholder="example1@domain.com, example2@domain.com">{{ old('notification_emails', $mailSettings['notification_emails'] ?? $setting->notification_emails) }}</textarea>
+                        <small class="form-text text-muted">يمكنك كتابة بريد إلكتروني واحد أو عدة إيميلات تفصل بينها فاصلة (,) لاستقبال إشعارات النظام.</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">وضع إرسال البريد الإلكتروني (Notification Email Routing)</label>
+                        <select class="form-select mb-3" name="notification_email_mode">
+                            <option value="custom_only" {{ old('notification_email_mode', $mailSettings['notification_email_mode'] ?? $setting->notification_email_mode) === 'custom_only' ? 'selected' : '' }}>
+                                1. إرسال للإيميلات المضافة في خانة "إيميلات الاستقبال" فقط
+                            </option>
+                            <option value="assigned_and_custom" {{ old('notification_email_mode', $mailSettings['notification_email_mode'] ?? ($setting->notification_email_mode ?? 'assigned_and_custom')) === 'assigned_and_custom' ? 'selected' : '' }}>
+                                2. إرسال للإيميلات المضافة في خانة "إيميلات الاستقبال" + إيميل البائع/المسؤول معاً
+                            </option>
+                            <option value="assigned_only" {{ old('notification_email_mode', $mailSettings['notification_email_mode'] ?? $setting->notification_email_mode) === 'assigned_only' ? 'selected' : '' }}>
+                                3. إرسال لإيميل البائع/المسؤول فقط
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <h6 class="fw-bold mb-3 text-secondary">2. إعدادات خادم البريد (SMTP Mail Server Credentials)</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">خادم البريد (SMTP Host)</label>
+                        <input type="text" class="form-control" name="mail_host" value="{{ old('mail_host', $mailSettings['mail_host'] ?? $setting->mail_host) }}" placeholder="smtp.hostinger.com أو smtp.gmail.com">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold">المنفذ (Port)</label>
+                        <input type="text" class="form-control" name="mail_port" value="{{ old('mail_port', $mailSettings['mail_port'] ?? ($setting->mail_port ?: '587')) }}" placeholder="587 أو 465">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">اسم المستخدم (SMTP Username)</label>
+                        <input type="text" class="form-control" name="mail_username" value="{{ old('mail_username', $mailSettings['mail_username'] ?? $setting->mail_username) }}" placeholder="info@travelwave-ras.com">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">كلمة المرور (SMTP Password)</label>
+                        <input type="password" class="form-control" name="mail_password" value="{{ old('mail_password', $mailSettings['mail_password'] ?? $setting->mail_password) }}" placeholder="••••••••">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">التشفير (Encryption)</label>
+                        <select class="form-select" name="mail_encryption">
+                            <option value="tls" {{ old('mail_encryption', $mailSettings['mail_encryption'] ?? ($setting->mail_encryption ?? 'tls')) === 'tls' ? 'selected' : '' }}>TLS (Port 587)</option>
+                            <option value="ssl" {{ old('mail_encryption', $mailSettings['mail_encryption'] ?? $setting->mail_encryption) === 'ssl' ? 'selected' : '' }}>SSL (Port 465)</option>
+                            <option value="null" {{ old('mail_encryption', $mailSettings['mail_encryption'] ?? $setting->mail_encryption) === 'null' ? 'selected' : '' }}>بدون تشفير (None)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">إيميل المُرسِل (From Address)</label>
+                        <input type="text" class="form-control" name="mail_from_address" value="{{ old('mail_from_address', $mailSettings['mail_from_address'] ?? ($setting->mail_from_address ?: $setting->contact_email)) }}" placeholder="info@travelwave-ras.com">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold">اسم المُرسِل (From Name)</label>
+                        <input type="text" class="form-control" name="mail_from_name" value="{{ old('mail_from_name', $mailSettings['mail_from_name'] ?? ($setting->mail_from_name ?: 'Travel Wave')) }}" placeholder="Travel Wave Notifications">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="submit" formaction="{{ route('admin.notifications.test-connection') }}" class="btn btn-outline-primary px-4 fw-bold">
+                        🔍 فحص واختبار الاتصال بـ SMTP
+                    </button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">
+                        💾 حفظ إعدادات البريد و SMTP
+                    </button>
+                </div>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="bg-light p-3 rounded-3">
+                <h6 class="fw-bold mb-2 text-dark">🧪 اختبار إرسال بريد تجريبي (Test Email)</h6>
+                <form method="post" action="{{ route('admin.notifications.test-email') }}" class="row g-2 align-items-center">
+                    @csrf
+                    <div class="col-md-8">
+                        <input type="email" name="test_email" class="form-control" placeholder="أدخل إيميل لاختبار الإرسال إليه" value="{{ auth()->user()->email }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-outline-success w-100">
+                            🚀 إرسال رسالة تجريبية الآن
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <form method="get" class="row g-3 align-items-end">

@@ -51,6 +51,163 @@ class CrmController extends Controller
             'latestLeads' => CrmLeadAccess::applyVisibilityScope(Inquiry::query()->with(['crmStatus', 'crmSource', 'assignedUser']), auth()->user())->latest()->limit(8)->get(),
             'latestNotes' => CrmLeadNote::query()->with(['inquiry', 'user'])->whereHas('inquiry', fn ($query) => CrmLeadAccess::applyVisibilityScope($query, auth()->user()))->latest()->limit(8)->get(),
             'canViewAllLeads' => CrmLeadAccess::canViewAll(auth()->user()),
+            'allStatuses' => $statuses,
+            'sources' => CrmLeadSource::query()->where('is_active', true)->orderBy('sort_order')->get(),
+            'serviceTypes' => CrmServiceType::query()->where('is_active', true)->orderBy('sort_order')->get(),
+            'users' => $this->assignableUsers(),
+        ]);
+    }
+
+    public function generalLeadStats(Request $request)
+    {
+        $viewer = auth()->user();
+        $query = CrmLeadAccess::applyVisibilityScope(Inquiry::query(), $viewer);
+
+        // 1. Date Period Filter (Default: today)
+        $datePeriod = (string) $request->input('date_period', 'today');
+        switch ($datePeriod) {
+            case 'today':
+                $query->whereDate('created_at', today());
+                break;
+            case 'yesterday':
+                $query->whereDate('created_at', today()->subDay());
+                break;
+            case 'current_week':
+                $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+                break;
+            case 'last_week':
+                $query->whereBetween('created_at', [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()]);
+                break;
+            case 'current_month':
+                $query->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+                break;
+            case 'last_month':
+                $query->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()]);
+                break;
+            case 'current_year':
+                $query->whereBetween('created_at', [now()->startOfYear(), now()->endOfYear()]);
+                break;
+            case 'last_year':
+                $query->whereBetween('created_at', [now()->subYear()->startOfYear(), now()->subYear()->endOfYear()]);
+                break;
+            case 'all':
+            default:
+                // No date restriction
+                break;
+        }
+
+        // 2. Lead Filters (Same filter parameters as Leads Index)
+        if ($request->filled('q')) {
+            $needle = '%' . trim((string) $request->input('q')) . '%';
+            $query->where(function ($builder) use ($needle) {
+                $builder->where('full_name', 'like', $needle)
+                    ->orWhere('phone', 'like', $needle)
+                    ->orWhere('whatsapp_number', 'like', $needle)
+                    ->orWhere('email', 'like', $needle)
+                    ->orWhere('country', 'like', $needle)
+                    ->orWhere('destination', 'like', $needle)
+                    ->orWhere('service_type', 'like', $needle)
+                    ->orWhere('service_country_name', 'like', $needle)
+                    ->orWhere('tourism_destination', 'like', $needle)
+                    ->orWhere('travel_destination', 'like', $needle)
+                    ->orWhere('hotel_destination', 'like', $needle)
+                    ->orWhere('lead_source', 'like', $needle)
+                    ->orWhere('admin_notes', 'like', $needle)
+                    ->orWhere('additional_notes', 'like', $needle);
+            });
+        }
+
+        if ($request->filled('admin_notes')) {
+            $query->where('admin_notes', 'like', '%' . trim((string) $request->input('admin_notes')) . '%');
+        }
+
+        if ($request->filled('additional_notes')) {
+            $query->where('additional_notes', 'like', '%' . trim((string) $request->input('additional_notes')) . '%');
+        }
+
+        $statusIds = (array) ($request->input('crm_status_ids') ?? ($request->filled('crm_status_id') ? [$request->input('crm_status_id')] : []));
+        $statusIds = array_filter(array_map('intval', $statusIds));
+        if (! empty($statusIds)) {
+            $query->whereIn('crm_status_id', $statusIds);
+        }
+
+        $sourceIds = (array) ($request->input('crm_source_ids') ?? ($request->filled('crm_source_id') ? [$request->input('crm_source_id')] : []));
+        $sourceIds = array_filter(array_map('intval', $sourceIds));
+        if (! empty($sourceIds)) {
+            $query->whereIn('crm_source_id', $sourceIds);
+        }
+
+        $userValues = (array) ($request->input('assigned_user_ids') ?? ($request->filled('assigned_user_id') ? [$request->input('assigned_user_id')] : []));
+        if (! empty($userValues)) {
+            $query->where(function ($q) use ($userValues) {
+                $hasUnassigned = in_array('unassigned', $userValues, true);
+                $userIds = array_filter(array_map('intval', $userValues));
+
+                if ($hasUnassigned && ! empty($userIds)) {
+                    $q->whereNull('assigned_user_id')->orWhereIn('assigned_user_id', $userIds);
+                } elseif ($hasUnassigned) {
+                    $q->whereNull('assigned_user_id');
+                } elseif (! empty($userIds)) {
+                    $q->whereIn('assigned_user_id', $userIds);
+                }
+            });
+        }
+
+        if ($request->filled('crm_service_type_id')) {
+            $query->where('crm_service_type_id', $request->integer('crm_service_type_id'));
+        }
+
+        if ($request->filled('created_from')) {
+            $query->whereDate('created_at', '>=', $request->date('created_from'));
+        }
+
+        if ($request->filled('created_to')) {
+            $query->whereDate('created_at', '<=', $request->date('created_to'));
+        }
+
+        if ($request->filled('changed_from')) {
+            $query->whereDate('crm_status_updated_at', '>=', $request->date('changed_from'));
+        }
+
+        if ($request->filled('changed_to')) {
+            $query->whereDate('crm_status_updated_at', '<=', $request->date('changed_to'));
+        }
+
+        if ($request->filled('updated_from')) {
+            $query->whereDate('updated_at', '>=', $request->date('updated_from'));
+        }
+
+        if ($request->filled('updated_to')) {
+            $query->whereDate('updated_at', '<=', $request->date('updated_to'));
+        }
+
+        // 3. Efficient Single GROUP BY Query for All Statuses
+        $allStatuses = $this->activeStatuses();
+
+        $countsByStatus = (clone $query)
+            ->whereNotNull('crm_status_id')
+            ->groupBy('crm_status_id')
+            ->selectRaw('crm_status_id, COUNT(*) as count')
+            ->pluck('count', 'crm_status_id')
+            ->all();
+
+        $statusStats = $allStatuses->map(function (CrmStatus $status) use ($countsByStatus) {
+            return [
+                'id' => $status->id,
+                'slug' => $status->slug,
+                'name' => $status->localizedName(),
+                'count' => (int) ($countsByStatus[$status->id] ?? 0),
+                'color' => $status->color_code ?? '#6c757d',
+            ];
+        })->values();
+
+        $totalCount = array_sum(array_column($statusStats->toArray(), 'count'));
+
+        return response()->json([
+            'success' => true,
+            'date_period' => $datePeriod,
+            'total' => $totalCount,
+            'statuses' => $statusStats,
         ]);
     }
 

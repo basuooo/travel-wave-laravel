@@ -135,7 +135,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/clear-cache', [DashboardController::class, 'clearCache'])->name('clear-cache');
         Route::get('/shortcuts', [\App\Http\Controllers\Admin\ShortcutController::class, 'index'])->name('shortcuts.index');
         Route::post('/shortcuts', [\App\Http\Controllers\Admin\ShortcutController::class, 'update'])->name('shortcuts.update');
-        Route::get('/', [\App\Http\Controllers\Admin\ShortcutController::class, 'index'])->name('dashboard');
+        Route::get('/', [\App\Http\Controllers\Admin\ShortcutController::class, 'index'])->name('home');
+        Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
         Route::get('/sync-pages-and-menus', function () {
             try {
                 \App\Support\PageAndMenuSyncer::sync();
@@ -148,6 +149,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/kpi-dashboard', [KpiDashboardController::class, 'index'])->middleware('permission:reports.view')->name('kpi.dashboard');
         Route::get('/search', [AdminSearchController::class, 'index'])->middleware('permission:dashboard.access')->name('search');
         Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+        Route::put('/notifications/email-settings', [AdminNotificationController::class, 'updateEmailSettings'])->name('notifications.email-settings.update');
+        Route::match(['post', 'put'], '/notifications/test-connection', [AdminNotificationController::class, 'testConnection'])->name('notifications.test-connection');
+        Route::post('/notifications/test-email', [AdminNotificationController::class, 'testEmail'])->name('notifications.test-email');
         Route::post('/notifications/read-all', [AdminNotificationController::class, 'readAll'])->name('notifications.read-all');
         Route::post('/notifications/{notification}/read', [AdminNotificationController::class, 'read'])->name('notifications.read');
         Route::get('/audit-logs', [AuditLogController::class, 'index'])->middleware('permission:audit_logs.view')->name('audit-logs.index');
@@ -500,6 +504,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/inquiries/{inquiry}', [InquiryController::class, 'show'])->name('inquiries.show');
             Route::prefix('crm')->name('crm.')->group(function () {
                 Route::get('/', [CrmController::class, 'dashboard'])->name('dashboard');
+                Route::get('/general-lead-stats', [CrmController::class, 'generalLeadStats'])->name('general-lead-stats');
                 Route::get('/leads', [CrmLeadController::class, 'index'])->name('leads.index');
                 Route::get('/customers', [CrmCustomerController::class, 'index'])->middleware('permission:customers.view')->name('customers.index');
                 Route::get('/customers/create', [CrmCustomerController::class, 'create'])->middleware('permission:customers.manage')->name('customers.create');
